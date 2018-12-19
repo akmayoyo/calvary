@@ -67,12 +67,13 @@
 	<div id="divPagination" class="text-center">
 	</div>
 
+
 </div>
 
 <script type="text/javascript">
 (function(){
 	$('#divPagination').bootpag({
-	   total: 7,
+	   total: 123,
 	   page: 2,
 	   maxVisible: 5,
 	   leaps: true
