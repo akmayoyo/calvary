@@ -1,0 +1,19 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="common">
+
+	<resultMap id="map" type="java.util.HashMap">
+	</resultMap>
+
+	<select id="getUser" resultType="map">
+		SELECT * FROM tb_user
+	</select>
+	
+	<insert id="createFileInfo" parameterType="map">
+		INSERT INTO tb_sys_file_info ( file_seq,file_type,file_size,file_path,file_name,upload_date )
+		VALUES ('A0001' , #{fileType} , #{fileSize} , #{filePath} , #{fileName} , current_date  )
+	</insert>
+
+</mapper>

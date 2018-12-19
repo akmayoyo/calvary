@@ -1,0 +1,94 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="admin">
+
+	<resultMap id="bunyangInfoVo" type="com.calvary.admin.vo.BunyangInfoVo">
+         <result property="bunyangSeq" column="bunyang_seq"/>
+         <result property="requestUserSeq" column="request_user_seq"/>
+         <result property="productType" column="product_type"/>
+         <result property="graveType" column="grave_type"/>
+         <result property="serviceChargeType" column="service_charge_type"/>
+         <result property="reqApprovalSeq" column="req_approval_seq"/>
+         <result property="contractSeq" column="contract_seq"/>
+         <result property="useApprovalSeq" column="use_approval_seq"/>
+         <result property="progressStatus" column="progress_status"/>
+         <result property="registUserSeq" column="regist_user_seq"/>
+         <result property="registDate" column="regist_date"/>
+    </resultMap>
+    
+	<resultMap id="bunyangUserVo" type="com.calvary.admin.vo.BunyangUserVo">
+         <result property="bunyangSeq" column="bunyang_seq"/>
+         <result property="userId" column="user_id"/>
+         <result property="userName" column="user_name"/>
+         <result property="birthDate" column="birth_date"/>
+         <result property="gender" column="gender"/>
+         <result property="email" column="email"/>
+         <result property="mobile" column="mobile"/>
+         <result property="phone" column="phone"/>
+         <result property="postNumber" column="post_number"/>
+         <result property="address1" column="address1"/>
+         <result property="address2" column="address2"/>
+         <result property="refType" column="ref_type"/>
+         <result property="relationType" column="relation_type"/>
+    </resultMap>
+    
+    <!-- 분양신청리스트 조회 -->
+	<select id="getBunyangList" parameterType="map" resultMap="bunyangInfoVo">
+		SELECT 
+			A.bunyang_seq,
+	       	A.request_user_seq,
+	       	A.product_type,
+	       	A.grave_type,
+	       	A.service_charge_type,
+	       	A.req_approval_seq,
+	       	A.contract_seq,
+	       	A.use_approval_seq,
+	       	A.progress_status,
+	       	A.regist_user_seq,
+	       	TO_CHAR(A.regist_date, 'YYYY/MM/DD') AS regist_date
+	  	FROM tb_bunyang_info A
+	  	WHERE (A.progress_status is null or A.progress_status in ('A', 'E'))
+	  	ORDER BY bunyang_seq
+	</select>
+
+	<!-- 분양정보 -->
+	<select id="getBunyangInfo" parameterType="String" resultMap="bunyangInfoVo">
+		SELECT 
+			A.bunyang_seq,
+	       	A.request_user_seq,
+	       	A.product_type,
+	       	A.grave_type,
+	       	A.service_charge_type,
+	       	A.req_approval_seq,
+	       	A.contract_seq,
+	       	A.use_approval_seq,
+	       	A.progress_status,
+	       	A.regist_user_seq,
+	       	TO_CHAR(A.regist_date, 'YYYY/MM/DD') AS regist_date
+	  	FROM tb_bunyang_info A
+	  	WHERE A.bunyang_seq = #{bunyangSeq}
+	</select>
+	
+	<!-- 분양관련 사용자 정보 -->
+	<select id="getBunyangRefUserInfo" parameterType="map" resultMap="bunyangUserVo">
+		SELECT A.bunyang_seq,
+		       A.ref_type,
+		       A.relation_type,
+		       A.user_id,
+		       COALESCE(A.user_name, b.user_name) AS user_name,
+		       COALESCE(A.birth_date, b.birth_date) AS birth_date,
+		       COALESCE(A.gender, b.gender) AS gender,
+		       COALESCE(A.email, b.email) AS email,
+		       COALESCE(A.mobile, b.mobile) AS mobile,
+		       COALESCE(A.phone, b.phone) AS phone,
+		       COALESCE(A.post_number, b.post_number) AS post_number,
+		       COALESCE(A.address1, b.address1) AS address1,
+		       COALESCE(A.address2, b.address2) AS address2
+		FROM tb_bunyang_ref_user A LEFT OUTER JOIN tb_com_user B ON a.user_id = b.user_id
+		WHERE A.bunyang_seq = #{bunyangSeq}
+    	AND A.ref_type = #{refType}
+	</select>
+
+</mapper>

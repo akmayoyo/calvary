@@ -1,0 +1,43 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="common">
+
+	<resultMap id="map" type="java.util.HashMap">
+	</resultMap>
+
+	<select id="getUser" parameterType="map" resultType="map">
+		SELECT 
+			a.user_id, a.password, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, TO_CHAR(a.regist_date, 'YYYY/MM/DD') regist_date 
+		FROM tb_com_user a
+		WHERE a.user_id = #{userId}
+		ORDER BY a.user_id
+	</select>
+	
+	<!--///////////////////////////  파일 관련 ///////////////////////////-->
+	
+	<select id="getFileSequence" resultType="map">
+		SELECT LPAD(NEXTVAL('seq_sys_file_info')::text, 10, '0') AS seq
+	</select>
+	
+	<insert id="createFileInfo" parameterType="map">
+		INSERT INTO tb_sys_file_info ( file_seq, file_type, file_size, file_path, file_name, real_file_name, upload_date )
+		VALUES (#{fileSeq} , #{fileType} , #{fileSize} , #{filePath} , #{fileName} , #{realFileName}, CURRENT_TIMESTAMP  )
+	</insert>
+	
+	<select id="getBunyangFileForm" parameterType="String" resultType="map">
+		SELECT 
+			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.upload_date 
+		FROM tb_sys_file_info a 
+		WHERE a.file_seq = (SELECT file_seq FROM tb_bunyang_file_form WHERE file_form_type = #{fileFormType})
+	</select>
+	
+	<select id="getSysFileInfo" parameterType="String" resultType="map">
+		SELECT 
+			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.upload_date 
+		FROM tb_sys_file_info a 
+		WHERE a.file_seq = #{fileSeq}
+	</select>
+
+</mapper>

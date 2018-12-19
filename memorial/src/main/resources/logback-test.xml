@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <!-- 변수 지정 -->
+    <property name="LOG_DIR" value="${catalina.base}/logs" />
+    <property name="DAY_PATH_NAME" value="${LOG_DIR}/day.log" />
+    <property name="ERROR_PATH_NAME" value="${LOG_DIR}/error.log" />
+
+    <!--///////////////////////// Appender /////////////////////////-->
+    
+    <!-- Day Appender -->
+    <appender name="DAY_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${DAY_PATH_NAME}</file>
+        <!-- 일자별로 로그파일 적용하기 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${DAY_PATH_NAME}.%d{yyyyMMdd}</fileNamePattern>
+            <maxHistory>30</maxHistory> <!-- 일자별 백업파일의 보관기간 -->
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%F]%M\(%L\) : %m%n</pattern>
+        </encoder>
+    </appender>
+    
+    <!-- Error Appender -->
+    <appender name="ERROR_APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ERROR_PATH_NAME}</file>
+        <!-- 일자별로 로그파일 적용하기 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${ERROR_PATH_NAME}.%d{yyyyMMdd}</fileNamePattern>
+            <maxHistory>30</maxHistory> <!-- 일자별 백업파일의 보관기간 -->
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%F]%M\(%L\) : %m%n</pattern>
+        </encoder>
+    </appender>
+
+	<!-- Console Appender -->
+    <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
+      <layout class="ch.qos.logback.classic.PatternLayout">
+        <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] [%F]%M\(%L\) : %m%n</pattern>
+      </layout>
+    </appender>
+
+	<!--///////////////////////// Logger /////////////////////////-->
+	
+    <logger name="com.calvary"  level="info" additivity="false">
+        <appender-ref ref="DAY_APPENDER" />
+    </logger>
+    
+    <logger name="ERROR_LOGGER"  level="error" additivity="false">
+        <appender-ref ref="ERROR_APPENDER" />
+    </logger>
+ 
+    <root level="info">
+        <appender-ref ref="CONSOLE_APPENDER" />
+    </root>
+    
+</configuration>
