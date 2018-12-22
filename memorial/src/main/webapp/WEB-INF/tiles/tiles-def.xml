@@ -26,4 +26,12 @@
       <put-attribute name="body" value="/WEB-INF/jsp/views/admin/{1}.jsp" />
     </definition>
     
+    <!-- Popup -->    
+    <definition name="popup" template="/WEB-INF/jsp/tileslayout/popupLayout.jsp">
+    </definition>
+    
+    <definition name="/popup/*" extends="popup">
+      <put-attribute name="body" value="/WEB-INF/jsp/views/popup/{1}.jsp" />
+    </definition>
+    
 </tiles-definitions>
