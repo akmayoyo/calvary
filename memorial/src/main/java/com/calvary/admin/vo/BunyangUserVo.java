@@ -15,6 +15,7 @@ public class BunyangUserVo {
 	private String address2;
 	private String refType;
 	private String relationType;
+	private String isChurchPerson;
 	public String getUserId() {
 		return userId;
 	}
@@ -93,12 +94,18 @@ public class BunyangUserVo {
 	public void setBunyangSeq(String bunyangSeq) {
 		this.bunyangSeq = bunyangSeq;
 	}
+	public String getIsChurchPerson() {
+		return isChurchPerson;
+	}
+	public void setIsChurchPerson(String isChurchPerson) {
+		this.isChurchPerson = isChurchPerson;
+	}
 	@Override
 	public String toString() {
-		return "BunyangUserVo [userId=" + userId + ", userName=" + userName + ", birthDate="
-				+ birthDate + ", gender=" + gender + ", email=" + email + ", mobile=" + mobile + ", phone=" + phone
-				+ ", postNumber=" + postNumber + ", address1=" + address1 + ", address2=" + address2 + ", refType="
-				+ refType + ", relationType=" + relationType + ", bunyangSeq=" + bunyangSeq + "]";
+		return "BunyangUserVo [bunyangSeq=" + bunyangSeq + ", userId=" + userId + ", userName=" + userName
+				+ ", birthDate=" + birthDate + ", gender=" + gender + ", email=" + email + ", mobile=" + mobile
+				+ ", phone=" + phone + ", postNumber=" + postNumber + ", address1=" + address1 + ", address2="
+				+ address2 + ", refType=" + refType + ", relationType=" + relationType + ", isChurchPerson="
+				+ isChurchPerson + "]";
 	}
-	
 }

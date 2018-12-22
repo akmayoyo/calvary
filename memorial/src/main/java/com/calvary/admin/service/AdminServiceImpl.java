@@ -1,12 +1,16 @@
 package com.calvary.admin.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.calvary.admin.vo.BunyangInfoVo;
+import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.dao.CommonDao;
 
 @Service
@@ -15,6 +19,81 @@ public class AdminServiceImpl implements IAdminService {
 	@Autowired
 	private CommonDao commonDao;
 
+	//===============================================================================
+	// 분양신청관리
+	//===============================================================================
+	/** 
+	 * 분양신청 정보 저장
+	 * @param bunyangInfoVo
+	 */
+	@SuppressWarnings("unchecked")
+	@Transactional
+	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo) {
+		String sRtn = "";
+		BunyangUserVo applyUser = bunyangInfoVo.getApplyUser();
+		BunyangUserVo agentUser = bunyangInfoVo.getAgentUser();
+		Map<String, Object> param = null;
+		List<BunyangUserVo> useUsers = bunyangInfoVo.getUseUsers();
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("admin.getBunyangInfoSequence", ""); 
+		String bunyangSeq = (String)rtnMap.get("seq");
+		
+		// 분양정보 생성
+		param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("productType", bunyangInfoVo.getProductType());
+		param.put("coupleTypeCount", bunyangInfoVo.getCoupleTypeCount());
+		param.put("singleTypeCount", bunyangInfoVo.getSingleTypeCount());
+		param.put("serviceChargeType", bunyangInfoVo.getServiceChargeType());
+		// TODO
+		param.put("registUserSeq", "calvaryadmin");
+		commonDao.insert("admin.createBunyangInfo", param);
+		
+		// 분양 관련 인명정보 생성(신청자)
+		param = getBunyangUserParam(applyUser);
+		param.put("bunyangSeq", bunyangSeq);
+		commonDao.insert("admin.createBunyangRefUserInfo", param);
+		
+		// 분양 관련 인명정보 생성(대리인)
+		if(agentUser != null) {
+			param = getBunyangUserParam(agentUser);
+			param.put("bunyangSeq", bunyangSeq);
+			commonDao.insert("admin.createBunyangRefUserInfo", param);
+		}
+		
+		// 분양 관련 인명정보 생성(사용자)
+		if(useUsers != null && useUsers.size() > 0) {
+			for(int i = 0; i < useUsers.size(); i++) {
+				BunyangUserVo useUser = useUsers.get(0);
+				param = getBunyangUserParam(useUser);
+				param.put("bunyangSeq", bunyangSeq);
+				commonDao.insert("admin.createBunyangRefUserInfo", param);
+			}
+		}
+		sRtn = bunyangSeq;
+		return sRtn;
+	}
+	
+	/** 
+	 * 분양 관련 인명정보 생성을 위한 parameter 반환
+	 */
+	private Map<String, Object> getBunyangUserParam(BunyangUserVo bunyangUserVo) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("refType", bunyangUserVo.getRefType());
+		param.put("relationType", bunyangUserVo.getRelationType());
+		param.put("userId", bunyangUserVo.getUserId());
+		param.put("userName", bunyangUserVo.getUserName());
+		param.put("birthDate", bunyangUserVo.getBirthDate());
+		param.put("gender", bunyangUserVo.getGender());
+		param.put("email", bunyangUserVo.getEmail());
+		param.put("mobile", bunyangUserVo.getMobile());
+		param.put("phone", bunyangUserVo.getPhone());
+		param.put("postNumber", bunyangUserVo.getPostNumber());
+		param.put("address1", bunyangUserVo.getAddress1());
+		param.put("address2", bunyangUserVo.getAddress2());
+		param.put("isChurchPerson", bunyangUserVo.getIsChurchPerson());
+		return param;
+	}
+	
 	
 	//===============================================================================
 	// 메뉴 관리

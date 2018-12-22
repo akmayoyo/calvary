@@ -17,6 +17,7 @@ public class BunyangInfoVo {
 	private String registDate;
 	
 	private BunyangUserVo applyUser;// 신청자
+	private BunyangUserVo agentUser;// 대리인
 	private List<BunyangUserVo> useUsers;// 사용자
 	
 	public String getBunyangSeq() {
@@ -97,6 +98,12 @@ public class BunyangInfoVo {
 	public void setApplyUser(BunyangUserVo applyUser) {
 		this.applyUser = applyUser;
 	}
+	public BunyangUserVo getAgentUser() {
+		return agentUser;
+	}
+	public void setAgentUser(BunyangUserVo agentUser) {
+		this.agentUser = agentUser;
+	}
 	public List<BunyangUserVo> getUseUsers() {
 		return useUsers;
 	}
@@ -110,6 +117,6 @@ public class BunyangInfoVo {
 				+ ", serviceChargeType=" + serviceChargeType + ", reqApprovalSeq=" + reqApprovalSeq + ", contractSeq="
 				+ contractSeq + ", useApprovalSeq=" + useApprovalSeq + ", progressStatus=" + progressStatus
 				+ ", registUserSeq=" + registUserSeq + ", registDate=" + registDate + ", applyUser=" + applyUser
-				+ ", useUsers=" + useUsers + "]";
+				+ ", agentUser=" + agentUser + ", useUsers=" + useUsers + "]";
 	}
 }

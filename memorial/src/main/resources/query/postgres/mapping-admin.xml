@@ -90,5 +90,22 @@
 		WHERE A.bunyang_seq = #{bunyangSeq}
     	AND A.ref_type = #{refType}
 	</select>
+	
+	<!-- 분양정보 시퀀스 생성 -->
+	<select id="getBunyangInfoSequence" resultType="map">
+		SELECT NEXTVAL('seq_bunyang_info')::text AS seq
+	</select>
+	
+	<!-- 분양정보 생성 -->
+	<insert id="createBunyangInfo" parameterType="map">
+		INSERT INTO tb_bunyang_info ( bunyang_seq,product_type,couple_type_count,single_type_count,service_charge_type,req_approval_seq,contract_seq,use_approval_seq,progress_status,regist_user_seq,regist_date )
+		VALUES (#{bunyangSeq} , #{productType}, #{coupleTypeCount}, #{singleTypeCount}, #{serviceChargeType}, #{reqApprovalSeq}, #{contractSeq}, #{useApprovalSeq}, #{progressStatus}, #{registUserSeq}, CURRENT_TIMESTAMP )
+	</insert>
+	
+	<!-- 분양 관련 인명정보 생성 -->
+	<insert id="createBunyangRefUserInfo" parameterType="map">
+		INSERT INTO tb_bunyang_ref_user ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person )
+		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}, #{userId}, #{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson})
+	</insert>
 
 </mapper>

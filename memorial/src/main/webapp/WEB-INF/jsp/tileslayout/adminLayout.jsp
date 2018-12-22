@@ -24,7 +24,7 @@
 <!-- custom style -->
 <link href="${contextPath}/resources/assets/css/style.css" rel="stylesheet">
 <link rel="stylesheet" href="${contextPath}/resources/assets/css/topmenu.css"/>
-	
+<link rel="stylesheet" href="${contextPath}/resources/css/loadingbar.css">
 </head>
 
 <body>

@@ -5,6 +5,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 
 import com.calvary.common.vo.SessionVo;
+import com.calvary.common.vo.UserVo;
 
 public class SessionUtil {
 
@@ -25,6 +26,14 @@ public class SessionUtil {
 			HttpSession session = request.getSession();
 			if(session != null) {
 				sessionVo = (SessionVo)session.getAttribute("sessionVo");
+			}
+			// TODO
+			if(sessionVo == null) {
+				sessionVo = new SessionVo();
+				UserVo userVo = new UserVo();
+				userVo.setUserId("calvaryadmin");
+				userVo.setUserName("Admin");
+				sessionVo.setUserVo(userVo);
 			}
 		}
 		return sessionVo;

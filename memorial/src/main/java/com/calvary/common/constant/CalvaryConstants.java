@@ -26,6 +26,8 @@ public class CalvaryConstants {
 	public static final String BUNYANG_REF_TYPE_APPLY_USER = "APPLY_USER";
 	/** 분양정보에서 참조하는 사용자 타입 : 사용자 */
 	public static final String BUNYANG_REF_TYPE_USE_USER = "USE_USER";
+	/** 분양정보에서 참조하는 사용자 타입 : 대리인 */
+	public static final String BUNYANG_REF_TYPE_AGENT_USER = "AGENT_USER";
 	
 	/** 
 	 * 분양 관련 인명정보 타입 : 신청자

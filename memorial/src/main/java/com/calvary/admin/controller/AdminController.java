@@ -2,10 +2,9 @@ package com.calvary.admin.controller;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -13,11 +12,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.calvary.admin.service.IAdminService;
 import com.calvary.admin.vo.BunyangInfoVo;
-import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
 import com.calvary.common.vo.SearchVo;
-import com.calvary.common.vo.UserVo;
 
 @Controller
 @RequestMapping(value=AdminController.ROOT_URL)
@@ -68,9 +65,10 @@ public class AdminController {
 	@ResponseBody
 	public Object saveApplyHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
 		boolean bRslt = false;
-		
-		System.out.println(bunyangInfoVo.toString());
-		
+		String bunyangSeq = adminService.createBunyangInfo(bunyangInfoVo);
+		if(!StringUtils.isEmpty(bunyangSeq)) {
+			System.out.println(bunyangSeq);
+		}
 		return bRslt;
 	}
 	

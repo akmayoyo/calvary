@@ -3,6 +3,10 @@
  */
 (function(){
 	
+	$.fn.exists = function () {
+	    return this.length !== 0;
+	}
+	
 	var ajax = function(opt) {
 		opt = opt || {};
 		opt = $.extend(true, {
@@ -97,9 +101,9 @@
 
 	var loading = function(show) {
 		if(show) {
-			$('body').append('<div class="modalWrapper"><div class="modal"></div><div class="spinner"></div></div>');	
+			$('body').append('<div class="loadingModalWrapper"><div class="loadingModal"></div><div class="spinner"></div></div>');	
 		} else {
-			$('body div.modalWrapper').remove();
+			$('body div.loadingModalWrapper').remove();
 		}
 	};
 
@@ -217,6 +221,10 @@
 		}
 		return rtnVal;
 	}
+	
+	var showAlert = function(msg) {
+		alert(msg);
+	}
 
 	var common = {};
 	common.ajax = ajax;
@@ -227,6 +235,7 @@
 	common.exportExcel = exportExcel;
 	common.formatBirthday = formatBirthday;
 	common.toNumeric = toNumeric;
+	common.showAlert = showAlert;
 
 	window.common = common;
 })();
