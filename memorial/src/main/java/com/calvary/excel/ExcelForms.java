@@ -5,11 +5,11 @@ package com.calvary.excel;
  */
 public enum ExcelForms {
 	/** 분양신청서 */
-	REQUEST_FORM,
+	APPLY_FORM,
 	/** 분양신청서-사용자 */
-	REQUEST_USER_FORM,
+	USE_USER_FORM,
 	/** 신청승인서 */
-	REQUEST_APPROVAL_FORM,
+	APPROVAL_FORM,
 	/** 사용승인서 */
 	USE_APPROVAL_FORM,
 	/** 분양계약서 */

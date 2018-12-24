@@ -225,6 +225,19 @@
 	var showAlert = function(msg) {
 		alert(msg);
 	}
+	
+	var calcBunyangPrice = function(coupleType, singleType) {
+		var price = 0;
+		var cnt = 0;
+		var pricePerCnt = 2000000;
+		if(coupleType > 0) {
+			cnt += (coupleType*2);
+		}
+		if(singleType > 0) {
+			cnt += singleType;
+		}
+		price = cnt*pricePerCnt;
+	}
 
 	var common = {};
 	common.ajax = ajax;
@@ -236,6 +249,7 @@
 	common.formatBirthday = formatBirthday;
 	common.toNumeric = toNumeric;
 	common.showAlert = showAlert;
+	common.calcBunyangPrice = calcBunyangPrice;
 
 	window.common = common;
 })();

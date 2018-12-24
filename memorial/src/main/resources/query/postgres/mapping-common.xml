@@ -42,7 +42,7 @@
 			, a.church_officer, a.diocese, a.user_status
 			, (SELECT code_name FROM tb_com_code b WHERE a.church_officer = b.code_seq) church_officer_name
 			, TO_CHAR(a.regist_date, 'YYYY/MM/DD') regist_date
-			, count(1) over() total_count 
+			, count(*) over() total_count 
 		FROM tb_com_user a
 		ORDER BY a.user_name, a.user_id
 		LIMIT #{countPerPage} OFFSET (#{pageIndex}-1)*#{countPerPage}

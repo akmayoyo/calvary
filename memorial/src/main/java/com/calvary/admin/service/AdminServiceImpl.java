@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
+import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.dao.CommonDao;
+import com.calvary.common.vo.SearchVo;
 
 @Service
 public class AdminServiceImpl implements IAdminService {
@@ -22,6 +24,46 @@ public class AdminServiceImpl implements IAdminService {
 	//===============================================================================
 	// 분양신청관리
 	//===============================================================================
+	/** 
+	 * 분양신청리스트 조회 
+	 */
+	public List<Object> getApplyList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("pageIndex", searchVo.getPageIndex());
+		parameter.put("countPerPage", searchVo.getCountPerPage());
+		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		List<Object> list = commonDao.selectList("admin.getApplyList", parameter); 
+		return list;
+	}
+	
+	/** 
+	 * 분양 정보 조회 
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getBunyangInfo(String bunyangSeq) {
+		Map<String, Object> rtn = (HashMap<String, Object>)commonDao.selectOne("admin.getBunyangInfo", bunyangSeq); 
+		return rtn;
+	}
+	
+	/** 
+	 * 분양관련 사용자 정보 조회 
+	 */
+	public List<Object> getBunyangRefUserInfo(String bunyangSeq, String refType) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("refType", refType);
+		List<Object> list = commonDao.selectList("admin.getBunyangRefUserInfo", parameter); 
+		return list;
+	}
+	
+	/** 
+	 * 분양정보의 신청서,승인서등 관련 파일양식 조회
+	 */
+	public List<Object> getBunyangFileList(String bunyangSeq) {
+		List<Object> list = commonDao.selectList("admin.getBunyangFileList", bunyangSeq); 
+		return list;
+	}
+	
 	/** 
 	 * 분양신청 정보 저장
 	 * @param bunyangInfoVo
@@ -44,6 +86,7 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("coupleTypeCount", bunyangInfoVo.getCoupleTypeCount());
 		param.put("singleTypeCount", bunyangInfoVo.getSingleTypeCount());
 		param.put("serviceChargeType", bunyangInfoVo.getServiceChargeType());
+		param.put("progressStatus", bunyangInfoVo.getProgressStatus());
 		// TODO
 		param.put("registUserSeq", "calvaryadmin");
 		commonDao.insert("admin.createBunyangInfo", param);
@@ -63,7 +106,7 @@ public class AdminServiceImpl implements IAdminService {
 		// 분양 관련 인명정보 생성(사용자)
 		if(useUsers != null && useUsers.size() > 0) {
 			for(int i = 0; i < useUsers.size(); i++) {
-				BunyangUserVo useUser = useUsers.get(0);
+				BunyangUserVo useUser = useUsers.get(i);
 				param = getBunyangUserParam(useUser);
 				param.put("bunyangSeq", bunyangSeq);
 				commonDao.insert("admin.createBunyangRefUserInfo", param);
@@ -71,6 +114,14 @@ public class AdminServiceImpl implements IAdminService {
 		}
 		sRtn = bunyangSeq;
 		return sRtn;
+	}
+	
+	/** 
+	 * 분양 양식파일 고유번호 업데이트
+	 */
+	public int updateBunyangFileSeq(Map<String, Object> param) {
+		int iRslt = commonDao.update("admin.updateBunyangFileSeq", param);
+		return iRslt;
 	}
 	
 	/** 

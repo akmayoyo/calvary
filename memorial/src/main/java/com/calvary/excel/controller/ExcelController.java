@@ -147,7 +147,7 @@ public class ExcelController {
 	@RequestMapping(value="/createRequestForm")
 	@ResponseBody
 	public String createFileFormTestHandler(String bunyangSeq, String fileSeq) {
-		String rtn = excelService.createBunyangExcelForm(ExcelForms.REQUEST_FORM, bunyangSeq, fileSeq);
+		String rtn = excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, fileSeq);
 		return rtn;
 	}
 		

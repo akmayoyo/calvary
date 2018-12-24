@@ -23,6 +23,15 @@ public class CommonDao {
 	}
 	
 	/** 
+	 * update
+	 * @param queryId mapping query id
+	 * @param parameter query parameter 
+	 */
+	public int update(String queryId, Object parameter) {
+		return sqlSessionTemplate.update(queryId, parameter);
+	}
+	
+	/** 
 	 * selectList
 	 * @param queryId mapping query id
 	 * @param parameter query parameter 

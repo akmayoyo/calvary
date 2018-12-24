@@ -22,7 +22,7 @@ public class PopupServiceImpl implements IPopupService {
 		Map<String, Object> searchParam = new HashMap<String, Object>();
 		searchParam.put("userName", searchVo.getUserName());
 		searchParam.put("pageIndex", searchVo.getPageIndex());
-		searchParam.put("countPerPage", CalvaryConstants.COUNT_PER_PAGE);
+		searchParam.put("countPerPage", searchVo.getCountPerPage());
 		List<Object> list = commonDao.selectList("common.getUserList", searchParam);
 		return list;
 	}

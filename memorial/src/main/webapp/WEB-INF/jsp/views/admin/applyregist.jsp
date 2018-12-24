@@ -136,7 +136,7 @@
             <div class="row">
                 <label for="input4" class="col-sm-2 control-label">총 분양가</label>
                 <div class="col-sm-2">
-                    <p class="form-control-static">4,000,000원</p>
+                    <p id="totalPrice" class="form-control-static">&nbsp;</p>
                 </div>
             </div>
         </div>
@@ -149,6 +149,7 @@
     
 </div>
 <form id="frm" method="post">
+<input type="hidden" id="bunyangSeq" name="bunyangSeq">
 </form>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript">
@@ -354,24 +355,24 @@ function saveApply() {
 	if(tr.exists()) {
 		tr.each(function(idx){
 			bunyangUser = {};
-			bunyangUser["userId"] = tr.attr("userId");
+			bunyangUser["userId"] = $(this).attr("userId");
 			if(!bunyangUser["userId"]) {// 등록교인이 아닌 경우만 기타 정보 저장
-				bunyangUser["userName"] = tr.attr("userName");
-				bunyangUser["birthDate"] = tr.attr("birthDate");
-				bunyangUser["email"] = tr.attr("email");
-				bunyangUser["mobile"] = tr.attr("mobile");
-				bunyangUser["postNumber"] = tr.attr("postNumber");
-				bunyangUser["address1"] = tr.attr("address1");
-				bunyangUser["address2"] = tr.attr("address2");
-				bunyangUser["churchOfficer"] = tr.attr("churchOfficer");
+				bunyangUser["userName"] = $(this).attr("userName");
+				bunyangUser["birthDate"] = $(this).attr("birthDate");
+				bunyangUser["email"] = $(this).attr("email");
+				bunyangUser["mobile"] = $(this).attr("mobile");
+				bunyangUser["postNumber"] = $(this).attr("postNumber");
+				bunyangUser["address1"] = $(this).attr("address1");
+				bunyangUser["address2"] = $(this).attr("address2");
+				bunyangUser["churchOfficer"] = $(this).attr("churchOfficer");
 			}
 			bunyangUser["refType"] = "<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>";
-			bunyangUser["relationType"] = tr.find("td .relation option:selected").val();
+			bunyangUser["relationType"] = $(this).find("td .relation option:selected").val();
 			if(!bunyangUser["relationType"]) {
 				registeredRelation = false;
 				return false;
 			}
-			bunyangUser["isChurchPerson"] = tr.find("td .ischurch option:selected").val();
+			bunyangUser["isChurchPerson"] = $(this).find("td .ischurch option:selected").val();
 			useUsers.push(bunyangUser);
 		});
 		if(!registeredRelation) {
@@ -394,9 +395,25 @@ function saveApply() {
 	bunyangInfo['serviceChargeType'] = $(":input:radio[name=rbServiceChargeType]:checked").val();
 	bunyangInfo['coupleTypeCount'] = coupleTypeCount;
 	bunyangInfo['singleTypeCount'] = singleTypeCount;
+	bunyangInfo['progressStatus'] = "<%=CalvaryConstants.PROGRESS_STATUS_NEW%>";
 	
 	// 저장 호출
-	common.ajax({url:"${contextPath}/admin/saveapply", data:JSON.stringify(bunyangInfo), contentType: 'application/json'});
+	common.ajax({
+		url:"${contextPath}/admin/saveapply", 
+		data:JSON.stringify(bunyangInfo),
+		contentType: 'application/json',
+		success: function(result) {
+			if(result && result.result) {
+				common.showAlert("저장되었습니다.");
+				// 상세정보 페이지로 이동
+				var bunyangSeq = result.bunyangSeq;
+				$("#bunyangSeq").val(bunyangSeq);
+				var frm = document.getElementById("frm");
+				frm.action = "${contextPath}/admin/applydetail";
+				frm.submit();
+			}
+		}
+	});
 }
 
 /**

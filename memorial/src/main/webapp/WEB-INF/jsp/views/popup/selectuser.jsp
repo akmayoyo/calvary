@@ -130,7 +130,7 @@
 (function(){
 	// 페이징 표시 설정
 	$('#divPagination').bootpag({
-	   total: Math.ceil(${15/countPerPage}),
+	   total: Math.ceil(${searchVo.totalCount/searchVo.countPerPage}),
 	   page: ${searchVo.pageIndex},
 	   maxVisible: 5
 	}).on('page', function(event, num){
