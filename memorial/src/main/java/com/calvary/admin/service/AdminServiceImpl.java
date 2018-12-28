@@ -125,6 +125,17 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
+	 * 분양정보 진행상태 업데이트
+	 */
+	public int updateBunyangProgressStatus(String bunyangSeq, String progressStatus) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("progressStatus", progressStatus);
+		int iRslt = commonDao.update("admin.updateBunyangProgressStatus", param);
+		return iRslt;
+	}
+	
+	/** 
 	 * 분양 관련 인명정보 생성을 위한 parameter 반환
 	 */
 	private Map<String, Object> getBunyangUserParam(BunyangUserVo bunyangUserVo) {
@@ -143,6 +154,31 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("address2", bunyangUserVo.getAddress2());
 		param.put("isChurchPerson", bunyangUserVo.getIsChurchPerson());
 		return param;
+	}
+	
+	
+	
+	//===============================================================================
+	// 사용계약관리
+	//===============================================================================
+	/** 
+	 * 사용계약리스트 조회 
+	 */
+	public List<Object> getContractList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("pageIndex", searchVo.getPageIndex());
+		parameter.put("countPerPage", searchVo.getCountPerPage());
+		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		List<Object> list = commonDao.selectList("contract.getContractList", parameter); 
+		return list;
+	}
+	
+	/** 
+	 * 대금납부내역조회
+	 */
+	public List<Object> getPaymentHistory(String bunyangSeq) {
+		List<Object> list = commonDao.selectList("contract.getPaymentHistory", bunyangSeq); 
+		return list;
 	}
 	
 	

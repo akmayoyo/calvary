@@ -6,7 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +16,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -30,6 +33,7 @@ import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.dao.CommonDao;
+import com.calvary.common.util.CommonUtil;
 import com.calvary.common.util.FileUtil;
 import com.calvary.excel.ExcelForms;
 import com.calvary.file.controller.FileController;
@@ -148,10 +152,25 @@ public class ExcelServiceImpl implements IExcelService {
 		param.put("refType", CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER);
 		Map<String, Object> agentUser = (HashMap<String, Object>) commonDao.selectOne("admin.getBunyangRefUserInfo",  param);
 		
-		if(ExcelForms.APPLY_FORM.equals(excelForm)) {// 분양신청서
-			fileFormType = CalvaryConstants.FILE_FORM_TYPE_APPLY;
-			destFilePath += "/apply";
+		if(ExcelForms.APPLY_FORM.equals(excelForm) || ExcelForms.APPROVAL_FORM.equals(excelForm)) {// 분양신청서, 신청승인서
+			
+			if(ExcelForms.APPLY_FORM.equals(excelForm)) {
+				fileFormType = CalvaryConstants.FILE_FORM_TYPE_APPLY;
+				destFilePath += "/apply";
+			}else if(ExcelForms.APPROVAL_FORM.equals(excelForm)) {
+				fileFormType = CalvaryConstants.FILE_FORM_TYPE_APPROVAL;
+				destFilePath += "/approval";
+			}
+			
 			//============= 업데이트할 셀정보 설정 =============//
+			// 승인번호
+			if(ExcelForms.APPROVAL_FORM.equals(excelForm)) {
+				sheetnums.add(0);
+				rownums.add(5);
+				cellnums.add(13);
+				cellvalues.add(bunyangSeq);
+			}
+			
 			// 신청자성명
 			sheetnums.add(0);
 			rownums.add(8);
@@ -253,13 +272,46 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(30);
 			cellnums.add(6);
-			cellvalues.add((String)bunyangInfo.get("regist_date"));
+			if(ExcelForms.APPLY_FORM.equals(excelForm)) {// 분양신청서는 신청일
+				cellvalues.add((String)bunyangInfo.get("regist_date"));
+			}else if(ExcelForms.APPROVAL_FORM.equals(excelForm)) {// 신청승인서는 승인일
+				cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+			}else {
+				cellvalues.add("");
+			}
 			
-			// 신청자
-			sheetnums.add(0);
-			rownums.add(32);
-			cellnums.add(3);
-			cellvalues.add((String)applyUser.get("user_name"));
+			if(ExcelForms.APPLY_FORM.equals(excelForm)) {// 신청자는 분양신청서만
+				// 신청자
+				sheetnums.add(0);
+				rownums.add(32);
+				cellnums.add(3);
+				cellvalues.add((String)applyUser.get("user_name"));
+			}
+			
+			if(ExcelForms.APPROVAL_FORM.equals(excelForm)) {// 총기수, 분양가, 계약금은 신청승인서만
+				
+				int bunyangCnt = coupleTypeCount*2+singleTypeCount;
+				int totalPrice = bunyangCnt * CalvaryConstants.BUNYANG_PRICE_PER_UNIT;
+				int contractPrice = (int)totalPrice/10;
+				
+				// 총기수
+				sheetnums.add(0);
+				rownums.add(21);
+				cellnums.add(1);
+				cellvalues.add(String.valueOf(bunyangCnt));
+				
+				// 총분양가
+				sheetnums.add(0);
+				rownums.add(37);
+				cellnums.add(5);
+				cellvalues.add(String.format("%,d", totalPrice));
+				
+				// 총계약금
+				sheetnums.add(0);
+				rownums.add(38);
+				cellnums.add(5);
+				cellvalues.add(String.format("%,d", contractPrice));
+			}
 			
 			// 대리인신청시 대리인 정보
 			if(agentUser != null) {
@@ -305,11 +357,13 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(11);
 				cellvalues.add((String)agentUser.get("email"));
 				
-				// 신청자(대리인)
-				sheetnums.add(0);
-				rownums.add(34);
-				cellnums.add(3);
-				cellvalues.add((String)agentUser.get("user_name"));
+				if(ExcelForms.APPLY_FORM.equals(excelForm)) {// 신청자는 분양신청서만
+					// 신청자(대리인)
+					sheetnums.add(0);
+					rownums.add(34);
+					cellnums.add(3);
+					cellvalues.add((String)agentUser.get("user_name"));
+				}
 			}
 			
 		}else if(ExcelForms.USE_USER_FORM.equals(excelForm)) {// 분양신청서-사용자

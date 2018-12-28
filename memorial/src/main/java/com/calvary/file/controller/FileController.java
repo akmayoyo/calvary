@@ -109,16 +109,18 @@ public class FileController {
 	    }
 	    byte[] buffer = new byte[8192];
 	    response.setContentType(mime + "; charset=utf-8");
+	    fileName = URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+", "%20");
 	    String userAgent = request.getHeader("User-Agent");
 	    if (userAgent != null && userAgent.indexOf("MSIE 5.5") > -1) { // MS IE 5.5 이하
-	      response.setHeader("Content-Disposition", "filename=" + URLEncoder.encode(fileName, "UTF-8") + ";");
+	      response.setHeader("Content-Disposition", "filename=" + fileName + ";");
 	    } else if (userAgent != null && userAgent.indexOf("MSIE") > -1) { // MS IE (보통은 6.x 이상 가정)
 	      response.setHeader("Content-Disposition", "attachment; filename="
-	          + java.net.URLEncoder.encode(fileName, "UTF-8") + ";");
+	          + fileName + ";");
 	    } else { // 모질라나 오페라
 	      response.setHeader("Content-Disposition", "attachment; filename="
-	          + new String(fileName.getBytes("utf-8"), "latin1") + ";");
+	          + fileName + ";");
 	    }
+	    
 
 	    if (fileSize > 0) {
 	      response.setHeader("Content-Length", "" + fileSize);

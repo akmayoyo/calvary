@@ -140,8 +140,35 @@
 			}
 	    });
 	};
+	
+	var exportExcel = function(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName) {
+		
+		var data = {};
+		data["excelHeaders"] = excelHeaders;
+		data["excelFields"] = excelFields;
+		data["searchKeys"] = searchKeys;
+		data["searchValues"] = searchValues;
+		data["queryId"] = queryId;
+		data["fileName"] = fileName;
+		
+		loading(true);
+		
+		$.fileDownload("/excel/exportExcel", {
+			httpMethod: "POST",
+			data:data,
+			successCallback: function(url) {
+				loading(false);
+			},
+			prepareCallback: function (url) {
+				loading(false);
+			},
+			failCallback: function (responseHtml, url, error) { 
+				loading(false);
+			}
+		});
+	}
 
-	var exportExcel = function(headers, fields, fileName, queryId, paramKeys, paramValues) {
+	var exportExcel2 = function(headers, fields, fileName, queryId, paramKeys, paramValues) {
 		var frm = $('<form action="/excel/exportExcel" method="post" target="_self"/>');
 		// headers
 		if(headers && headers.length > 0) {
@@ -246,6 +273,7 @@
 	common.loading = loading;
 	common.uploadFile = uploadFile;
 	common.exportExcel = exportExcel;
+	common.exportExcel2 = exportExcel2;
 	common.formatBirthday = formatBirthday;
 	common.toNumeric = toNumeric;
 	common.showAlert = showAlert;

@@ -50,9 +50,6 @@
     <div id="divAgentInfo" style="margin-top: 35px;">
     	<div>
 	    	<div class="pull-left"><h4>대리인</h4></div>
-<!-- 	    	<div class="pull-right"> -->
-<!-- 	        	<button id="btnRegistAgentUser" type="button" class="btn btn-primary btn-sm" onclick="registApplyUser(true)">입력</button> -->
-<!-- 	    	</div> -->
 	    </div>
 	    <div class="clearfix"></div>
 	    <div class="table-responsive">
@@ -88,9 +85,6 @@
 	<!-- 사용(봉안) 대상자 -->
 	<div style="margin-top: 35px;">
 		<div class="pull-left" style=""><h4>사용(봉안) 대상자</h4></div>
-<!--     	<div class="pull-right"> -->
-<!--         	<button id="btnRegistUseUser" type="button" class="btn btn-primary btn-sm">입력</button> -->
-<!--     	</div> -->
 	</div>
     <div class="clearfix"></div>
     <div class="table-responsive">
@@ -127,49 +121,115 @@
 		<div class="pull-left"><h4>동산 신청 정보</h4></div>	
 	</div>
     <div class="clearfix"></div>
-    <!-- 테이블 -->
-    <div class="form-style">
-        <div class="form-group">
-            <div class="row">
-                <label for="input1" class="col-sm-2 control-label form-control-static">신청형태</label>
-                <div class="col-sm-10">
-                    <p class="form-control-static" style="display: inline-block;">${bunyangInfo.product_type_name}</p>
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="row">
-                <label for="input2" class="col-sm-2 control-label form-control-static">장묘형태</label>
-                <div class="col-sm-10">
-                    <p class="form-control-static" style="display: inline-block;">부부형</p>
-                    <input id="tiCoupleTypeCount" disabled class="form-control" style="width: 95px;display: inline-block; margin-left: 4px;" type="number" placeholder="기수입력" value="${bunyangInfo.couple_type_count }">
-                    <p class="form-control-static" style="display: inline-block;">x 2</p>
-                    <p class="form-control-static" style="display: inline-block; margin-left: 20px;">1인형</p>
-                    <input id="tiSingleTypeCount" disabled class="form-control" style="width: 95px;display: inline-block; margin-left: 4px;" type="number" placeholder="기수입력" value="${bunyangInfo.single_type_count }">
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="row">
-                <label for="input4" class="col-sm-2 control-labe form-control-staticl">관리비 납부자</label>
-                <div class="col-sm-10">
-                    <p class="form-control-static" style="display: inline-block;">${bunyangInfo.service_charge_type_name}</p>
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="row">
-                <label for="input4" class="col-sm-2 control-label form-control-static">총 분양대금</label>
-                <div class="col-sm-2">
-                    <p class="form-control-static"><fmt:formatNumber value="${bunyangInfo.total_price}" pattern="#,###" />원</p>
-                </div>
-            </div>
-        </div>
+    
+    <div class="table-responsive" style="border-top: 1px solid #999;">
+        <table class="table table-style" style="border-top: 0;">
+        	<colgroup>
+        		<col width="18%">
+        		<col width="32%">
+        		<col width="18%">
+        		<col width="32%">
+        	</colgroup>
+            <tbody>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">신청형태</th>
+            		<td align="left" colspan="3">${bunyangInfo.product_type_name}</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">장묘형태</th>
+            		<td align="left" colspan="3">부부형 : [${bunyangInfo.couple_type_count }] x 2&nbsp;&nbsp;&nbsp;&nbsp;1인형 : [${bunyangInfo.single_type_count }]&nbsp;&nbsp;(총 ${bunyangInfo.couple_type_count*2 + bunyangInfo.single_type_count}기)</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">총 분양대금</th>
+            		<td align="left" colspan="3">일금 : 사백만원&nbsp;&nbsp;(₩4,000,000)</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">계약금</th>
+            		<td align="left" colspan="3">일금 : 사십만원&nbsp;&nbsp;(₩400,000)<span class="label label-warning" style="margin-left: 10px;">미납</span></td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">잔금</th>
+            		<td align="left" colspan="3">${bunyangInfo.balance_price}원<span class="label label-warning" style="margin-left: 10px;">미납</span></td>
+            	</tr>
+            </tbody>
+        </table>
     </div>
     
-    <!-- 신청 양식 -->
+    <!-- 계약금 납부 내역 -->
 	<div style="margin-top: 35px;">
-		<div class="pull-left"><h4>신청 양식</h4></div>	
+		<div class="pull-left"><h4>계약금 납부 내역</h4></div>
+		<div class="pull-right">
+	    	<button id="btnRegistContract" type="button" class="btn btn-primary" onclick="registApplyUser(true)">저장</button>
+		</div>	
+	</div>
+    <div class="clearfix"></div>
+    
+    <div class="table-responsive" style="border-top: 1px solid #999;">
+        <table class="table table-style" style="border-top: 0;">
+        	<colgroup>
+        		<col width="18%">
+        		<col width="32%">
+        		<col width="18%">
+        		<col width="32%">
+        	</colgroup>
+            <tbody>
+            	<tr>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부상태</p></th>
+            		<td align="left"><p class="form-control-static" style="display: inline-block;">미납</p></td>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부금액</p></th>
+            		<td align="left"><p class="form-control-static" style="display: inline-block;">일금 : 사십만원&nbsp;&nbsp;(₩400,000)</p></td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부일자</p></th>
+            		<td align="left"><input id="contract_payment_date" name="contract_payment_date" type="text" class="form-control" style="width: 200px;" value=""></td>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부방법</p></th>
+            		<td align="left">
+            			<select class="form-control" style="width: auto;">
+            				<option>무통장입금/계좌이체</option>
+            				<option>현금납부</option>
+            			</select>
+            		</td>
+            	</tr>
+<!--             	<tr> -->
+<!--             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">확인일자</p></th> -->
+<!--             		<td align="left"></td> -->
+<!--             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">확인자</p></th> -->
+<!--             		<td align="left"></td> -->
+<!--             	</tr> -->
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- 계약금 납부 내역 -->
+	<div style="margin-top: 35px;">
+		<div class="pull-left"><h4>잔금 납입 계획 및 납부 확인서</h4></div>
+		<div class="pull-right">
+	    	<button id="btnRegistContract" type="button" class="btn btn-primary" onclick="registApplyUser(true)">추가</button>
+	    	<button id="btnRegistContract" type="button" class="btn btn-primary" onclick="registApplyUser(true)">저장</button>
+		</div>	
+	</div>
+    <div class="clearfix"></div>
+    <div class="table-responsive">
+        <table class="table table-style">
+            <thead>
+                <tr>
+                    <th scope="col">회차</th>
+                    <th scope="col">납입예정일</th>
+                    <th scope="col">납입금액</th>
+                    <th scope="col">실납입일</th>
+                    <th scope="col">납입금</th>
+                    <th scope="col">확인/완납</th>
+                </tr>
+            </thead>
+            <tbody>
+            	
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- 관련 양식 -->
+	<div style="margin-top: 35px;">
+		<div class="pull-left"><h4>관련 양식</h4></div>	
 	</div>
     <div class="clearfix"></div>
     <!-- 양식 리스트 -->
@@ -181,10 +241,7 @@
 
     <div class="mt-30 text-center">
         <button id="btnEdit" type="button" class="btn btn-primary btn-lg">수정</button>
-        <c:if test="${bunyangInfo.progress_status == 'N'}">
-        <button id="btnApproval" type="button" class="btn btn-info btn-lg" onclick="approval()">승인</button>
-        <button id="btnReject" type="button" class="btn btn-warning btn-lg" onclick="reject()">반려</button>
-		</c:if>
+        <button id="btnEdit" type="button" class="btn btn-info btn-lg">계약</button>
         <button id="btnList" type="button" class="btn btn-default btn-lg">목록</button>
     </div>
     
@@ -193,9 +250,42 @@
 </form>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/jquery.fileDownload.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script type="text/javascript">
 // init 함수
 (function(){
+	
+	$('#contract_payment_date').daterangepicker({
+		singleDatePicker: true,
+		showDropdowns: true,
+		locale: {
+            "format": "YYYY/MM/DD",
+            "daysOfWeek": [
+                "일",
+                "월",
+                "화",
+                "수",
+                "목",
+                "금",
+                "토"
+            ],
+            "monthNames": [
+                "1월",
+                "2월",
+                "3월",
+                "4월",
+                "5월",
+                "6월",
+                "7월",
+                "8월",
+                "9월",
+                "10월",
+                "11월",
+                "12월"
+            ]
+        }
+	});
 	
 	// 목록 클릭
 	$('#btnList').click(function(e){
@@ -209,7 +299,7 @@
  */
 function goToList() {
 	var frm = document.getElementById("frm");
-	frm.action = "${contextPath}/admin/applymgmt";
+	frm.action = "${contextPath}/admin/contractmgmt";
 	frm.submit();
 }
 

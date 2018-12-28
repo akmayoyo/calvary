@@ -19,10 +19,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.excel.ExcelForms;
 import com.calvary.excel.service.IExcelService;
 import com.calvary.excel.vo.ExcelExportVo;
@@ -47,12 +48,20 @@ public class ExcelController {
 	 * Export 엑셀
 	 */
 	@SuppressWarnings("unchecked")
-	@RequestMapping(value="/exportExcel")
+	@PostMapping(value="/exportExcel")
 	public void exportExcelHandler(
 			HttpServletRequest request,
 			HttpServletResponse response,
-			ExcelExportVo excelExportVo
+			ExcelExportVo excelExportVo,
+			@RequestParam(value="excelHeaders[]") String[] excelHeaders,
+			@RequestParam(value="excelFields[]") String[] excelFields,
+			@RequestParam(value="searchKeys[]") String[] searchKeys,
+			@RequestParam(value="searchValues[]") String[] searchValues,
+			@RequestParam(value="queryId") String queryId,
+			@RequestParam(value="fileName") String fileName
 			) {
+		
+		boolean bRslt = false;
 		
 		// 워크북 생성
         XSSFWorkbook workbook = new XSSFWorkbook();
@@ -62,57 +71,52 @@ public class ExcelController {
         XSSFRow row;
         // 셀 생성
         XSSFCell cell;
-        // 헤더명
-        List<String> headers = excelExportVo.getHeaders();
-        // 데이터 field 명
-        List<String> fields = excelExportVo.getFields();
         
         int rowIdx = 2;
         int colIdx = 0;
         
         // 데이터 리스트
         Map<String, Object> queryParam = new HashMap<String, Object>();
-        List<String> paramKeys = excelExportVo.getParamKeys();
-        List<String> paramValues = excelExportVo.getParamValues();
-        if(paramKeys != null && paramValues != null) {
-        	for(int i = 0; i < paramKeys.size(); i++) {
-        		String key = paramKeys.get(i);
+        if(searchKeys != null && searchValues != null) {
+        	for(int i = 0; i < searchKeys.length; i++) {
+        		String key = searchKeys[i];
         		String value = null;
-        		if(paramValues.size() > i) {
-        			value = paramValues.get(i);
+        		if(searchValues.length > i) {
+        			value = searchValues[i];
         		}
         		queryParam.put(key, value);
         	}
         }
-        List<Object> list = excelService.getExportDataList(excelExportVo.getQueryId(), queryParam);
+        List<Object> list = excelService.getExportDataList(queryId, queryParam);
         
         // 헤더 생성
         row = sheet.createRow(rowIdx++);
-        for(colIdx = 0; colIdx < headers.size(); colIdx++) {
+        for(colIdx = 0; colIdx < excelHeaders.length; colIdx++) {
         	cell = row.createCell(colIdx);
-        	cell.setCellValue(headers.get(colIdx));
+        	cell.setCellValue(excelHeaders[colIdx]);
         }
         // 데이터 Row 생성
         if(list != null && list.size() > 0) {
         	for(Object obj : list) {
         		Map<String, Object> map = (HashMap<String, Object>)obj;
         		row = sheet.createRow(rowIdx++);
-        		for(colIdx = 0; colIdx < fields.size(); colIdx++) {
+        		for(colIdx = 0; colIdx < excelFields.length; colIdx++) {
                 	cell = row.createCell(colIdx);
-                	cell.setCellValue((String)map.get(fields.get(colIdx)));
+                	cell.setCellValue((String)map.get(excelFields[colIdx]));
                 }
         	}
         }
         try {
-        	String fileName = URLEncoder.encode(excelExportVo.getFileName(),"UTF-8").replaceAll("\\+", "%20");
+        	fileName = URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+", "%20");
             response.setContentType("ms-vnd/excel");
             response.setHeader("Content-Disposition", "attachment;filename=" + fileName);
             workbook.write(response.getOutputStream());
-        } catch (FileNotFoundException e) {
-        	logger.error("exceldownload FileNotFoundException occured!!", e);
-        } catch (IOException e) {
-        	logger.error("exceldownload IOException occured!!", e);
+            bRslt = true;
+        } catch (Exception e) {
+        	logger.error("exceldownload error occured!!", e);
         } finally {
+        	response.setHeader("Set-Cookie", "fileDownload=" + String.valueOf(bRslt) + "; path=/");
+            response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
             try {
                 if(workbook!=null) workbook.close();
             } catch (IOException e) {

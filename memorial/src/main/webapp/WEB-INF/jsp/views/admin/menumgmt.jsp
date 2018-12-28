@@ -128,7 +128,7 @@ function excelDownload() {
 	var queryId = "common.getUser";
 	var paramKeys = ["userId"];
 	var paramValues = ["akmayoyo"];
-	common.exportExcel(headers, fields, fileName, queryId, paramKeys, paramValues);
+	common.exportExcel2(headers, fields, fileName, queryId, paramKeys, paramValues);
 }
 
 function excelUpdate() {

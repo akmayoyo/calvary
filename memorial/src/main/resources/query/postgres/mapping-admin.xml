@@ -141,7 +141,11 @@
 
 	<!-- 분양 정보 -->
 	<select id="getBunyangInfo" parameterType="String" resultType="map">
-		SELECT 
+		SELECT
+			t.*
+			,total_price - down_payment - balance_payment AS balance_price
+		FROM
+		(SELECT 
 			A.bunyang_seq
 	       	,A.product_type
           	,(SELECT code_name FROM tb_com_code cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
@@ -150,9 +154,13 @@
           	,a.couple_type_count
           	,a.single_type_count
           	,a.progress_status
+          	,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
+          	,(SELECT COALESCE(SUM(payment_amount),0) FROM tb_bunyang_payment_history ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
+            ,(SELECT COALESCE(SUM(payment_amount),0) FROM tb_bunyang_payment_history ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
 	       	,TO_CHAR(A.regist_date, 'YYYY-MM-DD') AS regist_date
 	  	FROM tb_bunyang_info A
 	  	WHERE A.bunyang_seq = #{bunyangSeq}
+	  	) t
 	</select>
 	
 	<!-- 분양관련 사용자 정보 -->
@@ -216,6 +224,13 @@
 				<if test="file_seq_use_approval != null">file_seq_use_approval=#{file_seq_use_approval},</if>
 				<if test="file_seq_contract != null">file_seq_contract=#{file_seq_contract}</if>
 			</set> 
+		WHERE a.bunyang_seq = #{bunyangSeq}
+	</update>
+	
+	<!-- 분양정보 진행상태 업데이트 -->
+	<update id="updateBunyangProgressStatus">
+		UPDATE tb_bunyang_info a
+			SET progress_status = #{progressStatus}
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
 

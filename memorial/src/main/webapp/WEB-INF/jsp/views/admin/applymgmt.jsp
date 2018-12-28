@@ -1,3 +1,4 @@
+<%@page import="com.calvary.common.constant.CalvaryConstants"%>
 <%@page import="com.calvary.admin.controller.AdminController"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <form id="frm" method="post">
@@ -44,8 +45,8 @@
 				</thead>
 				<tbody>
 					<c:forEach items="${applyList}" var="apply">
-					<tr class="clickable-row" bunyang_seq="${apply.bunyang_seq}">
-	                    <td><p class="form-control-static">${apply.bunyang_no}</p></td>
+					<tr class="clickable-row" bunyangSeq="${apply.bunyang_seq}">
+	                    <td><p class="form-control-static">${apply.bunyang_seq}</p></td>
 	                    <td><p class="form-control-static">${apply.apply_user_name}</p></td>
 	                    <c:choose>
 						<c:when test="${apply.use_user_cnt > 1}">
@@ -74,8 +75,12 @@
 						</c:otherwise>
 						</c:choose>
 						<td style="text-decoration: none;">
-							<button type="button" class="btn btn-info btn-sm">승인</button>
-							<button type="button" class="btn btn-warning btn-sm">반려</button>
+						<c:choose>
+							<c:when test="${apply.progress_status == 'N'}">
+							<button type="button" class="btn btn-info btn-sm" onclick="approval(this, event)">승인</button>
+							<button type="button" class="btn btn-warning btn-sm" onclick="reject(this, event)">반려</button>
+							</c:when>
+						</c:choose>
 						</td>
 					</tr>
 					</c:forEach>
@@ -89,7 +94,8 @@
 	
 	</div>
 </form>
-
+<script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/jquery.fileDownload.js"></script>
 <script type="text/javascript">
 (function(){
 	// 페이징 표시 설정
@@ -103,7 +109,7 @@
 	
 	// 그리드 로우 선택시
 	$('#tblApplyList').on('click', '.clickable-row', function(event) {
-		var bunyangSeq = $(this).attr("bunyang_seq");
+		var bunyangSeq = $(this).attr("bunyangSeq");
 		_applyDetail(bunyangSeq);
 	});
 	
@@ -132,7 +138,13 @@ function _applyRegist() {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	
+	var excelHeaders = ["번호","신청자","신청형태"];
+	var excelFields = ["bunyang_seq","apply_user_name","product_type_name"];
+	var searchKeys = ["apply_user_name"];
+	var searchValues = ["이영준"];
+	var queryId = "admin.getApplyList";
+	var fileName = "분양신청정보.xlsx";
+	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName);
 }
 
 /** 
@@ -143,6 +155,60 @@ function _applyDetail(bunyangSeq) {
 	var frm = document.getElementById("frm");
 	frm.action = "${contextPath}/admin/applydetail";
 	frm.submit();
+}
+
+/**
+ * 승인
+ */
+function approval(btn, event) {
+	event.stopPropagation();
+	if(confirm("승인하시겠습니까?")) {
+		var bunyangSeq = $(btn).parent("td").parent("tr").attr("bunyangSeq");
+		var bunyangInfo = {};
+		bunyangInfo["bunyangSeq"] = bunyangSeq;
+		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_A%>";
+		// 저장 호출
+		common.ajax({
+			url:"${contextPath}/admin/approval", 
+			data:JSON.stringify(bunyangInfo),
+			contentType: 'application/json',
+			success: function(result) {
+				if(result && result.result) {
+					common.showAlert("승인되었습니다.");
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/admin/applymgmt";
+					frm.submit();
+				}
+			}
+		});
+	}
+}
+
+/**
+ * 반려
+ */
+function reject(btn) {
+	event.stopPropagation();
+	if(confirm("반려하시겠습니까?")) {
+		var bunyangSeq = $(btn).parent("td").parent("tr").attr("bunyangSeq");
+		var bunyangInfo = {};
+		bunyangInfo["bunyangSeq"] = bunyangSeq;
+		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_E%>";
+		// 저장 호출
+		common.ajax({
+			url:"${contextPath}/admin/reject", 
+			data:JSON.stringify(bunyangInfo),
+			contentType: 'application/json',
+			success: function(result) {
+				if(result && result.result) {
+					common.showAlert("반려처리 되었습니다.");
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/admin/applymgmt";
+					frm.submit();
+				}
+			}
+		});
+	}
 }
 
 </script>

@@ -10,6 +10,7 @@
 
 <!-- Bootstrap -->
 <link href="${contextPath}/resources/bootstrap/css/bootstrap.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script type="text/javascript" src="${contextPath}/resources/js/jquery-3.3.1.min.js"></script>
 <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script> -->
 <script src="${contextPath}/resources/bootstrap/js/bootstrap.min.js"></script>

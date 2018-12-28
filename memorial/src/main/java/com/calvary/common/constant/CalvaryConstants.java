@@ -6,6 +6,10 @@ public class CalvaryConstants {
 	public static final int COUNT_PER_PAGE = 10;
 	
 	
+	/** 1기당 분양가 */
+	public static final int BUNYANG_PRICE_PER_UNIT = 2000000;
+	
+	
 	/** 코드시퀀스 : 교회직분 */
 	public static final String CODE_SEQ_CHURCH_OFFICER = "CHURCH_OFFICER";
 	/** 코드시퀀스 : 사용자관계 */
@@ -56,4 +60,8 @@ public class CalvaryConstants {
 	 * 엑셀 서식 타입 : 분양신청서-사용자 
 	 */
 	public static final String FILE_FORM_TYPE_USE_USER = "USE_USER_FORM";
+	/** 
+	 * 엑셀 서식 타입 : 신청승인서
+	 */
+	public static final String FILE_FORM_TYPE_APPROVAL = "APPROVAL_FORM";
 }

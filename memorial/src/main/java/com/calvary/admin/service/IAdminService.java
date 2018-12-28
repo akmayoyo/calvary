@@ -42,6 +42,26 @@ public interface IAdminService {
 	 */
 	public int updateBunyangFileSeq(Map<String, Object> param);
 	
+	/** 
+	 * 분양정보 진행상태 업데이트
+	 */
+	public int updateBunyangProgressStatus(String bunyangSeq, String progressStatus);
+	
+	
+	
+	//===============================================================================
+	// 사용계약관리
+	//===============================================================================
+	/** 
+	 * 사용계약리스트 조회 
+	 */
+	public List<Object> getContractList(SearchVo searchVo);
+	/** 
+	 * 대금납부내역조회
+	 */
+	public List<Object> getPaymentHistory(String bunyangSeq);
+	
+	
 	
 	//===============================================================================
 	// 메뉴 관리
