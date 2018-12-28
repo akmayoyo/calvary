@@ -25,24 +25,27 @@
 					<li class="item">
 						<a href="${menu.menu_url}">${menu.menu_name}</a>
 						<ul class="depth2">
-							<div class="group wrap">
-								<div class="menu-title hidden-xs"><h2>${menu.menu_name}</h2></div>
-								<!-- 2 Level -->
-								<c:forEach items="${menu.children}" var="menu">
-									<li>
-										<a href="${menu.menu_url}">${menu.menu_name}</a>
-										<ul class="depth3">
-										<!-- 3 Level -->
-										<c:forEach items="${menu.children}" var="menu">
-											<li><a href="${menu.menu_url}">${menu.menu_name}</a></li>
-										</c:forEach>
-										</ul>
-									</li>
-								</c:forEach>
+							<div class="wrap">
+								<li class="menu_group">
+									<ul>
+									<!-- 2 Level -->
+									<c:forEach items="${menu.children}" var="menu">
+										<li><a href="${menu.menu_url}">${menu.menu_name}</a></li>
+									</c:forEach>
+									</ul>
+								</li>
 							</div>
 						</ul>
 					</li>
 				</c:forEach>
+				<div class="bx_sub hidden-xs">
+					<div class="wrap">
+						<c:forEach items="${menuList}" var="menu">
+						<!-- 메뉴선택시 서브메뉴 영역에 보일 텍스트 -->
+						<h2 class="title">${menu.menu_name}</h2>
+						</c:forEach>
+					</div>
+				</div>
 			</ul>
 			<ul class="link-bar pull-right">
 				<li class="item"><a href="#">로그인</a></li>

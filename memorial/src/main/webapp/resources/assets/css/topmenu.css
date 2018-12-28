@@ -1,18 +1,17 @@
-/* 모바일메뉴버튼 스타일 */
+/* ++++++++++++++ [ 모바일메뉴버튼 스타일 ] ++++++++++++++ */
 .menu-toggle input[type=checkbox] {
 	display: none;
 }
 .menu-toggle * {
-	box-sizing: border-box;
 	-webkit-transition: all 0.3s;
 	transition: all 0.3s;
 }
 .menu-toggle {
 	position: relative;
-	float: right;
 	display: none;
-	height: 60px;
+	float: right;
 	width: 60px;
+	height: 60px;
 	border-left: 1px solid #414141;
 }
 .menu-toggle label {
@@ -46,132 +45,140 @@
 	
 }
 .menu-toggle input[type=checkbox]:checked ~ .menu-lines > span:nth-child(3) {
-	margin-top: -12px;
 	width: 100%;
+	margin-top: -12px;
 	-webkit-transform: rotate(-45deg);
 	transform: rotate(-45deg);
 }
 
-/*메뉴스타일*/
+/* ++++++++++++++ [ 메뉴스타일 ] ++++++++++++++ */
 .menu {
 	width: 100%;
 	height: auto;
 	text-align: center;
-	background: #3a3a3a;
 	-webkit-transition: all .3s ease;
     transition: all .3s ease;
 }
-
 .menu ul {
-	display: inline-block;
-	list-style: none;
-	margin-bottom: 0px;
+	margin-bottom: 0;
 	padding-left: 0;
+	list-style: none;
+}
+.menu li {
+	vertical-align: top;
 }
 
-.menu > ul > li { 
+.menu .depth1 {
 	display: inline-block;
 }
 
-.menu a {
-	display: block;
-	height: 60px;
-	line-height: 60px;
-	padding: 0 15px;
-	font-size: 14px;
-}
-.menu .depth1 a {
-	position: relative;
-}
 .menu .depth1 a:hover,
 .menu .depth1 a:focus {
 	text-decoration: none;
 }
 
-/*메뉴 오버시 효과*/
-
-.menu .depth1 .item > a:after{
-	content: '';
-	position: absolute;
-	width: 100%;
-	height: 3px;
-	right: 0;
-	bottom: 10px;
-	background-color: transparent;
-    transition: all 0.3s ease-in-out;
-    -ms-transition: all 0.3s ease-in-out;
-    -moz-transition: all 0.3s ease-in-out;
-    -webkit-transition: all 0.3s ease-in-out;
+.menu .depth1 .item > a {
+	display: block;
+	height: 50px;
+	line-height: 50px;
+	margin: 5px 0;
+	padding: 0 15px;
+	border-bottom: 3px solid;
+	border-color: transparent;
+	-webkit-transition: all .3s ease;
+    transition: all .3s ease;
 }
-.menu .depth1 .item > a:hover:after{
-	content: '';
-	position: absolute;
-	width: 100%;
-	height: 3px;
-	right: 0;
-	bottom: 10px;
-	background-color: #ffffff;
-    transition: all 0.3s ease-in-out;
-    -ms-transition: all 0.3s ease-in-out;
-    -moz-transition: all 0.3s ease-in-out;
-    -webkit-transition: all 0.3s ease-in-out;
+.menu .depth1 .item.on > a {
+	border-color: #ffffff;
 }
 
-/*서브메뉴 스타일*/
+.menu .depth1 .item {
+	position: static;
+	display: inline-block;
+}
+
+/* ++++++++++++++ [ 서브메뉴 스타일 ] ++++++++++++++ */
 .menu .depth2 {
-	display: none;
 	position: absolute;
-	width: 100%;
-	top: 100%;
+	display: none;
+	padding: 30px 50%;
+	margin: 0 -50%;
+	text-align: left;
+	z-index: 99;
+}
+.menu .depth1 .item.on .depth2 {
+	display: block;
+	height: 285px;
+}
+
+.menu .depth2 .wrap {
+	white-space: nowrap;
+}
+.menu .depth2 .menu_group {
+	display: inline-block;
+	width: auto;
+	margin-right: 20px;
+}
+.menu .depth2 .menu_group:last-child {
+	margin-right: 0;
+}
+
+.menu .full .depth2 {
 	left: 0;
 	right: 0;
-	margin: 0 auto;
-	padding: 20px 0;
+}
+.menu .full .depth2 .wrap {
+	display: table;
+	width: 100%;
+	padding: 0 200px;
+}
+.menu .full .depth2 .menu_group {
+	display: table-cell;
+}
+
+.menu .depth2 a {
+	display: inline-block;
+	padding: 6px;
+	color: #474747 !important;
+}
+.menu .depth3 a {
+	color: #999999 !important;
+}
+
+/* ++++++++++++++ [ 서브메뉴 박스 ] ++++++++++++++ */
+.menu .bx_sub {
+	position: absolute;
+	width: 100%;
+	height: 0;
+	left: 0;
+	right: 0;
+	opacity: 0;
 	background: #ffffff;
 	border-bottom: 1px solid #aaaaaa;
 	box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.2);
+	-webkit-transition: all 0.1s;
+	transition: all 0.1s;
 }
-.menu .depth1 li:hover .depth2 {
-	display: block;
+.menu.on .bx_sub {
+	height: 285px;
+	opacity: 1;
 }
 
-.menu .group {
-	display: table;
-	width: 100%;
-}
-.menu .depth2 .group > li {
-	display: table-cell;
-	vertical-align: top;
-	border-left: 1px solid #cccccc;
-}
-.menu .depth2 .menu-title {
-	display: table-cell;
-	width: 300px;
-	vertical-align: middle;
-}
-.menu .depth2 .menu-title h2 {
+.menu .bx_sub .title {
+	display: none;
+	width: 200px;
 	margin: 0;
-}
-.menu .depth2 a {
-	color: #3a3a3a !important;
+	padding: 36px 15px;
 	text-align: left;
-	padding: 15px 20px;
-	height: auto;
-    line-height: normal;
+	font-size: 20px;
+	z-index: 999;
 }
-.menu .depth2 a:hover {
-	background: #f5f5f5;
-}
-.menu .depth2 .group > li > a {
-	font-family: 'NotoKrM', sans-serif;
-}
-.menu .depth3 {
+.menu .bx_sub .title.on {
 	display: block;
 }
-.menu .depth3 a {
-	color: #777777;
-}
 
+
+/* ++++++++++++++ [ @media ] ++++++++++++++ */
 @media (max-width: 768px) {
 	.menu-toggle {
 		display: block;
@@ -179,102 +186,100 @@
 
 	.menu {
 		clear: both;
-		min-width: inherit;
-		float: none;
-		text-align: left;
 		overflow: auto;
+		min-width: inherit;
 		max-height: 0;
-	}
-	.menu ul {
-		display: block;
+		text-align: left;
 	}
 	.menu li {
 		border-top: 1px solid #414141;
 	}
 	
-	.menu a:hover {
-		background: #4f4f4f !important;
+	.menu .depth1,
+	.menu .depth1 li,
+	.menu .depth2,
+	.menu .depth3 {
+		display: block !important;
 	}
 	
-	.menu .depth2 {
-		display: block;
-		background-color: transparent;
-		border-bottom: 0;
-		box-shadow: none;
+	.menu.active,
+	.menu .depth2.active,
+	.menu .depth3.active{
+		max-height: 55em;
+	}
+	
+	.menu .depth2,
+	.menu .depth3 {
+		overflow: hidden;
+		position: relative;
+		max-height: 0;
 		padding: 0;
-		background: #3f3f3f;
+		margin: 0;
 	}
-	.menu .depth2 .group > li {
-		display: block;
-		border-left: none;
-	}
-	.menu .depth2 a {
-		padding-left: 30px;
-		color: #ffffff !important;
+	.menu .depth2 {
+		background: #414141;
 	}
 	.menu .depth3 {
 		background: #444444;
 	}
+	
+	.menu .depth1 .item.on .depth2 {
+		height: auto;
+	}
+	
+	.menu .full .depth2 .wrap {
+		padding: 0;
+	}
+	
+	.menu .depth2 .menu_group {
+		margin-right: 0;
+	}
+	
+	.menu a {
+		position: relative;
+		display: block !important;
+		margin: 0 !important;
+	}
+	.menu a:hover {
+		background: #222222;
+	}
+	
+	.menu .depth1 .item > a {
+		border-bottom: none;
+		border-color: transparent;
+		-webkit-transition: none;
+		transition: none;
+	}
+	.menu .depth1 .item.on > a {
+		border-color: transparent;
+	}
+	
+	.menu .depth2 a {
+		height: 50px;
+		line-height: 50px;
+		padding: 0;
+		padding-left: 30px;
+		color: #cccccc !important;
+	}
 	.menu .depth3 a {
-		padding-left: 50px;
+		padding-left: 40px;
 		color: #aaaaaa !important;
 	}
 	
-	.menu > ul ul {
-		overflow: hidden;
-		max-height: 0;
-	}
-	.menu.active,
-	.menu > ul ul.active {
-		max-height: 55em;
-	}
-	
-	.menu .depth1 li:hover .depth2 {
-		display: block;
-	}
-	.menu .depth2,
-	.menu .depth3 {
-		display: inherit;
-		position: relative;
-	}
-	
-	.menu li,
-	.menu > ul > li {
-		display: block;
-	}
-
-	.menu li a {
-		position: relative;
-	}
 	.menu li.has-submenu > a:after {
 		content: '';
 		position: absolute;
-		width: 40px !important;
-		height: 40px !important;
-		top: 50% !important;
-		right: 10px !important;
+		width: 40px;
+		height: 40px;
+		top: 50%;
+		right: 10px;
 		margin-top: -20px;
-		background: url(../images/icon_plus.png) no-repeat center;
-		background-color: transparent !important;
-		transition: none !important;
-		-ms-transition: none !important;
-		-moz-transition: none !important;
-		-webkit-transition: none !important;
+		background-image: url(../images/icon_plus.png);
+		background-position: center;
+		background-repeat: no-repeat;
 	}
 	.menu li.has-submenu > a.active:after {
-		content: '';
-		position: absolute;
-		width: 40px !important;
-		height: 40px !important;
-		top: 50% !important;
-		right: 10px !important;
-		margin-top: -20px;
-		background: url(../images/icon_minus.png) no-repeat center;
-		background-color: transparent !important;
-		transition: none !important;
-		-ms-transition: none !important;
-		-moz-transition: none !important;
-		-webkit-transition: none !important;
+		background-image: url(../images/icon_minus.png);
 	}
 
 }
