@@ -10,6 +10,10 @@ public class CalvaryConstants {
 	public static final int BUNYANG_PRICE_PER_UNIT = 2000000;
 	
 	
+	/** 계약금 퍼센테이지 */
+	public static final float DOWN_PAYMENT_PERCENT = 10;
+	
+	
 	/** 코드시퀀스 : 교회직분 */
 	public static final String CODE_SEQ_CHURCH_OFFICER = "CHURCH_OFFICER";
 	/** 코드시퀀스 : 사용자관계 */

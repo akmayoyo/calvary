@@ -39,45 +39,48 @@
 						<th scope="col">1인형</th>
 						<th scope="col">총분양금</th>
 						<th scope="col">계약금</th>
-						<th scope="col">잔액납부</th>
 						<th scope="col">잔금</th>
-						<th scope="col">상태</th>
+						<th scope="col">납부금</th>
+						<th scope="col"></th>
 					</tr>
 				</thead>
 				<tbody>
 					<c:forEach items="${contractList}" var="contract">
 					<tr class="clickable-row" bunyangSeq="${contract.bunyang_seq}">
-	                    <td><p class="form-control-static">${contract.bunyang_seq}</p></td>
-	                    <td><p class="form-control-static">${contract.apply_user_name}</p></td>
+	                    <td>${contract.bunyang_seq}</td>
+	                    <td>${contract.apply_user_name}</td>
 	                    <c:choose>
 						<c:when test="${contract.use_user_cnt > 1}">
-							<td><p class="form-control-static">${contract.use_user_name}(${contract.use_user_relation_name}) 외 ${contract.use_user_cnt-1}명</p></td>
+							<td>${contract.use_user_name}(${contract.use_user_relation_name}) 외 ${contract.use_user_cnt-1}명</td>
 						</c:when>
 						<c:otherwise>
-							<td><p class="form-control-static">${contract.use_user_name}(${contract.use_user_relation_name})</p></td>
+							<td>${contract.use_user_name}(${contract.use_user_relation_name})</td>
 						</c:otherwise>
 						</c:choose>
-	                    <td><p class="form-control-static">${contract.product_type_name}</p></td>
-	                    <td><p class="form-control-static">${contract.couple_type_count}</p></td>
-	                    <td><p class="form-control-static">${contract.single_type_count}</p></td>
-	                    <td><p class="form-control-static"><fmt:formatNumber value="${contract.total_price }" pattern="#,###" /></p></td>
-	                    <td><p class="form-control-static"><fmt:formatNumber value="${contract.down_payment }" pattern="#,###" /></p></td>
-	                    <td><p class="form-control-static"><fmt:formatNumber value="${contract.balance_payment }" pattern="#,###" /></p></td>
-	                    <td><p class="form-control-static"><fmt:formatNumber value="${contract.balance_price }" pattern="#,###" /></p></td>
-	                   <c:choose>
-						<c:when test="${contract.progress_status == 'A'}">
-							<td><p class="form-control-static">계약전</p></td>
-						</c:when>
-						<c:when test="${contract.progress_status == 'B'}">
-							<td><p class="form-control-static">진행중</p></td>
-						</c:when>
-						<c:when test="${contract.progress_status == 'C'}">
-							<td><p class="form-control-static">완납</p></td>
-						</c:when>
-						<c:otherwise>
-							<td><p class="form-control-static">${contract.progress_status}</p></td>
-						</c:otherwise>
-						</c:choose>
+						<c:set var="contract_price" value="${cutil:getDownPayment(contract.total_price)}"/><!-- 계약금 -->
+	                    <td>${contract.product_type_name}</td>
+	                    <td>${contract.couple_type_count}</td>
+	                    <td>${contract.single_type_count}</td>
+	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_price)}</td>
+	                    <td>${cutil:getThousandSeperatorFormatString(contract_price)}
+	                    	<c:choose>
+							<c:when test="${contract.progress_status == 'A'}">
+								<span class="label label-warning" style="margin-left: 5px; ">미납</span>
+							</c:when>
+							<c:otherwise>
+								<span class="label label-info" style="margin-left: 5px; ">완납</span>
+							</c:otherwise>
+							</c:choose>
+	                    </td>
+	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_price - contract_price)}</td>
+	                    <td>${cutil:getThousandSeperatorFormatString(contract.balance_payment)}</td>
+	                    <td>
+	                    	<c:choose>
+							<c:when test="${contract.progress_status == 'C'}">
+								<span class="label label-info">완납</span>
+							</c:when>
+							</c:choose>
+	                    </td>
 					</tr>
 					</c:forEach>
 				</tbody>

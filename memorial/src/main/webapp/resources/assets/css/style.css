@@ -489,5 +489,5 @@ footer .icon-sns img {
 	cursor: pointer;
 }
 .clickable-row:hover td{
-	text-decoration: underline;
+	color: #337AB7;
 }

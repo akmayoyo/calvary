@@ -143,7 +143,6 @@
 	<select id="getBunyangInfo" parameterType="String" resultType="map">
 		SELECT
 			t.*
-			,total_price - down_payment - balance_payment AS balance_price
 		FROM
 		(SELECT 
 			A.bunyang_seq

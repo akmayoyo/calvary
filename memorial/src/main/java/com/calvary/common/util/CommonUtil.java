@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.calvary.common.constant.CalvaryConstants;
+
 public class CommonUtil {
 
 	/** 
@@ -19,50 +21,44 @@ public class CommonUtil {
 		return totalCount;
 	}
 	
-	/** */
-	public static String convertMoney(String str) {
-		int length = str.length();
-        long money = Long.parseLong(str);
-        long nanum = strMoney(length);
-        String total = pasing(nanum, money, length);
-        return total;
+	/** 
+	 * 금액을 한글로 변환 
+	 */
+	public static String convertPriceToHangul(int price) {
+		String[] han1 = {"","일","이","삼","사","오","육","칠","팔","구"}; 
+		String[] han2 = {"","십","백","천"}; 
+		String[] han3 = {"","만","억","조","경"}; 
+		StringBuffer result = new StringBuffer(); 
+		String money = String.valueOf(price);
+		int len = money.length(); 
+		for(int i=len-1; i>=0; i--) { 
+			result.append(han1[Integer.parseInt(money.substring(len-i-1, len-i))]); 
+			if(Integer.parseInt(money.substring(len-i-1, len-i)) > 0) {
+				result.append(han2[i%4]); 
+			}
+			if(i%4 == 0) {
+				result.append(han3[i/4]);
+			}
+		} 
+		return result.toString();
 	}
 	
-	/** */
-	public static long strMoney(int len) {
-        long nanum = 10; 
-        for(int i=2; i<len; i++) 
-            nanum *= 10;
-        return nanum;
-    }
+	/** 
+	 * 세자리 콤마 적용된 문자열 반환 
+	 */
+	public static String getThousandSeperatorFormatString(int value) {
+		String sRtn = String.format("%,d", value);
+		return sRtn;
+	}
 	
-	/** */
-	public static String pasing(long na, long mo, int len) {
-        String total = "";
-        String tmp = "";
-        while(true) {
-            long temp = mo / na;    // ??만원 ??천원을 붙이기위함
-            tmp = name(len-1);    // 돈위에 만원이나 천원을 붙이기 위함
-            total += temp + tmp;    // 위에 둘을 합쳐서 3만원같으걸 뽑음
-            mo-=(na*temp);
-            na /= 10;    // 1000, 100, 10 이렇게 나누기 위해서 씀
-            len--;    // 마찬가지로 한글로 된 돈 자리수를 위해서
-            if(mo==0)    // 0이되면 끝
-                break;
-        }
-        if(len>=8 && len<=10)
-            total+="억원";
-        else if(len>=5 && len<=7)
-            total+="만원";    
-        else if(mo!=0)
-            total+="원";
-        return total;
-    }
+	/** 
+	 * 총분양대금에 해당하는 계약금 반환 
+	 */
+	public static int getDownPayment(int totalPrice) {
+		int iRtn = 0;
+		iRtn = (int)Math.floor(totalPrice * (CalvaryConstants.DOWN_PAYMENT_PERCENT/100));
+		return iRtn;
+	}
 	
-	/** */
-	public static String name(int na) {
-        String[] na_name = {"원","십","백","천","만","십","백","천","억","십","백"};
-        String re_name = na_name[na];
-        return re_name;
-    }
+	
 }

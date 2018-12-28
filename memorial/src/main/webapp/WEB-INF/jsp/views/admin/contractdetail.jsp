@@ -141,15 +141,16 @@
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">총 분양대금</th>
-            		<td align="left" colspan="3">일금 : 사백만원&nbsp;&nbsp;(₩4,000,000)</td>
+            		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price)})</td>
             	</tr>
             	<tr>
+            		<c:set var="contract_price" value="${cutil:getDownPayment(bunyangInfo.total_price)}"/><!-- 계약금 -->
             		<th style="background-color: #f5f5f5;">계약금</th>
-            		<td align="left" colspan="3">일금 : 사십만원&nbsp;&nbsp;(₩400,000)<span class="label label-warning" style="margin-left: 10px;">미납</span></td>
+            		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(contract_price)})<span class="label label-warning" style="margin-left: 10px;">미납</span></td>
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">잔금</th>
-            		<td align="left" colspan="3">${bunyangInfo.balance_price}원<span class="label label-warning" style="margin-left: 10px;">미납</span></td>
+            		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price - contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price - contract_price)})<span class="label label-warning" style="margin-left: 10px;">미납</span></td>
             	</tr>
             </tbody>
         </table>

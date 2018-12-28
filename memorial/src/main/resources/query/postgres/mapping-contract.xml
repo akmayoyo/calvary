@@ -9,7 +9,6 @@
     <select id="getContractList" parameterType="map" resultType="map">
     	SELECT
     		t.*
-    		,total_price - down_payment - balance_payment AS balance_price
     		,COUNT(*) OVER() total_count
     	FROM
 		    (SELECT
