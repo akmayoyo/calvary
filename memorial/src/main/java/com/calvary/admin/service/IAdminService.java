@@ -59,7 +59,15 @@ public interface IAdminService {
 	/** 
 	 * 대금납부내역조회
 	 */
-	public List<Object> getPaymentHistory(String bunyangSeq);
+	public List<Object> getPaymentHistory(String bunyangSeq, String paymentType);
+	/** 
+	 * 계약금 납부 내역 업데이트
+	 */
+	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate);
+	/** 
+	 * 잔금 납부 내역 업데이트
+	 */
+	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate);
 	
 	
 	

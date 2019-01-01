@@ -116,6 +116,8 @@
         </table>
     </div>
 
+	<c:set var="contract_price" value="${cutil:getDownPayment(bunyangInfo.total_price)}"/><!-- 계약금 -->
+
 	<!-- 동산 신청 정보 -->
 	<div style="margin-top: 35px;">
 		<div class="pull-left"><h4>동산 신청 정보</h4></div>	
@@ -144,13 +146,29 @@
             		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price)})</td>
             	</tr>
             	<tr>
-            		<c:set var="contract_price" value="${cutil:getDownPayment(bunyangInfo.total_price)}"/><!-- 계약금 -->
             		<th style="background-color: #f5f5f5;">계약금</th>
-            		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(contract_price)})<span class="label label-warning" style="margin-left: 10px;">미납</span></td>
+            		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(contract_price)})
+            		<c:choose>
+						<c:when test="${contract_price == downPaymentInfo.payment_amount}">
+						<span class="label label-info" style="margin-left: 10px;">완납</span>
+						</c:when>
+						<c:otherwise>
+						<span class="label label-warning" style="margin-left: 10px;">미납</span>
+						</c:otherwise>
+					</c:choose>
+            		</td>
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">잔금</th>
-            		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price - contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price - contract_price)})<span class="label label-warning" style="margin-left: 10px;">미납</span></td>
+            		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price - contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price - contract_price)})
+            		<c:choose>
+					<c:when test="${bunyangInfo.progress_status == 'C'}">
+						<span class="label label-info" style="margin-left: 10px;">완납</span>
+					</c:when>
+					<c:otherwise>
+						<span class="label label-warning" style="margin-left: 10px;">미납</span>
+					</c:otherwise>
+					</c:choose>
             	</tr>
             </tbody>
         </table>
@@ -159,9 +177,6 @@
     <!-- 계약금 납부 내역 -->
 	<div style="margin-top: 35px;">
 		<div class="pull-left"><h4>계약금 납부 내역</h4></div>
-		<div class="pull-right">
-	    	<button id="btnRegistContract" type="button" class="btn btn-primary" onclick="registApplyUser(true)">저장</button>
-		</div>	
 	</div>
     <div class="clearfix"></div>
     
@@ -176,37 +191,56 @@
             <tbody>
             	<tr>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부상태</p></th>
-            		<td align="left"><p class="form-control-static" style="display: inline-block;">미납</p></td>
+            		<td align="left">
+            			<p class="form-control-static" style="display: inline-block;">
+            				<c:choose>
+								<c:when test="${contract_price == downPaymentInfo.payment_amount}">
+									완납
+								</c:when>
+								<c:otherwise>
+									미납
+								</c:otherwise>
+							</c:choose>
+            			</p>
+            		</td>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부금액</p></th>
-            		<td align="left"><p class="form-control-static" style="display: inline-block;">일금 : 사십만원&nbsp;&nbsp;(₩400,000)</p></td>
+            		<c:if test="${!empty downPaymentInfo.bunyang_seq}">
+            		<td align="left"><p class="form-control-static" style="display: inline-block;">일금 : ${cutil:convertPriceToHangul(downPaymentInfo.payment_amount)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(downPaymentInfo.payment_amount)})</p></td>
+            		</c:if>
+            		<c:if test="${empty downPaymentInfo.bunyang_seq}">
+            		<td align="left"><p class="form-control-static" style="display: inline-block;">일금 : ${cutil:convertPriceToHangul(contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(contract_price)})</p></td>
+            		</c:if>
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부일자</p></th>
             		<td align="left"><input id="contract_payment_date" name="contract_payment_date" type="text" class="form-control" style="width: 200px;" value=""></td>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부방법</p></th>
             		<td align="left">
-            			<select class="form-control" style="width: auto;">
-            				<option>무통장입금/계좌이체</option>
-            				<option>현금납부</option>
+            			<select id="selPaymentMethod" name="selPaymentMethod" class="form-control" style="width: auto;">
+            				<option value="<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>" <c:if test="${downPaymentInfo.payment_method == 'TRANSFER'}">selected</c:if>>무통장입금/계좌이체</option>
+            				<option value="<%=CalvaryConstants.PAYMENT_METHOD_CASH%>" <c:if test="${downPaymentInfo.payment_method == 'CASH'}">selected</c:if>>현금납부</option>
             			</select>
             		</td>
             	</tr>
-<!--             	<tr> -->
-<!--             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">확인일자</p></th> -->
-<!--             		<td align="left"></td> -->
-<!--             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">확인자</p></th> -->
-<!--             		<td align="left"></td> -->
-<!--             	</tr> -->
+            	<c:if test="${!empty downPaymentInfo.bunyang_seq}">
+            	<tr>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">확인일자</p></th>
+            		<td align="left"><p class="form-control-static" style="display: inline-block;">${downPaymentInfo.create_date }</p></td>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">확인자</p></th>
+            		<td align="left"><p class="form-control-static" style="display: inline-block;">${downPaymentInfo.create_user_name}</p></td>
+            	</tr>
+            	</c:if>
             </tbody>
         </table>
     </div>
     
-    <!-- 계약금 납부 내역 -->
+    <c:if test="${!empty downPaymentInfo.bunyang_seq}">
+    <!-- 잔금 납부 내역 -->
 	<div style="margin-top: 35px;">
-		<div class="pull-left"><h4>잔금 납입 계획 및 납부 확인서</h4></div>
+		<div class="pull-left"><h4>잔금 납부 내역</h4></div>
 		<div class="pull-right">
-	    	<button id="btnRegistContract" type="button" class="btn btn-primary" onclick="registApplyUser(true)">추가</button>
-	    	<button id="btnRegistContract" type="button" class="btn btn-primary" onclick="registApplyUser(true)">저장</button>
+	    	<button id="btnAddPayment" type="button" class="btn btn-primary" onclick="addPayment()">추가</button>
+	    	<button id="btnSavePayment" type="button" class="btn btn-primary" onclick="savePayment()">저장</button>
 		</div>	
 	</div>
     <div class="clearfix"></div>
@@ -215,18 +249,35 @@
             <thead>
                 <tr>
                     <th scope="col">회차</th>
-                    <th scope="col">납입예정일</th>
-                    <th scope="col">납입금액</th>
-                    <th scope="col">실납입일</th>
+                    <th scope="col">납입일</th>
                     <th scope="col">납입금</th>
+                    <th scope="col">납입유형</th>
                     <th scope="col">확인/완납</th>
                 </tr>
             </thead>
-            <tbody>
-            	
+            <tbody id="tbodyPayment">
+            	<c:if test="${!empty downPaymentInfo.bunyang_seq}">
+            	<tr>
+            		<td><p class="form-control-static" style="display: inline-block;">1</p></td>
+            		<td><p class="form-control-static" style="display: inline-block;">${downPaymentInfo.payment_date}</p></td>
+            		<td><p class="form-control-static" style="display: inline-block;">₩${cutil:getThousandSeperatorFormatString(downPaymentInfo.payment_amount)}</p></td>
+            		<td><p class="form-control-static" style="display: inline-block;">계약금</p></td>
+            		<td>&nbsp;</td>
+            	</tr>
+            	</c:if>
+            	<c:forEach items="${balancePaymentList}" var="balancePayment" varStatus="status">
+            	<tr>
+            		<td><p class="form-control-static" style="display: inline-block;">${status.count+1}</p></td>
+            		<td align="center"><input name="payment_date" type="text" class="form-control" style="width:150px; text-align:center;" value="${balancePayment.payment_date}"></td>
+            		<td align="center"><input name="payment_amount" type="text" class="form-control" style="width:150px; text-align:center; " value="₩${cutil:getThousandSeperatorFormatString(balancePayment.payment_amount)}"></td>
+            		<td><p class="form-control-static" style="display: inline-block;">중도금</p></td>
+            		<td>&nbsp;</td>
+            	</tr>
+            	</c:forEach>
             </tbody>
         </table>
     </div>
+    </c:if>
     
     <!-- 관련 양식 -->
 	<div style="margin-top: 35px;">
@@ -242,8 +293,13 @@
 
     <div class="mt-30 text-center">
         <button id="btnEdit" type="button" class="btn btn-primary btn-lg">수정</button>
-        <button id="btnEdit" type="button" class="btn btn-info btn-lg">계약</button>
-        <button id="btnList" type="button" class="btn btn-default btn-lg">목록</button>
+        <c:if test="${empty downPaymentInfo.bunyang_seq}">
+        <button id="btnContract" type="button" class="btn btn-info btn-lg" onclick="apprContract()">계약</button>
+        </c:if>
+        <c:if test="${!empty downPaymentInfo.bunyang_seq}">
+        <button id="btnFullPayment" type="button" class="btn btn-info btn-lg">완납</button>
+        </c:if>
+        <button id="btnList" type="button" class="btn btn-default btn-lg" onclick="goToList()">목록</button>
     </div>
     
 </div>
@@ -252,46 +308,33 @@
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/jquery.fileDownload.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/moment.min.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/jquery.number.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 <script type="text/javascript">
 // init 함수
 (function(){
 	
-	$('#contract_payment_date').daterangepicker({
-		singleDatePicker: true,
-		showDropdowns: true,
-		locale: {
-            "format": "YYYY/MM/DD",
-            "daysOfWeek": [
-                "일",
-                "월",
-                "화",
-                "수",
-                "목",
-                "금",
-                "토"
-            ],
-            "monthNames": [
-                "1월",
-                "2월",
-                "3월",
-                "4월",
-                "5월",
-                "6월",
-                "7월",
-                "8월",
-                "9월",
-                "10월",
-                "11월",
-                "12월"
-            ]
-        }
+	// 계약금 납부일자 datepicker
+	var datePickerOption = {};
+	<c:if test="${!empty downPaymentInfo.payment_date}">
+	datePickerOption["startDate"] = '${downPaymentInfo.payment_date}';
+	</c:if>
+	common.singleDatePicker($('#contract_payment_date'), datePickerOption);
+	// 잔금 납부일자 datepicker
+	common.singleDatePicker($("input[name='payment_date']"));
+	// 납입금 포맷처리
+	$("input[name='payment_amount']").focusout(function(e){
+		var val = $(this).val();
+		val = common.toNumeric(val);
+		if(val) {
+			val = "₩" + $.number(val);
+		}
+		$(this).val(val);
+	}).focusin(function(e){
+		var val = $(this).val();
+		val = common.toNumeric(val);
+		$(this).val(val);
 	});
-	
-	// 목록 클릭
-	$('#btnList').click(function(e){
-		goToList();
-	});	
 	
 })();
 
@@ -305,53 +348,93 @@ function goToList() {
 }
 
 /**
- * 승인
+ * 계약 승인
  */
-function approval() {
-	if(confirm("승인하시겠습니까?")) {
-		var bunyangInfo = {};
-		bunyangInfo["bunyangSeq"] = "${bunyangSeq}";
-		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_A%>";
-		// 저장 호출
-		common.ajax({
-			url:"${contextPath}/admin/approval", 
-			data:JSON.stringify(bunyangInfo),
-			contentType: 'application/json',
-			success: function(result) {
-				if(result && result.result) {
-					common.showAlert("승인되었습니다.");
-					var frm = document.getElementById("frm");
-					frm.action = "${contextPath}/admin/applymgmt";
-					frm.submit();
-				}
+function apprContract() {
+	var data = {};
+	var paymentDate =  $("#contract_payment_date").data('daterangepicker').startDate.format('YYYYMMDD');
+	data["bunyangSeq"] = "${bunyangSeq}";
+	data["paymentAmount"] = "${contract_price}";
+	data["paymentMethod"] = $("#selPaymentMethod option:selected").val();
+	data["paymentDate"] = paymentDate;
+	
+	common.ajax({
+		url:"${contextPath}/admin/apprcontract", 
+		data:data,
+		success: function(result) {
+			if(result && result.result) {
+				common.showAlert("저장되었습니다.");
+				var frm = document.getElementById("frm");
+				frm.action = "${contextPath}/admin/contractdetail";
+				frm.submit();
 			}
-		});
-	}
+		}
+	});
 }
 
 /**
- * 반려
+ * 납부 내역 추가
  */
-function reject() {
-	if(confirm("반려하시겠습니까?")) {
-		var bunyangInfo = {};
-		bunyangInfo["bunyangSeq"] = "${bunyangSeq}";
-		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_E%>";
-		// 저장 호출
-		common.ajax({
-			url:"${contextPath}/admin/reject", 
-			data:JSON.stringify(bunyangInfo),
-			contentType: 'application/json',
-			success: function(result) {
-				if(result && result.result) {
-					common.showAlert("반려처리 되었습니다.");
-					var frm = document.getElementById("frm");
-					frm.action = "${contextPath}/admin/applymgmt";
-					frm.submit();
-				}
+function addPayment() {
+	var len = $('#tbodyPayment tr').length;
+	var tr = $('<tr/>');
+	tr.append('<td><p class="form-control-static" style="display: inline-block;">'+(len+1)+'</p></td>');
+	tr.append('<td align="center"><input name="payment_date" type="text" class="form-control" style="width:150px; text-align:center; "></td>');
+	tr.append('<td align="center"><input name="payment_amount" type="text" class="form-control" style="width:150px; text-align:center; "></td>');
+	tr.append('<td><p class="form-control-static" style="display: inline-block;">중도금</p></td>');
+	tr.append('<td>&nbsp;</td>');
+	$('#tbodyPayment').append(tr);
+	common.singleDatePicker($("input[name='payment_date']"));
+	$("input[name='payment_amount']").focusout(function(e){
+		var val = $(this).val();
+		val = common.toNumeric(val);
+		if(val) {
+			val = "₩" + $.number(val);
+		}
+		$(this).val(val);
+	}).focusin(function(e){
+		var val = $(this).val();
+		val = common.toNumeric(val);
+		$(this).val(val);
+	});
+}
+
+/**
+ * 납부 내역 저장
+ */
+function savePayment() {
+	var isValid = true;
+	var payment_dates = [];
+	var payment_methods = [];
+	var payment_amounts = [];
+	$('#tbodyPayment tr').each(function(idx) {
+		// 첫번째행은 계약금이라 패스
+		if(idx > 0) {
+			var payment_date = $(this).find('td input[name="payment_date"]').data('daterangepicker').startDate.format('YYYYMMDD');
+			var payment_amount = $(this).find('td input[name="payment_amount"]').val();
+			payment_amount = common.toNumeric(payment_amount);
+			payment_dates.push(payment_date);
+			payment_methods.push('<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>');
+			payment_amounts.push(payment_amount);
+		}
+	});
+	var data = {};
+	data["bunyangSeq"] = "${bunyangSeq}";
+	data["paymentDate"] = payment_dates;
+	data["paymentMethod"] = payment_methods;
+	data["paymentAmount"] = payment_amounts;
+	common.ajax({
+		url:"${contextPath}/admin/savebalancepayment", 
+		data:data,
+		success: function(result) {
+			if(result && result.result) {
+				common.showAlert("저장되었습니다.");
+				var frm = document.getElementById("frm");
+				frm.action = "${contextPath}/admin/contractdetail";
+				frm.submit();
 			}
-		});
-	}
+		}
+	});
 }
 
 /**

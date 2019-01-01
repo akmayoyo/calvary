@@ -13,6 +13,7 @@ import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.dao.CommonDao;
+import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
 
 @Service
@@ -176,9 +177,65 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 대금납부내역조회
 	 */
-	public List<Object> getPaymentHistory(String bunyangSeq) {
-		List<Object> list = commonDao.selectList("contract.getPaymentHistory", bunyangSeq); 
+	public List<Object> getPaymentHistory(String bunyangSeq, String paymentType) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("paymentType", paymentType);
+		List<Object> list = commonDao.selectList("contract.getPaymentHistory", param); 
 		return list;
+	}
+	
+	/** 
+	 * 계약금 납부 내역 업데이트
+	 */
+	@Transactional
+	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		// 계약금 납부 정보 업데이트
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("paymentType", CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);
+		param.put("paymentAmount", paymentAmount);
+		param.put("paymentMethod", paymentMethod);
+		param.put("paymentDate", paymentDate);
+		param.put("createUser", SessionUtil.getCurrentUser().getUserId());
+		iRslt += commonDao.delete("contract.deleteDownPayment", param);
+		iRslt += commonDao.insert("contract.insertDownPayment", param);
+		// 분양상태를 계약상태로 업데이트
+		param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_B);
+		iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
+		return iRslt;
+	}
+	
+	/** 
+	 * 잔금 납부 내역 업데이트
+	 */
+	@Transactional
+	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("paymentType", CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT);
+		param.put("createUser", SessionUtil.getCurrentUser().getUserId());
+		// 일단삭제
+		iRslt += commonDao.delete("contract.deleteDownPayment", param);
+		// 신규로 생성
+		if(paymentAmount.length > 0) {
+			for(int i = 0; i < paymentAmount.length; i++) {
+				param.put("paymentAmount", paymentAmount[i]);
+				param.put("paymentMethod", paymentMethod[i]);
+				param.put("paymentDate", paymentDate[i]);
+				iRslt += commonDao.insert("contract.insertDownPayment", param);
+			}
+		}		
+		// 분양상태를 계약상태로 업데이트
+//		param = new HashMap<String, Object>();
+//		param.put("bunyangSeq", bunyangSeq);
+//		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_B);
+//		iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
+		return iRslt;
 	}
 	
 	

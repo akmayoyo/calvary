@@ -38,4 +38,15 @@ public class SessionUtil {
 		}
 		return sessionVo;
 	}
+	
+	/** 
+	 * 현재 접속 사용자 정보 반환 
+	 */
+	public static UserVo getCurrentUser() {
+		// TOOD
+		UserVo userVo = new UserVo();
+		userVo.setUserId("calvaryadmin");
+		userVo.setUserName("calvaryadmin");
+		return userVo;
+	}
 }

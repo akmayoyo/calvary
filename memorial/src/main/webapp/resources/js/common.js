@@ -265,6 +265,42 @@
 		}
 		price = cnt*pricePerCnt;
 	}
+	
+	var singleDatePicker = function(el, opt) {
+		opt = opt || {};
+		opt = $.extend(true, {
+			singleDatePicker:true,
+			showDropdowns:true,
+			locale:{
+				"format": "YYYY-MM-DD",
+				 "daysOfWeek": [
+		                "일",
+		                "월",
+		                "화",
+		                "수",
+		                "목",
+		                "금",
+		                "토"
+		            ],
+		            "monthNames": [
+		                "1월",
+		                "2월",
+		                "3월",
+		                "4월",
+		                "5월",
+		                "6월",
+		                "7월",
+		                "8월",
+		                "9월",
+		                "10월",
+		                "11월",
+		                "12월"
+		            ]
+			},
+			startDate: new Date()
+		}, opt);
+		return el.daterangepicker(opt);
+	}
 
 	var common = {};
 	common.ajax = ajax;
@@ -278,6 +314,7 @@
 	common.toNumeric = toNumeric;
 	common.showAlert = showAlert;
 	common.calcBunyangPrice = calcBunyangPrice;
+	common.singleDatePicker = singleDatePicker;
 
 	window.common = common;
 })();

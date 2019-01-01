@@ -37,10 +37,10 @@
 						<th scope="col">신청형태</th>
 						<th scope="col">부부형</th>
 						<th scope="col">1인형</th>
-						<th scope="col">총분양금</th>
-						<th scope="col">계약금</th>
-						<th scope="col">잔금</th>
-						<th scope="col">납부금</th>
+						<th scope="col">총분양대금</th>
+						<th scope="col">납부금액</th>
+						<th scope="col">계약여부</th>
+						<th scope="col">완납여부</th>
 						<th scope="col"></th>
 					</tr>
 				</thead>
@@ -62,24 +62,23 @@
 	                    <td>${contract.couple_type_count}</td>
 	                    <td>${contract.single_type_count}</td>
 	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_price)}</td>
-	                    <td>${cutil:getThousandSeperatorFormatString(contract_price)}
-	                    	<c:choose>
-							<c:when test="${contract.progress_status == 'A'}">
-								<span class="label label-warning" style="margin-left: 5px; ">미납</span>
-							</c:when>
-							<c:otherwise>
-								<span class="label label-info" style="margin-left: 5px; ">완납</span>
-							</c:otherwise>
-							</c:choose>
-	                    </td>
-	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_price - contract_price)}</td>
-	                    <td>${cutil:getThousandSeperatorFormatString(contract.balance_payment)}</td>
+	                    <td>${cutil:getThousandSeperatorFormatString(contract.down_payment + contract.balance_payment)}</td>
 	                    <td>
-	                    	<c:choose>
-							<c:when test="${contract.progress_status == 'C'}">
-								<span class="label label-info">완납</span>
-							</c:when>
-							</c:choose>
+	                    <c:choose>
+						<c:when test="${contract.progress_status == 'A'}">
+							<span class="label label-warning" style="margin-left: 5px; ">미납</span>
+						</c:when>
+						<c:otherwise>
+							<span class="label label-info" style="margin-left: 5px; ">완납</span>
+						</c:otherwise>
+						</c:choose>
+	                    </td>
+	                    <td>
+                    	<c:choose>
+						<c:when test="${contract.progress_status == 'C'}">
+							<span class="label label-info">완납</span>
+						</c:when>
+						</c:choose>
 	                    </td>
 					</tr>
 					</c:forEach>

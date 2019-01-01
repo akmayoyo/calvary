@@ -32,6 +32,15 @@ public class CommonDao {
 	}
 	
 	/** 
+	 * delete
+	 * @param queryId mapping query id
+	 * @param parameter query parameter 
+	 */
+	public int delete(String queryId, Object parameter) {
+		return sqlSessionTemplate.delete(queryId, parameter);
+	}
+	
+	/** 
 	 * selectList
 	 * @param queryId mapping query id
 	 * @param parameter query parameter 
