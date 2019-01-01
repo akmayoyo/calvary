@@ -46,40 +46,18 @@
 				</thead>
 				<tbody>
 					<c:forEach items="${contractList}" var="contract">
+					<c:set var="contract_price" value="${cutil:getDownPayment(contract.total_price)}"/><!-- 계약금 -->
 					<tr class="clickable-row" bunyangSeq="${contract.bunyang_seq}">
 	                    <td>${contract.bunyang_seq}</td>
 	                    <td>${contract.apply_user_name}</td>
-	                    <c:choose>
-						<c:when test="${contract.use_user_cnt > 1}">
-							<td>${contract.use_user_name}(${contract.use_user_relation_name}) 외 ${contract.use_user_cnt-1}명</td>
-						</c:when>
-						<c:otherwise>
-							<td>${contract.use_user_name}(${contract.use_user_relation_name})</td>
-						</c:otherwise>
-						</c:choose>
-						<c:set var="contract_price" value="${cutil:getDownPayment(contract.total_price)}"/><!-- 계약금 -->
+	                    <td>${contract.use_user_exp}</td>
 	                    <td>${contract.product_type_name}</td>
 	                    <td>${contract.couple_type_count}</td>
 	                    <td>${contract.single_type_count}</td>
 	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_price)}</td>
-	                    <td>${cutil:getThousandSeperatorFormatString(contract.down_payment + contract.balance_payment)}</td>
-	                    <td>
-	                    <c:choose>
-						<c:when test="${contract.progress_status == 'A'}">
-							<span class="label label-warning" style="margin-left: 5px; ">미납</span>
-						</c:when>
-						<c:otherwise>
-							<span class="label label-info" style="margin-left: 5px; ">완납</span>
-						</c:otherwise>
-						</c:choose>
-	                    </td>
-	                    <td>
-                    	<c:choose>
-						<c:when test="${contract.progress_status == 'C'}">
-							<span class="label label-info">완납</span>
-						</c:when>
-						</c:choose>
-	                    </td>
+	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_payment)}</td>
+	                    <td><c:if test="${contract.contract_yn == 'Y'}">O</c:if></td>
+	                    <td><c:if test="${contract.full_payment_yn == 'Y'}">O</c:if></td>
 					</tr>
 					</c:forEach>
 				</tbody>
@@ -127,12 +105,12 @@ function _search(pageIndex) {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호","신청자","신청형태"];
-	var excelFields = ["bunyang_seq","apply_user_name","product_type_name"];
-	var searchKeys = ["apply_user_name"];
-	var searchValues = ["이영준"];
+	var excelHeaders = ["번호", "신청자", "사용자", "신청형태", "부부형", "1인형", "총 분양대금", "납부금액", "계약여부", "완납여부"];
+	var excelFields = ["bunyang_seq","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","total_price","total_payment","contract_yn","full_payment_yn"];
+	var searchKeys = [""];
+	var searchValues = [""];
 	var queryId = "contract.getContractList";
-	var fileName = "분양신청정보.xlsx";
+	var fileName = "사용계약관리.xlsx";
 	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName);
 }
 

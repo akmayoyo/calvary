@@ -48,9 +48,9 @@ public class CalvaryConstants {
 	public static final String PROGRESS_STATUS_A = "A";
 	/** 분양 진행상태 코드값 : 계약 */
 	public static final String PROGRESS_STATUS_B = "B";
-	/** 분양 진행상태 코드값 : 사용승인 */
+	/** 분양 진행상태 코드값 : 완납 */
 	public static final String PROGRESS_STATUS_C = "C";
-	/** 분양 진행상태 코드값 : 사용신청 */
+	/** 분양 진행상태 코드값 : 사용승인 */
 	public static final String PROGRESS_STATUS_D = "D";
 	/** 분양 진행상태 코드값 : 반려 */
 	public static final String PROGRESS_STATUS_E = "E";
@@ -84,4 +84,8 @@ public class CalvaryConstants {
 	 * 엑셀 서식 타입 : 분양계약서
 	 */
 	public static final String FILE_FORM_TYPE_CONTRACT = "CONTRACT_FORM";
+	/** 
+	 * 엑셀 서식 타입 : 완납확인증명서
+	 */
+	public static final String FILE_FORM_TYPE_FULL_PAYMENT = "FULL_PAYMENT_FORM";
 }

@@ -237,6 +237,7 @@ public class AdminController {
 			mv.addObject("downPaymentInfo", paymentList.get(0));// 계약금 납부내역
 		}
 		mv.addObject("balancePaymentList", adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 잔금납부내역
+		mv.addObject("totalPaymentInfo", adminService.getTotalPayment(bunyangSeq));
 		mv.setViewName(ROOT_URL + CONTRACT_DETAIL_URL);
 		return mv;
 	}
@@ -271,13 +272,14 @@ public class AdminController {
 	@ResponseBody
 	public Object saveBalancePaymentHandler(
 			@RequestParam(value="bunyangSeq") String bunyangSeq,
-			@RequestParam(value="paymentAmount[]") int[] paymentAmount,
-			@RequestParam(value="paymentMethod[]") String[] paymentMethod,
-			@RequestParam(value="paymentDate[]") String[] paymentDate
+			@RequestParam(value="paymentAmount[]", required=false) int[] paymentAmount,
+			@RequestParam(value="paymentMethod[]", required=false) String[] paymentMethod,
+			@RequestParam(value="paymentDate[]", required=false) String[] paymentDate,
+			@RequestParam(value="isFullPayment") boolean isFullPayment
 			) {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateBalancePayment(bunyangSeq, paymentAmount, paymentMethod, paymentDate);
+		int iRslt = adminService.updateBalancePayment(bunyangSeq, paymentAmount, paymentMethod, paymentDate, isFullPayment);
 		if(iRslt > 0) {
 			String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
 			if(!StringUtils.isEmpty(fileSeq)) {
@@ -286,6 +288,16 @@ public class AdminController {
 				param.put("file_seq_contract", fileSeq);
 				iRslt = adminService.updateBunyangFileSeq(param);
 				bRslt = iRslt > 0;
+			}
+			if(isFullPayment) {
+				fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "");
+				if(!StringUtils.isEmpty(fileSeq)) {
+					Map<String, Object> param = new HashMap<String, Object>();
+					param.put("bunyangSeq", bunyangSeq);
+					param.put("file_seq_full_payment", fileSeq);
+					iRslt = adminService.updateBunyangFileSeq(param);
+					bRslt = iRslt > 0;
+				}
 			}
 		}
 		rtnMap.put("result", bRslt);

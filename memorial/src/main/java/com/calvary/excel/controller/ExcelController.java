@@ -102,7 +102,16 @@ public class ExcelController {
         		row = sheet.createRow(rowIdx++);
         		for(colIdx = 0; colIdx < excelFields.length; colIdx++) {
                 	cell = row.createCell(colIdx);
-                	cell.setCellValue((String)map.get(excelFields[colIdx]));
+                	Object objTmp = map.get(excelFields[colIdx]);
+                	if(objTmp instanceof Integer) {
+                		cell.setCellValue(String.valueOf(objTmp));
+                	}else if(objTmp instanceof String) {
+                		cell.setCellValue((String)objTmp);
+                	}else if(objTmp instanceof Long) {
+                		cell.setCellValue(String.valueOf(objTmp));
+                	}else {
+                		cell.setCellValue((String)objTmp);
+                	}
                 }
         	}
         }

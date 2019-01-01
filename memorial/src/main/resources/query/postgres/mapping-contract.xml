@@ -10,6 +10,13 @@
     	SELECT
     		t.*
     		,COUNT(*) OVER() total_count
+    		,CASE 
+        		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
+          		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
+        	END use_user_exp
+        	,down_payment + balance_payment AS total_payment
+        	,CASE WHEN down_payment > 0 THEN 'Y' ELSE 'N' END AS contract_yn
+        	,CASE WHEN down_payment + balance_payment = total_price THEN 'Y' ELSE 'N' END AS full_payment_yn
     	FROM
 		    (SELECT
 			  a.bunyang_seq
@@ -109,6 +116,14 @@
 		WHERE bunyang_seq = #{bunyangSeq}
 		and payment_type = #{paymentType}
 		ORDER BY a.payment_date, a.create_date
+    </select>
+    
+    <!-- 총대금납부금액조회 -->
+    <select id="getTotalPayment" parameterType="String" resultType="map">
+    	SELECT 
+			COALESCE(SUM(payment_amount), 0) total_amount
+		FROM tb_bunyang_payment_history a
+		WHERE bunyang_seq = #{bunyangSeq}
     </select>
     
     <!-- 계약금 납부 내역 -->

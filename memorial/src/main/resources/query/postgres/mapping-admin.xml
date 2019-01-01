@@ -38,6 +38,16 @@
     <select id="getApplyList" parameterType="map" resultType="map">
     	SELECT
     		t.*
+    		,CASE 
+        		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
+          		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
+        	END use_user_exp
+        	,CASE progress_status
+        		WHEN 'N' THEN '신청(미승인)'
+        		WHEN 'A' THEN '승인'
+        		WHEN 'E' THEN '반려'
+        		ELSE progress_status
+        	END progress_status_exp
     		,COUNT(*) OVER() total_count
     	FROM
 		    (SELECT
@@ -198,8 +208,9 @@
 		SELECT * FROM tb_sys_file_info WHERE file_seq = (SELECT file_seq_apply FROM tb_bunyang_info a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
 		SELECT * FROM tb_sys_file_info WHERE file_seq = (SELECT file_seq_use_user FROM tb_bunyang_info a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
 		SELECT * FROM tb_sys_file_info WHERE file_seq = (SELECT file_seq_approval FROM tb_bunyang_info a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
-		SELECT * FROM tb_sys_file_info WHERE file_seq = (SELECT file_seq_use_approval FROM tb_bunyang_info a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
-		SELECT * FROM tb_sys_file_info WHERE file_seq = (SELECT file_seq_contract FROM tb_bunyang_info a WHERE a.bunyang_seq = #{bunyangSeq})
+		SELECT * FROM tb_sys_file_info WHERE file_seq = (SELECT file_seq_contract FROM tb_bunyang_info a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT * FROM tb_sys_file_info WHERE file_seq = (SELECT file_seq_full_payment FROM tb_bunyang_info a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT * FROM tb_sys_file_info WHERE file_seq = (SELECT file_seq_use_approval FROM tb_bunyang_info a WHERE a.bunyang_seq = #{bunyangSeq})
 	</select>
 	
 	<!-- 분양정보 생성 -->
@@ -220,8 +231,9 @@
 				<if test="file_seq_apply != null">file_seq_apply=#{file_seq_apply},</if>
 				<if test="file_seq_use_user != null">file_seq_use_user=#{file_seq_use_user},</if>
 				<if test="file_seq_approval != null">file_seq_approval=#{file_seq_approval},</if>
-				<if test="file_seq_use_approval != null">file_seq_use_approval=#{file_seq_use_approval},</if>
 				<if test="file_seq_contract != null">file_seq_contract=#{file_seq_contract}</if>
+				<if test="file_seq_full_payment != null">file_seq_full_payment=#{file_seq_full_payment}</if>
+				<if test="file_seq_use_approval != null">file_seq_use_approval=#{file_seq_use_approval},</if>
 			</set> 
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>

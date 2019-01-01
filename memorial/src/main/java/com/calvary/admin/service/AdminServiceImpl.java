@@ -186,6 +186,15 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
+	 * 총대금납부금액조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getTotalPayment(String bunyangSeq) {
+		Map<String, Object> rtn = (HashMap<String, Object>)commonDao.selectOne("contract.getTotalPayment", bunyangSeq); 
+		return rtn;
+	}
+	
+	/** 
 	 * 계약금 납부 내역 업데이트
 	 */
 	@Transactional
@@ -213,7 +222,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 잔금 납부 내역 업데이트
 	 */
 	@Transactional
-	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate) {
+	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, boolean isFullPayment) {
 		Map<String, Object> param = new HashMap<String, Object>();
 		int iRslt = 0;
 		param.put("bunyangSeq", bunyangSeq);
@@ -222,19 +231,21 @@ public class AdminServiceImpl implements IAdminService {
 		// 일단삭제
 		iRslt += commonDao.delete("contract.deleteDownPayment", param);
 		// 신규로 생성
-		if(paymentAmount.length > 0) {
+		if(paymentAmount != null &&paymentAmount.length > 0) {
 			for(int i = 0; i < paymentAmount.length; i++) {
 				param.put("paymentAmount", paymentAmount[i]);
 				param.put("paymentMethod", paymentMethod[i]);
 				param.put("paymentDate", paymentDate[i]);
 				iRslt += commonDao.insert("contract.insertDownPayment", param);
 			}
-		}		
-		// 분양상태를 계약상태로 업데이트
-//		param = new HashMap<String, Object>();
-//		param.put("bunyangSeq", bunyangSeq);
-//		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_B);
-//		iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
+		}	
+		if(isFullPayment) {
+			// 분양상태를 완납상태로 업데이트
+			param = new HashMap<String, Object>();
+			param.put("bunyangSeq", bunyangSeq);
+			param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_C);
+			iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
+		}
 		return iRslt;
 	}
 	

@@ -48,32 +48,12 @@
 					<tr class="clickable-row" bunyangSeq="${apply.bunyang_seq}">
 	                    <td><p class="form-control-static">${apply.bunyang_seq}</p></td>
 	                    <td><p class="form-control-static">${apply.apply_user_name}</p></td>
-	                    <c:choose>
-						<c:when test="${apply.use_user_cnt > 1}">
-							<td><p class="form-control-static">${apply.use_user_name}(${apply.use_user_relation_name}) 외 ${apply.use_user_cnt-1}명</p></td>
-						</c:when>
-						<c:otherwise>
-							<td><p class="form-control-static">${apply.use_user_name}(${apply.use_user_relation_name})</p></td>
-						</c:otherwise>
-						</c:choose>
+	                    <td><p class="form-control-static">${apply.use_user_exp}</p></td>
 	                    <td><p class="form-control-static">${apply.product_type_name}</p></td>
 	                    <td><p class="form-control-static">${apply.couple_type_count}</p></td>
 	                    <td><p class="form-control-static">${apply.single_type_count}</p></td>
 	                    <td><p class="form-control-static">${apply.regist_date}</p></td>
-	                    <c:choose>
-						<c:when test="${apply.progress_status == 'N'}">
-							<td><p class="form-control-static">신청(미승인)</p></td>
-						</c:when>
-						<c:when test="${apply.progress_status == 'A'}">
-							<td><p class="form-control-static">승인</p></td>
-						</c:when>
-						<c:when test="${apply.progress_status == 'E'}">
-							<td><p class="form-control-static">반려</p></td>
-						</c:when>
-						<c:otherwise>
-							<td><p class="form-control-static">${apply.progress_status}</p></td>
-						</c:otherwise>
-						</c:choose>
+	                    <td><p class="form-control-static">${apply.progress_status_exp}</p></td>
 						<td style="text-decoration: none;">
 						<c:choose>
 							<c:when test="${apply.progress_status == 'N'}">
@@ -138,12 +118,12 @@ function _applyRegist() {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호","신청자","신청형태"];
-	var excelFields = ["bunyang_seq","apply_user_name","product_type_name"];
-	var searchKeys = ["apply_user_name"];
-	var searchValues = ["이영준"];
+	var excelHeaders = ["번호","신청자","사용자","신청형태","부부형","1인형","신청일자","신청상태"];
+	var excelFields = ["bunyang_seq","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","regist_date","progress_status_exp"];
+	var searchKeys = [""];
+	var searchValues = [""];
 	var queryId = "admin.getApplyList";
-	var fileName = "분양신청정보.xlsx";
+	var fileName = "분양신청관리.xlsx";
 	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName);
 }
 

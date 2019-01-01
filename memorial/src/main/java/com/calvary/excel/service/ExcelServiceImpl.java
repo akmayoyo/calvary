@@ -639,6 +639,158 @@ public class ExcelServiceImpl implements IExcelService {
 				cellvalues.add(createUser);
 			}
 			
+			// 잔금 납부내역
+			List<Object> balancePaymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT);
+			if(balancePaymentList != null && balancePaymentList.size() > 0) {
+				for(i = 0; i < balancePaymentList.size(); i++) {
+					tmp = (HashMap<String, Object>)balancePaymentList.get(i);
+					String paymentDate = (String)tmp.get("payment_date");
+					int paymentAmount = (int)tmp.get("payment_amount");
+					
+					// 납부일자
+					sheetnums.add(0);
+					rownums.add(68+i);
+					cellnums.add(convertColAlphabetToIndex("I"));
+					cellvalues.add(paymentDate);
+					// 납부금액
+					sheetnums.add(0);
+					rownums.add(68+i);
+					cellnums.add(convertColAlphabetToIndex("L"));
+					cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
+				}
+			}
+		}else if(ExcelForms.FULL_PAYMENT_FORM.equals(excelForm)) {// 완납확인증명서
+			fileFormType = CalvaryConstants.FILE_FORM_TYPE_FULL_PAYMENT;
+			destFilePath += "/fullPayment";
+			
+			// 계약번호
+			sheetnums.add(0);
+			rownums.add(5);
+			cellnums.add(convertColAlphabetToIndex("O"));
+			cellvalues.add(bunyangSeq);
+			// 신청자성명
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("C"));
+			cellvalues.add((String)applyUser.get("user_name"));
+			// 신청자 생년월일
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("F"));
+			cellvalues.add((String)applyUser.get("birth_date"));
+			// 신청자 직분
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("I"));
+			cellvalues.add((String)applyUser.get("church_officer_name"));
+			
+			// 신청자  교구
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("L"));
+			cellvalues.add((String)applyUser.get("diocese"));
+			
+			// 신청자  휴대전화
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("M"));
+			cellvalues.add((String)applyUser.get("mobile"));
+			
+			// 신청자  우편번호
+			sheetnums.add(0);
+			rownums.add(10);
+			cellnums.add(convertColAlphabetToIndex("C"));
+			cellvalues.add((String)applyUser.get("post_number"));
+			
+			// 신청자  주소
+			sheetnums.add(0);
+			rownums.add(10);
+			cellnums.add(convertColAlphabetToIndex("D"));
+			cellvalues.add((String)applyUser.get("address1") + (String)applyUser.get("address2"));
+			
+			// 신청자  이메일
+			sheetnums.add(0);
+			rownums.add(10);
+			cellnums.add(convertColAlphabetToIndex("M"));
+			cellvalues.add((String)applyUser.get("email"));
+			
+			// 신청형태
+			String productionType = (String)bunyangInfo.get("product_type");
+			if(CalvaryConstants.PRODUCT_TYPE_EACH.equals(productionType)) {// 개별형
+				sheetnums.add(0);
+				rownums.add(14);
+				cellnums.add(convertColAlphabetToIndex("J"));
+				cellvalues.add("O");
+			}else if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productionType)) {// 가족형
+				sheetnums.add(0);
+				rownums.add(14);
+				cellnums.add(convertColAlphabetToIndex("M"));
+				cellvalues.add("O");
+			}
+			if(coupleTypeCount > 0) {
+				sheetnums.add(0);
+				rownums.add(15);
+				cellnums.add(convertColAlphabetToIndex("J"));
+				cellvalues.add(String.valueOf(coupleTypeCount));
+			}
+			if(singleTypeCount > 0) {
+				sheetnums.add(0);
+				rownums.add(15);
+				cellnums.add(convertColAlphabetToIndex("M"));
+				cellvalues.add(String.valueOf(singleTypeCount));
+			}
+			
+			// 총기수
+			sheetnums.add(0);
+			rownums.add(16);
+			cellnums.add(convertColAlphabetToIndex("C"));
+			cellvalues.add(String.valueOf(bunyangCnt));
+			
+			// 총분양가
+			sheetnums.add(0);
+			rownums.add(17);
+			cellnums.add(convertColAlphabetToIndex("E"));
+			cellvalues.add("일금:" + totalPriceH + "원");
+			sheetnums.add(0);
+			rownums.add(17);
+			cellnums.add(convertColAlphabetToIndex("H"));
+			cellvalues.add("(₩" + totalPriceF + ")");
+			
+			// 총계약금
+			sheetnums.add(0);
+			rownums.add(18);
+			cellnums.add(convertColAlphabetToIndex("E"));
+			cellvalues.add("일금:" + contractPriceH + "원");
+			sheetnums.add(0);
+			rownums.add(18);
+			cellnums.add(convertColAlphabetToIndex("H"));
+			cellvalues.add("(₩" + contractPriceF + ")");
+			
+			// 잔금
+			sheetnums.add(0);
+			rownums.add(19);
+			cellnums.add(convertColAlphabetToIndex("E"));
+			cellvalues.add("일금:" + balancePriceH + "원");
+			sheetnums.add(0);
+			rownums.add(19);
+			cellnums.add(convertColAlphabetToIndex("H"));
+			cellvalues.add("(₩" + balancePriceF + ")");
+			
+			// 완납문구
+			sheetnums.add(0);
+			rownums.add(19);
+			cellnums.add(convertColAlphabetToIndex("L"));
+			cellvalues.add("완납");
+			
+			// 확인일자
+			sheetnums.add(0);
+			rownums.add(25);
+			cellnums.add(convertColAlphabetToIndex("D"));
+			cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+			sheetnums.add(0);
+			rownums.add(29);
+			cellnums.add(convertColAlphabetToIndex("G"));
+			cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 		}
 		
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();

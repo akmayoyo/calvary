@@ -296,8 +296,7 @@
 		                "11월",
 		                "12월"
 		            ]
-			},
-			startDate: new Date()
+			}
 		}, opt);
 		return el.daterangepicker(opt);
 	}

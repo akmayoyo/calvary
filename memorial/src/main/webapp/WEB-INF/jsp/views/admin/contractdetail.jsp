@@ -148,27 +148,12 @@
             	<tr>
             		<th style="background-color: #f5f5f5;">계약금</th>
             		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(contract_price)})
-            		<c:choose>
-						<c:when test="${contract_price == downPaymentInfo.payment_amount}">
-						<span class="label label-info" style="margin-left: 10px;">완납</span>
-						</c:when>
-						<c:otherwise>
-						<span class="label label-warning" style="margin-left: 10px;">미납</span>
-						</c:otherwise>
-					</c:choose>
             		</td>
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">잔금</th>
             		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price - contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price - contract_price)})
-            		<c:choose>
-					<c:when test="${bunyangInfo.progress_status == 'C'}">
-						<span class="label label-info" style="margin-left: 10px;">완납</span>
-					</c:when>
-					<c:otherwise>
-						<span class="label label-warning" style="margin-left: 10px;">미납</span>
-					</c:otherwise>
-					</c:choose>
+					</td>
             	</tr>
             </tbody>
         </table>
@@ -178,6 +163,11 @@
 	<div style="margin-top: 35px;">
 		<div class="pull-left"><h4>계약금 납부 내역</h4></div>
 	</div>
+	<c:if test="${bunyangInfo.progress_status == 'B'}">
+	<div class="pull-right">
+    	<button id="btnSaveContract" type="button" class="btn btn-primary" onclick="saveContract()">저장</button>
+	</div>	
+	</c:if>
     <div class="clearfix"></div>
     
     <div class="table-responsive" style="border-top: 1px solid #999;">
@@ -194,11 +184,11 @@
             		<td align="left">
             			<p class="form-control-static" style="display: inline-block;">
             				<c:choose>
-								<c:when test="${contract_price == downPaymentInfo.payment_amount}">
-									완납
+								<c:when test="${downPaymentInfo.payment_amount > 0}">
+									<span class="label label-info">완납</span>
 								</c:when>
 								<c:otherwise>
-									미납
+									<span class="label label-warning">미납</span>
 								</c:otherwise>
 							</c:choose>
             			</p>
@@ -213,13 +203,35 @@
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부일자</p></th>
-            		<td align="left"><input id="contract_payment_date" name="contract_payment_date" type="text" class="form-control" style="width: 200px;" value=""></td>
+            		<td align="left">
+            			<c:choose>
+            				<c:when test="${bunyangInfo.progress_status == 'C'}">
+            				<p class="form-control-static" style="display: inline-block;">${downPaymentInfo.payment_date}</p>
+            				</c:when>
+            				<c:otherwise>
+            				<input id="contract_payment_date" name="contract_payment_date" type="text" class="form-control" style="width: 200px;" value="${downPaymentInfo.payment_date}">
+            				</c:otherwise>
+            			</c:choose>
+            		</td>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부방법</p></th>
             		<td align="left">
-            			<select id="selPaymentMethod" name="selPaymentMethod" class="form-control" style="width: auto;">
-            				<option value="<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>" <c:if test="${downPaymentInfo.payment_method == 'TRANSFER'}">selected</c:if>>무통장입금/계좌이체</option>
-            				<option value="<%=CalvaryConstants.PAYMENT_METHOD_CASH%>" <c:if test="${downPaymentInfo.payment_method == 'CASH'}">selected</c:if>>현금납부</option>
-            			</select>
+            			<c:choose>
+            				<c:when test="${bunyangInfo.progress_status == 'C'}">
+            				<p class="form-control-static" style="display: inline-block;">
+            					<c:choose>
+            						<c:when test="${downPaymentInfo.payment_method == 'TRANSFER'}">무통장입금/계좌이체</c:when>
+            						<c:when test="${downPaymentInfo.payment_method == 'CASH'}">현금납부</c:when>
+            						<c:otherwise>${downPaymentInfo.payment_method}</c:otherwise>
+            					</c:choose>
+            				</p>
+            				</c:when>
+            				<c:otherwise>
+            				<select id="selPaymentMethod" name="selPaymentMethod" class="form-control" style="width: auto;">
+	            				<option value="<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>" <c:if test="${downPaymentInfo.payment_method == 'TRANSFER'}">selected</c:if>>무통장입금/계좌이체</option>
+	            				<option value="<%=CalvaryConstants.PAYMENT_METHOD_CASH%>" <c:if test="${downPaymentInfo.payment_method == 'CASH'}">selected</c:if>>현금납부</option>
+	            			</select>
+            				</c:otherwise>
+            			</c:choose>
             		</td>
             	</tr>
             	<c:if test="${!empty downPaymentInfo.bunyang_seq}">
@@ -237,11 +249,13 @@
     <c:if test="${!empty downPaymentInfo.bunyang_seq}">
     <!-- 잔금 납부 내역 -->
 	<div style="margin-top: 35px;">
-		<div class="pull-left"><h4>잔금 납부 내역</h4></div>
+		<div class="pull-left"><h4>잔금 납부 내역 (총 ₩${cutil:getThousandSeperatorFormatString(totalPaymentInfo.total_amount)})</h4></div>
+		<c:if test="${bunyangInfo.progress_status == 'B'}">
 		<div class="pull-right">
 	    	<button id="btnAddPayment" type="button" class="btn btn-primary" onclick="addPayment()">추가</button>
 	    	<button id="btnSavePayment" type="button" class="btn btn-primary" onclick="savePayment()">저장</button>
 		</div>	
+		</c:if>
 	</div>
     <div class="clearfix"></div>
     <div class="table-responsive">
@@ -252,7 +266,12 @@
                     <th scope="col">납입일</th>
                     <th scope="col">납입금</th>
                     <th scope="col">납입유형</th>
+                    <c:if test="${bunyangInfo.progress_status == 'C'}">
                     <th scope="col">확인/완납</th>
+                    </c:if>
+                    <c:if test="${bunyangInfo.progress_status == 'B'}">
+                    <th scope="col">&nbsp;</th>
+                    </c:if>
                 </tr>
             </thead>
             <tbody id="tbodyPayment">
@@ -262,16 +281,49 @@
             		<td><p class="form-control-static" style="display: inline-block;">${downPaymentInfo.payment_date}</p></td>
             		<td><p class="form-control-static" style="display: inline-block;">₩${cutil:getThousandSeperatorFormatString(downPaymentInfo.payment_amount)}</p></td>
             		<td><p class="form-control-static" style="display: inline-block;">계약금</p></td>
-            		<td>&nbsp;</td>
+            		<c:if test="${bunyangInfo.progress_status == 'C'}">
+            		<td><p class="form-control-static" style="display: inline-block;">&nbsp;</p></td>
+            		</c:if>
+            		<c:if test="${bunyangInfo.progress_status == 'B'}">
+            		<td><p class="form-control-static" style="display: inline-block;">&nbsp;</p></td>
+            		</c:if>
             	</tr>
             	</c:if>
             	<c:forEach items="${balancePaymentList}" var="balancePayment" varStatus="status">
             	<tr>
             		<td><p class="form-control-static" style="display: inline-block;">${status.count+1}</p></td>
-            		<td align="center"><input name="payment_date" type="text" class="form-control" style="width:150px; text-align:center;" value="${balancePayment.payment_date}"></td>
-            		<td align="center"><input name="payment_amount" type="text" class="form-control" style="width:150px; text-align:center; " value="₩${cutil:getThousandSeperatorFormatString(balancePayment.payment_amount)}"></td>
+            		<td align="center">
+            			<c:choose>
+            				<c:when test="${bunyangInfo.progress_status == 'B'}">
+            					<input name="payment_date" type="text" class="form-control" style="width:150px; text-align:center;" value="${balancePayment.payment_date}">
+            				</c:when>
+            				<c:when test="${bunyangInfo.progress_status == 'C'}">
+            					<p class="form-control-static" style="display: inline-block;">${balancePayment.payment_date}</p>
+            				</c:when>
+            			</c:choose>
+            		</td>
+            		<td align="center">
+            			<c:choose>
+	           				<c:when test="${bunyangInfo.progress_status == 'B'}">
+	           					<input name="payment_amount" type="text" class="form-control" style="width:150px; text-align:center; " value="₩${cutil:getThousandSeperatorFormatString(balancePayment.payment_amount)}">
+	           				</c:when>
+	           				<c:when test="${bunyangInfo.progress_status == 'C'}">
+	           					<p class="form-control-static" style="display: inline-block;">₩${cutil:getThousandSeperatorFormatString(balancePayment.payment_amount)}</p>
+	           				</c:when>
+	           			</c:choose>
+            		</td>
             		<td><p class="form-control-static" style="display: inline-block;">중도금</p></td>
-            		<td>&nbsp;</td>
+            		<c:if test="${bunyangInfo.progress_status == 'C'}">
+            		<td>
+            		<c:choose>
+            			<c:when test="${bunyangInfo.progress_status == 'C' && status.last}"><p class="form-control-static" style="display: inline-block;"><span class="label label-info">완납</span></p></c:when>
+            			<c:otherwise>&nbsp;</c:otherwise>
+            		</c:choose>
+            		</td>
+            		</c:if>
+            		<c:if test="${bunyangInfo.progress_status == 'B'}">
+            		<td><button type="button" class="btn btn-primary btn-sm" onclick="deleteRow(this)">삭제</button></td>
+            		</c:if>
             	</tr>
             	</c:forEach>
             </tbody>
@@ -296,15 +348,10 @@
         <c:if test="${empty downPaymentInfo.bunyang_seq}">
         <button id="btnContract" type="button" class="btn btn-info btn-lg" onclick="apprContract()">계약</button>
         </c:if>
-        <c:if test="${!empty downPaymentInfo.bunyang_seq}">
-        <button id="btnFullPayment" type="button" class="btn btn-info btn-lg">완납</button>
-        </c:if>
         <button id="btnList" type="button" class="btn btn-default btn-lg" onclick="goToList()">목록</button>
     </div>
     
 </div>
-<form id="frm" method="post">
-</form>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/jquery.fileDownload.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/moment.min.js"></script>
@@ -316,9 +363,6 @@
 	
 	// 계약금 납부일자 datepicker
 	var datePickerOption = {};
-	<c:if test="${!empty downPaymentInfo.payment_date}">
-	datePickerOption["startDate"] = '${downPaymentInfo.payment_date}';
-	</c:if>
 	common.singleDatePicker($('#contract_payment_date'), datePickerOption);
 	// 잔금 납부일자 datepicker
 	common.singleDatePicker($("input[name='payment_date']"));
@@ -373,6 +417,13 @@ function apprContract() {
 }
 
 /**
+ * 계약정보 저장 
+ */
+function saveContract() {
+	apprContract();
+}
+
+/**
  * 납부 내역 추가
  */
 function addPayment() {
@@ -382,7 +433,7 @@ function addPayment() {
 	tr.append('<td align="center"><input name="payment_date" type="text" class="form-control" style="width:150px; text-align:center; "></td>');
 	tr.append('<td align="center"><input name="payment_amount" type="text" class="form-control" style="width:150px; text-align:center; "></td>');
 	tr.append('<td><p class="form-control-static" style="display: inline-block;">중도금</p></td>');
-	tr.append('<td>&nbsp;</td>');
+	tr.append('<td><button type="button" class="btn btn-primary btn-sm" onclick="deleteRow(this)">삭제</button></td>');
 	$('#tbodyPayment').append(tr);
 	common.singleDatePicker($("input[name='payment_date']"));
 	$("input[name='payment_amount']").focusout(function(e){
@@ -400,41 +451,77 @@ function addPayment() {
 }
 
 /**
+ * 행삭제
+ * @param btn 삭제 버튼
+ */
+function deleteRow(btn) {
+	$(btn).parent("td").parent("tr").remove();
+}
+
+/**
  * 납부 내역 저장
  */
 function savePayment() {
 	var isValid = true;
-	var payment_dates = [];
-	var payment_methods = [];
-	var payment_amounts = [];
+	var paymentDates = [];
+	var paymentMethods = [];
+	var paymentAmounts = [];
+	var paymentTotal = ${contract_price};
 	$('#tbodyPayment tr').each(function(idx) {
 		// 첫번째행은 계약금이라 패스
 		if(idx > 0) {
-			var payment_date = $(this).find('td input[name="payment_date"]').data('daterangepicker').startDate.format('YYYYMMDD');
-			var payment_amount = $(this).find('td input[name="payment_amount"]').val();
-			payment_amount = common.toNumeric(payment_amount);
-			payment_dates.push(payment_date);
-			payment_methods.push('<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>');
-			payment_amounts.push(payment_amount);
-		}
-	});
-	var data = {};
-	data["bunyangSeq"] = "${bunyangSeq}";
-	data["paymentDate"] = payment_dates;
-	data["paymentMethod"] = payment_methods;
-	data["paymentAmount"] = payment_amounts;
-	common.ajax({
-		url:"${contextPath}/admin/savebalancepayment", 
-		data:data,
-		success: function(result) {
-			if(result && result.result) {
-				common.showAlert("저장되었습니다.");
-				var frm = document.getElementById("frm");
-				frm.action = "${contextPath}/admin/contractdetail";
-				frm.submit();
+			var paymentDate = $(this).find('td input[name="payment_date"]').data('daterangepicker').startDate.format('YYYYMMDD');
+			var paymentAmount = $(this).find('td input[name="payment_amount"]').val();
+			paymentAmount = common.toNumeric(paymentAmount);
+			paymentDates.push(paymentDate);
+			paymentMethods.push('<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>');
+			paymentAmounts.push(paymentAmount);
+			paymentTotal += parseInt(paymentAmount);
+			
+			if(!paymentAmount || paymentAmount <= 0) {
+				common.showAlert("납입금을 입력해주세요.");
+				$(this).find('td input[name="payment_amount"]').focus();
+				isValid = false;
+				return false;
 			}
 		}
 	});
+	
+	if(!isValid) {
+		return;
+	}
+	
+	if(paymentTotal > ${bunyangInfo.total_price}) {
+		common.showAlert("입력된 금액이 총 분양대금을 초과하였습니다.");
+		return;
+	}
+	
+	var isFullPayment = false;
+	
+	if(paymentTotal == ${bunyangInfo.total_price}) {
+		isFullPayment = true;
+	}
+	
+	if(!isFullPayment || confirm("입력된 납입금 합계가 총 분양대금과 같습니다.\n완납 처리하시겠습니까?")) {
+		var data = {};
+		data["bunyangSeq"] = "${bunyangSeq}";
+		data["paymentDate"] = paymentDates;
+		data["paymentMethod"] = paymentMethods;
+		data["paymentAmount"] = paymentAmounts;
+		data["isFullPayment"] = isFullPayment;
+		common.ajax({
+			url:"${contextPath}/admin/savebalancepayment", 
+			data:data,
+			success: function(result) {
+				if(result && result.result) {
+					common.showAlert("저장되었습니다.");
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/admin/contractdetail";
+					frm.submit();
+				}
+			}
+		});
+	}
 }
 
 /**

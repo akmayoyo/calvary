@@ -61,13 +61,17 @@ public interface IAdminService {
 	 */
 	public List<Object> getPaymentHistory(String bunyangSeq, String paymentType);
 	/** 
+	 * 총대금납부금액조회
+	 */
+	public Map<String, Object> getTotalPayment(String bunyangSeq);
+	/** 
 	 * 계약금 납부 내역 업데이트
 	 */
 	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate);
 	/** 
 	 * 잔금 납부 내역 업데이트
 	 */
-	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate);
+	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, boolean isFullPayment);
 	
 	
 	
