@@ -264,6 +264,7 @@
 			cnt += singleType;
 		}
 		price = cnt*pricePerCnt;
+		return price;
 	}
 	
 	var singleDatePicker = function(el, opt) {

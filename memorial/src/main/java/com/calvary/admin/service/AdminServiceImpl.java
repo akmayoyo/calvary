@@ -128,11 +128,18 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 분양정보 진행상태 업데이트
 	 */
-	public int updateBunyangProgressStatus(String bunyangSeq, String progressStatus) {
+	@Transactional
+	public int updateBunyangProgressStatus(String bunyangSeq, String progressStatus, String updateUser) {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("bunyangSeq", bunyangSeq);
 		param.put("progressStatus", progressStatus);
-		int iRslt = commonDao.update("admin.updateBunyangProgressStatus", param);
+		param.put("userId", updateUser);
+		param.put("remarks", "");
+		int iRslt = 0;
+		// 진행상태 업데이트
+		iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
+		// 변경이력
+		iRslt += commonDao.update("admin.createBunyangHistory", param);
 		return iRslt;
 	}
 	
@@ -211,10 +218,7 @@ public class AdminServiceImpl implements IAdminService {
 		iRslt += commonDao.delete("contract.deleteDownPayment", param);
 		iRslt += commonDao.insert("contract.insertDownPayment", param);
 		// 분양상태를 계약상태로 업데이트
-		param = new HashMap<String, Object>();
-		param.put("bunyangSeq", bunyangSeq);
-		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_B);
-		iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
+		iRslt += updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_B, SessionUtil.getCurrentUserId());
 		return iRslt;
 	}
 	
@@ -241,12 +245,25 @@ public class AdminServiceImpl implements IAdminService {
 		}	
 		if(isFullPayment) {
 			// 분양상태를 완납상태로 업데이트
-			param = new HashMap<String, Object>();
-			param.put("bunyangSeq", bunyangSeq);
-			param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_C);
-			iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
+			iRslt += updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_C, SessionUtil.getCurrentUserId());
 		}
 		return iRslt;
+	}
+	
+	
+	//===============================================================================
+	// 사용승인관리
+	//===============================================================================
+	/** 
+	 * 사용승인리스트 조회 
+	 */
+	public List<Object> getApprovalList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("pageIndex", searchVo.getPageIndex());
+		parameter.put("countPerPage", searchVo.getCountPerPage());
+		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		List<Object> list = commonDao.selectList("approval.getApprovalList", parameter); 
+		return list;
 	}
 	
 	

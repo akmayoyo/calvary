@@ -45,7 +45,7 @@ public interface IAdminService {
 	/** 
 	 * 분양정보 진행상태 업데이트
 	 */
-	public int updateBunyangProgressStatus(String bunyangSeq, String progressStatus);
+	public int updateBunyangProgressStatus(String bunyangSeq, String progressStatus, String updateUser);
 	
 	
 	
@@ -72,6 +72,15 @@ public interface IAdminService {
 	 * 잔금 납부 내역 업데이트
 	 */
 	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, boolean isFullPayment);
+	
+	
+	//===============================================================================
+	// 사용승인관리
+	//===============================================================================
+	/** 
+	 * 사용승인리스트 조회 
+	 */
+	public List<Object> getApprovalList(SearchVo searchVo);
 	
 	
 	

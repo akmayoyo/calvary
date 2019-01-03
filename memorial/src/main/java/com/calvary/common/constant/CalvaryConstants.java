@@ -88,4 +88,8 @@ public class CalvaryConstants {
 	 * 엑셀 서식 타입 : 완납확인증명서
 	 */
 	public static final String FILE_FORM_TYPE_FULL_PAYMENT = "FULL_PAYMENT_FORM";
+	/** 
+	 * 엑셀 서식 타입 : 사용승인서
+	 */
+	public static final String FILE_FORM_TYPE_USE_APPROVAL = "USE_APPROVAL_FORM";
 }

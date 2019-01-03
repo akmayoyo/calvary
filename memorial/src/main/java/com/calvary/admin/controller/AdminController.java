@@ -18,6 +18,7 @@ import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.CommonUtil;
+import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
 import com.calvary.excel.ExcelForms;
 import com.calvary.excel.service.IExcelService;
@@ -142,7 +143,7 @@ public class AdminController {
 		String bunyangSeq = bunyangInfoVo.getBunyangSeq();
 		String progressStatus = bunyangInfoVo.getProgressStatus();
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangSeq, progressStatus);
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangSeq, progressStatus, SessionUtil.getCurrentUserId());
 		if(iRslt > 0) {
 			String approvalFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, "");
 			if(!StringUtils.isEmpty(approvalFileSeq)) {
@@ -167,7 +168,7 @@ public class AdminController {
 		String bunyangSeq = bunyangInfoVo.getBunyangSeq();
 		String progressStatus = bunyangInfoVo.getProgressStatus();
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangSeq, progressStatus);
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangSeq, progressStatus, SessionUtil.getCurrentUserId());
 		if(iRslt > 0) {
 			String approvalFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, "");
 //			if(!StringUtils.isEmpty(approvalFileSeq)) {
@@ -305,9 +306,86 @@ public class AdminController {
 	}
 	
 	
+	
 	//===============================================================================
 	// 사용승인관리
 	//===============================================================================
+	/** 사용승인관리 메인 페이지  URL */
+	public static final String APPROVAL_MGMT_URL = "/approvalmgmt";
+	/** 사용승인관리 상세 페이지  URL */
+	public static final String APPROVAL_DETAIL_URL = "/approvaldetail";
+	/** 사용승인  URL */
+	public static final String USE_APPROVAL_URL = "/useapproval";
+	
+	/** 
+	 * 사용승인관리 메인 페이지 
+	 */
+	@RequestMapping(value=APPROVAL_MGMT_URL)
+	public Object approvalMgmtHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList("");
+		List<Object> approvalList = adminService.getApprovalList(searchVo);
+		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(approvalList, "total_count"));
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("menuList", menuList);
+		mv.addObject("menuSeq", "MENU01_03");
+		mv.addObject("pmenuSeq", "MENU01");
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("approvalList", approvalList);
+		mv.setViewName(ROOT_URL + APPROVAL_MGMT_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 사용승인관리 상세 정보 페이지
+	 */
+	@RequestMapping(value=APPROVAL_DETAIL_URL)
+	public Object approvalDetailHandler(SearchVo searchVo, String bunyangSeq) {
+		List<Object> menuList = adminService.getMenuList("");
+		ModelAndView mv = new ModelAndView();
+		List<Object> paymentList = null;
+		mv.addObject("menuList", menuList);
+		mv.addObject("menuSeq", "MENU01_03");
+		mv.addObject("pmenuSeq", "MENU01");
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
+		mv.addObject("applyUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER));// 신청자정보
+		mv.addObject("agentUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER));// 대리신청인정보
+		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
+		mv.addObject("fileList", adminService.getBunyangFileList(bunyangSeq));// 분양 파일 양식 리스트
+		paymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);// 계약금 납부내역
+		if(paymentList != null && paymentList.size() > 0) {
+			mv.addObject("downPaymentInfo", paymentList.get(0));// 계약금 납부내역
+		}
+		mv.addObject("balancePaymentList", adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 잔금납부내역
+		mv.addObject("totalPaymentInfo", adminService.getTotalPayment(bunyangSeq));
+		mv.setViewName(ROOT_URL + APPROVAL_DETAIL_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 사용 승인 처리
+	 */
+	@RequestMapping(value=USE_APPROVAL_URL)
+	@ResponseBody
+	public Object useApprovalHandler(String bunyangSeq) {
+		boolean bRslt = false;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_D, SessionUtil.getCurrentUserId());
+		if(iRslt > 0) {
+			String fileSeq = excelService.createBunyangExcelForm(ExcelForms.USE_APPROVAL_FORM, bunyangSeq, "");
+			if(!StringUtils.isEmpty(fileSeq)) {
+				Map<String, Object> param = new HashMap<String, Object>();
+				param.put("bunyangSeq", bunyangSeq);
+				param.put("file_seq_use_approval", fileSeq);
+				iRslt = adminService.updateBunyangFileSeq(param);
+				bRslt = iRslt > 0;
+			}
+		}
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
 	
 	
 	

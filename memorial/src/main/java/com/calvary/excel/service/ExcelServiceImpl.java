@@ -791,6 +791,98 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(29);
 			cellnums.add(convertColAlphabetToIndex("G"));
 			cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+		}else if(ExcelForms.USE_APPROVAL_FORM.equals(excelForm)) {// 사용승인서
+			fileFormType = CalvaryConstants.FILE_FORM_TYPE_USE_APPROVAL;
+			destFilePath += "/useApproval";
+			
+			// 계약번호
+			sheetnums.add(0);
+			rownums.add(16);
+			cellnums.add(convertColAlphabetToIndex("O"));
+			cellvalues.add(bunyangSeq);
+			// 신청자성명
+			sheetnums.add(0);
+			rownums.add(18);
+			cellnums.add(convertColAlphabetToIndex("C"));
+			cellvalues.add((String)applyUser.get("user_name"));
+			// 신청자 생년월일
+			sheetnums.add(0);
+			rownums.add(18);
+			cellnums.add(convertColAlphabetToIndex("F"));
+			cellvalues.add((String)applyUser.get("birth_date"));
+			// 신청자 직분
+			sheetnums.add(0);
+			rownums.add(18);
+			cellnums.add(convertColAlphabetToIndex("I"));
+			cellvalues.add((String)applyUser.get("church_officer_name"));
+			
+			// 신청자  교구
+			sheetnums.add(0);
+			rownums.add(18);
+			cellnums.add(convertColAlphabetToIndex("L"));
+			cellvalues.add((String)applyUser.get("diocese"));
+			
+			// 신청자  휴대전화
+			sheetnums.add(0);
+			rownums.add(18);
+			cellnums.add(convertColAlphabetToIndex("M"));
+			cellvalues.add((String)applyUser.get("mobile"));
+			
+			// 신청자  우편번호
+			sheetnums.add(0);
+			rownums.add(20);
+			cellnums.add(convertColAlphabetToIndex("C"));
+			cellvalues.add((String)applyUser.get("post_number"));
+			
+			// 신청자  주소
+			sheetnums.add(0);
+			rownums.add(20);
+			cellnums.add(convertColAlphabetToIndex("D"));
+			cellvalues.add((String)applyUser.get("address1") + (String)applyUser.get("address2"));
+			
+			// 신청자  이메일
+			sheetnums.add(0);
+			rownums.add(20);
+			cellnums.add(convertColAlphabetToIndex("M"));
+			cellvalues.add((String)applyUser.get("email"));
+			
+			// 신청형태
+			String productionType = (String)bunyangInfo.get("product_type");
+			if(CalvaryConstants.PRODUCT_TYPE_EACH.equals(productionType)) {// 개별형
+				sheetnums.add(0);
+				rownums.add(21);
+				cellnums.add(convertColAlphabetToIndex("J"));
+				cellvalues.add("O");
+			}else if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productionType)) {// 가족형
+				sheetnums.add(0);
+				rownums.add(21);
+				cellnums.add(convertColAlphabetToIndex("M"));
+				cellvalues.add("O");
+			}
+			if(coupleTypeCount > 0) {
+				sheetnums.add(0);
+				rownums.add(22);
+				cellnums.add(convertColAlphabetToIndex("J"));
+				cellvalues.add(String.valueOf(coupleTypeCount));
+			}
+			if(singleTypeCount > 0) {
+				sheetnums.add(0);
+				rownums.add(22);
+				cellnums.add(convertColAlphabetToIndex("M"));
+				cellvalues.add(String.valueOf(singleTypeCount));
+			}
+			
+			// 총기수
+			sheetnums.add(0);
+			rownums.add(23);
+			cellnums.add(convertColAlphabetToIndex("C"));
+			cellvalues.add(String.valueOf(bunyangCnt));
+			
+			// 확인일자
+			sheetnums.add(0);
+			rownums.add(31);
+			cellnums.add(convertColAlphabetToIndex("G"));
+			cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
 		}
 		
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();

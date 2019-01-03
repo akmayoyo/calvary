@@ -99,49 +99,51 @@
 		<div class="pull-left"><h4>동산 신청 정보</h4></div>	
 	</div>
     <div class="clearfix"></div>
-    <!-- 테이블 -->
-    <div class="form-style">
-        <div class="form-group">
-            <div class="row">
-                <label for="input1" class="col-sm-2 control-label required">신청형태</label>
-                <div class="col-sm-10">
-                    <label class="radio-inline"><input type="radio" name="rdProductType" value="<%=CalvaryConstants.PRODUCT_TYPE_EACH%>" checked>개별형</label>
-                    <label class="radio-inline"><input type="radio" name="rdProductType" value="<%=CalvaryConstants.PRODUCT_TYPE_FAMILY%>">가족형</label>
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="row">
-                <label for="input2" class="col-sm-2 control-label required">장묘형태</label>
-                <div class="col-sm-10">
-                    <p class="form-control-static" style="display: inline-block;">부부형</p>
-                    <input id="tiCoupleTypeCount" class="form-control" style="width: 95px;display: inline-block; margin-left: 4px;" type="number" placeholder="기수입력">
-                    <p class="form-control-static" style="display: inline-block;">x 2</p>
-                    <p class="form-control-static" style="display: inline-block; margin-left: 20px;">1인형</p>
-                    <input id="tiSingleTypeCount" class="form-control" style="width: 95px;display: inline-block; margin-left: 4px;" type="number" placeholder="기수입력">
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="row">
-                <label for="input4" class="col-sm-2 control-label required">관리비 납부자</label>
-                <div class="col-sm-10">
-                    <label class="radio-inline"><input type="radio" name="rbServiceChargeType" value="<%= CalvaryConstants.SERVICE_CHARGE_TYPE_APPLY_USER %>" checked>신청자</label>
-                    <label class="radio-inline"><input type="radio" name="rbServiceChargeType" value="<%= CalvaryConstants.SERVICE_CHARGE_TYPE_USE_USER %>">각 사용자별 납부</label>
-                    <label class="radio-inline"><input type="radio" name="rbServiceChargeType" value="<%= CalvaryConstants.SERVICE_CHARGE_TYPE_REPRESENT %>">사용자 중 1인 대표</label>
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="row">
-                <label for="input4" class="col-sm-2 control-label">총 분양가</label>
-                <div class="col-sm-2">
-                    <p id="totalPrice" class="form-control-static">&nbsp;</p>
-                </div>
-            </div>
-        </div>
+    
+    <div class="table-responsive" style="border-top: 1px solid #999;">
+        <table class="table table-style" style="border-top: 0;">
+        	<colgroup>
+        		<col width="18%">
+        		<col width="32%">
+        		<col width="18%">
+        		<col width="32%">
+        	</colgroup>
+            <tbody>
+            	<tr>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static">신청형태</p></th>
+            		<td align="left" colspan="3">
+            			<label class="radio-inline"><input type="radio" name="rdProductType" value="<%=CalvaryConstants.PRODUCT_TYPE_EACH%>" checked>개별형</label>
+                    	<label class="radio-inline"><input type="radio" name="rdProductType" value="<%=CalvaryConstants.PRODUCT_TYPE_FAMILY%>">가족형</label>
+            		</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static">장묘형태</p></th>
+            		<td align="left" colspan="3">
+            			<p class="form-control-static" style="display: inline-block;">부부형</p>
+	                    <input id="tiCoupleTypeCount" class="form-control" style="width: 95px;display: inline-block; margin-left: 4px;" type="text" placeholder="기수입력">
+	                    <p class="form-control-static" style="display: inline-block;">x 2</p>
+	                    <p class="form-control-static" style="display: inline-block; margin-left: 20px;">1인형</p>
+	                    <input id="tiSingleTypeCount" class="form-control" style="width: 95px;display: inline-block; margin-left: 4px;" type="text" placeholder="기수입력">
+            		</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static">관리비 납부자</p></th>
+            		<td align="left" colspan="3">
+            			<label class="radio-inline"><input type="radio" name="rbServiceChargeType" value="<%= CalvaryConstants.SERVICE_CHARGE_TYPE_APPLY_USER %>" checked>신청자</label>
+	                    <label class="radio-inline"><input type="radio" name="rbServiceChargeType" value="<%= CalvaryConstants.SERVICE_CHARGE_TYPE_USE_USER %>">각 사용자별 납부</label>
+	                    <label class="radio-inline"><input type="radio" name="rbServiceChargeType" value="<%= CalvaryConstants.SERVICE_CHARGE_TYPE_REPRESENT %>">사용자 중 1인 대표</label>
+            		</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static">총 분양대금</p></th>
+            		<td align="left" colspan="3">
+            			<p id="totalPrice" class="form-control-static">&nbsp;</p>
+            		</td>
+            	</tr>
+            </tbody>
+        </table>
     </div>
-
+    
     <div class="mt-30 text-center">
         <button id="btnSaveApply" type="button" class="btn btn-primary btn-lg">저장</button>
         <button id="btnCancelApply" type="button" class="btn btn-default btn-lg">취소</button>
@@ -152,6 +154,7 @@
 <input type="hidden" id="bunyangSeq" name="bunyangSeq">
 </form>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/jquery.number.min.js"></script>
 <script type="text/javascript">
 // init 함수
 (function(){
@@ -169,10 +172,28 @@
 	// 취소 클릭
 	$('#btnCancelApply').click(function(e){
 		cancelApply();
-	});	
+	});
 	
+	$('#tiCoupleTypeCount, #tiSingleTypeCount').focusout(function(e){
+		var val = $(this).val();
+		val = common.toNumeric(val);
+		$(this).val(val);
+		displayTotalPrice();
+	});
 	
 })();
+
+/**
+ * 총 분양대금 표시
+ */
+function displayTotalPrice() {
+	var coupleType = $('#tiCoupleTypeCount').val();
+	var singleType = $('#tiSingleTypeCount').val();
+	var totalPrice = common.calcBunyangPrice(coupleType ? parseInt(coupleType) : 0, singleType ? parseInt(singleType) : 0);
+	var val = "₩" + $.number(totalPrice);
+	console.log(val);
+	$('#totalPrice').text(val);
+}
 
 /**
  * 신청자 입력

@@ -1,0 +1,102 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="approval">
+
+
+    <!-- 사용승인리스트 조회 -->
+    <select id="getApprovalList" parameterType="map" resultType="map">
+    	SELECT
+    		t.*
+    		,COUNT(*) OVER() total_count
+    		,CASE 
+        		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
+          		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
+        	END use_user_exp
+    	FROM
+		    (SELECT
+			  a.bunyang_seq
+			  ,COALESCE(a.progress_status,'') || a.bunyang_seq bunyang_no
+			  ,a.product_type
+			  ,(SELECT code_name FROM tb_com_code cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
+			  ,a.couple_type_count
+			  ,a.single_type_count
+			  ,a.service_charge_type
+			  ,(SELECT code_name FROM tb_com_code cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
+			  ,a.progress_status
+			  ,b.user_id apply_user_id
+			  ,b.user_name apply_user_name
+			  ,b.relation_type apply_user_relation
+			  ,c.user_id agent_user_id
+			  ,c.user_name agent_user_name
+			  ,c.relation_type agent_user_relation
+			  ,(SELECT code_name FROM tb_com_code cc WHERE cc.code_seq = c.relation_type AND cc.parent_code_seq = 'USER_RELATION') agent_user_relation_name
+			  ,d.user_id use_user_id
+			  ,d.user_name use_user_name
+			  ,d.relation_type use_user_relation
+			  ,(SELECT code_name FROM tb_com_code cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
+			  ,d.cnt use_user_cnt
+			  ,a.regist_user_seq
+			  ,(SELECT user_name FROM tb_com_user cu WHERE cu.user_id = a.regist_user_seq) regist_user_name
+		      ,TO_CHAR(a.regist_date, 'YYYY-MM-DD') AS regist_date
+		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
+			  ,CASE WHEN progress_status = 'D' THEN 'Y' ELSE 'N' END AS approval_yn
+			  ,(SELECT TO_CHAR(update_date, 'YYYY-MM-DD') FROM tb_bunyang_history bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
+			  ,(SELECT TO_CHAR(update_date, 'YYYY-MM-DD') FROM tb_bunyang_history bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
+			  ,(SELECT TO_CHAR(update_date, 'YYYY-MM-DD') FROM tb_bunyang_history bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
+			FROM tb_bunyang_info a INNER JOIN       
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM tb_com_user b WHERE a.user_id = b.user_id) END user_name
+			  	,ref_type
+				,relation_type
+			FROM tb_bunyang_ref_user a
+			WHERE ref_type = 'APPLY_USER'
+			) b ON a.bunyang_seq = b.bunyang_seq  
+			LEFT OUTER JOIN
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM tb_com_user b WHERE a.user_id = b.user_id) END user_name
+			  	,ref_type
+				,relation_type
+			FROM tb_bunyang_ref_user a
+			WHERE ref_type = 'AGENT_USER'
+			) c ON a.bunyang_seq = c.bunyang_seq
+			INNER JOIN
+			(SELECT
+				*
+			FROM
+				(SELECT
+					bunyang_seq
+				  	,user_id
+					,user_name
+					,relation_type
+				  	,rank() over(partition BY bunyang_seq ORDER BY CASE WHEN relation_type = 'ONESELF' THEN 1 ELSE 2 end, user_name) rn
+			    	,COUNT(*) over(partition BY bunyang_seq) cnt
+				FROM      
+					(SELECT 
+						 bunyang_seq
+					   	,user_id
+					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM tb_com_user b WHERE a.user_id = b.user_id) END user_name
+					   	,relation_type 
+					FROM tb_bunyang_ref_user a
+					WHERE a.ref_type = 'USE_USER'
+					) a
+			  ) t
+			WHERE rn = 1
+			) d ON a.bunyang_seq = d.bunyang_seq
+			WHERE A.progress_status in ('C', 'D')
+			) t
+		WHERE 1=1
+		<if test="apply_user_name != null">
+		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		ORDER BY t.bunyang_seq
+		LIMIT #{countPerPage} OFFSET (#{pageIndex}-1)*#{countPerPage}
+    </select>
+    
+
+</mapper>

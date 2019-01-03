@@ -244,5 +244,11 @@
 			SET progress_status = #{progressStatus}
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
+	
+	<!-- 분양상태변경 이력 생성 -->
+	<insert id="createBunyangHistory" parameterType="map">
+		INSERT INTO tb_bunyang_history ( bunyang_seq,progress_status,update_user_seq,update_date,remarks )
+		VALUES ( #{bunyangSeq}, #{progressStatus}, #{userId}, CURRENT_TIMESTAMP, #{remarks})
+	</insert>
 
 </mapper>

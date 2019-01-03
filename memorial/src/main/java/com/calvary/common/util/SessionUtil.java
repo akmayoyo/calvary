@@ -49,4 +49,16 @@ public class SessionUtil {
 		userVo.setUserName("calvaryadmin");
 		return userVo;
 	}
+	
+	/** 
+	 * 현재 접속 사용자 아이디 반환 
+	 */
+	public static String getCurrentUserId() {
+		UserVo userVo = getCurrentUser();
+		String userId = "";
+		if(userVo != null) {
+			userId = userVo.getUserId();
+		}
+		return userId;
+	}
 }

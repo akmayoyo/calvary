@@ -127,44 +127,36 @@
 		<div class="pull-left"><h4>동산 신청 정보</h4></div>	
 	</div>
     <div class="clearfix"></div>
-    <!-- 테이블 -->
-    <div class="form-style">
-        <div class="form-group">
-            <div class="row">
-                <label for="input1" class="col-sm-2 control-label form-control-static">신청형태</label>
-                <div class="col-sm-10">
-                    <p class="form-control-static" style="display: inline-block;">${bunyangInfo.product_type_name}</p>
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="row">
-                <label for="input2" class="col-sm-2 control-label form-control-static">장묘형태</label>
-                <div class="col-sm-10">
-                    <p class="form-control-static" style="display: inline-block;">부부형</p>
-                    <input id="tiCoupleTypeCount" disabled class="form-control" style="width: 95px;display: inline-block; margin-left: 4px;" type="number" placeholder="기수입력" value="${bunyangInfo.couple_type_count }">
-                    <p class="form-control-static" style="display: inline-block;">x 2</p>
-                    <p class="form-control-static" style="display: inline-block; margin-left: 20px;">1인형</p>
-                    <input id="tiSingleTypeCount" disabled class="form-control" style="width: 95px;display: inline-block; margin-left: 4px;" type="number" placeholder="기수입력" value="${bunyangInfo.single_type_count }">
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="row">
-                <label for="input4" class="col-sm-2 control-labe form-control-staticl">관리비 납부자</label>
-                <div class="col-sm-10">
-                    <p class="form-control-static" style="display: inline-block;">${bunyangInfo.service_charge_type_name}</p>
-                </div>
-            </div>
-        </div>
-        <div class="form-group">
-            <div class="row">
-                <label for="input4" class="col-sm-2 control-label form-control-static">총 분양대금</label>
-                <div class="col-sm-2">
-                    <p class="form-control-static"><fmt:formatNumber value="${bunyangInfo.total_price}" pattern="#,###" />원</p>
-                </div>
-            </div>
-        </div>
+    
+    <div class="table-responsive" style="border-top: 1px solid #999;">
+        <table class="table table-style" style="border-top: 0;">
+        	<colgroup>
+        		<col width="18%">
+        		<col width="32%">
+        		<col width="18%">
+        		<col width="32%">
+        	</colgroup>
+            <tbody>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">신청형태</th>
+            		<td align="left" colspan="3">${bunyangInfo.product_type_name}</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">장묘형태</th>
+            		<td align="left" colspan="3">부부형 : [${bunyangInfo.couple_type_count }] x 2&nbsp;&nbsp;&nbsp;&nbsp;1인형 : [${bunyangInfo.single_type_count }]&nbsp;&nbsp;(총 ${bunyangInfo.couple_type_count*2 + bunyangInfo.single_type_count}기)</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">관리비 납부자</th>
+            		<td align="left" colspan="3">${bunyangInfo.service_charge_type_name}</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">총 분양대금</th>
+            		<td align="left" colspan="3">
+            			일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price)})
+            		</td>
+            	</tr>
+            </tbody>
+        </table>
     </div>
     
     <!-- 신청 양식 -->
