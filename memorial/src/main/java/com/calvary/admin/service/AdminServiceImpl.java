@@ -21,6 +21,24 @@ public class AdminServiceImpl implements IAdminService {
 	
 	@Autowired
 	private CommonDao commonDao;
+	
+	
+	//===============================================================================
+	// Common
+	//===============================================================================
+	/** 
+	 * 분양리스트 조회 
+	 */
+	public List<Object> getBunyangList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("pageIndex", searchVo.getPageIndex());
+		parameter.put("countPerPage", searchVo.getCountPerPage());
+		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		List<Object> list = commonDao.selectList("admin.getBunyangList", parameter); 
+		return list;
+	}
+	
+	
 
 	//===============================================================================
 	// 분양신청관리
@@ -264,6 +282,22 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("approval.getApprovalList", parameter); 
 		return list;
+	}
+	
+	
+	//===============================================================================
+	// 계약자관리
+	//===============================================================================
+	/** 
+	 * 계약자변경 
+	 */
+	public int updateApplyUser(String bunyangSeq, String userId) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("userId", userId);
+		iRslt += commonDao.delete("contractor.updateApplyUser", param);
+		return iRslt;
 	}
 	
 	

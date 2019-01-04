@@ -387,6 +387,94 @@ public class AdminController {
 	}
 	
 	
+	//===============================================================================
+	// 계약자관리
+	//===============================================================================
+	/** 계약자관리 메인 페이지  URL */
+	public static final String CONTRACTOR_MGMT_URL = "/contractormgmt";
+	/** 계약자변경 URL */
+	public static final String CHANGE_CONTRACTOR_URL = "/changecontractor";
+	
+	/** 
+	 * 계약자관리 메인 페이지 
+	 */
+	@RequestMapping(value=CONTRACTOR_MGMT_URL)
+	public Object contractorMgmtHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList("");
+		List<Object> bunyangList = adminService.getBunyangList(searchVo);
+		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(bunyangList, "total_count"));
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("menuList", menuList);
+		mv.addObject("menuSeq", "MENU01_04");
+		mv.addObject("pmenuSeq", "MENU01");
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("bunyangList", bunyangList);
+		mv.setViewName(ROOT_URL + CONTRACTOR_MGMT_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 계약자변경
+	 */
+	@RequestMapping(value=CHANGE_CONTRACTOR_URL)
+	@ResponseBody
+	public Object changeContractorHandler(String bunyangSeq, String progressStatus, String userId) {
+		boolean bRslt = false;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		int iRslt = adminService.updateApplyUser(bunyangSeq, userId);
+		if(iRslt > 0) {
+			String file_seq_apply = null;// 분양신청서
+			String file_seq_approval = null;// 신청승인서
+			String file_seq_contract = null;// 사용계약서
+			String file_seq_full_payment = null;// 완납확인증명서
+			String file_seq_use_approval = null;// 사용승인서
+			
+			file_seq_apply = excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, "");
+			
+			if(CalvaryConstants.PROGRESS_STATUS_A.equals(progressStatus)
+					|| CalvaryConstants.PROGRESS_STATUS_B.equals(progressStatus)
+					|| CalvaryConstants.PROGRESS_STATUS_C.equals(progressStatus)
+					|| CalvaryConstants.PROGRESS_STATUS_D.equals(progressStatus)
+					) {
+				file_seq_approval = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, "");
+			}
+			if(CalvaryConstants.PROGRESS_STATUS_B.equals(progressStatus)
+					|| CalvaryConstants.PROGRESS_STATUS_C.equals(progressStatus)
+					|| CalvaryConstants.PROGRESS_STATUS_D.equals(progressStatus)
+					) {
+				file_seq_contract = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
+			}
+			if(CalvaryConstants.PROGRESS_STATUS_C.equals(progressStatus)
+					|| CalvaryConstants.PROGRESS_STATUS_D.equals(progressStatus)
+					) {
+				file_seq_full_payment = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "");
+			}
+			if(CalvaryConstants.PROGRESS_STATUS_D.equals(progressStatus)) {
+				file_seq_use_approval = excelService.createBunyangExcelForm(ExcelForms.USE_APPROVAL_FORM, bunyangSeq, "");
+			}
+			Map<String, Object> param = new HashMap<String, Object>();
+			param.put("bunyangSeq", bunyangSeq);
+			if(!StringUtils.isEmpty(file_seq_apply)) {
+				param.put("file_seq_apply", file_seq_apply);
+			}
+			if(!StringUtils.isEmpty(file_seq_approval)) {
+				param.put("file_seq_approval", file_seq_approval);
+			}
+			if(!StringUtils.isEmpty(file_seq_contract)) {
+				param.put("file_seq_contract", file_seq_contract);
+			}
+			if(!StringUtils.isEmpty(file_seq_full_payment)) {
+				param.put("file_seq_full_payment", file_seq_full_payment);
+			}
+			if(!StringUtils.isEmpty(file_seq_use_approval)) {
+				param.put("file_seq_use_approval", file_seq_use_approval);
+			}
+			iRslt = adminService.updateBunyangFileSeq(param);
+			bRslt = iRslt > 0;
+		}
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
 	
 	
 	//===============================================================================
@@ -394,10 +482,6 @@ public class AdminController {
 	//===============================================================================
 	
 	
-	
-	//===============================================================================
-	// 계약자관리
-	//===============================================================================
 	
 	
 	

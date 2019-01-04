@@ -216,7 +216,7 @@ label.required:after {
 }
 .table-style thead th {
     border-bottom: none !important;
-	border-top: none !important;
+    vertical-align: middle !important;
 }
 .table-style th {
 	text-align: center;

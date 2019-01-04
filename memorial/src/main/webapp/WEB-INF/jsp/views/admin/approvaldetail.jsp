@@ -299,7 +299,6 @@ function goToList() {
  * 사용 승인
  */
 function approval() {
-	var bunyangSeq = $(btn).parent("td").parent("tr").attr("bunyangSeq");
 	var data = {};
 	data["bunyangSeq"] = '${bunyangSeq}';
 	// 저장 호출
