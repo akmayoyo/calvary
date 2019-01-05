@@ -20,7 +20,7 @@
 					</c:choose>
 				</div>
 				<c:choose>
-					<c:when test="${menu.menu_seq eq pmenuSeq}">
+					<c:when test="${menu.menu_seq eq pMenuInfo.menu_seq}">
 						<ul id="${menu.menu_seq}" class="collapse in depth2">
 					</c:when>
 					<c:otherwise>
@@ -31,7 +31,7 @@
 						<c:forEach items="${menu.children}" var="menu">
 							<li>
 							<c:choose>
-								<c:when test="${menu.menu_seq eq menuSeq}">
+								<c:when test="${menu.menu_seq eq menuInfo.menu_seq}">
 									<a class="active" href="${menu.menu_url}">${menu.menu_name}</a>
 								</c:when>
 								<c:otherwise>

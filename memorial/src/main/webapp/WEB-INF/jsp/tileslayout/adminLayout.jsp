@@ -37,7 +37,10 @@
 
 		<!-- sub-title -->
 		<div class="sub-title">
-			<h1>분양신청관리</h1>
+			<c:choose>
+				<c:when test="${!empty submenuName}"><h1>${submenuName}</h1></c:when>
+				<c:otherwise><h1>${menuInfo.menu_name}</h1></c:otherwise>
+			</c:choose>
 		</div>
 
 		<!-- breadcrumb -->
@@ -45,8 +48,8 @@
 			<div class="wrap">
 				<ul class="breadcrumb">
 					<li class="breadcrumb-item">홈</li>
-					<li class="breadcrumb-item">분양관리</li>
-					<li class="breadcrumb-item" aria-current="page">분양신청관리</li>
+					<li class="breadcrumb-item">${pMenuInfo.menu_name}</li>
+					<li class="breadcrumb-item" aria-current="page">${menuInfo.menu_name}</li>
 				</ul>
 			</div>
 		</div>

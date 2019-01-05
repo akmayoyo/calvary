@@ -62,9 +62,11 @@ public class AdminController {
 		List<Object> applyList = adminService.getApplyList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(applyList, "total_count"));
 		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
-		mv.addObject("menuSeq", "MENU01_01");
-		mv.addObject("pmenuSeq", "MENU01");
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("applyList", applyList);
 		mv.setViewName(ROOT_URL + APPLY_MGMT_URL);
@@ -78,9 +80,12 @@ public class AdminController {
 	public Object applyRegistHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList("");
 		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("submenuName", "분양 신청 등록");
 		mv.addObject("menuList", menuList);
-		mv.addObject("menuSeq", "MENU01_01");
-		mv.addObject("pmenuSeq", "MENU01");
 		mv.addObject("codeUserRelation", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_USER_RELATION));
 		mv.setViewName(ROOT_URL + APPLY_REGIST_URL);
 		return mv;
@@ -93,9 +98,12 @@ public class AdminController {
 	public Object applyDetailHandler(SearchVo searchVo, String bunyangSeq) {
 		List<Object> menuList = adminService.getMenuList("");
 		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("submenuName", "분양신청 상세 정보");
 		mv.addObject("menuList", menuList);
-		mv.addObject("menuSeq", "MENU01_01");
-		mv.addObject("pmenuSeq", "MENU01");
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
@@ -206,9 +214,11 @@ public class AdminController {
 		List<Object> contractList = adminService.getContractList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(contractList, "total_count"));
 		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_02");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
-		mv.addObject("menuSeq", "MENU01_02");
-		mv.addObject("pmenuSeq", "MENU01");
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("contractList", contractList);
 		mv.setViewName(ROOT_URL + CONTRACT_MGMT_URL);
@@ -223,9 +233,12 @@ public class AdminController {
 		List<Object> menuList = adminService.getMenuList("");
 		ModelAndView mv = new ModelAndView();
 		List<Object> paymentList = null;
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_02");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("submenuName", "계약 상세 정보");
 		mv.addObject("menuList", menuList);
-		mv.addObject("menuSeq", "MENU01_02");
-		mv.addObject("pmenuSeq", "MENU01");
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
@@ -326,9 +339,11 @@ public class AdminController {
 		List<Object> approvalList = adminService.getApprovalList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(approvalList, "total_count"));
 		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_03");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
-		mv.addObject("menuSeq", "MENU01_03");
-		mv.addObject("pmenuSeq", "MENU01");
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("approvalList", approvalList);
 		mv.setViewName(ROOT_URL + APPROVAL_MGMT_URL);
@@ -343,9 +358,11 @@ public class AdminController {
 		List<Object> menuList = adminService.getMenuList("");
 		ModelAndView mv = new ModelAndView();
 		List<Object> paymentList = null;
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_03");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
-		mv.addObject("menuSeq", "MENU01_03");
-		mv.addObject("pmenuSeq", "MENU01");
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
@@ -404,9 +421,11 @@ public class AdminController {
 		List<Object> bunyangList = adminService.getBunyangList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(bunyangList, "total_count"));
 		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_04");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
-		mv.addObject("menuSeq", "MENU01_04");
-		mv.addObject("pmenuSeq", "MENU01");
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("bunyangList", bunyangList);
 		mv.setViewName(ROOT_URL + CONTRACTOR_MGMT_URL);
@@ -477,10 +496,32 @@ public class AdminController {
 	}
 	
 	
+	
 	//===============================================================================
 	// 해약관리
 	//===============================================================================
+	/** 해약관리 메인 페이지  URL */
+	public static final String CANCEL_MGMT_URL = "/cancelmgmt";
 	
+	/** 
+	 * 해약관리 메인 페이지 
+	 */
+	@RequestMapping(value=CANCEL_MGMT_URL)
+	public Object cancelMgmtHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList("");
+		List<Object> cancelList = adminService.getCancelList(searchVo);
+		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(cancelList, "total_count"));
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_05");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("cancelList", cancelList);
+		mv.setViewName(ROOT_URL + CANCEL_MGMT_URL);
+		return mv;
+	}
 	
 	
 	

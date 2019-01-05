@@ -49,6 +49,24 @@
 	</select>
 	
 	
+	<!--///////////////////////////  메뉴 관련 ///////////////////////////-->
+	
+	<!-- 메뉴정보 조회 -->
+	<select id="getMenuInfo" parameterType="map" resultType="map">
+		SELECT 
+			A.menu_seq,
+       		A.menu_name,
+       		A.menu_url,
+       		A.menu_level,
+       		A.menu_type,
+       		A.display_order,
+       		A.parent_menu_seq,
+       		A.use_yn
+  		FROM tb_com_menu A 
+  		WHERE A.menu_seq = #{menuSeq}
+	</select>
+	
+	
 	<!--///////////////////////////  코드 관련 ///////////////////////////-->
 	
 	<select id="getChildCodeList" parameterType="String" resultType="map">

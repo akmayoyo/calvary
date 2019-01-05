@@ -1,8 +1,10 @@
 package com.calvary.excel.controller;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +13,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -18,11 +21,17 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import com.calvary.excel.ExcelForms;
 import com.calvary.excel.service.IExcelService;
@@ -133,6 +142,63 @@ public class ExcelController {
             }
         }
     }
+	
+	@RequestMapping(value="/importExcel", method=RequestMethod.POST)
+	public ResponseEntity<String> importExcel(MultipartHttpServletRequest request) throws Exception{
+		MultipartFile file = request.getFile("file");
+		InputStream is = null;
+		String importType = request.getParameter("importType");
+		try {
+			is = file.getInputStream();
+			XSSFWorkbook wb = new XSSFWorkbook(is);
+			XSSFSheet sheet = null;
+			XSSFRow row = null;
+			XSSFCell cell = null;
+			Map<String, Object> param = null;
+			int rowindex = 0;
+			int rows = 0;
+			
+			// 사용자정보 엑셀을 tb_com_user 로 import
+			if("user".equals(importType)) {
+				sheet = wb.getSheetAt(0);
+				rows = sheet.getPhysicalNumberOfRows();
+				for(rowindex=0;rowindex<rows;rowindex++){
+				    row=sheet.getRow(rowindex);
+				    if(row !=null){
+				    	param = new HashMap<String, Object>();
+				    	param.put("userName", getCellValue(row.getCell(2)));
+				    	getCellValue(row.getCell(3));
+				    	getCellValue(row.getCell(4));
+				    	getCellValue(row.getCell(5));
+//				    	param.put("birthDate", row.getCell(3).getDateCellValue());
+//				    	param.put("gender", row.getCell(4).getStringCellValue());
+//				    	param.put("churchOfficer", row.getCell(5).getStringCellValue());
+//				    	param.put("diocese", row.getCell(6).getStringCellValue());
+//				    	param.put("mobile", row.getCell(11).getStringCellValue());
+//				    	param.put("postNumber", row.getCell(12).getStringCellValue());
+//				    	param.put("address1", row.getCell(13).getStringCellValue());
+//				    	param.put("email", row.getCell(16).getStringCellValue());
+				    	System.out.println(param.toString());	
+				    }
+				}
+			}
+		} catch (Exception e) {
+			
+		} finally {
+			if(is != null) {
+				is.close();
+			}
+		}
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-Type", "text/html;charset=UTF-8");
+		return new ResponseEntity<String>("true", headers, HttpStatus.CREATED) ;
+	}
+	
+	private Object getCellValue(XSSFCell cell) {
+		Object rtn = null;
+		System.out.println(cell.getCellType().toString());
+		return rtn;
+	}
 	
 	/** 
 	 * 엑셀업데이트

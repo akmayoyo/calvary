@@ -1,0 +1,321 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="admin">
+
+    <!-- 분양신청리스트 조회 -->
+    <select id="getApplyList" parameterType="map" resultType="map">
+    	SELECT
+    		t.*
+    		,CASE 
+        		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
+          		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
+        	END use_user_exp
+        	,CASE progress_status
+        		WHEN 'N' THEN '신청(미승인)'
+        		WHEN 'A' THEN '승인'
+        		WHEN 'R' THEN '반려'
+        		ELSE progress_status
+        	END progress_status_exp
+    		,FOUND_ROWS() total_count
+    	FROM
+		    (SELECT
+			  a.bunyang_seq
+			  ,COALESCE(a.progress_status,'') || a.bunyang_seq bunyang_no
+			  ,a.product_type
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
+			  ,a.couple_type_count
+			  ,a.single_type_count
+			  ,a.service_charge_type
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
+			  ,a.progress_status
+			  ,b.user_id apply_user_id
+			  ,b.user_name apply_user_name
+			  ,b.relation_type apply_user_relation
+			  ,c.user_id agent_user_id
+			  ,c.user_name agent_user_name
+			  ,c.relation_type agent_user_relation
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = c.relation_type AND cc.parent_code_seq = 'USER_RELATION') agent_user_relation_name
+			  ,d.user_id use_user_id
+			  ,d.user_name use_user_name
+			  ,d.relation_type use_user_relation
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
+			  ,d.cnt use_user_cnt
+			  ,a.regist_user_id
+			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
+		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+			FROM TB_BUNYANG_INFO a INNER JOIN       
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'APPLY_USER'
+			) b ON a.bunyang_seq = b.bunyang_seq  
+			LEFT OUTER JOIN
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'AGENT_USER'
+			) c ON a.bunyang_seq = c.bunyang_seq
+			INNER JOIN
+			(SELECT
+				*
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq) cnt
+			FROM
+				(SELECT
+					bunyang_seq
+				  	,user_id
+					,user_name
+					,relation_type
+					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+                    ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
+				FROM      
+					(SELECT 
+						 bunyang_seq
+					   	,user_id
+					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+					   	,relation_type 
+					FROM TB_BUNYANG_REF_USER a
+					WHERE a.ref_type = 'USE_USER'
+					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
+				ORDER BY bunyang_seq, CASE WHEN relation_type = 'ONESELF' THEN 1 ELSE 2 end, user_name
+			  ) t
+			  WHERE rn = 1
+			) d ON a.bunyang_seq = d.bunyang_seq
+			WHERE a.progress_status in ('N', 'A', 'R')
+			) t
+		WHERE 1=1
+		<if test="apply_user_name != null">
+		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		ORDER BY t.bunyang_seq
+		LIMIT #{start}, #{count}
+    </select>
+    
+    <!-- 분양신청리스트 조회 -->
+	<select id="getBunyangList" parameterType="map" resultType="map">
+		SELECT
+    		t.*
+    		,CASE 
+        		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
+          		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
+        	END use_user_exp
+    		,FOUND_ROWS() total_count
+    	FROM
+		    (SELECT
+			  a.bunyang_seq
+			  ,COALESCE(a.progress_status,'') || a.bunyang_seq bunyang_no
+			  ,a.product_type
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
+			  ,a.couple_type_count
+			  ,a.single_type_count
+			  ,a.service_charge_type
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
+			  ,a.progress_status
+			  ,b.user_id apply_user_id
+			  ,b.user_name apply_user_name
+			  ,b.birth_date apply_user_birth_date
+			  ,b.church_officer apply_user_church_officer
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = b.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') apply_user_church_officer_name
+			  ,b.diocese apply_user_diocese
+			  ,b.relation_type apply_user_relation
+			  ,c.user_id agent_user_id
+			  ,c.user_name agent_user_name
+			  ,c.relation_type agent_user_relation
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = c.relation_type AND cc.parent_code_seq = 'USER_RELATION') agent_user_relation_name
+			  ,d.user_id use_user_id
+			  ,d.user_name use_user_name
+			  ,d.relation_type use_user_relation
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
+			  ,d.cnt use_user_cnt
+			  ,a.regist_user_id
+			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
+		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
+			  ,CASE WHEN progress_status = 'D' THEN 'Y' ELSE 'N' END AS approval_yn
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'A') apply_approval_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
+			FROM TB_BUNYANG_INFO a INNER JOIN       
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,CASE WHEN user_id IS NULL THEN birth_date ELSE (SELECT birth_date FROM TB_COM_USER b WHERE a.user_id = b.user_id) END birth_date
+				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT church_officer FROM TB_COM_USER b WHERE a.user_id = b.user_id) END church_officer
+				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT diocese FROM TB_COM_USER b WHERE a.user_id = b.user_id) END diocese
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'APPLY_USER'
+			) b ON a.bunyang_seq = b.bunyang_seq  
+			LEFT OUTER JOIN
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'AGENT_USER'
+			) c ON a.bunyang_seq = c.bunyang_seq
+			INNER JOIN
+			(SELECT
+				*
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq) cnt
+			FROM
+				(SELECT
+					bunyang_seq
+				  	,user_id
+					,user_name
+					,relation_type
+					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+                    ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
+				FROM      
+					(SELECT 
+						 bunyang_seq
+					   	,user_id
+					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+					   	,relation_type 
+					FROM TB_BUNYANG_REF_USER a
+					WHERE a.ref_type = 'USE_USER'
+					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
+				ORDER BY bunyang_seq, CASE WHEN relation_type = 'ONESELF' THEN 1 ELSE 2 end, user_name
+			  ) t
+			  WHERE rn = 1
+			) d ON a.bunyang_seq = d.bunyang_seq
+			) t
+		WHERE 1=1
+		<if test="apply_user_name != null">
+		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		ORDER BY t.bunyang_seq
+		LIMIT #{start}, #{count}
+	</select>
+
+	<!-- 분양 정보 -->
+	<select id="getBunyangInfo" parameterType="String" resultType="map">
+		SELECT
+			t.*
+		FROM
+		(SELECT 
+			a.bunyang_seq
+	       	,a.product_type
+	       	,b.user_id as apply_user_id
+	       	,b.user_name as apply_user_name
+          	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
+	       	,a.service_charge_type
+          	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
+          	,a.couple_type_count
+          	,a.single_type_count
+          	,a.progress_status
+          	,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
+          	,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
+            ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
+	       	,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+	  	FROM TB_BUNYANG_INFO a INNER JOIN       
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,CASE WHEN user_id IS NULL THEN birth_date ELSE (SELECT birth_date FROM TB_COM_USER b WHERE a.user_id = b.user_id) END birth_date
+				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT church_officer FROM TB_COM_USER b WHERE a.user_id = b.user_id) END church_officer
+				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT diocese FROM TB_COM_USER b WHERE a.user_id = b.user_id) END diocese
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'APPLY_USER'
+			) b ON a.bunyang_seq = b.bunyang_seq
+	  	WHERE a.bunyang_seq = #{bunyangSeq}
+	  	) t
+	</select>
+	
+	<!-- 분양관련 사용자 정보 -->
+	<select id="getBunyangRefUserInfo" parameterType="map" resultType="map">
+		SELECT 
+			a.bunyang_seq,
+		    a.ref_type,
+		    a.relation_type,
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.relation_type AND cc.parent_code_seq = 'USER_RELATION') relation_type_name,
+		    a.user_id,
+		    COALESCE(a.user_name, b.user_name) AS user_name,
+		    COALESCE(a.birth_date, b.birth_date) AS birth_date,
+		    COALESCE(a.gender, b.gender) AS gender,
+		    COALESCE(a.email, b.email) AS email,
+		    COALESCE(a.mobile, b.mobile) AS mobile,
+		    COALESCE(a.phone, b.phone) AS phone,
+		    COALESCE(a.post_number, b.post_number) AS post_number,
+		    COALESCE(a.address1, b.address1) AS address1,
+		    COALESCE(a.address2, b.address2) AS address2,
+           	b.church_officer,
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = b.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') church_officer_name,
+			b.diocese,
+			a.is_church_person
+		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_COM_USER b ON a.user_id = b.user_id
+		WHERE a.bunyang_seq = #{bunyangSeq}
+    	AND a.ref_type = #{refType}
+	</select>
+	
+	<!-- 분양정보 시퀀스 생성 -->
+	<select id="getBunyangInfoSequence" resultType="map">
+		SELECT NEXTVAL('seq_bunyang_info')::text AS seq
+	</select>
+	
+	<!-- 분양정보의 신청서,승인서등 관련 파일양식 조회 -->
+	<select id="getBunyangFileList" parameterType="String" resultType="map">
+		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_apply FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_use_user FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_contract FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_full_payment FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_use_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq})
+	</select>
+	
+	<!-- 분양정보 생성 -->
+	<insert id="createBunyangInfo" parameterType="map">
+		INSERT INTO TB_BUNYANG_INFO ( bunyang_seq,product_type,couple_type_count,single_type_count,service_charge_type,req_approval_seq,contract_seq,use_approval_seq,progress_status,regist_user_id,regist_date )
+		VALUES (#{bunyangSeq} , #{productType}, #{coupleTypeCount}, #{singleTypeCount}, #{serviceChargeType}, #{reqApprovalSeq}, #{contractSeq}, #{useApprovalSeq}, #{progressStatus}, #{registUserSeq}, CURRENT_TIMESTAMP )
+	</insert>
+	
+	<!-- 분양 관련 인명정보 생성 -->
+	<insert id="createBunyangRefUserInfo" parameterType="map">
+		INSERT INTO TB_BUNYANG_REF_USER ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person )
+		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}, #{userId}, #{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson})
+	</insert>
+	
+	<update id="updateBunyangFileSeq">
+		UPDATE TB_BUNYANG_INFO a
+			<set>
+				<if test="file_seq_apply != null">file_seq_apply=#{file_seq_apply},</if>
+				<if test="file_seq_use_user != null">file_seq_use_user=#{file_seq_use_user},</if>
+				<if test="file_seq_approval != null">file_seq_approval=#{file_seq_approval},</if>
+				<if test="file_seq_contract != null">file_seq_contract=#{file_seq_contract},</if>
+				<if test="file_seq_full_payment != null">file_seq_full_payment=#{file_seq_full_payment},</if>
+				<if test="file_seq_use_approval != null">file_seq_use_approval=#{file_seq_use_approval}</if>
+			</set> 
+		WHERE a.bunyang_seq = #{bunyangSeq}
+	</update>
+	
+	<!-- 분양정보 진행상태 업데이트 -->
+	<update id="updateBunyangProgressStatus">
+		UPDATE TB_BUNYANG_INFO a
+			SET progress_status = #{progressStatus}
+		WHERE a.bunyang_seq = #{bunyangSeq}
+	</update>
+	
+	<!-- 분양상태변경 이력 생성 -->
+	<insert id="createBunyangHistory" parameterType="map">
+		INSERT INTO TB_BUNYANG_HISTORY ( bunyang_seq,progress_status,update_user_seq,update_date,remarks )
+		VALUES ( #{bunyangSeq}, #{progressStatus}, #{userId}, CURRENT_TIMESTAMP, #{remarks})
+	</insert>
+
+</mapper>

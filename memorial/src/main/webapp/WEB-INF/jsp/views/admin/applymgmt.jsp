@@ -60,6 +60,10 @@
 							<button type="button" class="btn btn-info btn-sm" onclick="approval(this, event)">승인</button>
 							<button type="button" class="btn btn-warning btn-sm" onclick="reject(this, event)">반려</button>
 							</c:when>
+							<c:when test="${apply.progress_status == 'A'}">
+							<button type="button" class="btn btn-info btn-sm" style="visibility: hidden;" onclick="approval(this, event)">승인</button>
+							<button type="button" class="btn btn-warning btn-sm" onclick="reject(this, event)">반려</button>
+							</c:when>
 						</c:choose>
 						</td>
 					</tr>
@@ -173,7 +177,7 @@ function reject(btn) {
 		var bunyangSeq = $(btn).parent("td").parent("tr").attr("bunyangSeq");
 		var bunyangInfo = {};
 		bunyangInfo["bunyangSeq"] = bunyangSeq;
-		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_E%>";
+		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_R%>";
 		// 저장 호출
 		common.ajax({
 			url:"${contextPath}/admin/reject", 

@@ -23,21 +23,30 @@
 		<property name="dataSource" ref="dataSource" /> 
 	</bean>
 	
-	<!-- Data Source -->
+	<!-- Data Source(postgresql) -->
+<!-- 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"> -->
+<!--         <property name="driverClassName" value="org.postgresql.Driver"/> -->
+<!--         <property name="url" value="jdbc:postgresql://localhost:5432/calvary"/> -->
+<!--         <property name="username" value="calvary_dev"/> -->
+<!--         <property name="password" value="0909"/> -->
+<!--     </bean> -->
+    
+	<!-- Data Source(mariadb) -->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="org.postgresql.Driver"/>
-        <property name="url" value="jdbc:postgresql://localhost:5432/calvary"/>
-        <property name="username" value="calvary_dev"/>
-        <property name="password" value="0909"/>
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://calvarydev.cafe24.com:3306/calvarydev?serverTimezone=UTC"/>
+        <property name="username" value="calvarydev"/>
+        <property name="password" value="calvarydev!"/>
     </bean>
     
     <bean id="sqlSession" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />
-        <property name="mapperLocations" value="classpath*:/query/postgres/mapping*.xml" />
+<!--         <property name="mapperLocations" value="classpath*:/query/postgres/mapping*.xml" /> -->
+        <property name="mapperLocations" value="classpath*:/query/mariadb/mapping*.xml" />
     </bean>
      
     <bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
         <constructor-arg index="0" ref="sqlSession"/>
     </bean>
-
+    
 </beans>

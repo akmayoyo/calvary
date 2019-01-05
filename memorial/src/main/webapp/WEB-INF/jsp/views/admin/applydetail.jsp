@@ -237,7 +237,7 @@ function reject() {
 	if(confirm("반려하시겠습니까?")) {
 		var bunyangInfo = {};
 		bunyangInfo["bunyangSeq"] = "${bunyangSeq}";
-		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_E%>";
+		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_R%>";
 		// 저장 호출
 		common.ajax({
 			url:"${contextPath}/admin/reject", 

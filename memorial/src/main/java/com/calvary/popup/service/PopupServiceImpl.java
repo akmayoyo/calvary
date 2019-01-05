@@ -21,8 +21,8 @@ public class PopupServiceImpl implements IPopupService {
 	public List<Object> getUserList(UserSearchVo searchVo) {
 		Map<String, Object> searchParam = new HashMap<String, Object>();
 		searchParam.put("userName", searchVo.getUserName());
-		searchParam.put("pageIndex", searchVo.getPageIndex());
-		searchParam.put("countPerPage", searchVo.getCountPerPage());
+		searchParam.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		searchParam.put("count", searchVo.getCountPerPage());
 		List<Object> list = commonDao.selectList("common.getUserList", searchParam);
 		return list;
 	}

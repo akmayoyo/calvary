@@ -1,0 +1,144 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="contract">
+
+
+    <!-- 사용계약리스트 조회 -->
+    <select id="getContractList" parameterType="map" resultType="map">
+    	SELECT
+    		t.*
+    		,FOUND_ROWS() total_count
+    		,CASE 
+        		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
+          		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
+        	END use_user_exp
+        	,down_payment + balance_payment AS total_payment
+        	,CASE WHEN down_payment > 0 THEN 'Y' ELSE 'N' END AS contract_yn
+        	,CASE WHEN down_payment + balance_payment = total_price THEN 'Y' ELSE 'N' END AS full_payment_yn
+    	FROM
+		    (SELECT
+			  a.bunyang_seq
+			  ,COALESCE(a.progress_status,'') || a.bunyang_seq bunyang_no
+			  ,a.product_type
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
+			  ,a.couple_type_count
+			  ,a.single_type_count
+			  ,a.service_charge_type
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
+			  ,a.progress_status
+			  ,b.user_id apply_user_id
+			  ,b.user_name apply_user_name
+			  ,b.relation_type apply_user_relation
+			  ,c.user_id agent_user_id
+			  ,c.user_name agent_user_name
+			  ,c.relation_type agent_user_relation
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = c.relation_type AND cc.parent_code_seq = 'USER_RELATION') agent_user_relation_name
+			  ,d.user_id use_user_id
+			  ,d.user_name use_user_name
+			  ,d.relation_type use_user_relation
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
+			  ,d.cnt use_user_cnt
+			  ,a.regist_user_id
+			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
+		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
+			  ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
+              ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
+			FROM TB_BUNYANG_INFO a INNER JOIN       
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'APPLY_USER'
+			) b ON a.bunyang_seq = b.bunyang_seq  
+			LEFT OUTER JOIN
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'AGENT_USER'
+			) c ON a.bunyang_seq = c.bunyang_seq
+			INNER JOIN
+			(SELECT
+				*
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq) cnt
+			FROM
+				(SELECT
+					bunyang_seq
+				  	,user_id
+					,user_name
+					,relation_type
+					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+                    ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
+				FROM      
+					(SELECT 
+						 bunyang_seq
+					   	,user_id
+					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+					   	,relation_type 
+					FROM TB_BUNYANG_REF_USER a
+					WHERE a.ref_type = 'USE_USER'
+					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
+				ORDER BY bunyang_seq, CASE WHEN relation_type = 'ONESELF' THEN 1 ELSE 2 end, user_name
+			  ) t
+			  WHERE rn = 1
+			) d ON a.bunyang_seq = d.bunyang_seq
+			WHERE a.progress_status in ('A', 'B', 'C')
+			) t
+		WHERE 1=1
+		<if test="apply_user_name != null">
+		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		ORDER BY t.bunyang_seq
+		LIMIT #{start}, #{count}
+    </select>
+    
+    <!-- 대금납부내역조회 -->
+    <select id="getPaymentHistory" parameterType="map" resultType="map">
+    	SELECT 
+			a.bunyang_seq
+		  	,a.payment_type
+		  	,a.payment_method
+		  	,a.payment_amount
+		  	,DATE_FORMAT(a.payment_date, '%Y-%m-%d') AS payment_date
+		  	,a.payment_user 
+		  	,a.create_user
+		  	,(SELECT user_name FROM TB_COM_USER cu where cu.user_id = a.create_user) create_user_name
+		  	,DATE_FORMAT(a.create_date, '%Y-%m-%d') AS create_date
+		  	,(SELECT SUM(payment_amount) FROM TB_BUNYANG_PAYMENT_HISTORY s WHERE s.bunyang_seq = a.bunyang_seq AND s.payment_type = a.payment_type) total_amount
+		FROM TB_BUNYANG_PAYMENT_HISTORY a
+		WHERE bunyang_seq = #{bunyangSeq}
+		and payment_type = #{paymentType}
+		ORDER BY a.payment_date, a.create_date
+    </select>
+    
+    <!-- 총대금납부금액조회 -->
+    <select id="getTotalPayment" parameterType="String" resultType="map">
+    	SELECT 
+			COALESCE(SUM(payment_amount), 0) total_amount
+		FROM TB_BUNYANG_PAYMENT_HISTORY a
+		WHERE bunyang_seq = #{bunyangSeq}
+    </select>
+    
+    <!-- 계약금 납부 내역 -->
+	<insert id="insertDownPayment" parameterType="map">
+		INSERT INTO TB_BUNYANG_PAYMENT_HISTORY 
+		(bunyang_seq, payment_type, payment_amount, payment_method, payment_date, create_user, create_date) 
+		values (#{bunyangSeq}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, DATE_FORMAT(#{paymentDate}, '%Y%m%d'), #{createUser}, CURRENT_TIMESTAMP)
+	</insert>
+	
+    <!-- 계약금 납부 내역 삭제 -->
+	<delete id="deleteDownPayment" parameterType="map">
+		DELETE FROM TB_BUNYANG_PAYMENT_HISTORY WHERE bunyang_seq = #{bunyangSeq} and payment_type = #{paymentType}
+	</delete>
+    
+
+</mapper>

@@ -4,13 +4,10 @@
 
 <mapper namespace="menumgmt">
 
-	<resultMap id="map" type="java.util.HashMap">
-	</resultMap>
-
 	<select id="getMenuList" resultType="map">
 		SELECT 
 			a.menu_seq, a.menu_name, a.menu_url, a.menu_level, a.menu_type, a.display_order, a.parent_menu_seq, a.use_yn 
-		FROM tb_com_menu a
+		FROM TB_COM_MENU a
 		WHERE a.use_yn = 'Y'
 		ORDER BY a.menu_level, a.display_order
 	</select>

@@ -6,14 +6,93 @@
 
 	<resultMap id="map" type="java.util.HashMap">
 	</resultMap>
+	
+    <!--///////////////////////////  사용자 관련 ///////////////////////////-->
 
-	<select id="getUser" resultType="map">
-		SELECT * FROM tb_user
+	<select id="getUser" parameterType="map" resultType="map">
+		SELECT 
+			a.user_id, a.password, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date 
+		FROM TB_COM_USER a
+		WHERE a.user_id = #{userId}
+		ORDER BY a.user_id
+	</select>
+	
+	<select id="getUserList" parameterType="map" resultType="map">
+		SELECT 
+			a.user_id, a.password, a.user_name, a.birth_date
+			, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2
+			, a.church_officer, a.diocese, a.user_status
+			, (SELECT code_name FROM TB_COM_CODE b WHERE a.church_officer = b.code_seq) church_officer_name
+			, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+			, FOUND_ROWS() total_count 
+		FROM TB_COM_USER a
+		ORDER BY a.user_name, a.user_id
+		LIMIT #{start}, #{count}
+	</select>
+	
+	<!-- 사용자정보 생성 -->
+	<insert id="createUser" parameterType="map">
+		INSERT INTO TB_COM_USER( USER_ID,PASSWORD,USER_NAME,BIRTH_DATE,GENDER,EMAIL,MOBILE,PHONE,POST_NUMBER,ADDRESS1,ADDRESS2,CHURCH_OFFICER,DIOCESE,USER_STATUS,REGIST_DATE )
+		VALUES(COALESCE(#{userId},(SELECT CONCAT('USER', LPAD(MAX(CAST(replace(USER_ID,'USER','') AS UNSIGNED))+1, 5, '0')) FROM TB_COM_USER)),#{password},#{userName},#{birthDate},#{gender},#{email},#{mobile},#{phone},#{postNumber},#{address1},#{address2},#{churchOfficer},#{diocese}, 'ACTIVE', CURRENT_TIMESTAMP)
+	</insert>
+	
+	
+	<!--///////////////////////////  메뉴 관련 ///////////////////////////-->
+	
+	<!-- 메뉴정보 조회 -->
+	<select id="getMenuInfo" parameterType="map" resultType="map">
+		SELECT 
+			A.menu_seq,
+       		A.menu_name,
+       		A.menu_url,
+       		A.menu_level,
+       		A.menu_type,
+       		A.display_order,
+       		A.parent_menu_seq,
+       		A.use_yn
+  		FROM TB_COM_MENU A 
+  		WHERE A.menu_seq = #{menuSeq}
+	</select>
+	
+	
+	<!--///////////////////////////  코드 관련 ///////////////////////////-->
+	
+	<select id="getChildCodeList" parameterType="String" resultType="map">
+		SELECT A.code_seq,
+			A.code_name,
+			A.code_desc,
+	       	A.code_level,
+	       	A.parent_code_seq,
+	       	A.display_order
+	  	FROM TB_COM_CODE A
+	  	WHERE A.parent_code_seq = #{parentCodeSeq}
+	  	ORDER BY A.display_order
+	</select>
+	
+	
+	<!--///////////////////////////  파일 관련 ///////////////////////////-->
+	
+	<select id="getFileSequence" resultType="map">
+		SELECT LPAD(NEXTVAL('seq_sys_file_info')::text, 10, '0') AS seq
 	</select>
 	
 	<insert id="createFileInfo" parameterType="map">
-		INSERT INTO tb_sys_file_info ( file_seq,file_type,file_size,file_path,file_name,upload_date )
-		VALUES ('A0001' , #{fileType} , #{fileSize} , #{filePath} , #{fileName} , current_date  )
+		INSERT INTO TB_SYS_FILE_INFO ( file_seq, file_type, file_size, file_path, file_name, real_file_name, upload_date )
+		VALUES (#{fileSeq} , #{fileType} , #{fileSize} , #{filePath} , #{fileName} , #{realFileName}, CURRENT_TIMESTAMP  )
 	</insert>
+	
+	<select id="getBunyangFileForm" parameterType="String" resultType="map">
+		SELECT 
+			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.upload_date 
+		FROM TB_SYS_FILE_INFO a 
+		WHERE a.file_seq = (SELECT file_seq FROM tb_bunyang_file_form WHERE file_form_type = #{fileFormType})
+	</select>
+	
+	<select id="getSysFileInfo" parameterType="String" resultType="map">
+		SELECT 
+			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.upload_date 
+		FROM TB_SYS_FILE_INFO a 
+		WHERE a.file_seq = #{fileSeq}
+	</select>
 
 </mapper>

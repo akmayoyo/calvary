@@ -45,7 +45,7 @@
         	,CASE progress_status
         		WHEN 'N' THEN '신청(미승인)'
         		WHEN 'A' THEN '승인'
-        		WHEN 'E' THEN '반려'
+        		WHEN 'R' THEN '반려'
         		ELSE progress_status
         	END progress_status_exp
     		,COUNT(*) OVER() total_count
@@ -118,7 +118,7 @@
 			  ) t
 			WHERE rn = 1
 			) d ON a.bunyang_seq = d.bunyang_seq
-			WHERE A.progress_status in ('N', 'A', 'E')
+			WHERE A.progress_status in ('N', 'A', 'R')
 			) t
 		WHERE 1=1
 		<if test="apply_user_name != null">
@@ -236,6 +236,8 @@
 		(SELECT 
 			A.bunyang_seq
 	       	,A.product_type
+	       	,B.user_id as apply_user_id
+	       	,B.user_name as apply_user_name
           	,(SELECT code_name FROM tb_com_code cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
 	       	,A.service_charge_type
           	,(SELECT code_name FROM tb_com_code cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
@@ -246,7 +248,19 @@
           	,(SELECT COALESCE(SUM(payment_amount),0) FROM tb_bunyang_payment_history ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
             ,(SELECT COALESCE(SUM(payment_amount),0) FROM tb_bunyang_payment_history ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
 	       	,TO_CHAR(A.regist_date, 'YYYY-MM-DD') AS regist_date
-	  	FROM tb_bunyang_info A
+	  	FROM tb_bunyang_info A INNER JOIN       
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM tb_com_user b WHERE a.user_id = b.user_id) END user_name
+				,CASE WHEN user_id IS NULL THEN birth_date ELSE (SELECT birth_date FROM tb_com_user b WHERE a.user_id = b.user_id) END birth_date
+				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT church_officer FROM tb_com_user b WHERE a.user_id = b.user_id) END church_officer
+				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT diocese FROM tb_com_user b WHERE a.user_id = b.user_id) END diocese
+			  	,ref_type
+				,relation_type
+			FROM tb_bunyang_ref_user a
+			WHERE ref_type = 'APPLY_USER'
+			) b ON a.bunyang_seq = b.bunyang_seq
 	  	WHERE A.bunyang_seq = #{bunyangSeq}
 	  	) t
 	</select>

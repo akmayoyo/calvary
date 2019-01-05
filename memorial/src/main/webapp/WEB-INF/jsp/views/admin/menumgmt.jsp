@@ -61,6 +61,10 @@
 
 <input id="tiFile" type="file">
 <button onclick="uploadFile()">Upload</button> 
+
+<input class="importExcel" type="file">
+<button onclick="importExcel('user')">Import User</button>
+
 <form id="excelForm" method="post" action="/excel/excelDownload" target="_top">
 <input type="hidden" name="headers[0]" value="header1"></input>
 <input type="hidden" name="headers[1]" value="header2"></input>
@@ -107,6 +111,7 @@ function collapse() {
 }
 
 $("#tiFile").on('change',fileChanged);
+$(".importExcel").on('change',importExcelChanged);
 
 var files;
 
@@ -115,10 +120,45 @@ function fileChanged(e){
 	//$('#storeimagetext').val($(this).val());
 }
 
+
+var importFiles;
+
+function importExcelChanged(e) {
+	importFiles=e.target.files;
+}
+
 function uploadFile() {
 	common.uploadFile(files[0], "form", true, function(result){
 		alert(result);
 	});
+}
+
+function importExcel(importType) {
+	var fileFrm = new FormData();
+	fileFrm.append("file", importFiles[0]);
+	if(importType) {
+		fileFrm.append("importType", importType);
+	}
+   	$.ajax({
+   		dataType : 'text',
+        url:"/excel/importExcel",
+        data:fileFrm,
+        type : "POST",
+        enctype: 'multipart/form-data',
+        processData: false, 
+        contentType:false,
+        success : function(result) {
+        	if(result){
+        		alert(result);
+        	}else{
+        		alert('파일 업로드에 실패하였습니다.');
+        	}
+		},error : function(result){
+        	alert('파일 업로드중 에러가 발생하였습니다.');
+		}
+    });
+	
+	
 }
 
 function excelDownload() {

@@ -31,8 +31,8 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	public List<Object> getBunyangList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("pageIndex", searchVo.getPageIndex());
-		parameter.put("countPerPage", searchVo.getCountPerPage());
+		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("admin.getBunyangList", parameter); 
 		return list;
@@ -48,8 +48,8 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	public List<Object> getApplyList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("pageIndex", searchVo.getPageIndex());
-		parameter.put("countPerPage", searchVo.getCountPerPage());
+		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("admin.getApplyList", parameter); 
 		return list;
@@ -192,8 +192,8 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	public List<Object> getContractList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("pageIndex", searchVo.getPageIndex());
-		parameter.put("countPerPage", searchVo.getCountPerPage());
+		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("contract.getContractList", parameter); 
 		return list;
@@ -277,8 +277,8 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	public List<Object> getApprovalList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("pageIndex", searchVo.getPageIndex());
-		parameter.put("countPerPage", searchVo.getCountPerPage());
+		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("approval.getApprovalList", parameter); 
 		return list;
@@ -298,6 +298,22 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("userId", userId);
 		iRslt += commonDao.delete("contractor.updateApplyUser", param);
 		return iRslt;
+	}
+	
+	
+	//===============================================================================
+	// 해약관리
+	//===============================================================================
+	/** 
+	 * 해약관리 대상 조회
+	 */
+	public List<Object> getCancelList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
+		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		List<Object> list = commonDao.selectList("cancel.getCancelList", parameter); 
+		return list;
 	}
 	
 	
