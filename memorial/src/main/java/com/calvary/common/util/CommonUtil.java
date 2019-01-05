@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.StringUtils;
+
 import com.calvary.common.constant.CalvaryConstants;
 
 public class CommonUtil {
@@ -58,6 +60,37 @@ public class CommonUtil {
 		int iRtn = 0;
 		iRtn = (int)Math.floor(totalPrice * (CalvaryConstants.DOWN_PAYMENT_PERCENT/100));
 		return iRtn;
+	}
+	
+	/** 
+	 * 생년월일을 YYYY-MM-DD 문자열로 변환 
+	 */
+	public static String getBirthDateFormatString(String birthDate) {
+		String sRtn = birthDate;
+		if(!StringUtils.isEmpty(sRtn)) {
+			sRtn = sRtn.replaceAll("[^\\d]", "");
+		}
+		if(!StringUtils.isEmpty(sRtn) && sRtn.length() == 8) {
+			String year = sRtn.substring(0, 4);
+			String month = sRtn.substring(4, 6);
+			String date = sRtn.substring(6, 8);
+			sRtn = year + CalvaryConstants.DELIMITER_DATE + month + CalvaryConstants.DELIMITER_DATE + date;
+		}
+		return sRtn;
+	}
+	
+	/** 
+	 * 휴대폰번호를 xxx-xxxx-xxxx 문자열로 변환 
+	 */
+	public static String getMobileFormatString(String mobile) {
+		String sRtn = mobile;
+		if(!StringUtils.isEmpty(sRtn)) {
+			sRtn = sRtn.replaceAll("[^\\d]", "");
+		}
+		if(!StringUtils.isEmpty(sRtn) && sRtn.length() == 11) {
+			sRtn = String.format("%s-%s-%s", sRtn.substring(0, 3), sRtn.substring(3, 7), sRtn.substring(7, 11));
+		}
+		return sRtn;
 	}
 	
 	

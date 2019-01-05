@@ -1,17 +1,20 @@
 package com.calvary.popup.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.calvary.admin.service.IAdminService;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.CommonUtil;
+import com.calvary.common.vo.SearchVo;
 import com.calvary.common.vo.UserSearchVo;
 import com.calvary.popup.service.IPopupService;
 
@@ -23,6 +26,7 @@ public class PopupController {
 	public static final String ROOT_URL = "/popup";
 	
 	public static final String SELECT_USER_URL = "/selectuser";
+	public static final String CHECK_DUPLICATED_USER_URL = "/checkduplicateduser";
 	public static final String CONTRACT_CANCEL_URL = "/contractcancel";
 	
 	@Autowired
@@ -33,7 +37,7 @@ public class PopupController {
 	private IAdminService adminService;
 	
 	@RequestMapping(value=SELECT_USER_URL)
-	public Object selectUserHandler(UserSearchVo searchVo, String popupTitle) {
+	public Object selectUserHandler(SearchVo searchVo, String popupTitle) {
 		ModelAndView mv = new ModelAndView();
 		List<Object> userList = popupService.getUserList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(userList, "total_count"));
@@ -43,6 +47,20 @@ public class PopupController {
 		mv.addObject("popupTitle", popupTitle);
 		mv.setViewName(ROOT_URL + SELECT_USER_URL);
 		return mv;
+	}
+	
+	@RequestMapping(value=CHECK_DUPLICATED_USER_URL)
+	@ResponseBody
+	public Object checkDuplicatedUserHandler(String userName, String birthDate) {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean bRslt = popupService.checkDuplicatedUser(userName, birthDate);
+		Map<String, Object> user = null;
+		if(bRslt) {
+			user = popupService.getUserByNameAndBirthDate(userName, birthDate);
+		}
+		rtnMap.put("isduplicated", bRslt);
+		rtnMap.put("user", user);
+		return rtnMap;
 	}
 	
 	/** 

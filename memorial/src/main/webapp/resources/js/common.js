@@ -267,6 +267,28 @@
 		return price;
 	}
 	
+	var isValidMail = function(email) {
+		var regExp = /^[0-9a-zA-Z][_a-zA-Z0-9-\.]+@[\.a-zA-Z0-9-]+\.[a-zA-Z]+$/;
+		if(!email) {
+			return false;
+		}
+		if (!email.match(regExp)) {
+			return false;
+		}
+		return true;
+	}
+	
+	var isValidMobile = function(mobile) {
+		var regExp = /^(010|011|016|017|018|019)\d{3,4}\d{4}$/;
+		if(!mobile) {
+			return false;
+		}
+		if (!mobile.match(regExp)) {
+			return false;
+		}
+		return true;
+	}
+	
 	var singleDatePicker = function(el, opt) {
 		opt = opt || {};
 		opt = $.extend(true, {
@@ -315,6 +337,8 @@
 	common.showAlert = showAlert;
 	common.calcBunyangPrice = calcBunyangPrice;
 	common.singleDatePicker = singleDatePicker;
+	common.isValidMail = isValidMail;
+	common.isValidMobile = isValidMobile;
 
 	window.common = common;
 })();

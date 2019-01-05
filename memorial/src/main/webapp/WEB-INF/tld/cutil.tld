@@ -27,7 +27,7 @@
          </function-signature>
     </function>
     
-     <function>
+    <function>
          <description>총분양대금에 해당하는 계약금 반환 </description>
          <name>getDownPayment</name>
          <function-class>com.calvary.common.util.CommonUtil</function-class>
@@ -35,4 +35,23 @@
               int getDownPayment(int)
          </function-signature>
     </function>
+    
+     <function>
+         <description>생년월일을 YYYY-MM-DD 문자열로 변환 </description>
+         <name>getBirthDateFormatString</name>
+         <function-class>com.calvary.common.util.CommonUtil</function-class>
+         <function-signature>
+              java.lang.String getBirthDateFormatString(java.lang.String)
+         </function-signature>
+    </function>
+    
+     <function>
+         <description>휴대폰번호를 xxx-xxxx-xxxx 문자열로 변환 </description>
+         <name>getMobileFormatString</name>
+         <function-class>com.calvary.common.util.CommonUtil</function-class>
+         <function-signature>
+              java.lang.String getMobileFormatString(java.lang.String)
+         </function-signature>
+    </function>
+    
 </taglib>

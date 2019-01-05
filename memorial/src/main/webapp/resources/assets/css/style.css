@@ -185,6 +185,12 @@ label.required:after {
 	color: #d74b4a;
 }
 
+p.required:after {
+	content: '*';
+	margin-left: 5px;
+	color: #d74b4a;
+}
+
 .form-style {
 	border-top: 1px solid #999;
 	border-bottom: 1px solid #e0e0e0;
@@ -490,4 +496,14 @@ footer .icon-sns img {
 }
 .clickable-row:hover td{
 	color: #337AB7;
+}
+.nav li a {
+	padding: 15px 30px !important;
+}
+.help-block {
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+}
+.select.yearselect {
+	width: 50% !important;
 }

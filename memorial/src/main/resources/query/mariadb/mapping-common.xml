@@ -11,10 +11,21 @@
 
 	<select id="getUser" parameterType="map" resultType="map">
 		SELECT 
-			a.user_id, a.password, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date 
+			a.user_id, a.password, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date,
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') as church_officer_name
 		FROM TB_COM_USER a
 		WHERE a.user_id = #{userId}
 		ORDER BY a.user_id
+	</select>
+	
+	<select id="getUserByNameAndBirthDate" parameterType="map" resultType="map">
+		SELECT 
+			a.user_id, a.password, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date,
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') as church_officer_name 
+		FROM TB_COM_USER a
+		WHERE a.user_name = #{userName} AND a.birth_date = #{birthDate}
+		ORDER BY a.user_id
+		LIMIT 0,1
 	</select>
 	
 	<select id="getUserList" parameterType="map" resultType="map">
@@ -26,8 +37,19 @@
 			, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
 			, FOUND_ROWS() total_count 
 		FROM TB_COM_USER a
+		WHERE 1=1
+		<if test="user_name != null">
+		AND user_name like CONCAT('%',#{user_name},'%')
+		</if>
 		ORDER BY a.user_name, a.user_id
 		LIMIT #{start}, #{count}
+	</select>
+	
+	<select id="checkDuplicatedUser" parameterType="map" resultType="map">
+		SELECT
+			COUNT(*) AS cnt
+		FROM TB_COM_USER a
+		WHERE a.user_name = #{userName} AND a.birth_date = #{birthDate}
 	</select>
 	
 	<!-- 사용자정보 생성 -->

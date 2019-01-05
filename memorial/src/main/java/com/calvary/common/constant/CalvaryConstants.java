@@ -2,6 +2,9 @@ package com.calvary.common.constant;
 
 public class CalvaryConstants {
 	
+	/** 날짜 구분자 */
+	public static final String DELIMITER_DATE = "-";
+	
 	/** 화면에서 1 페이지당 표시할 건수 */
 	public static final int COUNT_PER_PAGE = 10;
 	

@@ -206,55 +206,72 @@ function registApplyUser(isAgent) {
 	// 신청자 입력 팝업 callback 함수
 	window.selectuserCallBack = function(type, item) {
 		var idx = 0, userId = '', userName = '', birthDate = '', email = '', mobile = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', diocese = '';
-		if(type == "select") {
-			if(item && item.length > 0) {
-				var tr = $("<tr/>");
-				userId = item[idx++];
-				userName = item[idx++];
-				birthDate = item[idx++];
-				email = item[idx++];
-				mobile = item[idx++];
-				postNumber = item[idx++];
-				address1 = item[idx++];
-				address2 = item[idx++];
-				fulladdress = item[idx++];
-				churchOfficer = item[idx++];
-				churchOfficerName = item[idx++];
-				diocese = item[idx++];
-				tr.attr('userId', userId);
-				tr.attr('userName', userName);
-				tr.attr('birthDate', birthDate);
-				tr.attr('email', email);
-				tr.attr('mobile', mobile);
-				tr.attr('postNumber', postNumber);
-				tr.attr('address1', address1);
-				tr.attr('address2', address2);
-				tr.attr('fulladdress', fulladdress);
-				tr.attr('churchOfficer', churchOfficer);
-				tr.attr('churchOfficerName', churchOfficerName);
-				tr.attr('diocese', diocese);
-				tr.attr('isAgent', isAgent);
-				tr.append('<td><p class="form-control-static">'+userName+"</p></td>");
-				tr.append('<td><p class="form-control-static">'+birthDate+"</p></td>");
-				tr.append('<td><p class="form-control-static">'+mobile+"</p></td>");
-				tr.append('<td><p class="form-control-static">'+email+"</p></td>");
-				tr.append('<td><p class="form-control-static">'+fulladdress+"</p></td>");
-				if(isAgent) {
-					tr.append("<td>"+getUserRelationSelect()+"</td>");
-					tr.append("<td>"+getIsChurchSelect()+"</td>");
-					tr.append('<td><button type="button" class="btn btn-primary btn-sm" onclick="deleteRow(this)">삭제</button></td>');
-				}else {
-					tr.append('<td><p class="form-control-static">'+churchOfficerName+"</p></td>");
-					tr.append('<td><p class="form-control-static">'+diocese+"</p></td>");
+		if(item && item.length > 0) {
+			var tr = $("<tr/>");
+			userId = item[idx++];
+			userName = item[idx++];
+			birthDate = item[idx++];
+			email = item[idx++];
+			mobile = item[idx++];
+			postNumber = item[idx++];
+			address1 = item[idx++];
+			address2 = item[idx++];
+			fulladdress = item[idx++];
+			churchOfficer = item[idx++];
+			churchOfficerName = item[idx++];
+			diocese = item[idx++];
+			tr.attr('userId', userId);
+			tr.attr('userName', userName);
+			tr.attr('birthDate', birthDate);
+			tr.attr('email', email);
+			tr.attr('mobile', mobile);
+			tr.attr('postNumber', postNumber);
+			tr.attr('address1', address1);
+			tr.attr('address2', address2);
+			tr.attr('fulladdress', fulladdress);
+			tr.attr('churchOfficer', churchOfficer);
+			tr.attr('churchOfficerName', churchOfficerName);
+			tr.attr('diocese', diocese);
+			tr.attr('isAgent', isAgent);
+			tr.append('<td><p class="form-control-static">'+userName+"</p></td>");
+			tr.append('<td><p class="form-control-static">'+birthDate+"</p></td>");
+			tr.append('<td><p class="form-control-static">'+mobile+"</p></td>");
+			tr.append('<td><p class="form-control-static">'+email+"</p></td>");
+			tr.append('<td><p class="form-control-static">'+fulladdress+"</p></td>");
+			if(isAgent) {
+				tr.append("<td>"+getUserRelationSelect(isAgent)+"</td>");
+				tr.append("<td>"+getIsChurchSelect()+"</td>");
+				tr.append('<td><button type="button" class="btn btn-primary btn-sm" onclick="deleteRow(this)">삭제</button></td>');
+			}else {
+				tr.append('<td><p class="form-control-static">'+churchOfficerName+"</p></td>");
+				tr.append('<td><p class="form-control-static">'+diocese+"</p></td>");
+			}
+			var duplicated = false;
+			if(isAgent) {
+				var applyTR = $("#tblApplyUser tbody tr");
+				if(applyTR && applyTR.length > 0) {
+					var applyUserId = applyTR.attr("userId");
+					if(userId && applyUserId && userId == applyUserId) {
+						common.showAlert("대리인 정보가 신청자와 동일합니다.");
+						duplicated = true;
+					}
 				}
-				if(isAgent) {
+				if(!duplicated) {
 					$("#tblAgentUser tbody").html(tr);
-				}else {
+				}
+			}else {
+				var agentTR = $("#tblAgentUser tbody tr");
+				if(agentTR && agentTR.length > 0) {
+					var agentUserId = agentTR.attr("userId");
+					if(userId && agentUserId && userId == agentUserId) {
+						common.showAlert("신청자 정보가 대리인 정보와 동일합니다.\n해당 사용자를 신청자로 등록하려면 대리인 정보 삭제 후 등록해주세요.");
+						duplicated = true;
+					}
+				}
+				if(!duplicated) {
 					$("#tblApplyUser tbody").html(tr);	
 				}
 			}
-		}else if(type == "input") {
-			
 		}
 	};
 }
@@ -269,10 +286,18 @@ function registUseUser() {
 	// 사용(봉안) 대상자 입력 팝업 callback 함수
 	window.selectuserCallBack = function(type, item) {
 		var idx = 0, userId = '', userName = '', birthDate = '', email = '', mobile = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', diocese = '';
-		if(type == "select") {
-			if(item && item.length > 0) {
-				var tr = $('<tr/>');
-				userId = item[idx++];
+		if(item && item.length > 0) {
+			var tr = $('<tr/>');
+			var duplicated = false;
+			userId = item[idx++];
+			$("#tblUseUser tbody tr").each(function(idx){
+				if(userId && userId == $(this).attr('userId')) {
+					common.showAlert('이미 등록된 사용자입니다.');
+					duplicated = true;
+					return false;
+				}
+			});
+			if(!duplicated) {
 				userName = item[idx++];
 				birthDate = item[idx++];
 				email = item[idx++];
@@ -306,8 +331,6 @@ function registUseUser() {
 				tr.append('<td><button type="button" class="btn btn-primary btn-sm" onclick="deleteRow(this)">삭제</button></td>');
 				$("#tblUseUser tbody").append(tr);
 			}
-		}else if(type == "input") {
-			
 		}
 	};
 }
@@ -319,6 +342,8 @@ function saveApply() {
 	var tr, bunyangUser = {}, useUsers = [], bunyangInfo = {};
 	var coupleTypeCount = $("#tiCoupleTypeCount").val();
 	var singleTypeCount = $("#tiSingleTypeCount").val();
+	coupleTypeCount = coupleTypeCount ? parseInt(coupleTypeCount) : 0;
+	singleTypeCount = singleTypeCount ? parseInt(singleTypeCount) : 0;
 	
 	// 신청자 정보
 	tr = $("#tblApplyUser tbody tr");
@@ -406,9 +431,16 @@ function saveApply() {
 		return;
 	}
 	
-	if(!coupleTypeCount && !singleTypeCount) {
+	if(coupleTypeCount == 0 && singleTypeCount == 0) {
 		common.showAlert("부부형 또는 1인형 기수를 입력해주세요.");
 		return;
+	}
+	
+	if($(":input:radio[name=rdProductType]:checked").val() == '<%=CalvaryConstants.PRODUCT_TYPE_FAMILY%>') {
+		if(coupleTypeCount > 0 && singleTypeCount > 0) {
+			common.showAlert('가족형의 경우 부부형 또는 1인형 둘중 한가지만 선택가능합니다.');
+			return;
+		}
 	}
 	
 	// 분양신청정보
@@ -449,10 +481,12 @@ function cancelApply() {
 /** 
  * 사용자 관계 select box html 반환 
  */
-function getUserRelationSelect() {
+function getUserRelationSelect(isAgent) {
 	var select = '<select class="form-control relation"><option value="">선택</option>';
 	<c:forEach items="${codeUserRelation}" var="code">
-	select += '<option value="${code.code_seq}">${code.code_name}</option>';
+	if(!isAgent || '${code.code_seq}' != 'ONESELF'){
+		select += '<option value="${code.code_seq}">${code.code_name}</option>';	
+	}
 	</c:forEach>
 	select += "</select>";
 	return select;
