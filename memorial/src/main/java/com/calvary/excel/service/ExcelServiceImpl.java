@@ -31,6 +31,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import com.calvary.admin.service.IAdminService;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.dao.CommonDao;
+import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.CommonUtil;
 import com.calvary.common.util.FileUtil;
 import com.calvary.excel.ExcelForms;
@@ -47,6 +48,8 @@ public class ExcelServiceImpl implements IExcelService {
 	private CommonDao commonDao;
 	@Autowired
 	private IFileService fileService;
+	@Autowired
+	private ICommonService commonService;
 	@Autowired
 	private IAdminService adminService;
 	
@@ -164,14 +167,22 @@ public class ExcelServiceImpl implements IExcelService {
 		int contractPrice = (int)totalPrice/10;
 		// 잔금
 		int balancePrice = totalPrice - contractPrice;
+		
+		int downPayment = CommonUtil.convertToInt(bunyangInfo.get("down_payment"));// 납부계약금
+		int balancePayment = CommonUtil.convertToInt(bunyangInfo.get("balance_payment"));// 납부잔금
+		
 		// 금액 한글변환명
 		String totalPriceH = CommonUtil.convertPriceToHangul(totalPrice);
 		String contractPriceH = CommonUtil.convertPriceToHangul(contractPrice);
 		String balancePriceH = CommonUtil.convertPriceToHangul(balancePrice);
+		String downPaymentH = CommonUtil.convertPriceToHangul(downPayment);
+		String balancePaymentH = CommonUtil.convertPriceToHangul(balancePayment);
 		// 금액 세자리콤마
 		String totalPriceF = CommonUtil.getThousandSeperatorFormatString(totalPrice);
 		String contractPriceF = CommonUtil.getThousandSeperatorFormatString(contractPrice);
 		String balancePriceF = CommonUtil.getThousandSeperatorFormatString(balancePrice);
+		String downPaymentF = CommonUtil.getThousandSeperatorFormatString(downPayment);
+		String balancePaymentF = CommonUtil.getThousandSeperatorFormatString(balancePayment);
 		
 		if(ExcelForms.APPLY_FORM.equals(excelForm) || ExcelForms.APPROVAL_FORM.equals(excelForm)) {// 분양신청서, 신청승인서
 			
@@ -581,7 +592,7 @@ public class ExcelServiceImpl implements IExcelService {
 			if(downPaymentList != null && downPaymentList.size() > 0) {
 				tmp = (HashMap<String, Object>)downPaymentList.get(0);
 				String paymentDate = (String)tmp.get("payment_date");
-				int paymentAmount = (int)tmp.get("payment_amount");
+				int paymentAmount = CommonUtil.convertToInt(tmp.get("payment_amount"));
 				String paymentMethod = (String)tmp.get("payment_method");
 				String createUser = (String)tmp.get("create_user_name");
 				String createDate = (String)tmp.get("create_date");
@@ -645,7 +656,7 @@ public class ExcelServiceImpl implements IExcelService {
 				for(i = 0; i < balancePaymentList.size(); i++) {
 					tmp = (HashMap<String, Object>)balancePaymentList.get(i);
 					String paymentDate = (String)tmp.get("payment_date");
-					int paymentAmount = (int)tmp.get("payment_amount");
+					int paymentAmount = CommonUtil.convertToInt(tmp.get("payment_amount"));
 					
 					// 납부일자
 					sheetnums.add(0);
@@ -883,6 +894,198 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(31);
 			cellnums.add(convertColAlphabetToIndex("G"));
 			cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+		}else if(ExcelForms.CANCEL_APPROVAL_FORM.equals(excelForm)) {// 해약승인서
+			fileFormType = CalvaryConstants.FILE_FORM_TYPE_CANCEL_APPROVAL;
+			destFilePath += "/cancelApproval";
+			
+			// 해약승인번호
+			sheetnums.add(0);
+			rownums.add(5);
+			cellnums.add(convertColAlphabetToIndex("O"));
+			cellvalues.add(bunyangSeq);
+			// 신청자성명
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("C"));
+			cellvalues.add((String)applyUser.get("user_name"));
+			// 신청자 생년월일
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("F"));
+			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
+			// 신청자 직분
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("I"));
+			cellvalues.add((String)applyUser.get("church_officer_name"));
+			
+			// 신청자  교구
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("L"));
+			cellvalues.add((String)applyUser.get("diocese"));
+			
+			// 신청자  휴대전화
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("M"));
+			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
+			
+			// 신청자  우편번호
+			sheetnums.add(0);
+			rownums.add(10);
+			cellnums.add(convertColAlphabetToIndex("C"));
+			cellvalues.add((String)applyUser.get("post_number"));
+			
+			// 신청자  주소
+			sheetnums.add(0);
+			rownums.add(10);
+			cellnums.add(convertColAlphabetToIndex("D"));
+			cellvalues.add((String)applyUser.get("address1") + (String)applyUser.get("address2"));
+			
+			// 신청자  이메일
+			sheetnums.add(0);
+			rownums.add(10);
+			cellnums.add(convertColAlphabetToIndex("M"));
+			cellvalues.add((String)applyUser.get("email"));
+			
+			// 신청형태
+			String productionType = (String)bunyangInfo.get("product_type");
+			if(CalvaryConstants.PRODUCT_TYPE_EACH.equals(productionType)) {// 개별형
+				sheetnums.add(0);
+				rownums.add(14);
+				cellnums.add(convertColAlphabetToIndex("J"));
+				cellvalues.add("O");
+			}else if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productionType)) {// 가족형
+				sheetnums.add(0);
+				rownums.add(14);
+				cellnums.add(convertColAlphabetToIndex("M"));
+				cellvalues.add("O");
+			}
+			if(coupleTypeCount > 0) {
+				sheetnums.add(0);
+				rownums.add(15);
+				cellnums.add(convertColAlphabetToIndex("J"));
+				cellvalues.add(String.valueOf(coupleTypeCount));
+			}
+			if(singleTypeCount > 0) {
+				sheetnums.add(0);
+				rownums.add(15);
+				cellnums.add(convertColAlphabetToIndex("M"));
+				cellvalues.add(String.valueOf(singleTypeCount));
+			}
+			
+			// 총기수
+			sheetnums.add(0);
+			rownums.add(16);
+			cellnums.add(convertColAlphabetToIndex("C"));
+			cellvalues.add(String.valueOf(bunyangCnt));
+			
+			// 총분양가
+			sheetnums.add(0);
+			rownums.add(17);
+			cellnums.add(convertColAlphabetToIndex("E"));
+			cellvalues.add("일금:" + totalPriceH + "원");
+			sheetnums.add(0);
+			rownums.add(17);
+			cellnums.add(convertColAlphabetToIndex("H"));
+			cellvalues.add("(₩" + totalPriceF + ")");
+			
+			// 총계약금
+			sheetnums.add(0);
+			rownums.add(18);
+			cellnums.add(convertColAlphabetToIndex("E"));
+			cellvalues.add("일금:" + downPaymentH + "원");
+			sheetnums.add(0);
+			rownums.add(18);
+			cellnums.add(convertColAlphabetToIndex("H"));
+			cellvalues.add("(₩" + downPaymentF + ")");
+			
+			// 잔금
+			sheetnums.add(0);
+			rownums.add(19);
+			cellnums.add(convertColAlphabetToIndex("E"));
+			cellvalues.add("일금:" + balancePaymentH + "원");
+			sheetnums.add(0);
+			rownums.add(19);
+			cellnums.add(convertColAlphabetToIndex("H"));
+			cellvalues.add("(₩" + balancePaymentF + ")");
+			
+			// 해약신청일자
+			sheetnums.add(0);
+			rownums.add(24);
+			cellnums.add(convertColAlphabetToIndex("G"));
+			cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+			
+			String cancelReason = (String)bunyangInfo.get("cancel_reason");
+			String cancelBank = (String)bunyangInfo.get("cancel_bank");
+			String cancelAccount = (String)bunyangInfo.get("cancel_account");
+			String cancelAccountHoler = (String)bunyangInfo.get("cancel_account_holder");
+			String cancelDepositPlanDate = (String)bunyangInfo.get("cancel_deposit_plan_date");
+			int penalty = downPayment/2;// 위약금
+			int cancelReturn = downPayment + balancePayment - penalty;// 해약반환금
+			String penaltyH = CommonUtil.convertPriceToHangul(penalty);
+			String penaltyF = CommonUtil.getThousandSeperatorFormatString(penalty);
+			String cancelReturnH = CommonUtil.convertPriceToHangul(cancelReturn);
+			String cancelReturnF = CommonUtil.getThousandSeperatorFormatString(cancelReturn);
+			
+			// 해약사유
+			sheetnums.add(0);
+			rownums.add(20);
+			cellnums.add(convertColAlphabetToIndex("D"));
+			cellvalues.add(cancelReason);
+			
+			// 해약반환금
+			sheetnums.add(0);
+			rownums.add(21);
+			cellnums.add(convertColAlphabetToIndex("E"));
+			cellvalues.add("일금:" + cancelReturnH + "원");
+			sheetnums.add(0);
+			rownums.add(34);
+			cellnums.add(convertColAlphabetToIndex("G"));
+			cellvalues.add("일금:" + cancelReturnH + "원");
+			sheetnums.add(0);
+			rownums.add(21);
+			cellnums.add(convertColAlphabetToIndex("H"));
+			cellvalues.add("(₩" + cancelReturnF + ")");
+			sheetnums.add(0);
+			rownums.add(34);
+			cellnums.add(convertColAlphabetToIndex("L"));
+			cellvalues.add("(₩" + cancelReturnF + ")");
+			
+			// 입금은행
+			sheetnums.add(0);
+			rownums.add(22);
+			cellnums.add(convertColAlphabetToIndex("E"));
+			cellvalues.add(cancelBank);
+			
+			// 입금계좌번호
+			sheetnums.add(0);
+			rownums.add(22);
+			cellnums.add(convertColAlphabetToIndex("J"));
+			cellvalues.add(cancelAccount);
+			
+			// 예금주명
+			sheetnums.add(0);
+			rownums.add(22);
+			cellnums.add(convertColAlphabetToIndex("O"));
+			cellvalues.add(cancelAccountHoler);
+			
+			// 해약위약금
+			sheetnums.add(0);
+			rownums.add(33);
+			cellnums.add(convertColAlphabetToIndex("G"));
+			cellvalues.add("일금:" + penaltyH + "원");
+			sheetnums.add(0);
+			rownums.add(33);
+			cellnums.add(convertColAlphabetToIndex("L"));
+			cellvalues.add("(₩" + penaltyF + ")");
+			
+			// 입금예정일자
+			sheetnums.add(0);
+			rownums.add(35);
+			cellnums.add(convertColAlphabetToIndex("G"));
+			cellvalues.add(cancelDepositPlanDate);
 		}
 		
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
@@ -905,7 +1108,7 @@ public class ExcelServiceImpl implements IExcelService {
 			destFile = new File(realPath + destFilePath, destFileName);
 			try {
 				FileUtils.copyFile(srcFile, destFile);
-				fileSeq = fileService.getFileSequence();
+				fileSeq = String.valueOf(commonService.getSeqNexVal("FILE_SEQ"));
 				String fileType = Files.probeContentType(destFile.toPath());
 				String fileSize = Long.toString(destFile.length());
 				fileService.createFileInfo(fileSeq, fileType, fileSize, destFilePath, srcFileName, destFileName);

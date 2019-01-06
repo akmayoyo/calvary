@@ -15,5 +15,7 @@ public enum ExcelForms {
 	/** 완납확인증명서 */
 	FULL_PAYMENT_FORM,
 	/** 사용승인서 */
-	USE_APPROVAL_FORM
+	USE_APPROVAL_FORM,
+	/** 해약승인서 */
+	CANCEL_APPROVAL_FORM
 }

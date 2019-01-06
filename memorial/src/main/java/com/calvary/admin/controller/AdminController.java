@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -502,6 +504,8 @@ public class AdminController {
 	//===============================================================================
 	/** 해약관리 메인 페이지  URL */
 	public static final String CANCEL_MGMT_URL = "/cancelmgmt";
+	/** 해약승인 URL */
+	public static final String CANCEL_APPROVAL_URL = "/cancelapproval";
 	
 	/** 
 	 * 해약관리 메인 페이지 
@@ -523,7 +527,36 @@ public class AdminController {
 		return mv;
 	}
 	
-	
+	/** 
+	 * 해약승인
+	 */
+	@RequestMapping(value=CANCEL_APPROVAL_URL)
+	@ResponseBody
+	public Object cancelApprovalHandler(
+			String bunyangSeq
+			,int depositAmount
+			,String depositPlanDate
+			,String depositBank
+			,String depositAccount
+			,String accountHolder
+			,String cancelReason
+			) throws Exception {
+		boolean bRslt = false;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		int iRslt = adminService.updateCancel(bunyangSeq, depositAmount, depositPlanDate, depositBank, depositAccount, accountHolder, cancelReason);
+		if(iRslt > 0) {
+			String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CANCEL_APPROVAL_FORM, bunyangSeq, "");
+			if(!StringUtils.isEmpty(fileSeq)) {
+				Map<String, Object> param = new HashMap<String, Object>();
+				param.put("bunyangSeq", bunyangSeq);
+				param.put("file_seq_cancel", fileSeq);
+				adminService.updateBunyangFileSeq(param);
+				bRslt = true;
+			}
+		}
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
 	
 	
 	//===============================================================================

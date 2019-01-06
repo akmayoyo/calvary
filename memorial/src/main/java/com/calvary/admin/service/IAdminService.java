@@ -109,6 +109,17 @@ public interface IAdminService {
 	 */
 	public List<Object> getCancelList(SearchVo searchVo);
 	
+	/** 
+	 * 해약 승인 내역 업데이트
+	 */
+	public int updateCancel(String bunyangSeq
+			,int depositAmount
+			,String depositPlanDate
+			,String depositBank
+			,String depositAccount
+			,String accountHolder
+			,String cancelReason) throws Exception;
+	
 	
 	
 	//===============================================================================

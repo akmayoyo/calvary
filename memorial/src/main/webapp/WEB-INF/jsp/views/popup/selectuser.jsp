@@ -52,7 +52,7 @@
                                 <th scope="col">생년월일</th>
                                 <th scope="col">이메일</th>
                                 <th scope="col">휴대전화</th>
-                                <th scope="col">주소</th>
+                                <th scope="col" style="max-width: 200px;">주소</th>
                                 <th scope="col">직분</th>
                                 <th scope="col">교구</th>
                             </tr>

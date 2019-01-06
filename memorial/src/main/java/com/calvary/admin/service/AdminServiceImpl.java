@@ -13,6 +13,7 @@ import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.dao.CommonDao;
+import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
 
@@ -21,6 +22,8 @@ public class AdminServiceImpl implements IAdminService {
 	
 	@Autowired
 	private CommonDao commonDao;
+	@Autowired
+	private ICommonService commonService;
 	
 	
 	//===============================================================================
@@ -31,7 +34,7 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	public List<Object> getBunyangList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("admin.getBunyangList", parameter); 
@@ -48,7 +51,7 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	public List<Object> getApplyList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("admin.getApplyList", parameter); 
@@ -87,7 +90,6 @@ public class AdminServiceImpl implements IAdminService {
 	 * 분양신청 정보 저장
 	 * @param bunyangInfoVo
 	 */
-	@SuppressWarnings("unchecked")
 	@Transactional
 	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo) {
 		String sRtn = "";
@@ -95,8 +97,7 @@ public class AdminServiceImpl implements IAdminService {
 		BunyangUserVo agentUser = bunyangInfoVo.getAgentUser();
 		Map<String, Object> param = null;
 		List<BunyangUserVo> useUsers = bunyangInfoVo.getUseUsers();
-		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("admin.getBunyangInfoSequence", ""); 
-		String bunyangSeq = (String)rtnMap.get("seq");
+		String bunyangSeq = String.valueOf(commonService.getSeqNexVal("BUNYANG_SEQ"));
 		
 		// 분양정보 생성
 		param = new HashMap<String, Object>();
@@ -107,7 +108,7 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("serviceChargeType", bunyangInfoVo.getServiceChargeType());
 		param.put("progressStatus", bunyangInfoVo.getProgressStatus());
 		// TODO
-		param.put("registUserSeq", "calvaryadmin");
+		param.put("registUserId", SessionUtil.getCurrentUserId());
 		commonDao.insert("admin.createBunyangInfo", param);
 		
 		// 분양 관련 인명정보 생성(신청자)
@@ -192,7 +193,7 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	public List<Object> getContractList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("contract.getContractList", parameter); 
@@ -277,7 +278,7 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	public List<Object> getApprovalList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("approval.getApprovalList", parameter); 
@@ -309,12 +310,58 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	public List<Object> getCancelList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("start", (1-searchVo.getPageIndex()) * searchVo.getCountPerPage());
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("cancel.getCancelList", parameter); 
 		return list;
 	}
+	
+	/** 
+	 * 해약 승인 내역 업데이트
+	 */
+	@Transactional
+	public int updateCancel(String bunyangSeq
+			,int depositAmount
+			,String depositPlanDate
+			,String depositBank
+			,String depositAccount
+			,String accountHolder
+			,String cancelReason) throws Exception {
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		// 해약정보 업데이트
+		param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("cancelReason", cancelReason);
+		param.put("cancelBank", depositBank);
+		param.put("cancelAccount", depositAccount);
+		param.put("cancelAccountHolder", accountHolder);
+		param.put("cancelDepositPlanDate", depositPlanDate);
+		iRslt += commonDao.update("cancel.updateCancel", param);
+		
+		param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_E);
+		param.put("userId", SessionUtil.getCurrentUserId());
+		param.put("remarks", "");
+		// 상태 업데이트
+		iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
+		// 변경이력
+		iRslt += commonDao.update("admin.createBunyangHistory", param);
+		
+		// 계약금 납부 정보 업데이트
+		param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("paymentType", CalvaryConstants.PAYMENT_TYPE_CANCEL_PAYMENT);
+		param.put("paymentAmount", depositAmount);
+		param.put("paymentMethod", CalvaryConstants.PAYMENT_METHOD_TRANSFER);
+		param.put("paymentDate", depositPlanDate);
+		param.put("createUser", SessionUtil.getCurrentUserId());
+		iRslt += commonDao.insert("cancel.insertCancelPayment", param);
+		return iRslt;
+	}
+	
 	
 	
 	//===============================================================================

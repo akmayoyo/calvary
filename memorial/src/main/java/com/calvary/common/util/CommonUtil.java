@@ -1,5 +1,6 @@
 package com.calvary.common.util;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +92,24 @@ public class CommonUtil {
 			sRtn = String.format("%s-%s-%s", sRtn.substring(0, 3), sRtn.substring(3, 7), sRtn.substring(7, 11));
 		}
 		return sRtn;
+	}
+	
+	public static int convertToInt(Object val) {
+		int iRtn = 0;
+		try {
+			if(val instanceof BigDecimal) {
+				iRtn = ((BigDecimal)val).intValue();
+			}else if(val instanceof Long) {
+				iRtn = (int)(long)val;
+			}else if(val instanceof Integer) {
+				iRtn = (int)val;
+			}else if(val instanceof String) {
+				iRtn = Integer.parseInt((String)val);
+			}
+		} catch (Exception e) {
+			
+		}
+		return iRtn;
 	}
 	
 	

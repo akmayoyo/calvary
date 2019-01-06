@@ -200,7 +200,7 @@ function displayTotalPrice() {
  * @param isAgent true:대리신청
  */
 function registApplyUser(isAgent) {
-	var winoption = {width:1024, height:830};
+	var winoption = {width:1080, height:830};
 	var param = {popupTitle: isAgent ? "대리인 입력" : "신청자 입력"};
 	common.openWindow("${contextPath}/popup/selectuser", "popRegistApplyUser", winoption, param);
 	// 신청자 입력 팝업 callback 함수
@@ -280,7 +280,7 @@ function registApplyUser(isAgent) {
  * 사용(봉안) 대상자 입력
  */
 function registUseUser() {
-	var winoption = {width:1024, height:830};
+	var winoption = {width:1080, height:830};
 	var param = {popupTitle: "사용(봉안) 대상자 입력"};
 	common.openWindow("${contextPath}/popup/selectuser", "popRegistUser", winoption, param);
 	// 사용(봉안) 대상자 입력 팝업 callback 함수

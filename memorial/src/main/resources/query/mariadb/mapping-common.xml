@@ -35,7 +35,6 @@
 			, a.church_officer, a.diocese, a.user_status
 			, (SELECT code_name FROM TB_COM_CODE b WHERE a.church_officer = b.code_seq) church_officer_name
 			, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
-			, FOUND_ROWS() total_count 
 		FROM TB_COM_USER a
 		WHERE 1=1
 		<if test="user_name != null">
@@ -43,6 +42,16 @@
 		</if>
 		ORDER BY a.user_name, a.user_id
 		LIMIT #{start}, #{count}
+	</select>
+	
+	<select id="getUserListTotalCount" parameterType="map" resultType="map">
+		SELECT 
+			COUNT(*) total_count 
+		FROM TB_COM_USER a
+		WHERE 1=1
+		<if test="user_name != null">
+		AND user_name like CONCAT('%',#{user_name},'%')
+		</if>
 	</select>
 	
 	<select id="checkDuplicatedUser" parameterType="map" resultType="map">
@@ -99,22 +108,35 @@
 	</select>
 	
 	<insert id="createFileInfo" parameterType="map">
-		INSERT INTO TB_SYS_FILE_INFO ( file_seq, file_type, file_size, file_path, file_name, real_file_name, upload_date )
+		INSERT INTO TB_SYS_FILE_INFO ( file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date )
 		VALUES (#{fileSeq} , #{fileType} , #{fileSize} , #{filePath} , #{fileName} , #{realFileName}, CURRENT_TIMESTAMP  )
 	</insert>
 	
 	<select id="getBunyangFileForm" parameterType="String" resultType="map">
 		SELECT 
-			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.upload_date 
+			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.update_date 
 		FROM TB_SYS_FILE_INFO a 
-		WHERE a.file_seq = (SELECT file_seq FROM tb_bunyang_file_form WHERE file_form_type = #{fileFormType})
+		WHERE a.file_seq = (SELECT file_seq FROM TB_BUNYANG_FILE_FORM WHERE file_form_type = #{fileFormType})
 	</select>
 	
 	<select id="getSysFileInfo" parameterType="String" resultType="map">
 		SELECT 
-			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.upload_date 
+			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.update_date 
 		FROM TB_SYS_FILE_INFO a 
 		WHERE a.file_seq = #{fileSeq}
 	</select>
+	
+	
+	<!--///////////////////////////  시퀀스 관련 ///////////////////////////-->
+	
+	<select id="getSeqNexVal" parameterType="map" resultType="map">
+		SELECT COALESCE(seq_num,1) AS seq FROM SEQ_NUMBER a WHERE a.seq_type = #{seqType}
+	</select>
+	
+	<update id="updateSeqNexVal" parameterType="map">
+		UPDATE SEQ_NUMBER a
+			SET seq_num = COALESCE(seq_num,0)+1
+		WHERE a.seq_type = #{seqType}
+	</update>
 
 </mapper>

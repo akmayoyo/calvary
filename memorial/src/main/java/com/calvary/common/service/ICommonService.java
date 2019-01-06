@@ -8,4 +8,6 @@ public interface ICommonService {
 	public List<Object> getChildCodeList(String parentCodeSeq);
 	
 	public Map<String, Object> getMenuInfo(String menuSeq);
+	
+	public long getSeqNexVal(String seqType);
 }

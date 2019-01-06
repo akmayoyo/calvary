@@ -222,6 +222,12 @@
           	,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
             ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
 	       	,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+	       	,cancel_reason
+	       	,cancel_bank
+	       	,cancel_account
+	       	,cancel_account_holder
+	       	,DATE_FORMAT(a.cancel_deposit_plan_date, '%Y-%m-%d') AS cancel_deposit_plan_date
+	       	,DATE_FORMAT(a.cancel_deposit_confirm_date, '%Y-%m-%d') AS cancel_deposit_confirm_date
 	  	FROM TB_BUNYANG_INFO a INNER JOIN       
 			(SELECT
 				bunyang_seq
@@ -265,25 +271,20 @@
     	AND a.ref_type = #{refType}
 	</select>
 	
-	<!-- 분양정보 시퀀스 생성 -->
-	<select id="getBunyangInfoSequence" resultType="map">
-		SELECT NEXTVAL('seq_bunyang_info')::text AS seq
-	</select>
-	
 	<!-- 분양정보의 신청서,승인서등 관련 파일양식 조회 -->
 	<select id="getBunyangFileList" parameterType="String" resultType="map">
-		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_apply FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
-		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_use_user FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
-		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
-		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_contract FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
-		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_full_payment FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
-		SELECT * FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_use_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq})
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_apply FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_use_user FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_contract FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_full_payment FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_use_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq})
 	</select>
 	
 	<!-- 분양정보 생성 -->
 	<insert id="createBunyangInfo" parameterType="map">
-		INSERT INTO TB_BUNYANG_INFO ( bunyang_seq,product_type,couple_type_count,single_type_count,service_charge_type,req_approval_seq,contract_seq,use_approval_seq,progress_status,regist_user_id,regist_date )
-		VALUES (#{bunyangSeq} , #{productType}, #{coupleTypeCount}, #{singleTypeCount}, #{serviceChargeType}, #{reqApprovalSeq}, #{contractSeq}, #{useApprovalSeq}, #{progressStatus}, #{registUserSeq}, CURRENT_TIMESTAMP )
+		INSERT INTO TB_BUNYANG_INFO ( bunyang_seq,product_type,couple_type_count,single_type_count,service_charge_type,progress_status,regist_user_id,regist_date )
+		VALUES (#{bunyangSeq} , #{productType}, #{coupleTypeCount}, #{singleTypeCount}, #{serviceChargeType}, #{progressStatus}, #{registUserId}, CURRENT_TIMESTAMP )
 	</insert>
 	
 	<!-- 분양 관련 인명정보 생성 -->
@@ -300,7 +301,8 @@
 				<if test="file_seq_approval != null">file_seq_approval=#{file_seq_approval},</if>
 				<if test="file_seq_contract != null">file_seq_contract=#{file_seq_contract},</if>
 				<if test="file_seq_full_payment != null">file_seq_full_payment=#{file_seq_full_payment},</if>
-				<if test="file_seq_use_approval != null">file_seq_use_approval=#{file_seq_use_approval}</if>
+				<if test="file_seq_use_approval != null">file_seq_use_approval=#{file_seq_use_approval},</if>
+				<if test="file_seq_cancel != null">file_seq_cancel=#{file_seq_cancel}</if>
 			</set> 
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
@@ -314,7 +316,7 @@
 	
 	<!-- 분양상태변경 이력 생성 -->
 	<insert id="createBunyangHistory" parameterType="map">
-		INSERT INTO TB_BUNYANG_HISTORY ( bunyang_seq,progress_status,update_user_seq,update_date,remarks )
+		INSERT INTO TB_BUNYANG_HISTORY ( bunyang_seq,progress_status,update_user_id,update_date,remarks )
 		VALUES ( #{bunyangSeq}, #{progressStatus}, #{userId}, CURRENT_TIMESTAMP, #{remarks})
 	</insert>
 

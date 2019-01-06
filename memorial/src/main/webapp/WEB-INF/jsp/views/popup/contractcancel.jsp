@@ -41,16 +41,19 @@
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">총 분양대금</th>
-            		<td align="left" colspan="3">₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price)}</td>
+            		<td align="left" colspan="3">₩ ${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price)}</td>
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">총 납부금액</th>
-            		<td align="left" colspan="3">계약금 : ₩${cutil:getThousandSeperatorFormatString(bunyangInfo.down_payment)} + 잔금 : ₩${cutil:getThousandSeperatorFormatString(bunyangInfo.balance_payment)} = ₩${cutil:getThousandSeperatorFormatString(bunyangInfo.down_payment + bunyangInfo.balance_payment)}
+            		<td align="left" colspan="3">계약금 : ₩ ${cutil:getThousandSeperatorFormatString(bunyangInfo.down_payment)} + 잔금 : ₩ ${cutil:getThousandSeperatorFormatString(bunyangInfo.balance_payment)} = ₩ ${cutil:getThousandSeperatorFormatString(bunyangInfo.down_payment + bunyangInfo.balance_payment)}
             		</td>
             	</tr>
             </tbody>
         </table>
     </div>
+    
+    <c:set var="penalty" value="${bunyangInfo.down_payment/2}"/><!-- 위약금 -->
+    <c:set var="cancelReturn" value="${bunyangInfo.down_payment + bunyangInfo.balance_payment - penalty}"/><!-- 반환금 -->
     
     <!-- 해약 정보 -->
 	<div style="margin-top: 15px;">
@@ -72,29 +75,29 @@
             	<tr>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static">해약 위약금</p></th>
             		<td align="left">
-            			<p class="form-control-static">₩100,000</p>
+            			<p class="form-control-static">₩ ${cutil:getThousandSeperatorFormatString(penalty)}</p>
             		</td>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static">반환금</p></th>
             		<td align="left">
-            			<p class="form-control-static">₩100,000</p>
+            			<p class="form-control-static">₩ ${cutil:getThousandSeperatorFormatString(cancelReturn)}</p>
             		</td>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static">입금예정일</p></th>
             		<td align="left">
-            			<input id="tiCancelReason" class="form-control" type="text">
+            			<input id="tiDepositDate" class="form-control" type="text">
             		</td>
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static">입금은행</p></th>
             		<td align="left">
-            			<input id="tiCancelReason" class="form-control" type="text">
+            			<input id="tiDepositBank" class="form-control" type="text">
             		</td>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static">입금계좌</p></th>
             		<td align="left">
-            			<input id="tiCancelReason" class="form-control" type="text">
+            			<input id="tiDepositAccount" class="form-control" type="text">
             		</td>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static">예금주</p></th>
             		<td align="left">
-            			<input id="tiCancelReason" class="form-control" type="text">
+            			<input id="tiAccountHolder" class="form-control" type="text">
             		</td>
             	</tr>
             	<tr>
@@ -108,18 +111,55 @@
     </div>
 
 	<div class="mt-30 text-center">
-    	<button id="btnConfrim" type="button" class="btn btn-warning btn-lg">해약</button>
-        <button type="button" class="btn btn-default btn-lg btnClose">취소</button>
+    	<button id="btnConfrim" type="button" class="btn btn-warning btn-lg" onclick="_cancel()">해약</button>
+        <button type="button" class="btn btn-default btn-lg btnClose" onclick="_close()">취소</button>
 	</div>
 
 </div>
 
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/moment.min.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/daterangepicker.js"></script>
 <script type="text/javascript">
 (function(){
 	
+	common.singleDatePicker($("#tiDepositDate"));
 	
 })();
+
+/**
+ * 해약
+ */
+function _cancel() {
+	if(confirm('해당계약건을 해약하시겠습니까?')) {
+		var data = {};
+		data['bunyangSeq'] = '${bunyangInfo.bunyang_seq}';
+		data['depositAmount'] = ${cancelReturn};
+		data['depositPlanDate'] = $("#tiDepositDate").data('daterangepicker').startDate.format('YYYYMMDD');
+		data['depositBank'] = $("#tiDepositBank").val();
+		data['depositAccount'] = $("#tiDepositAccount").val();
+		data['accountHolder'] = $("#tiAccountHolder").val();
+		data['cancelReason'] = $("#tiCancelReason").val();
+		common.ajax({
+    		url:"${contextPath}/admin/cancelapproval", 
+    		data:data,
+    		success: function(result) {
+    			if(window.opener && window.opener.contractCancelCallBack != 'undefined') {
+        			window.opener.contractCancelCallBack(result);
+        		}
+        		common.closeWindow();
+    		}
+    	});
+	}
+}
+
+/**
+ * 취소
+ */
+function _close() {
+	common.closeWindow();
+}
+
 
 
 </script>

@@ -106,5 +106,24 @@
 		ORDER BY t.bunyang_seq
 		LIMIT #{start}, #{count}
 	</select>
+	
+	<!-- 해약 반환금 내역 -->
+	<insert id="insertCancelPayment" parameterType="map">
+		INSERT INTO TB_BUNYANG_PAYMENT_HISTORY 
+		(bunyang_seq, payment_type, payment_amount, payment_method, payment_date, create_user, create_date) 
+		values (#{bunyangSeq}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, DATE_FORMAT(#{paymentDate}, '%Y%m%d'), #{createUser}, CURRENT_TIMESTAMP)
+	</insert>
+	
+	<!-- 해약 내용 업데이트 -->
+	<update id="updateCancel" parameterType="map">
+		UPDATE TB_BUNYANG_INFO a
+		SET 
+			cancel_reason = #{cancelReason},
+			cancel_bank = #{cancelBank},
+			cancel_account = #{cancelAccount},
+			cancel_account_holder = #{cancelAccountHolder},
+			cancel_deposit_plan_date = DATE_FORMAT(#{cancelDepositPlanDate}, '%Y%m%d')
+		WHERE a.bunyang_seq = #{bunyangSeq}
+	</update>
     
 </mapper>

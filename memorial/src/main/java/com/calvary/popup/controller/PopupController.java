@@ -40,7 +40,7 @@ public class PopupController {
 	public Object selectUserHandler(SearchVo searchVo, String popupTitle) {
 		ModelAndView mv = new ModelAndView();
 		List<Object> userList = popupService.getUserList(searchVo);
-		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(userList, "total_count"));
+		searchVo.setTotalCount(popupService.getUserListTotalCount(searchVo));
 		mv.addObject("userList", userList);
 		mv.addObject("officerList", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_CHURCH_OFFICER));
 		mv.addObject("searchVo", searchVo);

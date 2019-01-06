@@ -131,29 +131,15 @@ function _approvalDetail(bunyangSeq) {
 function _cancel(btn, event) {
 	event.stopPropagation();
 	var bunyangSeq = $(btn).parent("td").parent("tr").attr("bunyangSeq");
-	var winoption = {width:1024, height:830};
+	var winoption = {width:1024, height:690};
 	var param = {bunyangSeq: bunyangSeq};
 	common.openWindow("${contextPath}/popup/contractcancel", "popContractCancel", winoption, param);
-	
-	
-// 	if(confirm('사용승인하시겠습니까?')) {
-// 		var bunyangSeq = $(btn).parent("td").parent("tr").attr("bunyangSeq");
-// 		var data = {};
-// 		data["bunyangSeq"] = bunyangSeq;
-// 		// 저장 호출
-// 		common.ajax({
-// 			url:"${contextPath}/admin/useapproval", 
-// 			data:data,
-// 			success: function(result) {
-// 				if(result && result.result) {
-// 					common.showAlert("사용승인되었습니다.");
-// 					var frm = document.getElementById("frm");
-// 					frm.action = "${contextPath}/admin/approvalmgmt";
-// 					frm.submit();
-// 				}
-// 			}
-// 		});
-// 	}
+	window.contractCancelCallBack = function(result) {
+		common.showAlert('저장되었습니다.');
+		var frm = document.getElementById("frm");
+		frm.action = "${contextPath}/admin/cancelmgmt";
+		frm.submit();
+	}
 }
 
 </script>

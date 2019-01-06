@@ -9,6 +9,7 @@ import com.calvary.common.vo.UserSearchVo;
 public interface IPopupService {
 
 	public List<Object> getUserList(SearchVo searchVo);
+	public long getUserListTotalCount(SearchVo searchVo);
 	
 	public Map<String, Object> getUserByNameAndBirthDate(String userName, String birthDate);
 	

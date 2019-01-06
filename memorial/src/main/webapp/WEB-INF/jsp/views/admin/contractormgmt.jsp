@@ -123,7 +123,7 @@ function _changeContractor(btn, event) {
 	var progressStatus = $(btn).parent("td").parent("tr").attr("progressStatus");
 	var userId;
 	var userName;
-	var winoption = {width:1024, height:830};
+	var winoption = {width:1080, height:830};
 	var param = {popupTitle: "계약자 변경"};
 	common.openWindow("${contextPath}/popup/selectuser", "popChangeContractor", winoption, param);
 	// 신청자 입력 팝업 callback 함수

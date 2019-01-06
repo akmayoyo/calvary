@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.FileUtil;
 import com.calvary.file.service.IFileService;
 
@@ -44,6 +45,9 @@ public class FileController {
 	
 	@Autowired
 	private IFileService fileService;
+	
+	@Autowired
+	private ICommonService commonService;
 	
 	@RequestMapping(value="/uploadFile", method=RequestMethod.POST)
 	public ResponseEntity<String> uploadFile(MultipartHttpServletRequest request) throws Exception{
@@ -74,7 +78,7 @@ public class FileController {
 		String result = "";
 		if(newFile != null){
 			if(Boolean.valueOf(dosave)) {
-				String fileSeq = fileService.getFileSequence();
+				String fileSeq = String.valueOf(commonService.getSeqNexVal("FILE_SEQ"));
 				String fileType = Files.probeContentType(newFile.toPath());
 				String fileSize = Long.toString(newFile.length());
 				boolean bRslt = fileService.createFileInfo(fileSeq, fileType, fileSize, filePath, fileName, realFileName);

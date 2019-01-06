@@ -65,6 +65,8 @@ public class CalvaryConstants {
 	public static final String PAYMENT_TYPE_DOWN_PAYMENT = "DOWN_PAYMENT";
 	/** 분양금 납부 타입 : 잔금납부 */
 	public static final String PAYMENT_TYPE_BALANCE_PAYMENT = "BALANCE_PAYMENT";
+	/** 분양금 납부 타입 : 해약에 따른 반환 */
+	public static final String PAYMENT_TYPE_CANCEL_PAYMENT = "CANCEL_PAYMENT";
 	
 	
 	/** 납부 방법 : 이체 */
@@ -97,4 +99,8 @@ public class CalvaryConstants {
 	 * 엑셀 서식 타입 : 사용승인서
 	 */
 	public static final String FILE_FORM_TYPE_USE_APPROVAL = "USE_APPROVAL_FORM";
+	/** 
+	 * 엑셀 서식 타입 : 해약승인서
+	 */
+	public static final String FILE_FORM_TYPE_CANCEL_APPROVAL = "CANCEL_APPROVAL_FORM";
 }
