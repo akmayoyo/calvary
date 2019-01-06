@@ -212,7 +212,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(4);
-			cellvalues.add((String)applyUser.get("birth_date"));
+			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -229,7 +229,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(11);
-			cellvalues.add((String)applyUser.get("mobile"));
+			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
 			
 			// 신청자  우편번호
 			sheetnums.add(0);
@@ -241,7 +241,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(2);
-			cellvalues.add((String)applyUser.get("address1") + (String)applyUser.get("address2"));
+			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
 			
 			// 신청자  이메일
 			sheetnums.add(0);
@@ -348,7 +348,7 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(13);
 				cellnums.add(4);
-				cellvalues.add((String)agentUser.get("birth_date"));
+				cellvalues.add(CommonUtil.getBirthDateFormatString((String)agentUser.get("birth_date")));
 				
 				// 신청자와의 관계
 				sheetnums.add(0);
@@ -360,7 +360,7 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(13);
 				cellnums.add(11);
-				cellvalues.add((String)agentUser.get("mobile"));
+				cellvalues.add(CommonUtil.getMobileFormatString((String)agentUser.get("mobile")));
 				
 				// 우편번호
 				sheetnums.add(0);
@@ -372,7 +372,7 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(15);
 				cellnums.add(2);
-				cellvalues.add((String)agentUser.get("address1") + (String)agentUser.get("address2"));
+				cellvalues.add(CommonUtil.nullToEmpty(agentUser.get("address1")) + CommonUtil.nullToEmpty(agentUser.get("address2")));
 				
 				// 이메일
 				sheetnums.add(0);
@@ -423,7 +423,7 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(startRowNum);
 					cellnums.add(4);
-					cellvalues.add((String)userMap.get("birth_date"));
+					cellvalues.add(CommonUtil.getBirthDateFormatString((String)userMap.get("birth_date")));
 					// 우편번호
 					sheetnums.add(0);
 					rownums.add(startRowNum);
@@ -433,7 +433,7 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(startRowNum);
 					cellnums.add(7);
-					cellvalues.add((String)userMap.get("address1") + (String)userMap.get("address2"));
+					cellvalues.add(CommonUtil.nullToEmpty(userMap.get("address1")) + CommonUtil.nullToEmpty(userMap.get("address2")));
 					// 신청유형 TODO
 					// 부부표시 TODO
 					// 갈보리 교인여부
@@ -448,7 +448,7 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(startRowNum);
 					cellnums.add(13);
-					cellvalues.add((String)userMap.get("mobile"));
+					cellvalues.add(CommonUtil.getMobileFormatString((String)userMap.get("mobile")));
 					// 이메일
 					sheetnums.add(0);
 					rownums.add(startRowNum);
@@ -479,11 +479,11 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("F"));
-			cellvalues.add((String)applyUser.get("birth_date"));
+			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
 			sheetnums.add(0);
 			rownums.add(52);
 			cellnums.add(convertColAlphabetToIndex("E"));
-			cellvalues.add((String)applyUser.get("birth_date"));
+			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -500,7 +500,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("M"));
-			cellvalues.add((String)applyUser.get("mobile"));
+			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
 			
 			// 신청자  우편번호
 			sheetnums.add(0);
@@ -512,11 +512,11 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("D"));
-			cellvalues.add((String)applyUser.get("address1") + (String)applyUser.get("address2"));
+			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
 			sheetnums.add(0);
 			rownums.add(54);
 			cellnums.add(convertColAlphabetToIndex("E"));
-			cellvalues.add((String)applyUser.get("address1") + (String)applyUser.get("address2"));
+			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
 			
 			// 신청자  이메일
 			sheetnums.add(0);
@@ -688,7 +688,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("F"));
-			cellvalues.add((String)applyUser.get("birth_date"));
+			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -705,7 +705,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("M"));
-			cellvalues.add((String)applyUser.get("mobile"));
+			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
 			
 			// 신청자  우편번호
 			sheetnums.add(0);
@@ -717,7 +717,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("D"));
-			cellvalues.add((String)applyUser.get("address1") + (String)applyUser.get("address2"));
+			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
 			
 			// 신청자  이메일
 			sheetnums.add(0);
@@ -820,7 +820,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("F"));
-			cellvalues.add((String)applyUser.get("birth_date"));
+			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(18);
@@ -837,7 +837,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("M"));
-			cellvalues.add((String)applyUser.get("mobile"));
+			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
 			
 			// 신청자  우편번호
 			sheetnums.add(0);
@@ -849,7 +849,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(20);
 			cellnums.add(convertColAlphabetToIndex("D"));
-			cellvalues.add((String)applyUser.get("address1") + (String)applyUser.get("address2"));
+			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
 			
 			// 신청자  이메일
 			sheetnums.add(0);
@@ -941,7 +941,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("D"));
-			cellvalues.add((String)applyUser.get("address1") + (String)applyUser.get("address2"));
+			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
 			
 			// 신청자  이메일
 			sheetnums.add(0);

@@ -112,5 +112,13 @@ public class CommonUtil {
 		return iRtn;
 	}
 	
+	public static String nullToEmpty(Object val) {
+		String sRtn = "";
+		if(val != null && val instanceof String) {
+			sRtn = (String)val;
+		}
+		return sRtn;
+	}
+	
 	
 }

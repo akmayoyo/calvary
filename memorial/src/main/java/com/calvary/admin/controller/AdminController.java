@@ -559,6 +559,57 @@ public class AdminController {
 	}
 	
 	
+	
+	//===============================================================================
+	// 분양정보 관리
+	//===============================================================================
+	/** 분양상세정보 페이지  URL */
+	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
+	/** 분양정보 수정 페이지 URL */
+	public static final String BUNYANG_INFO_EDIT_URL = "/bunyanginfoedit";
+	
+	/** 
+	 * 분양상세정보 페이지 
+	 */
+	@RequestMapping(value=BUNYANG_INFO_URL)
+	public Object bunyangInfoHandler(SearchVo searchVo, String menuId, String bunyangSeq, String listUrl) {
+		List<Object> menuList = adminService.getMenuList("");
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> menuInfo = null;
+		Map<String, Object> pMenuInfo = null;
+		List<Object> paymentList = null;
+		if(!StringUtils.isEmpty(menuId)) {
+			menuInfo = commonService.getMenuInfo(menuId);
+		}
+		if(menuInfo != null && menuInfo.get("parent_menu_seq") != null) {
+			pMenuInfo = commonService.getMenuInfo((String)menuInfo.get("parent_menu_seq"));
+		}
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("listUrl", listUrl);
+		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
+		mv.addObject("applyUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER));// 신청자정보
+		mv.addObject("agentUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER));// 대리신청인정보
+		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
+		mv.addObject("fileList", adminService.getBunyangFileList(bunyangSeq));// 분양 파일 양식 리스트
+		paymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);// 계약금 납부내역
+		if(paymentList != null && paymentList.size() > 0) {
+			mv.addObject("downPaymentInfo", paymentList.get(0));// 계약금 납부내역
+		}
+		mv.addObject("balancePaymentList", adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 잔금납부내역
+		mv.addObject("totalPaymentInfo", adminService.getTotalPayment(bunyangSeq));
+		mv.setViewName(ROOT_URL + BUNYANG_INFO_URL);
+		return mv;
+	}
+	
+	
+	
+	
+	
+	
 	//===============================================================================
 	// 사용자 관리
 	//===============================================================================

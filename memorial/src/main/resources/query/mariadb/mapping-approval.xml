@@ -68,7 +68,7 @@
 			INNER JOIN
 			(SELECT
 				*
-				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq) cnt
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
 			FROM
 				(SELECT
 					bunyang_seq

@@ -68,7 +68,7 @@
 			INNER JOIN
 			(SELECT
 				*
-				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq) cnt
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
 			FROM
 				(SELECT
 					bunyang_seq
@@ -145,6 +145,7 @@
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E') cancel_approval_date
 			FROM TB_BUNYANG_INFO a INNER JOIN       
 			(SELECT
 				bunyang_seq
@@ -171,7 +172,7 @@
 			INNER JOIN
 			(SELECT
 				*
-				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq) cnt
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
 			FROM
 				(SELECT
 					bunyang_seq
@@ -228,6 +229,11 @@
 	       	,cancel_account_holder
 	       	,DATE_FORMAT(a.cancel_deposit_plan_date, '%Y-%m-%d') AS cancel_deposit_plan_date
 	       	,DATE_FORMAT(a.cancel_deposit_confirm_date, '%Y-%m-%d') AS cancel_deposit_confirm_date
+	       	,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'A') apply_approval_date
+			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
+			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
+			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
+			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E') cancel_approval_date
 	  	FROM TB_BUNYANG_INFO a INNER JOIN       
 			(SELECT
 				bunyang_seq
@@ -278,7 +284,8 @@
 		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
 		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_contract FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
 		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_full_payment FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
-		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_use_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq})
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_use_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_cancel FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq})
 	</select>
 	
 	<!-- 분양정보 생성 -->

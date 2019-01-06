@@ -4,6 +4,8 @@
 <form id="frm" method="post">
 	<input type="hidden" id="pageIndex" name="pageIndex" value="${searchVo.pageIndex}">
 	<input type="hidden" id="bunyangSeq" name="bunyangSeq">
+	<input type="hidden" id="listUrl" name="listUrl" value="${contextPath}/admin/cancelmgmt">
+	<input type="hidden" id="menuId" name="menuId" value="${menuInfo.menu_seq}">
 	<!-- 그리드 샘플 -->
 	<div class="col-md-9">
 		<!-- 검색 -->
@@ -41,6 +43,7 @@
 						<th scope="col">계약일</th>
 						<th scope="col">완납일</th>
 						<th scope="col">사용승인일</th>
+						<th scope="col">해약일</th>
 						<th scope="col"></th>
 					</tr>
 				</thead>
@@ -58,7 +61,10 @@
 	                    <td><p class="form-control-static">${approval.contract_date}</p></td>
 	                    <td><p class="form-control-static">${approval.full_payment_date}</p></td>
 	                    <td><p class="form-control-static">${approval.use_approval_date}</p></td>
-	                    <td><button type="button" class="btn btn-warning btn-sm" style="margin-left: 8px;" onclick="_cancel(this, event)">해약</button></td>
+	                    <td><p class="form-control-static">${approval.cancel_approval_date}</p></td>
+	                    <td>
+	                    	<button type="button" class="btn btn-warning btn-sm" <c:if test="${approval.progress_status == 'E'}">style="visibility: hidden;"</c:if> onclick="_cancel(this, event)">해약</button>
+	                    </td>
 					</tr>
 					</c:forEach>
 				</tbody>
@@ -87,7 +93,7 @@
 	// 그리드 로우 선택시
 	$('#tblList').on('click', '.clickable-row', function(event) {
 		var bunyangSeq = $(this).attr("bunyangSeq");
-		_approvalDetail(bunyangSeq);
+		_detail(bunyangSeq);
 	});
 	
 })();
@@ -118,10 +124,10 @@ function _downloadExcel() {
 /** 
  * 상세 페이지 이동
  */
-function _approvalDetail(bunyangSeq) {
+function _detail(bunyangSeq) {
 	$("#bunyangSeq").val(bunyangSeq);
 	var frm = document.getElementById("frm");
-	frm.action = "${contextPath}/admin/approvaldetail";
+	frm.action = "${contextPath}/admin/bunyanginfo";
 	frm.submit();
 }
 

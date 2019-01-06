@@ -69,7 +69,7 @@
 			INNER JOIN
 			(SELECT
 				*
-				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq) cnt
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
 			FROM
 				(SELECT
 					bunyang_seq
@@ -126,6 +126,7 @@
 			COALESCE(SUM(payment_amount), 0) total_amount
 		FROM TB_BUNYANG_PAYMENT_HISTORY a
 		WHERE bunyang_seq = #{bunyangSeq}
+		AND payment_type in('DOWN_PAYMENT','BALANCE_PAYMENT')
     </select>
     
     <!-- 계약금 납부 내역 -->
