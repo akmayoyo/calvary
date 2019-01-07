@@ -60,7 +60,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPLY_MGMT_URL)
 	public Object applyMgmtHandler(SearchVo searchVo) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> applyList = adminService.getApplyList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(applyList, "total_count"));
 		ModelAndView mv = new ModelAndView();
@@ -80,7 +80,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPLY_REGIST_URL)
 	public Object applyRegistHandler(SearchVo searchVo) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
@@ -98,7 +98,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPLY_DETAIL_URL)
 	public Object applyDetailHandler(SearchVo searchVo, String bunyangSeq) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
@@ -212,7 +212,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=CONTRACT_MGMT_URL)
 	public Object contractMgmtHandler(SearchVo searchVo) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> contractList = adminService.getContractList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(contractList, "total_count"));
 		ModelAndView mv = new ModelAndView();
@@ -232,7 +232,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=CONTRACT_DETAIL_URL)
 	public Object contractDetailHandler(SearchVo searchVo, String bunyangSeq) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		List<Object> paymentList = null;
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
@@ -337,7 +337,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPROVAL_MGMT_URL)
 	public Object approvalMgmtHandler(SearchVo searchVo) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> approvalList = adminService.getApprovalList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(approvalList, "total_count"));
 		ModelAndView mv = new ModelAndView();
@@ -357,7 +357,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPROVAL_DETAIL_URL)
 	public Object approvalDetailHandler(SearchVo searchVo, String bunyangSeq) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		List<Object> paymentList = null;
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
@@ -419,7 +419,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=CONTRACTOR_MGMT_URL)
 	public Object contractorMgmtHandler(SearchVo searchVo) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> bunyangList = adminService.getBunyangList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(bunyangList, "total_count"));
 		ModelAndView mv = new ModelAndView();
@@ -512,7 +512,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=CANCEL_MGMT_URL)
 	public Object cancelMgmtHandler(SearchVo searchVo) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> cancelList = adminService.getCancelList(searchVo);
 		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(cancelList, "total_count"));
 		ModelAndView mv = new ModelAndView();
@@ -573,7 +573,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=BUNYANG_INFO_URL)
 	public Object bunyangInfoHandler(SearchVo searchVo, String menuId, String bunyangSeq, String listUrl) {
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> menuInfo = null;
 		Map<String, Object> pMenuInfo = null;

@@ -1,8 +1,7 @@
 package com.calvary.excel.controller;
 
+import java.awt.Color;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
@@ -10,11 +9,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
-import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -98,12 +103,44 @@ public class ExcelController {
         }
         List<Object> list = excelService.getExportDataList(queryId, queryParam);
         
+        XSSFFont bFont = workbook.createFont();
+        bFont.setBold(true);
+        Color borderColor = new Color(153, 153, 153);
+        XSSFCellStyle headerStyle = workbook.createCellStyle();
+        headerStyle.setFillForegroundColor(new XSSFColor(new Color(234, 234, 234), workbook.getStylesSource().getIndexedColors()));
+        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setTopBorderColor(new XSSFColor(new Color(89, 89, 89), workbook.getStylesSource().getIndexedColors()));
+        headerStyle.setRightBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        headerStyle.setBottomBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        headerStyle.setLeftBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        headerStyle.setFont(bFont);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        XSSFCellStyle rowStyle = workbook.createCellStyle();
+        rowStyle.setBorderTop(BorderStyle.THIN);
+        rowStyle.setBorderRight(BorderStyle.THIN);
+        rowStyle.setBorderBottom(BorderStyle.THIN);
+        rowStyle.setBorderLeft(BorderStyle.THIN);
+        rowStyle.setTopBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        rowStyle.setRightBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        rowStyle.setBottomBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        rowStyle.setLeftBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        rowStyle.setAlignment(HorizontalAlignment.CENTER);
+        rowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        
         // 헤더 생성
         row = sheet.createRow(rowIdx++);
+        row.setHeightInPoints((2 * sheet.getDefaultRowHeightInPoints()));
         for(colIdx = 0; colIdx < excelHeaders.length; colIdx++) {
         	cell = row.createCell(colIdx);
         	cell.setCellValue(excelHeaders[colIdx]);
+        	cell.setCellStyle(headerStyle);
         }
+        
         // 데이터 Row 생성
         if(list != null && list.size() > 0) {
         	for(Object obj : list) {
@@ -111,6 +148,7 @@ public class ExcelController {
         		row = sheet.createRow(rowIdx++);
         		for(colIdx = 0; colIdx < excelFields.length; colIdx++) {
                 	cell = row.createCell(colIdx);
+                	cell.setCellStyle(rowStyle);
                 	Object objTmp = map.get(excelFields[colIdx]);
                 	if(objTmp instanceof Integer) {
                 		cell.setCellValue(String.valueOf(objTmp));
@@ -124,6 +162,12 @@ public class ExcelController {
                 }
         	}
         }
+        
+        // 너비 조정
+        for(colIdx = 0; colIdx < excelHeaders.length; colIdx++) {
+        	sheet.setColumnWidth(colIdx, 4500);
+        }
+        
         try {
         	fileName = URLEncoder.encode(fileName,"UTF-8").replaceAll("\\+", "%20");
             response.setContentType("ms-vnd/excel");

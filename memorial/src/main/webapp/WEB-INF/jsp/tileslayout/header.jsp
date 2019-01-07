@@ -13,7 +13,7 @@
 		</div>
 
 		<!-- 사이트 로고 -->
-		<a class="logo" href="#">
+		<a class="logo" href="${contextPath}/main/index">
 			<img src="${contextPath}/resources/assets/images/logo_w.png" alt="">
 		</a>
 
@@ -48,9 +48,35 @@
 				</div>
 			</ul>
 			<ul class="link-bar pull-right">
-				<li class="item"><a href="#">로그인</a></li>
-				<li class="item"><a href="#">회원가입</a></li>
+				<c:choose>
+					<c:when test="${not empty sessionVo}">
+					<li class="item"><a href="javascript:void(0)" onclick="_logout()">로그아웃</a></li>
+					</c:when>
+					<c:otherwise>
+					<li class="item"><a href="${contextPath}/account/login">로그인</a></li>
+					<li class="item"><a href="${contextPath}/account/join">회원가입</a></li>
+					</c:otherwise>
+				</c:choose>
 			</ul>
 		</nav>
 	</div>
 </header>
+
+<script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
+<script type="text/javascript">
+
+/**
+ * 로그아웃처리
+ */
+function _logout() {
+	common.ajax({
+		url:"${contextPath}/account/logout", 
+		data:{},
+		success: function(result) {
+			if(result) {
+				location.href = '${contextPath}/main/index';
+			}
+		}
+	});
+}
+</script>

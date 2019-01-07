@@ -1,6 +1,8 @@
 package com.calvary.account.service;
 
+import com.calvary.common.vo.UserVo;
+
 public interface IAccountService {
 
-	public boolean checkLogin();
+	public UserVo getUserVo(String userId, String password);
 }

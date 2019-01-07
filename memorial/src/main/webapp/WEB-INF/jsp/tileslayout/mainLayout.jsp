@@ -36,5 +36,7 @@
 	
 	<tiles:insertAttribute name="footer"/>
 	
+	<script src="${contextPath}/resources/assets/js/topmenu.js"></script>
+	
 </body>
 </html>

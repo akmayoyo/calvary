@@ -4,12 +4,27 @@
 
 <mapper namespace="menumgmt">
 
-	<select id="getMenuList" resultType="map">
+	<select id="getMenuList" parameterType="String" resultType="map">
+		SELECT
+			t.*
+		FROM
+		(SELECT 
+			a.menu_seq, a.menu_name, a.menu_url, a.menu_level, a.menu_type, a.display_order, a.parent_menu_seq, a.use_yn 
+		FROM TB_COM_MENU a
+		WHERE a.use_yn = 'Y' AND a.has_auth = 'N'
+		UNION
 		SELECT 
 			a.menu_seq, a.menu_name, a.menu_url, a.menu_level, a.menu_type, a.display_order, a.parent_menu_seq, a.use_yn 
 		FROM TB_COM_MENU a
-		WHERE a.use_yn = 'Y'
-		ORDER BY a.menu_level, a.display_order
+		WHERE a.use_yn = 'Y' AND a.has_auth = 'Y'
+		AND a.menu_seq in
+			(SELECT 
+	        	DISTINCT b.menu_seq	 
+	        FROM TB_COM_USER_ROLE a INNER JOIN TB_COM_USER_ROLE_MENU b ON a.USER_ROLE = b.USER_ROLE
+	        WHERE a.user_id = #{userId}
+	        )
+		) t
+		ORDER BY t.menu_level, t.display_order
 	</select>
 
 </mapper>

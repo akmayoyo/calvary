@@ -1,0 +1,33 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="account">
+
+	<resultMap id="userVo" type="com.calvary.common.vo.UserVo">
+         <result property="userId" column="user_id"/>
+         <result property="userName" column="user_name"/>
+         <result property="birthDate" column="birth_date"/>
+         <result property="gender" column="gender"/>
+         <result property="email" column="email"/>
+         <result property="mobile" column="mobile"/>
+         <result property="phone" column="phone"/>
+         <result property="postNumber" column="post_number"/>
+         <result property="address1" column="address1"/>
+         <result property="address2" column="address2"/>
+         <result property="churchOfficer" column="church_officer"/>
+         <result property="diocese" column="diocese"/>
+         <result property="userStatus" column="user_status"/>
+         <result property="registDate" column="regist_date"/>
+    </resultMap>
+
+    <!-- 로그인 사용자 조회 -->
+    <select id="getUserVo" parameterType="map" resultMap="userVo">
+    	SELECT 
+			a.user_id, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+		FROM TB_COM_USER a
+		WHERE a.user_id = #{userId} AND a.password = #{password}
+		ORDER BY a.user_id
+    </select>
+
+</mapper>

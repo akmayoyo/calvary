@@ -8,11 +8,12 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 
+import com.calvary.account.controller.AccountController;
 import com.calvary.common.util.SessionUtil;
-import com.calvary.common.vo.SessionVo;
 
 public class AdminFilter implements Filter {
 
@@ -24,13 +25,13 @@ public class AdminFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		SessionVo sessionVo = SessionUtil.getSessionVo((HttpServletRequest)request);	
-		String url = ((HttpServletRequest)request).getServletPath();
-		if(sessionVo != null) {
+		boolean bValid =  SessionUtil.checkSession((javax.servlet.http.HttpServletRequest)request);
+		String requestUrl = ((HttpServletRequest)request).getServletPath();
+		if(bValid) {
 			chain.doFilter(request, response);
 		} else {
-			//((HttpServletResponse)response).sendRedirect(AccountController.ROOT_URL + AccountController.LOGIN_URL);
-			chain.doFilter(request, response);
+			request.setAttribute("requestUrl", requestUrl);
+			((HttpServletResponse)response).sendRedirect(AccountController.ROOT_URL + AccountController.LOGIN_URL);
 		}
 	}
 

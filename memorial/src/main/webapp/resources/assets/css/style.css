@@ -46,6 +46,8 @@ body {
 	position: relative;
 	color: #3a3a3a;
 	font-family: 'NotoKrR', sans-serif;
+	font-weight: 300;
+	font-size: 15px;
 }
 
 /* ++++++++++++++ [ padding/margin ] ++++++++++++++ */
@@ -71,6 +73,9 @@ body {
 .mb-20 {
 	margin-bottom: 20px;
 }
+.mb-35 {
+	margin-bottom: 35px;
+}
 .ml-30 {
 	margin-left: 30px;
 }
@@ -86,7 +91,7 @@ body {
 }
 
 .section {
-	padding-top: 30px;
+	padding-top: 50px;
 	padding-bottom: 100px;
 }
 
@@ -102,7 +107,7 @@ body {
 
 /* ++++++++++++++ [ text ] ++++++++++++++ */
 h1, h2, h3, h4, h5, h6 {
-	font-family: 'NotoKrB', sans-serif;
+	font-family: 'NotoKrM', sans-serif;
 }
 
 h1 {
@@ -115,6 +120,23 @@ h6 {
     font-size: 12px;
     margin-top: 0px;
     margin-bottom: 5px;
+}
+
+.txt-333 {
+	color: #333333;
+}
+
+.txt-gray {
+	color: #6c747d;
+}
+
+.font-20 {
+	font-size: 20px;
+}
+
+.dot:after {
+    content: ".";
+    color: #2589e6;	
 }
 
 /* ++++++++++++++ [ button ] ++++++++++++++ */
@@ -240,6 +262,22 @@ p.required:after {
 
 .table-style tbody tr.hover:hover {
     background-color: #e2f1ff;
+}
+
+.table-line td {
+    vertical-align: top;
+	border-top: 1px solid #dddddd;
+}
+.table-line tr:last-child > td {
+	border-bottom: 1px solid #dddddd;
+}
+
+.table-point {
+    color: #2589e6;
+}
+
+.table-hover tr:hover {
+	background-color: #f5f5f5;
 }
 
 /* +++++++++++++++ [ pagination ] ++++++++++++++ */
@@ -455,12 +493,116 @@ footer .icon-sns img {
 	padding: 10% 15%;
 }
 
+/* ++++++++++++++ [ list ] ++++++++++++++ */
+.list .group {
+	margin-top: 50px !important;
+    margin-bottom: 0px !important;
+    padding-top: 0px !important;
+    padding-bottom: 50px !important;
+	border-bottom: 1px solid #e8e8e8;
+}
+.list .title {
+	margin-top: 0;
+    margin-bottom: 0;
+}
+.list .title h3 {
+	letter-spacing: -1px;
+    font-size: 30px;
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+.list .text {
+	line-height: 25px;
+    font-size: 17px;
+	margin-top: 0px !important;
+    margin-bottom: 0px !important;
+    margin-left: 30px !important;
+    border-left-width: 1px !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    padding-left: 30px !important;
+    border-left-color: #666666 !important;
+    border-left-style: dotted !important;	
+}
+
+/* ++++++++++++++ [ title ] ++++++++++++++ */
+.title {
+	margin-top: 25px;
+    margin-bottom: 25px;
+}
+
+.title > i {
+    font-size: 45px;
+    margin-bottom: 25px;
+}
+
+.title hr {
+	width: 45px;
+    margin: 20px 0;
+    border-top: 1px solid #2589e6;
+}
+.title.center hr {
+	margin: 30px auto;
+}
+
+.title h3 {
+	letter-spacing: -1px;
+    font-size: 16px;
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+/* ++++++++++++++ [ img-view ] ++++++++++++++ */
+.img-view img {
+	width: 150px;
+	height: 150px;
+	border-radius: 50%;
+}
+
+/* ++++++++++++++ [ main ] ++++++++++++++ */
+.img-container {
+	text-align: center;
+	color: #ffffff !important;
+	background-color: #3a3a3a;
+	background-position: center !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+}
+
+.img-title {
+	padding: 100px 15px;
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.img-container h2 {
+	font-size: 50px;
+}
+
+.img-container p {
+	color: #e5e7e9;
+}
+
+.img-container.main {
+	background: url(../images/갈보리추모동산.jpg);
+}
+.img-container.guide {
+	background: url(../images/갈보리추모동산-2.jpg);
+}
+
 /* ++++++++++++++ [ @media ] ++++++++++++++ */
 @media (min-width: 1440px) {
 	.widget {
 		float: left;
 		margin-right: 60px;
 	}
+	
+}
+
+@media (max-width: 1439px) {
+	.img-container h2 {
+        font-size: 36px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -480,8 +622,11 @@ footer .icon-sns img {
 		padding-top: 20px;
 		padding-bottom: 20px;
 	}
+	
+	.table-responsive .table-line {
+		margin: -1px 0;
+	}
 }
-
 
 /* ++++++++++++++ [ added ] ++++++++++++++ */
 .poptitle {

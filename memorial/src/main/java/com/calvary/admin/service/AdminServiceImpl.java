@@ -112,13 +112,13 @@ public class AdminServiceImpl implements IAdminService {
 		commonDao.insert("admin.createBunyangInfo", param);
 		
 		// 분양 관련 인명정보 생성(신청자)
-		param = getBunyangUserParam(applyUser);
+		param = getBunyangUserParam(applyUser, 1);
 		param.put("bunyangSeq", bunyangSeq);
 		commonDao.insert("admin.createBunyangRefUserInfo", param);
 		
 		// 분양 관련 인명정보 생성(대리인)
 		if(agentUser != null) {
-			param = getBunyangUserParam(agentUser);
+			param = getBunyangUserParam(agentUser, 1);
 			param.put("bunyangSeq", bunyangSeq);
 			commonDao.insert("admin.createBunyangRefUserInfo", param);
 		}
@@ -127,7 +127,7 @@ public class AdminServiceImpl implements IAdminService {
 		if(useUsers != null && useUsers.size() > 0) {
 			for(int i = 0; i < useUsers.size(); i++) {
 				BunyangUserVo useUser = useUsers.get(i);
-				param = getBunyangUserParam(useUser);
+				param = getBunyangUserParam(useUser, i+1);
 				param.put("bunyangSeq", bunyangSeq);
 				commonDao.insert("admin.createBunyangRefUserInfo", param);
 			}
@@ -165,7 +165,7 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 분양 관련 인명정보 생성을 위한 parameter 반환
 	 */
-	private Map<String, Object> getBunyangUserParam(BunyangUserVo bunyangUserVo) {
+	private Map<String, Object> getBunyangUserParam(BunyangUserVo bunyangUserVo, int userSeq) {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("refType", bunyangUserVo.getRefType());
 		param.put("relationType", bunyangUserVo.getRelationType());
@@ -180,6 +180,7 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("address1", bunyangUserVo.getAddress1());
 		param.put("address2", bunyangUserVo.getAddress2());
 		param.put("isChurchPerson", bunyangUserVo.getIsChurchPerson());
+		param.put("userSeq", userSeq);
 		return param;
 	}
 	

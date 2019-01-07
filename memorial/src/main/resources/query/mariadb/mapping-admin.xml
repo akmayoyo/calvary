@@ -97,7 +97,9 @@
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
 		</if>
 		ORDER BY t.bunyang_seq
+		<if test="start != null">
 		LIMIT #{start}, #{count}
+		</if>
     </select>
     
     <!-- 분양신청리스트 조회 -->
@@ -296,8 +298,8 @@
 	
 	<!-- 분양 관련 인명정보 생성 -->
 	<insert id="createBunyangRefUserInfo" parameterType="map">
-		INSERT INTO TB_BUNYANG_REF_USER ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person )
-		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}, #{userId}, #{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson})
+		INSERT INTO TB_BUNYANG_REF_USER ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person,user_seq )
+		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}, #{userId}, #{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson}, #{userSeq})
 	</insert>
 	
 	<update id="updateBunyangFileSeq">

@@ -1,8 +1,10 @@
 package com.calvary.common.util;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.apache.catalina.servlet4preview.http.HttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.calvary.common.vo.SessionVo;
 import com.calvary.common.vo.UserVo;
@@ -20,21 +22,38 @@ public class SessionUtil {
 	}
 	
 	/** */
+	public static SessionVo getSessionVo() {
+		SessionVo sessionVo = null;
+		ServletRequestAttributes servletRequestAttribute = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+		if(servletRequestAttribute != null) {
+			HttpServletRequest request = servletRequestAttribute.getRequest();
+			sessionVo = getSessionVo(request);
+		}
+		return sessionVo;
+	}
+	
+	/** */
 	public static SessionVo getSessionVo(HttpServletRequest request) {
 		SessionVo sessionVo = null;
+		if(request == null) {
+			ServletRequestAttributes servletRequestAttribute = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
+			if(servletRequestAttribute != null) {
+				request = servletRequestAttribute.getRequest();
+			}
+		}
 		if(request != null) {
 			HttpSession session = request.getSession();
 			if(session != null) {
 				sessionVo = (SessionVo)session.getAttribute("sessionVo");
 			}
 			// TODO
-			if(sessionVo == null) {
-				sessionVo = new SessionVo();
-				UserVo userVo = new UserVo();
-				userVo.setUserId("calvaryadmin");
-				userVo.setUserName("Admin");
-				sessionVo.setUserVo(userVo);
-			}
+//			if(sessionVo == null) {
+//				sessionVo = new SessionVo();
+//				UserVo userVo = new UserVo();
+//				userVo.setUserId("calvaryadmin");
+//				userVo.setUserName("Admin");
+//				sessionVo.setUserVo(userVo);
+//			}
 		}
 		return sessionVo;
 	}
@@ -43,11 +62,12 @@ public class SessionUtil {
 	 * 현재 접속 사용자 정보 반환 
 	 */
 	public static UserVo getCurrentUser() {
-		// TOOD
-		UserVo userVo = new UserVo();
-		userVo.setUserId("calvaryadmin");
-		userVo.setUserName("calvaryadmin");
-		return userVo;
+		SessionVo sessionVo = getSessionVo();
+		UserVo uservo = null;
+		if(sessionVo != null) {
+			uservo = sessionVo.getUserVo();
+		}
+		return uservo;
 	}
 	
 	/** 

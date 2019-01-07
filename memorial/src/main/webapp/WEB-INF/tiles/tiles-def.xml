@@ -26,6 +26,16 @@
       <put-attribute name="body" value="/WEB-INF/jsp/views/admin/{1}.jsp" />
     </definition>
     
+    <!-- Main -->    
+    <definition name="main" template="/WEB-INF/jsp/tileslayout/mainLayout.jsp">
+        <put-attribute name="header" value="/WEB-INF/jsp/tileslayout/header.jsp" />
+        <put-attribute name="footer" value="/WEB-INF/jsp/tileslayout/footer.jsp" />
+    </definition>
+    
+    <definition name="/main/*" extends="main">
+      <put-attribute name="body" value="/WEB-INF/jsp/views/main/{1}.jsp" />
+    </definition>
+    
     <!-- Popup -->    
     <definition name="popup" template="/WEB-INF/jsp/tileslayout/popupLayout.jsp">
     </definition>

@@ -9,7 +9,7 @@
 						<div class="col-sm-4">
 							<div class="widget clearfix">
 								<div class="textwidget">
-									<a href="http://merecalvary.com">
+									<a href="http://merecalvary.com" target="_blank">
 										<img src="${contextPath}/resources/assets/images/logo_g.png" alt="" style="width:126px; height:31px">
 									</a>
 								</div>
