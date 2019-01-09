@@ -2,17 +2,33 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="cancel">
+<mapper namespace="use">
 
-	<!-- 해약관리 대상 조회 -->
-	<select id="getCancelList" parameterType="map" resultType="map">
-		SELECT
+    <!-- 추모동산 사용현황 리스트 조회 -->
+    <select id="getGraveUseList" parameterType="map" resultType="map">
+    	SELECT
+			section_seq
+		    ,row_seq
+		    ,col_seq
+		    ,product_type
+		    ,bunyang_seq
+		    ,use_user_seq1
+		    ,use_user_seq2
+		    ,assign_status
+		    ,(SELECT MAX(col_seq) FROM TB_BUNYANG_GRAVE_ASSIGN t WHERE a.section_seq = t.SECTION_SEQ) max_col_cnt
+		FROM TB_BUNYANG_GRAVE_ASSIGN a
+		ORDER BY section_seq, row_seq, col_seq
+    </select>
+    
+    <!-- 동산 사용신청 리스트 조회 -->
+    <select id="getUseApplyList" parameterType="map" resultType="map">
+    	SELECT
     		t.*
-    		,FOUND_ROWS() total_count
     		,CASE 
         		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
           		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
         	END use_user_exp
+        	,FOUND_ROWS() total_count
     	FROM
 		    (SELECT
 			  a.bunyang_seq
@@ -26,10 +42,6 @@
 			  ,a.progress_status
 			  ,b.user_id apply_user_id
 			  ,b.user_name apply_user_name
-			  ,b.birth_date apply_user_birth_date
-			  ,b.church_officer apply_user_church_officer
-			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = b.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') apply_user_church_officer_name
-			  ,b.diocese apply_user_diocese
 			  ,b.relation_type apply_user_relation
 			  ,c.user_id agent_user_id
 			  ,c.user_name agent_user_name
@@ -45,19 +57,14 @@
 		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
 		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
 			  ,CASE WHEN progress_status = 'D' THEN 'Y' ELSE 'N' END AS approval_yn
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'A') apply_approval_date
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E') cancel_approval_date
 			FROM TB_BUNYANG_INFO a INNER JOIN       
 			(SELECT
 				bunyang_seq
 			  	,user_id
 				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
-				,CASE WHEN user_id IS NULL THEN birth_date ELSE (SELECT birth_date FROM TB_COM_USER b WHERE a.user_id = b.user_id) END birth_date
-				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT church_officer FROM TB_COM_USER b WHERE a.user_id = b.user_id) END church_officer
-				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT diocese FROM TB_COM_USER b WHERE a.user_id = b.user_id) END diocese
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -98,7 +105,7 @@
 			  ) t
 			  WHERE rn = 1
 			) d ON a.bunyang_seq = d.bunyang_seq
-			WHERE a.progress_status in ('B','C','D','E')
+			WHERE a.progress_status in ('D')
 			) t
 		WHERE 1=1
 		<if test="apply_user_name != null">
@@ -108,25 +115,49 @@
 		<if test="start != null">
 		LIMIT #{start}, #{count}
 		</if>
-	</select>
-	
-	<!-- 해약 반환금 내역 -->
-	<insert id="insertCancelPayment" parameterType="map">
-		INSERT INTO TB_BUNYANG_PAYMENT_HISTORY 
-		(bunyang_seq, payment_type, payment_amount, payment_method, payment_date, create_user, create_date) 
-		values (#{bunyangSeq}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, DATE_FORMAT(#{paymentDate}, '%Y%m%d'), #{createUser}, CURRENT_TIMESTAMP)
-	</insert>
-	
-	<!-- 해약 내용 업데이트 -->
-	<update id="updateCancel" parameterType="map">
-		UPDATE TB_BUNYANG_INFO a
-		SET 
-			cancel_reason = #{cancelReason},
-			cancel_bank = #{cancelBank},
-			cancel_account = #{cancelAccount},
-			cancel_account_holder = #{cancelAccountHolder},
-			cancel_deposit_plan_date = DATE_FORMAT(#{cancelDepositPlanDate}, '%Y%m%d')
-		WHERE a.bunyang_seq = #{bunyangSeq}
-	</update>
+    </select>
+    
+    <!-- 사용자리스트 조회 -->
+    <select id="getUseUserList" parameterType="map" resultType="map">
+    	SELECT 
+			 a.bunyang_seq
+		   	,a.user_id
+		   	,COALESCE(a.user_name, b.user_name) AS user_name
+		   	,COALESCE(a.birth_date, b.birth_date) AS birth_date
+		   	,COALESCE(a.mobile, b.mobile) AS mobile
+		   	,COALESCE(a.post_number, b.post_number) AS post_number
+		   	,COALESCE(a.address1, b.address1) AS address1
+		   	,COALESCE(a.address2, b.address2) AS address2
+		   	,relation_type
+		   	,(SELECT code_name FROM TB_COM_CODE t WHERE t.parent_code_seq = 'USER_RELATION' and t.code_seq = a.relation_type) as relation_type_name
+		   	,(SELECT COUNT(1) FROM TB_BUNYANG_GRAVE_ASSIGN t WHERE t.bunyang_seq = a.bunyang_seq AND (t.use_user_seq1 = a.user_seq or t.use_user_seq2 = a.user_seq)) assign_yn
+		   	,a.user_seq
+		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_COM_USER b ON a.user_id = b.user_id
+		WHERE a.ref_type = 'USE_USER'
+		AND a.bunyang_seq = #{bunyangSeq}
+		ORDER BY a.user_seq
+    </select>
+    
+    <!-- 사용가능한 동산 정보 조회 -->
+    <select id="getAvailableGraveInfo" parameterType="map" resultType="map">
+    	SELECT
+			section_seq, row_seq, col_seq
+		FROM
+		(SELECT
+			section_seq, row_seq, count(1) cnt, min(col_seq) col_seq
+		FROM TB_BUNYANG_GRAVE_ASSIGN a
+		WHERE product_type = #{productType} AND assign_status = 'AVAILABLE'
+		GROUP BY section_seq, row_seq
+		) t
+		WHERE cnt >= #{cnt}
+		ORDER BY section_seq, row_seq, col_seq
+		LIMIT 1
+    </select>
+    
+    <!-- 동산 배정 -->
+    <insert id="createAssignGrave" parameterType="map">
+    	INSERT INTO TB_BUNYANG_GRAVE_ASSIGN( section_seq,row_seq,col_seq,product_type,bunyang_seq,use_user_seq1,use_user_seq2,assign_status )
+		VALUES ( #{sectionSeq}, #{rowSeq}, #{colSeq}, #{productType}, #{bunyangSeq}, #{useUserSeq1}, #{useUserSeq2}, #{assignStatus})
+    </insert>
     
 </mapper>

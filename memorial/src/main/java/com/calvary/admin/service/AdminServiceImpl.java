@@ -364,6 +364,64 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	
+	//===============================================================================
+	// 사용(봉안) 관리
+	//===============================================================================
+	/** 
+	 * 추모동산 사용현황 리스트 조회
+	 */
+	public List<Object> getGraveUseList() {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		List<Object> list = commonDao.selectList("use.getGraveUseList", parameter); 
+		return list;
+	}
+	
+	/** 
+	 * 동산 사용신청 리스트 조회
+	 */
+	public List<Object> getUseApplyList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
+		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		List<Object> list = commonDao.selectList("use.getUseApplyList", parameter); 
+		return list;
+	}
+	
+	/** 
+	 * 사용자리스트 조회
+	 */
+	public List<Object> getUseUserList(String bunyangSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		List<Object> list = commonDao.selectList("use.getUseUserList", parameter); 
+		return list;
+	}
+	
+	/** 
+	 * 동산 배정
+	 */
+	public int createAssignGrave(String bunyangSeq, int userSeq) {
+		int iRslt = 0;
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("userSeq", userSeq);
+		iRslt = commonDao.insert("use.createAssignGrave", parameter);
+		return iRslt;
+	}
+	
+	/** 
+	 * 사용가능한 동산 정보 조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getAvailableGraveInfo(String productType, int cnt) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("productType", productType);
+		parameter.put("cnt", cnt);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("use.getAvailableGraveInfo", parameter); 
+		return rtnMap;
+	}
+	
 	
 	//===============================================================================
 	// 메뉴 관리

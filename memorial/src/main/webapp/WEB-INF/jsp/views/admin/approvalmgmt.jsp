@@ -41,30 +41,25 @@
 						<th scope="col">계약일자</th>
 						<th scope="col">완납일자</th>
 						<th scope="col">사용승인일자</th>
+						<th scope="col"></th>
 					</tr>
 				</thead>
 				<tbody>
 					<c:forEach items="${approvalList}" var="approval">
 					<c:set var="contract_price" value="${cutil:getDownPayment(approval.total_price)}"/><!-- 계약금 -->
 					<tr class="clickable-row" bunyangSeq="${approval.bunyang_seq}">
-	                    <td>${approval.bunyang_seq}</td>
-	                    <td>${approval.apply_user_name}</td>
-	                    <td>${approval.use_user_exp}</td>
-	                    <td>${approval.product_type_name}</td>
-	                    <td>${approval.couple_type_count}</td>
-	                    <td>${approval.single_type_count}</td>
-	                    <td>${cutil:getThousandSeperatorFormatString(approval.total_price)}</td>
-	                    <td>${approval.contract_date}</td>
-	                    <td>${approval.full_payment_date}</td>
+	                    <td><p class="form-control-static">${approval.bunyang_seq}</p></td>
+	                    <td><p class="form-control-static">${approval.apply_user_name}</p></td>
+	                    <td><p class="form-control-static">${approval.use_user_exp}</p></td>
+	                    <td><p class="form-control-static">${approval.product_type_name}</p></td>
+	                    <td><p class="form-control-static">${approval.couple_type_count}</p></td>
+	                    <td><p class="form-control-static">${approval.single_type_count}</p></td>
+	                    <td><p class="form-control-static">${cutil:getThousandSeperatorFormatString(approval.total_price)}</p></td>
+	                    <td><p class="form-control-static">${approval.contract_date}</p></td>
+	                    <td><p class="form-control-static">${approval.full_payment_date}</p></td>
+	                    <td><p class="form-control-static">${approval.use_approval_date}</p></td>
 	                    <td>
-	                    	<c:choose>
-	                    		<c:when test="${approval.approval_yn == 'N'}">
-	                    		<button type="button" class="btn btn-info btn-xs" onclick="_approval(this, event)">사용승인</button>
-	                    		</c:when>
-	                    		<c:otherwise>
-	                    		${approval.use_approval_date}
-	                    		</c:otherwise>
-	                    	</c:choose>
+	                    	<button type="button" class="btn btn-info btn-sm" <c:if test="${approval.approval_yn == 'Y'}">style="visibility: hidden;"</c:if> onclick="_approval(this, event)">사용승인</button></td>
 	                    </td>
 					</tr>
 					</c:forEach>

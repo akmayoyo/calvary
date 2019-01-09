@@ -1,8 +1,4 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
-<%
-String requestUrl = (String)request.getAttribute("requestUrl");
-System.out.println("requestUrl :: " + requestUrl);
-%>
 
 <form id="frm" method="post">
 </form>

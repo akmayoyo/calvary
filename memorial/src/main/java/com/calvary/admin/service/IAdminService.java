@@ -121,6 +121,34 @@ public interface IAdminService {
 			,String cancelReason) throws Exception;
 	
 	
+	//===============================================================================
+	// 사용(봉안) 관리
+	//===============================================================================
+	/** 
+	 * 추모동산 사용현황 리스트 조회
+	 */
+	public List<Object> getGraveUseList();
+	
+	/** 
+	 * 동산 사용신청 리스트 조회
+	 */
+	public List<Object> getUseApplyList(SearchVo searchVo);
+	
+	/** 
+	 * 사용자리스트 조회
+	 */
+	public List<Object> getUseUserList(String bunyangSeq);
+	
+	/** 
+	 * 동산 배정
+	 */
+	public int createAssignGrave(String bunyangSeq, int userSeq);
+	
+	/** 
+	 * 사용가능한 동산 정보 조회
+	 */
+	public Map<String, Object> getAvailableGraveInfo(String productType, int cnt);
+	
 	
 	//===============================================================================
 	// 메뉴 관리

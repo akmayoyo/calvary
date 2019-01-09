@@ -74,7 +74,7 @@ function _logout() {
 		data:{},
 		success: function(result) {
 			if(result) {
-				location.href = '${contextPath}/main/index';
+				location.replace('${contextPath}/main/index');
 			}
 		}
 	});

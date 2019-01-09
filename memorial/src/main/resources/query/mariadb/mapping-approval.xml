@@ -97,7 +97,9 @@
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
 		</if>
 		ORDER BY t.bunyang_seq
+		<if test="start != null">
 		LIMIT #{start}, #{count}
+		</if>
     </select>
     
 

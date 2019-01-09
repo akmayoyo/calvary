@@ -607,6 +607,41 @@ public class AdminController {
 	
 	
 	
+	//===============================================================================
+	// 사용(봉안) 관리
+	//===============================================================================
+	/** 사용(봉안) 관리 페이지  URL */
+	public static final String USE_MGMT_URL = "/usemgmt";
+	/** 추모동산 사용현황 리스트 조회  URL */
+	public static final String GET_GRAVE_USE_LIST = "/getGraveUseList";
+	
+	/** 
+	 * 사용(봉안) 관리 페이지
+	 */
+	@RequestMapping(value=USE_MGMT_URL)
+	public Object userMgmtHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU02_02");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("searchVo", searchVo);
+		mv.setViewName(ROOT_URL + USE_MGMT_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 추모동산 사용현황 리스트 조회
+	 */
+	@RequestMapping(value=GET_GRAVE_USE_LIST)
+	@ResponseBody
+	public List<Object> getGraveUseListHandler() {
+		List<Object> graveUseList = adminService.getGraveUseList();
+		return graveUseList;
+	}
+	
 	
 	
 	

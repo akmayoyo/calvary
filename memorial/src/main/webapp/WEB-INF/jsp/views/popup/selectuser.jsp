@@ -312,7 +312,7 @@
 function _search(pageIndex) {
     $("#pageIndex").val(pageIndex ? pageIndex : 1);
     var frm = $("#frm");
-    frm.action = "/${contextPath}/popup/selectuser";
+    frm.action = "${contextPath}/popup/selectuser";
     frm.submit();
 }
 

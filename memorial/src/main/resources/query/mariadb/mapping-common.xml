@@ -41,7 +41,9 @@
 		AND user_name like CONCAT('%',#{user_name},'%')
 		</if>
 		ORDER BY a.user_name, a.user_id
+		<if test="start != null">
 		LIMIT #{start}, #{count}
+		</if>
 	</select>
 	
 	<select id="getUserListTotalCount" parameterType="map" resultType="map">

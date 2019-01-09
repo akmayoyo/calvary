@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -28,6 +29,9 @@ public class PopupController {
 	public static final String SELECT_USER_URL = "/selectuser";
 	public static final String CHECK_DUPLICATED_USER_URL = "/checkduplicateduser";
 	public static final String CONTRACT_CANCEL_URL = "/contractcancel";
+	public static final String USE_APPLY_URL = "/useapply";
+	public static final String SELECT_USE_USER = "/selectuseuser";
+	public static final String ASSIGN_GRAVE = "/assigngrave";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -74,4 +78,52 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + CONTRACT_CANCEL_URL);
 		return mv;
 	}
+	
+	/** 
+	 * 동산 사용신청
+	 */
+	@RequestMapping(value=USE_APPLY_URL)
+	public Object useApplyHandler(SearchVo searchVo) {
+		ModelAndView mv = new ModelAndView();
+		List<Object> useApplyList = adminService.getUseApplyList(searchVo);
+		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(useApplyList, "total_count"));
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("useApplyList", useApplyList);
+		mv.setViewName(ROOT_URL + USE_APPLY_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=SELECT_USE_USER)
+	public Object selectUseUserHandler(SearchVo searchVo, String bunyangSeq) {
+		ModelAndView mv = new ModelAndView();
+		List<Object> useUserList = adminService.getUseUserList(bunyangSeq);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("useUserList", useUserList);
+		mv.setViewName(ROOT_URL + SELECT_USE_USER);
+		return mv;
+	}
+	
+	@RequestMapping(value=ASSIGN_GRAVE)
+	public Object assignGraveHandler(
+			@RequestParam(value="bunyangSeq[]") String[] bunyangSeq,
+			@RequestParam(value="userSeq[]") String[] userSeq,
+			@RequestParam(value="productType") String productType
+			) {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean bRslt = false;
+//		
+//		Map<String, Object> graveInfo = adminService.getAvailableGraveInfo(productType, 1);
+//		String sectionSeq = (String)graveInfo.get("section_seq");
+//		String rowSeq = (String)graveInfo.get("section_seq");
+//		String colSeq = (String)graveInfo.get("section_seq");
+//		String sectionSeq = (String)graveInfo.get("section_seq");
+//		
+//		adminService.createAssignGrave(bunyangSeq, userSeq);
+//		
+//		#{sectionSeq}, #{rowSeq}, #{colSeq}, #{productType}, #{bunyangSeq}, #{useUserSeq1}, #{useUserSeq2}, #{assignStatus}
+		
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
 }
