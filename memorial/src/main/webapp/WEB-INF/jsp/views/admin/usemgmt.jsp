@@ -4,18 +4,25 @@
 <!-- 그리드 샘플 -->
 <div class="col-md-9">
 	
-	<div style="background-color: #E0EFFC; padding: 10px 10px;">
+	<div>
+        <button type="button" class="btn btn-primary btn-lg" onclick="_useapply()">사용신청</button>
+    </div>
+	
+	<div style="background-color: #E0EFFC; padding: 10px 10px; margin-top: 10px;">
 		<div style="text-align: center;">
 			<h3 style="display: inline-block;">추모동산 사용(봉안)현황</h3>
 		</div>
 		<div style="text-align: center; margin-top: 5px;">
-			<div style="width: 10px; height: 10px; background-color: #FF7F27; display: inline-block; margin-left: 20px;">
+			<div style="width: 10px; height: 10px; background-color: #FF7F27; display: inline-block;">
 			</div>
 			<span>사용중</span>
-			<div style="width: 10px; height: 10px; background-color: #FFCCA9; display: inline-block; margin-left: 5px;">
+			<div style="width: 10px; height: 10px; background-color: #FFCCA9; display: inline-block; margin-left: 10px;">
+			</div>
+			<span>1/2 사용중(부부형)</span>
+			<div style="width: 10px; height: 10px; background-color: #007BFF; display: inline-block; margin-left: 10px;">
 			</div>
 			<span>사용예정</span>
-			<div style="width: 10px; height: 10px; background-color: #fff; display: inline-block; margin-left: 5px; border: 1px solid #ccc;">
+			<div style="width: 10px; height: 10px; background-color: #fff; display: inline-block; margin-left: 10px; border: 1px solid #ccc;">
 			</div>
 			<span>사용가능</span>
 		</div>
@@ -37,12 +44,9 @@
 		</div>
 	</div>
 	
-	<div class="mt-30 text-center">
-        <button type="button" class="btn btn-primary btn-lg" onclick="_useapply()">사용신청</button>
-    </div>
-	
 </div>
-
+<form id="frm" method="post">
+</form>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/d3.min.js"></script>
 <script type="text/javascript">
@@ -198,9 +202,13 @@ function makeGraveGrid(grid, gridData) {
 		.attr("height", function(d) { return d.height; })
 		.style("fill", function(d) {
 			if(d.assign_status == 'OCCUPIED') {
-				return "#FF7F27";
+				if(d.grave_type == 'SINGLE' || (d.use_user_seq1 && d.use_user_seq2)) {// 1인형 또는 2기 모두 사용중인 부부형
+					return "#FF7F27";
+				}else {
+					return "#FFCCA9";
+				}
 			} else if(d.assign_status == 'RESERVED') {
-				return "#FFCCA9";
+				return "#007BFF";
 			} else {
 				return "#fff";
 			}
@@ -220,12 +228,16 @@ function makeGraveGrid(grid, gridData) {
  * 사용신청
  */
 function _useapply() {
-	var winoption = {width:1024, height:830};
+	var winoption = {width:1140, height:830};
 	var param = {};
 	common.openWindow("${contextPath}/popup/useapply", "popUseApply", winoption, param);
 	// callback 함수
 	window.saveCallBack = function(result) {
-		
+		if(result && result.result) {
+        	var frm = document.getElementById("frm");
+			frm.action = "${contextPath}/admin/usemgmt";
+			frm.submit();
+    	}
 	};
 }
 

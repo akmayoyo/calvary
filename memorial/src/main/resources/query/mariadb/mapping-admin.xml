@@ -275,10 +275,13 @@
            	b.church_officer,
 			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = b.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') church_officer_name,
 			b.diocese,
-			a.is_church_person
+			a.is_church_person,
+			a.user_seq,
+			a.couple_seq
 		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_COM_USER b ON a.user_id = b.user_id
 		WHERE a.bunyang_seq = #{bunyangSeq}
     	AND a.ref_type = #{refType}
+    	ORDER BY a.user_seq
 	</select>
 	
 	<!-- 분양정보의 신청서,승인서등 관련 파일양식 조회 -->
@@ -300,8 +303,8 @@
 	
 	<!-- 분양 관련 인명정보 생성 -->
 	<insert id="createBunyangRefUserInfo" parameterType="map">
-		INSERT INTO TB_BUNYANG_REF_USER ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person,user_seq )
-		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}, #{userId}, #{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson}, #{userSeq})
+		INSERT INTO TB_BUNYANG_REF_USER ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person,user_seq,couple_seq )
+		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}, #{userId}, #{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson}, #{userSeq}, #{coupleSeq})
 	</insert>
 	
 	<update id="updateBunyangFileSeq">

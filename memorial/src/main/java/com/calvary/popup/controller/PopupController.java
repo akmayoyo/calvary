@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -97,31 +98,33 @@ public class PopupController {
 	public Object selectUseUserHandler(SearchVo searchVo, String bunyangSeq) {
 		ModelAndView mv = new ModelAndView();
 		List<Object> useUserList = adminService.getUseUserList(bunyangSeq);
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
 		mv.addObject("searchVo", searchVo);
+		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("useUserList", useUserList);
+		mv.addObject("bunyangInfo", bunyangInfo);
 		mv.setViewName(ROOT_URL + SELECT_USE_USER);
 		return mv;
 	}
 	
 	@RequestMapping(value=ASSIGN_GRAVE)
+	@ResponseBody
 	public Object assignGraveHandler(
-			@RequestParam(value="bunyangSeq[]") String[] bunyangSeq,
-			@RequestParam(value="userSeq[]") String[] userSeq,
-			@RequestParam(value="productType") String productType
+			@RequestParam(value="bunyangSeq") String bunyangSeq,
+			@RequestParam(value="productType") String productType,
+			@RequestParam(value="userSeqs[]") int[] userSeqs,
+			@RequestParam(value="coupleSeqs[]") int[] coupleSeqs
 			) {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		boolean bRslt = false;
-//		
-//		Map<String, Object> graveInfo = adminService.getAvailableGraveInfo(productType, 1);
-//		String sectionSeq = (String)graveInfo.get("section_seq");
-//		String rowSeq = (String)graveInfo.get("section_seq");
-//		String colSeq = (String)graveInfo.get("section_seq");
-//		String sectionSeq = (String)graveInfo.get("section_seq");
-//		
-//		adminService.createAssignGrave(bunyangSeq, userSeq);
-//		
-//		#{sectionSeq}, #{rowSeq}, #{colSeq}, #{productType}, #{bunyangSeq}, #{useUserSeq1}, #{useUserSeq2}, #{assignStatus}
-		
+		int iRslt = 0;
+		// 개별형의 경우
+		if(CalvaryConstants.PRODUCT_TYPE_EACH.equals(productType)) {
+			iRslt = adminService.assignEachGrave(bunyangSeq, userSeqs, coupleSeqs);
+		}else if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productType)) {
+			iRslt = adminService.assignFamilyGrave(bunyangSeq, userSeqs, coupleSeqs);
+		}
+		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}

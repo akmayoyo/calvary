@@ -130,6 +130,11 @@ public interface IAdminService {
 	public List<Object> getGraveUseList();
 	
 	/** 
+	 * 추모동산 사용현황 정보 조회
+	 */
+	public List<Object> getGraveUseInfo(String sectionSeq, int rowSeq, int colSeq);
+	
+	/** 
 	 * 동산 사용신청 리스트 조회
 	 */
 	public List<Object> getUseApplyList(SearchVo searchVo);
@@ -140,14 +145,19 @@ public interface IAdminService {
 	public List<Object> getUseUserList(String bunyangSeq);
 	
 	/** 
-	 * 동산 배정
+	 * 동산 배정(개별형)
 	 */
-	public int createAssignGrave(String bunyangSeq, int userSeq);
+	public int assignEachGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs);
+	
+	/** 
+	 * 동산 배정(가족형)
+	 */
+	public int assignFamilyGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs);
 	
 	/** 
 	 * 사용가능한 동산 정보 조회
 	 */
-	public Map<String, Object> getAvailableGraveInfo(String productType, int cnt);
+	public Map<String, Object> getAvailableGraveInfo(String graveType, int cnt);
 	
 	
 	//===============================================================================

@@ -29,6 +29,20 @@ public class CalvaryConstants {
 	public static final String PRODUCT_TYPE_FAMILY = "FAMILY";
 	
 	
+	/** 장묘형태 : 부부형 */
+	public static final String GRAVE_TYPE_COUPLE = "COUPLE";
+	/** 장묘형태 : 1인형 */
+	public static final String GRAVE_TYPE_SINGLE = "SINGLE";
+	
+	
+	/** 동산 배정 상태 : 사용중 */
+	public static final String GRAVE_ASSIGN_STATUS_OCCUPIED = "OCCUPIED";
+	/** 동산 배정 상태 : 사용예정 */
+	public static final String GRAVE_ASSIGN_STATUS_RESERVED = "RESERVED";
+	/** 동산 배정 상태 : 사용가능 */
+	public static final String GRAVE_ASSIGN_STATUS_AVAILABLE = "AVAILABLE";
+	
+	
 	/** 관리비 납부자 : 신청자 */
 	public static final String SERVICE_CHARGE_TYPE_APPLY_USER = "APPLY_USER";
 	/** 관리비 납부자 : 각 사용자 */

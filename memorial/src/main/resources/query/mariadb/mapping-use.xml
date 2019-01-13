@@ -10,13 +10,44 @@
 			section_seq
 		    ,row_seq
 		    ,col_seq
-		    ,product_type
+		    ,grave_type
 		    ,bunyang_seq
 		    ,use_user_seq1
 		    ,use_user_seq2
 		    ,assign_status
 		    ,(SELECT MAX(col_seq) FROM TB_BUNYANG_GRAVE_ASSIGN t WHERE a.section_seq = t.SECTION_SEQ) max_col_cnt
 		FROM TB_BUNYANG_GRAVE_ASSIGN a
+		ORDER BY section_seq, row_seq, col_seq
+    </select>
+    
+    <!-- 추모동산 사용현황 정보 조회 -->
+    <select id="getGraveUseInfo" parameterType="map" resultType="map">
+    	SELECT
+	  		b.bunyang_seq
+			,a.section_seq
+		    ,a.row_seq
+		    ,a.col_seq
+		    ,a.grave_type
+            ,a.assign_status
+		    ,c.user_seq
+            ,c.user_id
+            ,c.relation_type
+            ,COALESCE(d.user_name, c.user_name) AS user_name
+		    ,COALESCE(d.birth_date, c.birth_date) AS birth_date
+		    ,COALESCE(d.gender, c.gender) AS gender
+		    ,COALESCE(d.email, c.email) AS email
+		    ,COALESCE(d.mobile, c.mobile) AS mobile
+		    ,COALESCE(d.phone, c.phone) AS phone
+		    ,COALESCE(d.post_number, c.post_number) AS post_number
+		    ,COALESCE(d.address1, c.address1) AS address1
+		    ,COALESCE(d.address2, c.address2) AS address2
+		FROM TB_BUNYANG_GRAVE_ASSIGN a 
+		INNER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
+		LEFT OUTER JOIN TB_BUNYANG_REF_USER c ON c.ref_type = 'USE_USER' and a.bunyang_seq = c.bunyang_seq and (a.use_user_seq1 = c.user_seq or a.use_user_seq2 = c.user_seq)
+        LEFT OUTER JOIN TB_COM_USER d ON c.user_id = d.user_id
+		WHERE a.section_seq = #{sectionSeq}
+		AND a.row_seq = #{rowSeq}
+		AND a.col_seq = #{colSeq}
 		ORDER BY section_seq, row_seq, col_seq
     </select>
     
@@ -132,6 +163,7 @@
 		   	,(SELECT code_name FROM TB_COM_CODE t WHERE t.parent_code_seq = 'USER_RELATION' and t.code_seq = a.relation_type) as relation_type_name
 		   	,(SELECT COUNT(1) FROM TB_BUNYANG_GRAVE_ASSIGN t WHERE t.bunyang_seq = a.bunyang_seq AND (t.use_user_seq1 = a.user_seq or t.use_user_seq2 = a.user_seq)) assign_yn
 		   	,a.user_seq
+		   	,a.couple_seq
 		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_COM_USER b ON a.user_id = b.user_id
 		WHERE a.ref_type = 'USE_USER'
 		AND a.bunyang_seq = #{bunyangSeq}
@@ -146,7 +178,7 @@
 		(SELECT
 			section_seq, row_seq, count(1) cnt, min(col_seq) col_seq
 		FROM TB_BUNYANG_GRAVE_ASSIGN a
-		WHERE product_type = #{productType} AND assign_status = 'AVAILABLE'
+		WHERE grave_type = #{graveType} AND assign_status = 'AVAILABLE'
 		GROUP BY section_seq, row_seq
 		) t
 		WHERE cnt >= #{cnt}
@@ -154,10 +186,63 @@
 		LIMIT 1
     </select>
     
+    <!-- 예약된 가족형 자리중에서 사용가능한 동산 정보 조회 -->
+    <select id="getAvailableFamilyGraveInfo" parameterType="map" resultType="map">
+    	SELECT
+    		section_seq
+    		,row_seq
+			,min(col_seq) col_seq
+		FROM TB_BUNYANG_GRAVE_ASSIGN a
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		AND grave_type = #{graveType} 
+		AND assign_status = 'RESERVED'
+		GROUP BY section_seq, row_seq
+    </select>
+    
+    <!-- 부부형 2기중에서 현재 사용중인 사용자 조회 -->
+    <select id="getUsingCoupleUserSeq" parameterType="map" resultType="map">
+    	SELECT 
+			a.use_user_seq1
+		FROM TB_BUNYANG_GRAVE_ASSIGN a INNER JOIN TB_BUNYANG_REF_USER b 
+		ON a.bunyang_seq = b.bunyang_seq AND a.use_user_seq1 = b.user_seq AND b.couple_seq = #{coupleSeq} AND b.ref_type = 'USE_USER'
+		WHERE a.bunyang_seq = #{bunyangSeq} 
+		LIMIT 1
+    </select>
+    
+    <!-- 분양신청번호에 해당하는 사용정보 조회 -->
+    <select id="getBunyangSeqGraveInfo" parameterType="map" resultType="map">
+    	SELECT 
+			section_seq
+			,row_seq
+			,col_seq
+			,product_type
+			,bunyang_seq
+			,use_user_seq1
+			,use_user_seq2
+			,assign_status
+			,grave_type
+		FROM TB_BUNYANG_GRAVE_ASSIGN a
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		ORDER BY section_seq, row_seq, col_seq
+    </select>
+    
     <!-- 동산 배정 -->
-    <insert id="createAssignGrave" parameterType="map">
-    	INSERT INTO TB_BUNYANG_GRAVE_ASSIGN( section_seq,row_seq,col_seq,product_type,bunyang_seq,use_user_seq1,use_user_seq2,assign_status )
-		VALUES ( #{sectionSeq}, #{rowSeq}, #{colSeq}, #{productType}, #{bunyangSeq}, #{useUserSeq1}, #{useUserSeq2}, #{assignStatus})
-    </insert>
+    <update id="updateGrave" parameterType="map">
+    	UPDATE TB_BUNYANG_GRAVE_ASSIGN a
+			SET bunyang_seq = #{bunyangSeq},
+			use_user_seq1 = #{useUserSeq1},
+			use_user_seq2 = #{useUserSeq2},
+			assign_status = #{assignStatus}
+		WHERE a.section_seq = #{sectionSeq} 
+		AND a.row_seq = #{rowSeq}
+		AND a.col_seq = #{colSeq}
+    </update>
+    
+    <!-- 동산 배정(부부형 두번째 자리 업데이트) -->
+    <update id="updateCoupleGrave" parameterType="map">
+    	UPDATE TB_BUNYANG_GRAVE_ASSIGN a
+			SET use_user_seq2 = #{useUserSeq2}
+		WHERE a.bunyang_seq = #{bunyangSeq} AND a.use_user_seq1 = #{useUserSeq1}
+    </update>
     
 </mapper>

@@ -619,7 +619,7 @@ public class AdminController {
 	 * 사용(봉안) 관리 페이지
 	 */
 	@RequestMapping(value=USE_MGMT_URL)
-	public Object userMgmtHandler(SearchVo searchVo) {
+	public Object useMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");

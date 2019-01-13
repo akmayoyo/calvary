@@ -14,6 +14,7 @@ import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.dao.CommonDao;
 import com.calvary.common.service.ICommonService;
+import com.calvary.common.util.CommonUtil;
 import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
 
@@ -180,6 +181,9 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("address1", bunyangUserVo.getAddress1());
 		param.put("address2", bunyangUserVo.getAddress2());
 		param.put("isChurchPerson", bunyangUserVo.getIsChurchPerson());
+		if(bunyangUserVo.getCoupleSeq() >= 0) {
+			param.put("coupleSeq", bunyangUserVo.getCoupleSeq());
+		}
 		param.put("userSeq", userSeq);
 		return param;
 	}
@@ -377,6 +381,18 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
+	 * 추모동산 사용현황 정보 조회
+	 */
+	public List<Object> getGraveUseInfo(String sectionSeq, int rowSeq, int colSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("sectionSeq", sectionSeq);
+		parameter.put("rowSeq", rowSeq);
+		parameter.put("colSeq", colSeq);
+		List<Object> list = commonDao.selectList("use.getGraveUseInfo", parameter); 
+		return list;
+	}
+	
+	/** 
 	 * 동산 사용신청 리스트 조회
 	 */
 	public List<Object> getUseApplyList(SearchVo searchVo) {
@@ -399,14 +415,154 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
-	 * 동산 배정
+	 * 동산 배정(개별형)
 	 */
-	public int createAssignGrave(String bunyangSeq, int userSeq) {
+	@SuppressWarnings("unchecked")
+	@Transactional
+	public int assignEachGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs) {
 		int iRslt = 0;
 		Map<String, Object> parameter = new HashMap<String, Object>();
+		if(userSeqs != null && coupleSeqs != null && userSeqs.length == coupleSeqs.length) {
+			for(int i = 0; i < userSeqs.length; i++) {
+				int userSeq = userSeqs[i];
+				int coupleSeq = coupleSeqs[i];
+				int usingUserSeq = -1;
+				if(coupleSeq >= 0) {// 부부형
+					parameter.put("bunyangSeq", bunyangSeq);
+					parameter.put("coupleSeq", coupleSeq);
+					Map<String, Object> usingUser = (HashMap<String, Object>)commonDao.selectOne("use.getUsingCoupleUserSeq", parameter);
+					if(usingUser != null) { 
+						usingUserSeq = CommonUtil.convertToInt(usingUser.get("use_user_seq1"));
+					}
+				}
+				if(usingUserSeq >= 0) {// 부부형 2기중 1기 사용중인 경우
+					parameter = new HashMap<String, Object>();
+					parameter.put("bunyangSeq", bunyangSeq);
+					parameter.put("coupleSeq", coupleSeq);
+					parameter.put("useUserSeq1", usingUserSeq);
+					parameter.put("useUserSeq2", userSeq);
+					iRslt += commonDao.update("use.updateCoupleGrave", parameter);
+				} else {
+					String graveType = coupleSeq >= 0 ? CalvaryConstants.GRAVE_TYPE_COUPLE : CalvaryConstants.GRAVE_TYPE_SINGLE;
+					Map<String, Object> availableGraveInfo = getAvailableGraveInfo(graveType, 1);
+					String sectionSeq = (String)availableGraveInfo.get("section_seq");
+					int rowSeq = CommonUtil.convertToInt(availableGraveInfo.get("row_seq"));
+					int colSeq = CommonUtil.convertToInt(availableGraveInfo.get("col_seq"));
+					parameter = new HashMap<String, Object>();
+					parameter.put("bunyangSeq", bunyangSeq);
+					parameter.put("useUserSeq1", userSeq);
+					parameter.put("useUserSeq2", null);
+					parameter.put("sectionSeq", sectionSeq);
+					parameter.put("rowSeq", rowSeq);
+					parameter.put("colSeq", colSeq);
+					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED);
+					parameter.put("graveType", graveType);
+					iRslt += commonDao.update("use.updateGrave", parameter);
+				}
+			}
+		}
+		return iRslt;
+	}
+	
+	/** 
+	 * 동산 배정(가족형)
+	 */
+	@SuppressWarnings("unchecked")
+	@Transactional
+	public int assignFamilyGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs) {
+		
+		int i = 0;
+		int iRslt = 0;
+		int ERROR_NOT_AVAILABLE = -1;
+		
+		// 가족형의 경우 부부형 또는 1인형 둘중 하나만 가능하기 때문에 0번째 데이터만 확인
+		String graveType = null;
+		if(coupleSeqs != null && coupleSeqs.length > 0) {
+			if(coupleSeqs[0] >= 0) {
+				graveType = CalvaryConstants.GRAVE_TYPE_COUPLE;
+			} else {
+				graveType = CalvaryConstants.GRAVE_TYPE_SINGLE;
+			}
+		}
+		Map<String, Object> parameter = null;
+		Map<String, Object> availableGraveInfo = null;
+		
+		// 이미 배정된 동산이 있는지 조회
+		parameter = new HashMap<String, Object>();
 		parameter.put("bunyangSeq", bunyangSeq);
-		parameter.put("userSeq", userSeq);
-		iRslt = commonDao.insert("use.createAssignGrave", parameter);
+		List<Object> graveList = commonDao.selectList("use.getBunyangSeqGraveInfo", parameter);
+		
+		// 가족형의 경우 연속으로 자리를 배정해야하기 때문에 배정된 동산이 없는 경우 미리 예약해둠
+		if(graveList == null || graveList.size() == 0) {
+			List<Object> useUserList = getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
+			int requireCnt = useUserList.size();
+			if(graveType == CalvaryConstants.GRAVE_TYPE_COUPLE) {
+				requireCnt = requireCnt/2;
+			}
+			// 가족수만큼 연속배정이 가능한 자리를 조회
+			availableGraveInfo = getAvailableGraveInfo(graveType, requireCnt);
+			
+			if(availableGraveInfo != null) {
+				String sectionSeq = (String)availableGraveInfo.get("section_seq");
+				int rowSeq = CommonUtil.convertToInt(availableGraveInfo.get("row_seq"));
+				int colSeq = CommonUtil.convertToInt(availableGraveInfo.get("col_seq"));
+				// 
+				for(i = 0; i < requireCnt; i++) {
+					parameter = new HashMap<String, Object>();
+					parameter.put("bunyangSeq", bunyangSeq);
+					parameter.put("useUserSeq1", null);
+					parameter.put("useUserSeq2", null);
+					parameter.put("sectionSeq", sectionSeq);
+					parameter.put("rowSeq", rowSeq);
+					parameter.put("colSeq", colSeq+i);
+					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_RESERVED);
+					iRslt += commonDao.update("use.updateGrave", parameter);
+				}
+			} else {// 연속배정이 가능한 자리가 없을 경우 에러
+				iRslt = ERROR_NOT_AVAILABLE;
+				return iRslt;
+			}
+		}
+		if(userSeqs != null && coupleSeqs != null && userSeqs.length == coupleSeqs.length) {
+			for(i = 0; i < userSeqs.length; i++) {
+				int userSeq = userSeqs[i];
+				int coupleSeq = coupleSeqs[i];
+				int usingUserSeq = -1;
+				if(coupleSeq >= 0) {// 부부형
+					parameter.put("bunyangSeq", bunyangSeq);
+					parameter.put("coupleSeq", coupleSeq);
+					Map<String, Object> usingUser = (HashMap<String, Object>)commonDao.selectOne("use.getUsingCoupleUserSeq", parameter);
+					if(usingUser != null) { 
+						usingUserSeq = CommonUtil.convertToInt(usingUser.get("use_user_seq1"));
+					}
+				}
+				if(usingUserSeq >= 0) {// 부부형 2기중 1기 사용중인 경우
+					parameter = new HashMap<String, Object>();
+					parameter.put("bunyangSeq", bunyangSeq);
+					parameter.put("coupleSeq", coupleSeq);
+					parameter.put("useUserSeq1", usingUserSeq);
+					parameter.put("useUserSeq2", userSeq);
+					iRslt += commonDao.update("use.updateCoupleGrave", parameter);
+				} else {
+					parameter = new HashMap<String, Object>();
+					parameter.put("bunyangSeq", bunyangSeq);
+					parameter.put("graveType", graveType);
+					availableGraveInfo = (HashMap<String, Object>)commonDao.selectOne("use.getAvailableFamilyGraveInfo", parameter);
+					String sectionSeq = (String)availableGraveInfo.get("section_seq");
+					int rowSeq = CommonUtil.convertToInt(availableGraveInfo.get("row_seq"));
+					int colSeq = CommonUtil.convertToInt(availableGraveInfo.get("col_seq"));
+					parameter = new HashMap<String, Object>();
+					parameter.put("bunyangSeq", bunyangSeq);
+					parameter.put("useUserSeq1", userSeq);
+					parameter.put("useUserSeq2", null);
+					parameter.put("sectionSeq", sectionSeq);
+					parameter.put("rowSeq", rowSeq);
+					parameter.put("colSeq", colSeq);
+					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED);
+					iRslt += commonDao.update("use.updateGrave", parameter);
+				}
+			}
+		}
 		return iRslt;
 	}
 	
@@ -414,9 +570,9 @@ public class AdminServiceImpl implements IAdminService {
 	 * 사용가능한 동산 정보 조회
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> getAvailableGraveInfo(String productType, int cnt) {
+	public Map<String, Object> getAvailableGraveInfo(String graveType, int cnt) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
-		parameter.put("productType", productType);
+		parameter.put("graveType", graveType);
 		parameter.put("cnt", cnt);
 		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("use.getAvailableGraveInfo", parameter); 
 		return rtnMap;

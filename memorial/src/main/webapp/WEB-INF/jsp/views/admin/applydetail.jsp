@@ -34,8 +34,8 @@
             	<c:forEach items="${applyUser}" var="apply">
             	<tr>
             		<td>${apply.user_name}</td>
-            		<td>${apply.birth_date}</td>
-            		<td>${apply.mobile}</td>
+            		<td>${cutil:getBirthDateFormatString(apply.birth_date)}</td>
+            		<td>${cutil:getMobileFormatString(apply.mobile)}</td>
             		<td>${apply.email}</td>
             		<td>(${apply.post_number}) ${apply.address1} ${apply.address2}</td>
             		<td>${apply.church_officer_name}</td>
@@ -50,9 +50,6 @@
     <div id="divAgentInfo" style="margin-top: 35px;">
     	<div>
 	    	<div class="pull-left"><h4>대리인</h4></div>
-<!-- 	    	<div class="pull-right"> -->
-<!-- 	        	<button id="btnRegistAgentUser" type="button" class="btn btn-primary btn-sm" onclick="registApplyUser(true)">입력</button> -->
-<!-- 	    	</div> -->
 	    </div>
 	    <div class="clearfix"></div>
 	    <div class="table-responsive">
@@ -72,8 +69,8 @@
 	            	<c:forEach items="${agentUser}" var="agent">
 	            	<tr>
 	            		<td>${agent.user_name}</td>
-	            		<td>${agent.birth_date}</td>
-	            		<td>${agent.mobile}</td>
+	            		<td>${cutil:getBirthDateFormatString(agent.birth_date)}</td>
+	            		<td>${cutil:getMobileFormatString(agent.mobile)}</td>
 	            		<td>${agent.email}</td>
 	            		<td>(${agent.post_number}) ${agent.address1} ${agent.address2}</td>
 	            		<td>${agent.relation_type_name}</td>
@@ -88,31 +85,38 @@
 	<!-- 사용(봉안) 대상자 -->
 	<div style="margin-top: 35px;">
 		<div class="pull-left" style=""><h4>사용(봉안) 대상자</h4></div>
-<!--     	<div class="pull-right"> -->
-<!--         	<button id="btnRegistUseUser" type="button" class="btn btn-primary btn-sm">입력</button> -->
-<!--     	</div> -->
 	</div>
     <div class="clearfix"></div>
     <div class="table-responsive">
-        <table id="tblUseUser" class="table table-style">
+        <table id="tblUseUser" class="table table-style table-bordered">
             <thead>
                 <tr>
+                    <th scope="col">장묘형태</th>
                     <th scope="col">성명</th>
                     <th scope="col">생년월일</th>
                     <th scope="col">휴대전화</th>
-                    <th scope="col">이메일</th>
                     <th scope="col">주소</th>
                     <th scope="col">관계</th>
                     <th scope="col">교인여부</th>
                 </tr>
             </thead>
             <tbody>
-            	<c:forEach items="${useUser}" var="use">
+            	<c:forEach items="${useUser}" var="use" varStatus="status">
             	<tr>
+            		<c:choose>
+            			<c:when test="${!empty use.couple_seq}">
+            				<c:set var="nextVal" value="${useUser[status.count]}"/>
+            				<c:if test="${nextVal.couple_seq == use.couple_seq}">
+	            				<td rowspan="2">부부형</td>
+            				</c:if>
+            			</c:when>
+            			<c:otherwise>
+            				<td>1인형</td>
+            			</c:otherwise>
+            		</c:choose>
             		<td>${use.user_name}</td>
-            		<td>${use.birth_date}</td>
-            		<td>${use.mobile}</td>
-            		<td>${use.email}</td>
+            		<td>${cutil:getBirthDateFormatString(use.birth_date)}</td>
+            		<td>${cutil:getMobileFormatString(use.mobile)}</td>
             		<td>(${use.post_number}) ${use.address1} ${use.address2}</td>
             		<td>${use.relation_type_name}</td>
             		<td>${use.is_church_person}</td>

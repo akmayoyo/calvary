@@ -652,3 +652,6 @@ footer .icon-sns img {
 .select.yearselect {
 	width: 50% !important;
 }
+.table-style tr td{
+	vertical-align:middle !important; 
+}

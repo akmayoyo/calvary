@@ -20,7 +20,7 @@
 			<div class="row">
 				<div class="col-xs-4 col-md-3 pr-10">
 					<select name="searchKey" class="form-control">
-						<option value="apply_user_name">성명</option>
+						<option value="apply_user_name">신청자</option>
 					</select>
 				</div>
 				<div class="col-xs-8 col-md-9 pl-0">
