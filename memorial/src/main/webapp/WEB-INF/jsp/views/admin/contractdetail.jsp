@@ -194,7 +194,7 @@
             		<td align="left">
             			<p class="form-control-static" style="display: inline-block;">
             				<c:choose>
-								<c:when test="${downPaymentInfo.payment_amount > 0}">
+								<c:when test="${downPaymentInfo.payment_amount == contract_price}">
 									<span class="label label-info">완납</span>
 								</c:when>
 								<c:otherwise>
@@ -373,9 +373,9 @@
 	
 	// 계약금 납부일자 datepicker
 	var datePickerOption = {};
-	common.singleDatePicker($('#contract_payment_date'), datePickerOption);
+	common.datePicker($('#contract_payment_date'), datePickerOption);
 	// 잔금 납부일자 datepicker
-	common.singleDatePicker($("input[name='payment_date']"));
+	common.datePicker($("input[name='payment_date']"));
 	// 납입금 포맷처리
 	$("input[name='payment_amount']").focusout(function(e){
 		var val = $(this).val();
@@ -445,7 +445,7 @@ function addPayment() {
 	tr.append('<td><p class="form-control-static" style="display: inline-block;">중도금</p></td>');
 	tr.append('<td><button type="button" class="btn btn-primary btn-sm" onclick="deleteRow(this)">삭제</button></td>');
 	$('#tbodyPayment').append(tr);
-	common.singleDatePicker($("input[name='payment_date']"));
+	common.datePicker($("input[name='payment_date']"));
 	$("input[name='payment_amount']").focusout(function(e){
 		var val = $(this).val();
 		val = common.toNumeric(val);

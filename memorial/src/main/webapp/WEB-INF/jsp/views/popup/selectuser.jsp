@@ -170,7 +170,7 @@
 <script type="text/javascript">
 (function() {
 	
-	common.singleDatePicker($("#tiBirthDate"));
+	common.datePicker($("#tiBirthDate"));
 	
     // 이메일 유효성체크
     $.formUtils.addValidator({

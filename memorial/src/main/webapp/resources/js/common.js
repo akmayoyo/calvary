@@ -289,11 +289,12 @@
 		return true;
 	}
 	
-	var singleDatePicker = function(el, opt) {
+	var datePicker = function(el, opt) {
 		opt = opt || {};
 		opt = $.extend(true, {
 			singleDatePicker:true,
 			showDropdowns:true,
+			linkedCalendars:false,
 			locale:{
 				"format": "YYYY-MM-DD",
 				 "daysOfWeek": [
@@ -318,7 +319,10 @@
 		                "10월",
 		                "11월",
 		                "12월"
-		            ]
+		            ],
+		            "separator": " ~ ",
+		            "applyLabel": "확인",
+		            "cancelLabel": "취소"
 			}
 		}, opt);
 		return el.daterangepicker(opt);
@@ -336,7 +340,7 @@
 	common.toNumeric = toNumeric;
 	common.showAlert = showAlert;
 	common.calcBunyangPrice = calcBunyangPrice;
-	common.singleDatePicker = singleDatePicker;
+	common.datePicker = datePicker;
 	common.isValidMail = isValidMail;
 	common.isValidMobile = isValidMobile;
 

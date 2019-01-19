@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,8 +17,11 @@ import com.calvary.admin.service.IAdminService;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.CommonUtil;
+import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
 import com.calvary.common.vo.UserSearchVo;
+import com.calvary.excel.ExcelForms;
+import com.calvary.excel.service.IExcelService;
 import com.calvary.popup.service.IPopupService;
 
 @Controller
@@ -33,6 +37,8 @@ public class PopupController {
 	public static final String USE_APPLY_URL = "/useapply";
 	public static final String SELECT_USE_USER = "/selectuseuser";
 	public static final String ASSIGN_GRAVE = "/assigngrave";
+	public static final String REGIST_PAYMENT = "/registpayment";
+	public static final String SAVE_PAYMENT = "/savepayment";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -40,6 +46,8 @@ public class PopupController {
 	private ICommonService commonService;
 	@Autowired
 	private IAdminService adminService;
+	@Autowired
+	private IExcelService excelService;
 	
 	@RequestMapping(value=SELECT_USER_URL)
 	public Object selectUserHandler(SearchVo searchVo, String popupTitle) {
@@ -124,6 +132,69 @@ public class PopupController {
 		}else if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productType)) {
 			iRslt = adminService.assignFamilyGrave(bunyangSeq, userSeqs, coupleSeqs);
 		}
+		bRslt = iRslt > 0;
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
+	@RequestMapping(value=REGIST_PAYMENT)
+	public Object registPaymentHandler() {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName(ROOT_URL + REGIST_PAYMENT);
+		return mv;
+	}
+	
+	@RequestMapping(value=SAVE_PAYMENT)
+	@ResponseBody
+	public Object savePaymentHandler(
+			@RequestParam(value="bunyangSeqs[]") String[] bunyangSeqs,
+			@RequestParam(value="paymentDates[]") String[] paymentDates,
+			@RequestParam(value="paymentAmounts[]") int[] paymentAmounts,
+			@RequestParam(value="paymentTypes[]") String[] paymentTypes,
+			@RequestParam(value="paymentMethods[]") String[] paymentMethods,
+			@RequestParam(value="contractBunyangSeqs[]", required=false) String[] contractBunyangSeqs,
+			@RequestParam(value="fullPaymentBunyangSeqs[]", required=false) String[] fullPaymentBunyangSeqs
+			) {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean bRslt = false;
+		int iRslt = 0;
+		int i = 0;
+		String bunyangSeq = null;
+		// 납입금 정보 생성
+		if(bunyangSeqs != null && bunyangSeqs.length > 0) {
+			for(i = 0; i < bunyangSeqs.length; i++) {
+				iRslt += adminService.createPaymentHistory(bunyangSeqs[i], paymentAmounts[i], paymentMethods[i], paymentDates[i], paymentTypes[i]);
+			}
+		}
+		// 계약금 납부가 된 건에 대해 계약상태로 업데이트
+		if(contractBunyangSeqs != null && contractBunyangSeqs.length > 0) {
+			for(i = 0; i < contractBunyangSeqs.length; i++) {
+				bunyangSeq = contractBunyangSeqs[i];
+				iRslt += adminService.updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_B, SessionUtil.getCurrentUserId());
+				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
+				if(!StringUtils.isEmpty(fileSeq)) {
+					Map<String, Object> param = new HashMap<String, Object>();
+					param.put("bunyangSeq", bunyangSeq);
+					param.put("file_seq_contract", fileSeq);
+					iRslt += adminService.updateBunyangFileSeq(param);
+				}
+			}
+		}
+		// 잔금 완납된 건에 대해 완납상태로 업데이트
+		if(fullPaymentBunyangSeqs != null && fullPaymentBunyangSeqs.length > 0) {
+			for(i = 0; i < fullPaymentBunyangSeqs.length; i++) {
+				bunyangSeq = fullPaymentBunyangSeqs[i];
+				iRslt += adminService.updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_C, SessionUtil.getCurrentUserId());
+				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "");
+				if(!StringUtils.isEmpty(fileSeq)) {
+					Map<String, Object> param = new HashMap<String, Object>();
+					param.put("bunyangSeq", bunyangSeq);
+					param.put("file_seq_full_payment", fileSeq);
+					iRslt += adminService.updateBunyangFileSeq(param);
+				}
+			}
+		}
+		
 		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);
 		return rtnMap;

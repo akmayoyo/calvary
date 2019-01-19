@@ -1,5 +1,8 @@
 package com.calvary.admin.controller;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -559,6 +562,42 @@ public class AdminController {
 	}
 	
 	
+	//===============================================================================
+	// 납부관리
+	//===============================================================================
+	/** 납부관리 메인 페이지  URL */
+	public static final String PAYMENT_MGMT_URL = "/paymentmgmt";
+		
+	/** 
+	 * 납부관리 메인 페이지 
+	 */
+	@RequestMapping(value=PAYMENT_MGMT_URL)
+	public Object paymentMgmtHandler(SearchVo searchVo, String paymentType) {
+		SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
+		// 검색기간은 default 1주일
+		if(StringUtils.isEmpty(searchVo.getFromDt()) && StringUtils.isEmpty(searchVo.getToDt())) {
+			Calendar cl = Calendar.getInstance();
+			cl.add(Calendar.MONTH, -1);
+			searchVo.setFromDt(sf.format(cl.getTime()));
+			searchVo.setToDt(sf.format(new Date()));
+		}
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		List<Object> paymentList = adminService.getPaymentList(searchVo, paymentType);
+		searchVo.setTotalCount(commonService.getTotalCount());
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_06");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("paymentType", paymentType);
+		mv.addObject("paymentList", paymentList);
+		mv.setViewName(ROOT_URL + PAYMENT_MGMT_URL);
+		return mv;
+	}
+	
+	
 	
 	//===============================================================================
 	// 분양정보 관리
@@ -614,6 +653,8 @@ public class AdminController {
 	public static final String USE_MGMT_URL = "/usemgmt";
 	/** 추모동산 사용현황 리스트 조회  URL */
 	public static final String GET_GRAVE_USE_LIST = "/getGraveUseList";
+	/** 특정 구역에 배정된 정보 조회  URL */
+	public static final String GET_GRAVE_ASSIGN_INFO = "/getGraveAssignInfo";
 	
 	/** 
 	 * 사용(봉안) 관리 페이지
@@ -642,7 +683,37 @@ public class AdminController {
 		return graveUseList;
 	}
 	
+	/** 
+	 * 특정 구역에 배정된 정보 조회
+	 */
+	@RequestMapping(value=GET_GRAVE_ASSIGN_INFO)
+	@ResponseBody
+	public List<Object> getGraveAssignInfoHandler(String sectionSeq, int rowSeq, int colSeq) {
+		List<Object> graveAssignList = adminService.getGraveAssignInfo(sectionSeq, rowSeq, colSeq);
+		return graveAssignList;
+	}
 	
+	
+	//===============================================================================
+	// 공통
+	//===============================================================================
+	/** 분양리스트 조회용 select2 ajax URL */
+	public static final String GET_BUNYANG_SELECT_LIST_URL = "/getBunyangSelectList";
+	
+	
+	/** 
+	 * 분양리스트 조회용 select2 ajax 처리
+	 */
+	@RequestMapping(value=GET_BUNYANG_SELECT_LIST_URL)
+	@ResponseBody
+	public Map<String, Object> getBunyangSelectListHandler(String searchVal, int pageIndex) {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		List<Object> bunyangList = adminService.getBunyangSelectList(searchVal, pageIndex);
+		int total_count = commonService.getTotalCount();
+		rtnMap.put("result", bunyangList);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
+	}
 	
 	
 	//===============================================================================

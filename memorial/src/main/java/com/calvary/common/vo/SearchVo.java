@@ -10,6 +10,8 @@ public class SearchVo {
 	
 	private String searchKey;
 	private String searchVal;
+	private String fromDt;
+	private String toDt;
 	
 	public int getPageIndex() {
 		return pageIndex;
@@ -41,10 +43,23 @@ public class SearchVo {
 	public void setSearchVal(String searchVal) {
 		this.searchVal = searchVal;
 	}
+	public String getFromDt() {
+		return fromDt;
+	}
+	public void setFromDt(String fromDt) {
+		this.fromDt = fromDt;
+	}
+	public String getToDt() {
+		return toDt;
+	}
+	public void setToDt(String toDt) {
+		this.toDt = toDt;
+	}
 	@Override
 	public String toString() {
 		return "SearchVo [pageIndex=" + pageIndex + ", countPerPage=" + countPerPage + ", totalCount=" + totalCount
-				+ ", searchKey=" + searchKey + ", searchVal=" + searchVal + "]";
+				+ ", searchKey=" + searchKey + ", searchVal=" + searchVal + ", fromDt=" + fromDt + ", toDt=" + toDt
+				+ "]";
 	}
 	
 }

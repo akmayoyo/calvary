@@ -105,6 +105,7 @@
     <!-- 분양신청리스트 조회 -->
 	<select id="getBunyangList" parameterType="map" resultType="map">
 		SELECT
+			SQL_CALC_FOUND_ROWS
     		t.*
     		,CASE 
         		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
@@ -113,7 +114,8 @@
     		,FOUND_ROWS() total_count
     	FROM
 		    (SELECT
-			  a.bunyang_seq
+		      a.bunyang_seq as id
+			  ,a.bunyang_seq
 			  ,COALESCE(a.progress_status,'') || a.bunyang_seq bunyang_no
 			  ,a.product_type
 			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
@@ -142,6 +144,8 @@
 			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
 		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
 		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
+		      ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
+              ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
 			  ,CASE WHEN progress_status = 'D' THEN 'Y' ELSE 'N' END AS approval_yn
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'A') apply_approval_date
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
@@ -198,8 +202,11 @@
 			) d ON a.bunyang_seq = d.bunyang_seq
 			) t
 		WHERE 1=1
-		<if test="apply_user_name != null">
+		<if test="apply_user_name != null and apply_user_name != ''">
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		<if test="searchVal != null and searchVal != ''">
+		AND (apply_user_name like CONCAT('%',#{searchVal},'%') OR bunyang_seq like CONCAT('%',#{searchVal},'%'))
 		</if>
 		ORDER BY t.bunyang_seq
 		<if test="start != null">

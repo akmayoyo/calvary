@@ -123,7 +123,7 @@
 <script type="text/javascript">
 (function(){
 	
-	common.singleDatePicker($("#tiDepositDate"));
+	common.datePicker($("#tiDepositDate"));
 	
 })();
 

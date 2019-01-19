@@ -10,4 +10,10 @@ public interface ICommonService {
 	public Map<String, Object> getMenuInfo(String menuSeq);
 	
 	public long getSeqNexVal(String seqType);
+	
+	/**
+	 * 페이징에서 사용할 전제 행 개수를 반환
+	 * 각 쿼리에 SQL_CALC_FOUND_ROWS 를 정의한후 해당 함수 호출해야 정상 동작함
+	 */
+	public int getTotalCount();
 }

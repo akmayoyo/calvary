@@ -44,6 +44,44 @@
 		</div>
 	</div>
 	
+    <div style="margin-top: 10px;">
+    	<div>
+	    	<div class="pull-left"><h4 style="display: inline-block;">동산 사용 정보</h4><span style="color: #007BFF; margin-left: 10px;">※ 상단의 사용(봉안) 현황을 클릭하시면 상세 정보가 표시됩니다.</span></div>
+	    </div>
+	    <div class="clearfix"></div>
+	    <div class="table-responsive">
+	        <table id="tblAssignInfo" class="table table-style table-bordered">
+	        	<colgroup>
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="30%">
+	        	</colgroup>
+	            <thead>
+	                <tr>
+	                    <th scope="col" rowspan="2">구역</th>
+	                    <th scope="col" rowspan="2">신청번호</th>
+	                    <th scope="col" rowspan="2">신청자</th>
+	                    <th scope="col" rowspan="2">장묘형태</th>
+	                    <th scope="col" colspan="5">사용자</th>
+	                </tr>
+	                <tr>
+	                	<th scope="col">성명</th>
+	                    <th scope="col">관계</th>
+	                    <th scope="col">생년월일</th>
+	                    <th scope="col">주소</th>
+	                </tr>
+	            </thead>
+	            <tbody>
+	            </tbody>
+	        </table>
+	    </div>
+    </div>
+	
 </div>
 <form id="frm" method="post">
 </form>
@@ -215,13 +253,32 @@ function makeGraveGrid(grid, gridData) {
 		})
 		.style("stroke", "#999")
 		.style("stroke-width", 1)
+		.on('mouseover', function(d) {
+	       if(_clickable(d)) {
+	    	   d3.select(this).style("cursor", "pointer"); 
+	       }
+	    })
+	    .on('mouseout', function(d) {
+	       if(_clickable(d)) {
+	    	   d3.select(this).style("cursor", "default"); 
+	       }
+	    })
 		.on('click', function(d) {
-	       d.click ++;
-	       if ((d.click)%4 == 0 ) { d3.select(this).style("fill","#fff"); }
-		   if ((d.click)%4 == 1 ) { d3.select(this).style("fill","#2C93E8"); }
-		   if ((d.click)%4 == 2 ) { d3.select(this).style("fill","#F56C4E"); }
-		   if ((d.click)%4 == 3 ) { d3.select(this).style("fill","#838690"); }
+			if(_clickable(d)) {
+				_getGraveAssignInfo(d);
+			}
 	    });
+}
+
+/**
+ * 
+ */
+function _clickable(d) {
+	var bRtn = false;
+	if(d.assign_status == 'OCCUPIED') {
+		bRtn = true;
+	}
+	return bRtn;
 }
 
 /**
@@ -239,6 +296,44 @@ function _useapply() {
 			frm.submit();
     	}
 	};
+}
+
+/**
+ * 특정 구역에 배정된 정보 조회
+ */
+function _getGraveAssignInfo(d) {
+	var data = {};
+	data.sectionSeq = d.section_seq;
+	data.rowSeq = d.row_seq;
+	data.colSeq = d.col_seq;
+	common.ajax({
+		url:"${contextPath}/admin/getGraveAssignInfo", 
+		data:data,
+		success: function(result) {
+			$('#tblAssignInfo tbody').html('');
+			if(result) {
+				var len = result.length;
+				$.each(result, function(idx, item){
+					var tr = $('<tr/>');
+					var section = item.section_seq + '구역';
+					section += '  ' + item.row_seq + ' - ' + item.col_seq;
+					var graveType = item.grave_type == 'COUPLE' ? '부부형' : '1인형';
+					var address = '(' + item.post_number + ') ' + item.address1 + (item.address2 ? item.address2 : '');
+					if(idx == 0) {
+						tr.append('<td rowspan="' + len + '">'+ section +'</td>');
+						tr.append('<td rowspan="' + len + '">'+ item.bunyang_seq +'</td>');
+						tr.append('<td rowspan="' + len + '">'+ item.apply_user_name +'</td>');
+						tr.append('<td rowspan="' + len + '">'+ graveType +'</td>');	
+					}
+					tr.append('<td>'+ item.user_name +'</td>');
+					tr.append('<td>'+ item.relation_type_name +'</td>');
+					tr.append('<td>'+ item.birth_date +'</td>');
+					tr.append('<td>'+ address +'</td>');
+					$('#tblAssignInfo tbody').append(tr);
+				});
+			}
+		}
+	});
 }
 
 </script>

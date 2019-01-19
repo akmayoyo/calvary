@@ -20,8 +20,8 @@
 		ORDER BY section_seq, row_seq, col_seq
     </select>
     
-    <!-- 추모동산 사용현황 정보 조회 -->
-    <select id="getGraveUseInfo" parameterType="map" resultType="map">
+    <!-- 특정 구역에 배정된 정보 조회 -->
+    <select id="getGraveAssignInfo" parameterType="map" resultType="map">
     	SELECT
 	  		b.bunyang_seq
 			,a.section_seq
@@ -29,22 +29,25 @@
 		    ,a.col_seq
 		    ,a.grave_type
             ,a.assign_status
-		    ,c.user_seq
-            ,c.user_id
-            ,c.relation_type
-            ,COALESCE(d.user_name, c.user_name) AS user_name
-		    ,COALESCE(d.birth_date, c.birth_date) AS birth_date
-		    ,COALESCE(d.gender, c.gender) AS gender
-		    ,COALESCE(d.email, c.email) AS email
-		    ,COALESCE(d.mobile, c.mobile) AS mobile
-		    ,COALESCE(d.phone, c.phone) AS phone
-		    ,COALESCE(d.post_number, c.post_number) AS post_number
-		    ,COALESCE(d.address1, c.address1) AS address1
-		    ,COALESCE(d.address2, c.address2) AS address2
+            ,COALESCE(c.user_name, (SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = c.user_id)) AS apply_user_name
+		    ,d.user_seq
+            ,d.user_id
+            ,d.relation_type
+            ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') relation_type_name
+            ,COALESCE(d.user_name, e.user_name) AS user_name
+		    ,COALESCE(d.birth_date, e.birth_date) AS birth_date
+		    ,COALESCE(d.gender, e.gender) AS gender
+		    ,COALESCE(d.email, e.email) AS email
+		    ,COALESCE(d.mobile, e.mobile) AS mobile
+		    ,COALESCE(d.phone, e.phone) AS phone
+		    ,COALESCE(d.post_number, e.post_number) AS post_number
+		    ,COALESCE(d.address1, e.address1) AS address1
+		    ,COALESCE(d.address2, e.address2) AS address2
 		FROM TB_BUNYANG_GRAVE_ASSIGN a 
 		INNER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
-		LEFT OUTER JOIN TB_BUNYANG_REF_USER c ON c.ref_type = 'USE_USER' and a.bunyang_seq = c.bunyang_seq and (a.use_user_seq1 = c.user_seq or a.use_user_seq2 = c.user_seq)
-        LEFT OUTER JOIN TB_COM_USER d ON c.user_id = d.user_id
+		INNER JOIN TB_BUNYANG_REF_USER c ON a.bunyang_seq = c.bunyang_seq AND c.ref_type = 'APPLY_USER'
+		LEFT OUTER JOIN TB_BUNYANG_REF_USER d ON d.ref_type = 'USE_USER' and a.bunyang_seq = d.bunyang_seq and (a.use_user_seq1 = d.user_seq or a.use_user_seq2 = d.user_seq)
+        LEFT OUTER JOIN TB_COM_USER e ON d.user_id = e.user_id
 		WHERE a.section_seq = #{sectionSeq}
 		AND a.row_seq = #{rowSeq}
 		AND a.col_seq = #{colSeq}
@@ -215,7 +218,6 @@
 			section_seq
 			,row_seq
 			,col_seq
-			,product_type
 			,bunyang_seq
 			,use_user_seq1
 			,use_user_seq2

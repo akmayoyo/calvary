@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.calvary.common.dao.CommonDao;
+import com.calvary.common.util.CommonUtil;
 
 @Service
 public class CommonServiceImpl implements ICommonService {
@@ -46,6 +47,20 @@ public class CommonServiceImpl implements ICommonService {
 			}
 		}
 		return seq;
+	}
+	
+	/**
+	 * 페이징에서 사용할 전제 행 개수를 반환
+	 * 각 쿼리에 SQL_CALC_FOUND_ROWS 를 정의한후 해당 함수 호출해야 정상 동작함
+	 */
+	@SuppressWarnings("unchecked")
+	public int getTotalCount() {
+		int iRtn = 0;
+		Map<String, Object> map = (HashMap<String, Object>)commonDao.selectOne("common.getTotalCount", null);
+		if(map != null) {
+			iRtn = CommonUtil.convertToInt(map.get("total_count"));
+		}
+		return iRtn;
 	}
 
 }

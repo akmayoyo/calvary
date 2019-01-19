@@ -16,6 +16,11 @@ public interface IAdminService {
 	 */
 	public List<Object> getBunyangList(SearchVo searchVo);
 	
+	/** 
+	 * 분양리스트 조회 
+	 */
+	public List<Object> getBunyangSelectList(String searchVal, int pageIndex);
+	
 	
 	//===============================================================================
 	// 분양신청관리
@@ -81,6 +86,10 @@ public interface IAdminService {
 	 * 잔금 납부 내역 업데이트
 	 */
 	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, boolean isFullPayment);
+	/** 
+	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
+	 */
+	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentType);
 	
 	
 	//===============================================================================
@@ -122,6 +131,15 @@ public interface IAdminService {
 	
 	
 	//===============================================================================
+	// 납부관리
+	//===============================================================================
+	/** 
+	 * 납부내역조회 
+	 */
+	public List<Object> getPaymentList(SearchVo searchVo, String paymentType);
+	
+	
+	//===============================================================================
 	// 사용(봉안) 관리
 	//===============================================================================
 	/** 
@@ -130,9 +148,9 @@ public interface IAdminService {
 	public List<Object> getGraveUseList();
 	
 	/** 
-	 * 추모동산 사용현황 정보 조회
+	 * 특정 구역에 배정된 정보 조회
 	 */
-	public List<Object> getGraveUseInfo(String sectionSeq, int rowSeq, int colSeq);
+	public List<Object> getGraveAssignInfo(String sectionSeq, int rowSeq, int colSeq);
 	
 	/** 
 	 * 동산 사용신청 리스트 조회

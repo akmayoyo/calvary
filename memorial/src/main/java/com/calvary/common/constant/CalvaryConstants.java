@@ -81,6 +81,8 @@ public class CalvaryConstants {
 	public static final String PAYMENT_TYPE_BALANCE_PAYMENT = "BALANCE_PAYMENT";
 	/** 분양금 납부 타입 : 해약에 따른 반환 */
 	public static final String PAYMENT_TYPE_CANCEL_PAYMENT = "CANCEL_PAYMENT";
+	/** 분양금 납부 타입 : 관리비 */
+	public static final String PAYMENT_TYPE_MAINT_PAYMENT = "MAINT_PAYMENT";
 	
 	
 	/** 납부 방법 : 이체 */

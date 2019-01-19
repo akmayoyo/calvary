@@ -1,0 +1,45 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="payment">
+
+	<!-- 납부내역조회  -->	
+	<select id="getPaymentList" parameterType="map" resultType="map">
+		SELECT 
+			SQL_CALC_FOUND_ROWS
+			a.bunyang_seq
+		    ,a.payment_type
+		    ,a.payment_amount
+		    ,a.payment_method
+		    ,DATE_FORMAT(a.payment_date, '%Y-%m-%d') AS payment_date
+		    ,a.payment_user
+		    ,a.create_user
+		    ,(SELECT cu.user_name FROM TB_COM_USER cu WHERE cu.user_id = a.create_user) create_user_name
+		    ,DATE_FORMAT(a.create_date, '%Y-%m-%d') AS create_date
+		    ,FOUND_ROWS() total_count
+		FROM TB_BUNYANG_PAYMENT_HISTORY a
+		WHERE 1=1
+		<if test="bunyangSeq != null and bunyangSeq != ''">
+		AND a.bunyang_seq = #{bunyangSeq}
+		</if>
+		<if test="paymentType != null and paymentType != ''">
+		AND a.payment_type = #{paymentType}
+		</if>
+		<if test="fromDt != null and fromDt != ''">
+		<![CDATA[
+		AND payment_date >= STR_TO_DATE(#{fromDt}, '%Y%m%d')
+		]]>
+		</if>
+		<if test="toDt != null and toDt != ''">
+		<![CDATA[
+		AND payment_date < DATE_ADD(STR_TO_DATE(#{toDt}, '%Y%m%d'), INTERVAL 1 DAY)
+		]]>
+		</if>
+		ORDER BY a.payment_date DESC, a.bunyang_seq
+		<if test="start != null">
+		LIMIT #{start}, #{count}
+		</if>
+	</select>
+
+</mapper>

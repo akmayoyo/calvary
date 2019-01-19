@@ -42,6 +42,19 @@ public class AdminServiceImpl implements IAdminService {
 		return list;
 	}
 	
+	/** 
+	 * 분양리스트 조회 
+	 */
+	public List<Object> getBunyangSelectList(String searchVal, int pageIndex) {
+		int countPerPage = 10;
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (pageIndex-1) * countPerPage);
+		parameter.put("count", countPerPage);
+		parameter.put("searchVal", searchVal);
+		List<Object> list = commonDao.selectList("admin.getBunyangList", parameter); 
+		return list;
+	}
+	
 	
 
 	//===============================================================================
@@ -274,6 +287,23 @@ public class AdminServiceImpl implements IAdminService {
 		return iRslt;
 	}
 	
+	/** 
+	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
+	 */
+	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentType) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		// 계약금 납부 정보 업데이트
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("paymentType", paymentType);
+		param.put("paymentAmount", paymentAmount);
+		param.put("paymentMethod", paymentMethod);
+		param.put("paymentDate", paymentDate);
+		param.put("createUser", SessionUtil.getCurrentUser().getUserId());
+		iRslt = commonDao.insert("contract.insertDownPayment", param);
+		return iRslt;
+	}
+	
 	
 	//===============================================================================
 	// 사용승인관리
@@ -369,6 +399,25 @@ public class AdminServiceImpl implements IAdminService {
 	
 	
 	//===============================================================================
+	// 납부관리
+	//===============================================================================
+	/** 
+	 * 납부내역조회 
+	 */
+	public List<Object> getPaymentList(SearchVo searchVo, String paymentType) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
+		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		parameter.put("paymentType", paymentType);
+		parameter.put("fromDt", searchVo.getFromDt());
+		parameter.put("toDt", searchVo.getToDt());
+		List<Object> list = commonDao.selectList("payment.getPaymentList", parameter); 
+		return list;
+	}
+	
+	
+	//===============================================================================
 	// 사용(봉안) 관리
 	//===============================================================================
 	/** 
@@ -381,14 +430,14 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
-	 * 추모동산 사용현황 정보 조회
+	 * 특정 구역에 배정된 정보 조회
 	 */
-	public List<Object> getGraveUseInfo(String sectionSeq, int rowSeq, int colSeq) {
+	public List<Object> getGraveAssignInfo(String sectionSeq, int rowSeq, int colSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("sectionSeq", sectionSeq);
 		parameter.put("rowSeq", rowSeq);
 		parameter.put("colSeq", colSeq);
-		List<Object> list = commonDao.selectList("use.getGraveUseInfo", parameter); 
+		List<Object> list = commonDao.selectList("use.getGraveAssignInfo", parameter); 
 		return list;
 	}
 	

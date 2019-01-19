@@ -7,6 +7,11 @@
 	<resultMap id="map" type="java.util.HashMap">
 	</resultMap>
 	
+	<!--///////////////////////////  SQL_CALC_FOUND_ROWS 수행후 전체 행 개수 반환 ///////////////////////////-->
+	<select id="getTotalCount" resultType="map">
+		SELECT FOUND_ROWS() as total_count
+	</select>
+	
     <!--///////////////////////////  사용자 관련 ///////////////////////////-->
 
 	<select id="getUser" parameterType="map" resultType="map">

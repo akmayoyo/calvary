@@ -26,6 +26,7 @@
 <link href="${contextPath}/resources/assets/css/style.css" rel="stylesheet">
 <link rel="stylesheet" href="${contextPath}/resources/assets/css/topmenu.css"/>
 <link rel="stylesheet" href="${contextPath}/resources/css/loadingbar.css">
+<link rel="stylesheet" href="${contextPath}/resources/css/select2.min.css">
 </head>
 
 <body>
