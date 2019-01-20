@@ -8,8 +8,8 @@
     <!-- 사용계약리스트 조회 -->
     <select id="getContractList" parameterType="map" resultType="map">
     	SELECT
+    		SQL_CALC_FOUND_ROWS
     		t.*
-    		,FOUND_ROWS() total_count
     		,CASE 
         		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
           		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')

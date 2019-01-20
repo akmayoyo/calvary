@@ -655,3 +655,15 @@ footer .icon-sns img {
 .table-style tr td{
 	vertical-align:middle !important; 
 }
+a.tbllink{
+	color: #3a3a3a;
+	text-decoration: none;
+}
+a.tbllink:hover{
+	color: #337ab7;
+	text-decoration: underline;
+}
+tr.cancel td{
+	text-decoration:line-through;
+	background-color: #f0f0f0;
+}

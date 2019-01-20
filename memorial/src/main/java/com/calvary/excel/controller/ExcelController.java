@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
@@ -156,6 +157,8 @@ public class ExcelController {
                 		cell.setCellValue((String)objTmp);
                 	}else if(objTmp instanceof Long) {
                 		cell.setCellValue(String.valueOf(objTmp));
+                	}else if(objTmp instanceof BigDecimal) {
+                		cell.setCellValue(objTmp == null ? "" : ((BigDecimal)objTmp).toString());
                 	}else {
                 		cell.setCellValue((String)objTmp);
                 	}

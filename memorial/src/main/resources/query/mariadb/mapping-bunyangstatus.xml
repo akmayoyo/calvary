@@ -1,0 +1,138 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bunyangstatus">
+
+
+    <!-- 장묘형태별 신청현황조회 -->
+    <select id="getStatusByGraveType" parameterType="map" resultType="map">
+    	SELECT
+			t1.couple_cnt
+		    ,t1.single_cnt
+		    ,t2.total_couple_cnt
+		    ,t2.total_single_cnt
+		    ,case when t2.total_couple_cnt = 0 then null else round(t1.couple_cnt/t2.total_couple_cnt * 100,1) end couple_usage
+		    ,case when t2.total_single_cnt = 0 then null else round(t1.single_cnt/t2.total_single_cnt * 100,1) end single_usage
+		FROM
+		(SELECT
+			sum(couple_type_count) as  couple_cnt
+		    ,sum(single_type_count) as single_cnt
+		FROM TB_BUNYANG_INFO a
+		WHERE a.progress_status not in ('E', 'R')
+		) t1,
+		(SELECT
+			sum(case when product_type = 'COUPLE' then 1 else 0 end) as total_couple_cnt
+		    ,sum(case when product_type = 'SINGLE' then 1 else 0 end) as total_single_cnt
+		from TB_BUNYANG_GRAVE_ASSIGN a
+		) t2
+    </select>
+    
+    <!-- 개별형/가족형 별 신청현황조회 -->
+    <select id="getStatusByProductType" parameterType="map" resultType="map">
+    	SELECT 
+			sum(case when product_type = 'EACH' then 1 else 0 end) each_cnt
+		    ,sum(case when product_type = 'FAMILY' then 1 else 0 end) family_cnt 
+		FROM TB_BUNYANG_INFO a
+		WHERE a.progress_status not in ('E', 'R')
+    </select>
+    
+    <!-- 진행상태 별 신청현황조회 -->
+    <select id="getStatusByProgress" parameterType="map" resultType="map">
+    	SELECT
+			max(case when progress_status = 'B' then cnt end) contract_cnt
+		    ,max(case when progress_status = 'C' then cnt end) fullpayment_cnt
+		from
+		(select 
+			count(distinct bunyang_seq) cnt, progress_status 
+		from TB_BUNYANG_HISTORY b 
+		where progress_status = 'B'
+		union ALL
+		select 
+			count(distinct bunyang_seq) cnt, progress_status
+		from TB_BUNYANG_HISTORY b 
+		where progress_status = 'C'
+		) t
+    </select>
+    
+    <!-- 납부현황조회 -->
+    <select id="getPaymentStatus" parameterType="map" resultType="map">
+    	SELECT
+			t1.total_price
+			,t2.total_payment
+			,case when t1.total_price = 0 then null else round(t2.total_payment/t1.total_price*100,1) end as payment_rate
+		from
+		(select 
+			sum((COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000) as total_price 
+		from TB_BUNYANG_INFO a 
+		where a.PROGRESS_STATUS not in('E', 'R')
+		) t1,
+		(SELECT
+			sum(payment_amount) total_payment
+		from TB_BUNYANG_PAYMENT_HISTORY a
+		where a.PAYMENT_TYPE in('DOWN_PAYMENT','BALANCE_PAYMENT')
+		and a.BUNYANG_SEQ in(select BUNYANG_SEQ from TB_BUNYANG_INFO a where a.PROGRESS_STATUS not in('E', 'R'))
+		) t2
+    </select>
+    
+    <!-- 관리비납부현황조회 -->
+    <select id="getMaintPaymentStatus" parameterType="map" resultType="map">
+    	select 
+			COALESCE(sum(case when PAYMENT_METHOD = 'TRANSFER' then payment_amount else 0 end),0) as transfer_amount
+		    ,COALESCE(sum(case when PAYMENT_METHOD = 'CASH' then payment_amount else 0 end),0) as cash_amount
+		    ,COALESCE(sum(case when PAYMENT_METHOD = 'TRANSFER' then 1 else 0 end),0) as transfer_cnt
+		    ,COALESCE(sum(case when PAYMENT_METHOD = 'CASH' then 1 else 0 end),0) as cash_cnt
+		from TB_BUNYANG_PAYMENT_HISTORY a
+		where 1=1
+    </select>
+    
+    <!-- 관리비납부현황조회 -->
+    <select id="getMaintPaymentList" parameterType="map" resultType="map">
+    	select
+    		SQL_CALC_FOUND_ROWS
+    		t.*
+    	from
+	    	(select 
+				a.bunyang_seq,
+				b.user_name as apply_user_name,
+				b.birth_date as apply_user_birth_date,
+				b.church_officer as apply_user_church_officer,
+				b.diocese as apply_user_diocese,
+				a.payment_type,
+			    a.payment_amount,
+			    a.payment_method,
+			    case a.payment_method when 'TRANSFER' then '관리비' when 'CASH' then '헌금' else a.payment_method end as payment_method_name,
+			    DATE_FORMAT(a.payment_date, '%Y-%m-%d') AS payment_date,
+			    a.payment_user,
+			    (select user_name from TB_COM_USER cu where cu.user_id = a.payment_user) as payment_user_name,
+			    a.create_user,
+			    (select user_name from TB_COM_USER cu where cu.user_id = a.create_user) as create_user_name,
+			    DATE_FORMAT(a.create_date, '%Y-%m-%d') AS create_date
+			from TB_BUNYANG_PAYMENT_HISTORY a INNER JOIN
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,CASE WHEN user_id IS NULL THEN birth_date ELSE (SELECT birth_date FROM TB_COM_USER b WHERE a.user_id = b.user_id) END birth_date
+				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT church_officer FROM TB_COM_USER b WHERE a.user_id = b.user_id) END church_officer
+				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT diocese FROM TB_COM_USER b WHERE a.user_id = b.user_id) END diocese
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'APPLY_USER'
+		    ) b ON a.bunyang_seq = b.bunyang_seq
+			where 1=1
+			<if test="bunyang_seq != null and bunyang_seq != ''">
+			AND a.bunyang_seq like CONCAT('%',#{bunyang_seq},'%')
+			</if>
+			) t
+		where 1=1
+		<if test="apply_user_name != null and apply_user_name != ''">
+		and apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		order by payment_date desc
+		<if test="start != null">
+		LIMIT #{start}, #{count}
+		</if>
+    </select>
+    
+
+</mapper>

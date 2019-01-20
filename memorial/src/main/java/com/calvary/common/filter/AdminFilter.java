@@ -11,6 +11,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.StringUtils;
 
 import com.calvary.account.controller.AccountController;
 import com.calvary.common.util.SessionUtil;
@@ -26,12 +27,18 @@ public class AdminFilter implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
 		boolean bValid =  SessionUtil.checkSession((javax.servlet.http.HttpServletRequest)request);
-		String requestUrl = ((HttpServletRequest)request).getServletPath();
+		HttpServletRequest hRequest = (HttpServletRequest)request;
 		if(bValid) {
 			chain.doFilter(request, response);
 		} else {
-			request.setAttribute("requestUrl", requestUrl);
-			((HttpServletResponse)response).sendRedirect(AccountController.ROOT_URL + AccountController.LOGIN_URL);
+			String query = hRequest.getQueryString();
+			String requestUrl = hRequest.getServletPath();
+			String contextPath = hRequest.getContextPath();
+			if(!StringUtils.isEmpty(query)) {
+				requestUrl += "?" + query;
+			}
+			hRequest.getSession().setAttribute("requestUrl", requestUrl);
+			((HttpServletResponse)response).sendRedirect(contextPath + AccountController.ROOT_URL + AccountController.LOGIN_URL);
 		}
 	}
 

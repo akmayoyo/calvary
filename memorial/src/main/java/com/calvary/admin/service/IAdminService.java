@@ -179,6 +179,35 @@ public interface IAdminService {
 	
 	
 	//===============================================================================
+	// 분양현황
+	//===============================================================================
+	/** 
+	 * 장묘형태별 신청현황조회
+	 */
+	public Map<String, Object> getStatusByGraveType();
+	/** 
+	 * 개별형/가족형 별 신청현황조회
+	 */
+	public Map<String, Object> getStatusByProductType();
+	/** 
+	 * 진행상태 별 신청현황조회
+	 */
+	public Map<String, Object> getStatusByProgress();
+	/** 
+	 * 납부현황조회
+	 */
+	public Map<String, Object> getPaymentStatus();
+	/** 
+	 * 관리비납부현황조회
+	 */
+	public Map<String, Object> getMaintPaymentStatus();
+	/** 
+	 * 관리비납부 리스트 조회
+	 */
+	public List<Object> getMaintPaymentList(SearchVo searchVo);
+	
+	
+	//===============================================================================
 	// 메뉴 관리
 	//===============================================================================
 	

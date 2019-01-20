@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.ServletException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -22,7 +20,6 @@ import com.calvary.admin.service.IAdminService;
 import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
-import com.calvary.common.util.CommonUtil;
 import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
 import com.calvary.excel.ExcelForms;
@@ -65,7 +62,7 @@ public class AdminController {
 	public Object applyMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> applyList = adminService.getApplyList(searchVo);
-		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(applyList, "total_count"));
+		searchVo.setTotalCount(commonService.getTotalCount());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
@@ -217,7 +214,7 @@ public class AdminController {
 	public Object contractMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> contractList = adminService.getContractList(searchVo);
-		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(contractList, "total_count"));
+		searchVo.setTotalCount(commonService.getTotalCount());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_02");
@@ -342,7 +339,7 @@ public class AdminController {
 	public Object approvalMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> approvalList = adminService.getApprovalList(searchVo);
-		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(approvalList, "total_count"));
+		searchVo.setTotalCount(commonService.getTotalCount());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_03");
@@ -424,7 +421,7 @@ public class AdminController {
 	public Object contractorMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> bunyangList = adminService.getBunyangList(searchVo);
-		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(bunyangList, "total_count"));
+		searchVo.setTotalCount(commonService.getTotalCount());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_04");
@@ -517,7 +514,7 @@ public class AdminController {
 	public Object cancelMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> cancelList = adminService.getCancelList(searchVo);
-		searchVo.setTotalCount(CommonUtil.getPaingTotalCount(cancelList, "total_count"));
+		searchVo.setTotalCount(commonService.getTotalCount());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_05");
@@ -691,6 +688,102 @@ public class AdminController {
 	public List<Object> getGraveAssignInfoHandler(String sectionSeq, int rowSeq, int colSeq) {
 		List<Object> graveAssignList = adminService.getGraveAssignInfo(sectionSeq, rowSeq, colSeq);
 		return graveAssignList;
+	}
+	
+	
+	
+	//===============================================================================
+	// 분양현황
+	//===============================================================================
+	/** 분양현황  URL */
+	public static final String BUNYANG_STATUS_URL = "/bunyangstatus";
+		
+	/** 
+	 * 분양현황 페이지
+	 */
+	@RequestMapping(value=BUNYANG_STATUS_URL)
+	public Object bunyangStatusHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU03");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU03_01");
+		List<Object> bunyangList = adminService.getBunyangList(searchVo);
+		searchVo.setTotalCount(commonService.getTotalCount());
+		Map<String, Object> statusByGraveType = adminService.getStatusByGraveType();
+		Map<String, Object> statusByProductType = adminService.getStatusByProductType();
+		Map<String, Object> statusByProgress = adminService.getStatusByProgress();
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("bunyangList", bunyangList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("statusByGraveType", statusByGraveType);
+		mv.addObject("statusByProductType", statusByProductType);
+		mv.addObject("statusByProgress", statusByProgress);
+		mv.setViewName(ROOT_URL + BUNYANG_STATUS_URL);
+		return mv;
+	}
+	
+	
+	//===============================================================================
+	// 대금납부현황
+	//===============================================================================
+	/** 대금납부현황  URL */
+	public static final String PAYMENT_STATUS_URL = "/paymentstatus";
+	
+	/** 
+	 * 대금납부현황 페이지
+	 */
+	@RequestMapping(value=PAYMENT_STATUS_URL)
+	public Object paymentStatusHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU03");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU03_02");
+		List<Object> bunyangList = adminService.getBunyangList(searchVo);
+		searchVo.setTotalCount(commonService.getTotalCount());
+		Map<String, Object> statusByGraveType = adminService.getStatusByGraveType();
+		Map<String, Object> statusByProductType = adminService.getStatusByProductType();
+		Map<String, Object> paymentStatus = adminService.getPaymentStatus();
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("bunyangList", bunyangList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("statusByGraveType", statusByGraveType);
+		mv.addObject("statusByProductType", statusByProductType);
+		mv.addObject("paymentStatus", paymentStatus);
+		mv.setViewName(ROOT_URL + PAYMENT_STATUS_URL);
+		return mv;
+	}
+	
+	
+	//===============================================================================
+	// 관리비납부현황
+	//===============================================================================
+	/** 관리비납부현황  URL */
+	public static final String MAINT_PAYMENT_STATUS_URL = "/maintPaymentStatus";
+	
+	/** 
+	 * 관리비납부현황 페이지
+	 */
+	@RequestMapping(value=MAINT_PAYMENT_STATUS_URL)
+	public Object maintPaymentStatusHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU03");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU03_03");
+		List<Object> maintPaymentList = adminService.getMaintPaymentList(searchVo);
+		searchVo.setTotalCount(commonService.getTotalCount());
+		Map<String, Object> maintPaymentStatus = adminService.getMaintPaymentStatus();
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("maintPaymentList", maintPaymentList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("maintPaymentStatus", maintPaymentStatus);
+		mv.setViewName(ROOT_URL + MAINT_PAYMENT_STATUS_URL);
+		return mv;
 	}
 	
 	

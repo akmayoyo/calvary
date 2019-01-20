@@ -589,65 +589,70 @@ public class ExcelServiceImpl implements IExcelService {
 			// 계약금 납부내역
 			List<Object> downPaymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);
 			Map<String, Object> tmp = null;
+			int paymentRnum = 67;
 			if(downPaymentList != null && downPaymentList.size() > 0) {
-				tmp = (HashMap<String, Object>)downPaymentList.get(0);
-				String paymentDate = (String)tmp.get("payment_date");
-				int paymentAmount = CommonUtil.convertToInt(tmp.get("payment_amount"));
-				String paymentMethod = (String)tmp.get("payment_method");
-				String createUser = (String)tmp.get("create_user_name");
-				String createDate = (String)tmp.get("create_date");
-				
-				// 납부일자
-				sheetnums.add(0);
-				rownums.add(22);
-				cellnums.add(convertColAlphabetToIndex("D"));
-				cellvalues.add(paymentDate);
-				sheetnums.add(0);
-				rownums.add(67);
-				cellnums.add(convertColAlphabetToIndex("I"));
-				cellvalues.add(paymentDate);
-				// 납부금액
-				sheetnums.add(0);
-				rownums.add(22);
-				cellnums.add(convertColAlphabetToIndex("K"));
-				cellvalues.add("일금:" + CommonUtil.convertPriceToHangul(paymentAmount) + "원");
-				sheetnums.add(0);
-				rownums.add(22);
-				cellnums.add(convertColAlphabetToIndex("M"));
-				cellvalues.add("(₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount) + ")");
-				sheetnums.add(0);
-				rownums.add(67);
-				cellnums.add(convertColAlphabetToIndex("L"));
-				cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
-				
-				// 납부방법
-				if(CalvaryConstants.PAYMENT_METHOD_TRANSFER.equals(paymentMethod)) {// 이체
+				for(i = 0; i < downPaymentList.size(); i++) {
+					tmp = (HashMap<String, Object>)downPaymentList.get(i);
+					String paymentDate = (String)tmp.get("payment_date");
+					int paymentAmount = CommonUtil.convertToInt(tmp.get("payment_amount"));
+					String paymentMethod = (String)tmp.get("payment_method");
+					String createUser = (String)tmp.get("create_user_name");
+					String createDate = (String)tmp.get("create_date");
+					
+					// 납부일자
 					sheetnums.add(0);
-					rownums.add(24);
+					rownums.add(22);
+					cellnums.add(convertColAlphabetToIndex("D"));
+					cellvalues.add(paymentDate);
+					sheetnums.add(0);
+					rownums.add(paymentRnum);
+					cellnums.add(convertColAlphabetToIndex("I"));
+					cellvalues.add(paymentDate);
+					// 납부금액
+					sheetnums.add(0);
+					rownums.add(22);
+					cellnums.add(convertColAlphabetToIndex("K"));
+					cellvalues.add("일금:" + CommonUtil.convertPriceToHangul(paymentAmount) + "원");
+					sheetnums.add(0);
+					rownums.add(22);
+					cellnums.add(convertColAlphabetToIndex("M"));
+					cellvalues.add("(₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount) + ")");
+					sheetnums.add(0);
+					rownums.add(paymentRnum);
+					cellnums.add(convertColAlphabetToIndex("L"));
+					cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
+					
+					// 납부방법
+					if(CalvaryConstants.PAYMENT_METHOD_TRANSFER.equals(paymentMethod)) {// 이체
+						sheetnums.add(0);
+						rownums.add(24);
+						cellnums.add(convertColAlphabetToIndex("H"));
+						cellvalues.add("O");
+					}else if(CalvaryConstants.PAYMENT_METHOD_CASH.equals(paymentMethod)) {// 현금
+						sheetnums.add(0);
+						rownums.add(24);
+						cellnums.add(convertColAlphabetToIndex("N"));
+						cellvalues.add("O");
+					}
+					
+					// 확인일자
+					sheetnums.add(0);
+					rownums.add(26);
+					cellnums.add(convertColAlphabetToIndex("D"));
+					cellvalues.add(createDate);
+					sheetnums.add(0);
+					rownums.add(46);
 					cellnums.add(convertColAlphabetToIndex("H"));
-					cellvalues.add("O");
-				}else if(CalvaryConstants.PAYMENT_METHOD_CASH.equals(paymentMethod)) {// 현금
+					cellvalues.add(createDate);
+					
+					// 확인자
 					sheetnums.add(0);
-					rownums.add(24);
-					cellnums.add(convertColAlphabetToIndex("N"));
-					cellvalues.add("O");
+					rownums.add(26);
+					cellnums.add(convertColAlphabetToIndex("J"));
+					cellvalues.add(createUser);
+					
+					paymentRnum++;
 				}
-				
-				// 확인일자
-				sheetnums.add(0);
-				rownums.add(26);
-				cellnums.add(convertColAlphabetToIndex("D"));
-				cellvalues.add(createDate);
-				sheetnums.add(0);
-				rownums.add(46);
-				cellnums.add(convertColAlphabetToIndex("H"));
-				cellvalues.add(createDate);
-				
-				// 확인자
-				sheetnums.add(0);
-				rownums.add(26);
-				cellnums.add(convertColAlphabetToIndex("J"));
-				cellvalues.add(createUser);
 			}
 			
 			// 잔금 납부내역
@@ -660,7 +665,7 @@ public class ExcelServiceImpl implements IExcelService {
 					
 					// 납부일자
 					sheetnums.add(0);
-					rownums.add(68+i);
+					rownums.add(paymentRnum);
 					cellnums.add(convertColAlphabetToIndex("I"));
 					cellvalues.add(paymentDate);
 					// 납부금액
@@ -668,6 +673,8 @@ public class ExcelServiceImpl implements IExcelService {
 					rownums.add(68+i);
 					cellnums.add(convertColAlphabetToIndex("L"));
 					cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
+					
+					paymentRnum++;
 				}
 			}
 		}else if(ExcelForms.FULL_PAYMENT_FORM.equals(excelForm)) {// 완납확인증명서

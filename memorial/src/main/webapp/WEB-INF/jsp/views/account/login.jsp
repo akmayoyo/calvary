@@ -1,5 +1,14 @@
 <%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 
+<c:choose>
+	<c:when test="${not empty requestUrl}">
+		<c:set var="requestUrl" value="${requestUrl}"></c:set>
+	</c:when>
+	<c:otherwise>
+		<c:set var="requestUrl" value="/"></c:set>
+	</c:otherwise>
+</c:choose>
+
 <form id="frm" method="post">
 </form>
 
@@ -85,7 +94,7 @@
     		success: function(result) {
     			if(result && result.result) {
     				var frm = document.getElementById("frm");
-    				frm.action = "${contextPath}/main/index";
+    				frm.action = "${contextPath}${requestUrl}";
     				frm.submit();
     			}
     		}

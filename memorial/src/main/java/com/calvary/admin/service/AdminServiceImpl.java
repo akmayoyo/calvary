@@ -629,6 +629,67 @@ public class AdminServiceImpl implements IAdminService {
 	
 	
 	//===============================================================================
+	// 분양현황
+	//===============================================================================
+	/** 
+	 * 장묘형태별 신청현황조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getStatusByGraveType() {
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("bunyangstatus.getStatusByGraveType", null);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 개별형/가족형 별 신청현황조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getStatusByProductType() {
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("bunyangstatus.getStatusByProductType", null);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 진행상태 별 신청현황조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getStatusByProgress() {
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("bunyangstatus.getStatusByProgress", null);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 납부현황조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getPaymentStatus() {
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("bunyangstatus.getPaymentStatus", null);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 관리비납부현황조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getMaintPaymentStatus() {
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("bunyangstatus.getMaintPaymentStatus", null);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 관리비납부 리스트 조회
+	 */
+	public List<Object> getMaintPaymentList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
+		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		List<Object> list = commonDao.selectList("bunyangstatus.getMaintPaymentList", parameter); 
+		return list;
+	}
+	
+	
+	//===============================================================================
 	// 메뉴 관리
 	//===============================================================================
 	

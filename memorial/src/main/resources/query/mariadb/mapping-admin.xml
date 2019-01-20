@@ -7,6 +7,7 @@
     <!-- 분양신청리스트 조회 -->
     <select id="getApplyList" parameterType="map" resultType="map">
     	SELECT
+    		SQL_CALC_FOUND_ROWS
     		t.*
     		,CASE 
         		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
@@ -18,7 +19,6 @@
         		WHEN 'R' THEN '반려'
         		ELSE progress_status
         	END progress_status_exp
-    		,FOUND_ROWS() total_count
     	FROM
 		    (SELECT
 			  a.bunyang_seq
@@ -111,7 +111,6 @@
         		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
           		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
         	END use_user_exp
-    		,FOUND_ROWS() total_count
     	FROM
 		    (SELECT
 		      a.bunyang_seq as id
@@ -204,6 +203,9 @@
 		WHERE 1=1
 		<if test="apply_user_name != null and apply_user_name != ''">
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		<if test="bunyang_seq != null and bunyang_seq != ''">
+		AND bunyang_seq like CONCAT('%',#{bunyang_seq},'%')
 		</if>
 		<if test="searchVal != null and searchVal != ''">
 		AND (apply_user_name like CONCAT('%',#{searchVal},'%') OR bunyang_seq like CONCAT('%',#{searchVal},'%'))

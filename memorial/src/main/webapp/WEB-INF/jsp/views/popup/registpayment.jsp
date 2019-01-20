@@ -79,7 +79,7 @@
 function _addRow() {
     var tr = $('<tr/>');
     // 계약번호
-    tr.append('<td><select name="bunyangSeq" class="form-control"></select></td>');
+    tr.append('<td><select style="width:100%;" name="bunyangSeq" class="form-control"></select></td>');
  	// 총분양대금
     tr.append('<td><p name="totalPrice" class="form-control-static text-center"></td>');
  	// 기납부금액
@@ -197,18 +197,18 @@ function _savePayment() {
     var fullPaymentBunyangSeqs = [];// 분양잔금이 모두 입금되어 완납상태로 변경해야될 분양건
     var bValidate = true;
     var summaryByBunyangSeq = {};// 계약번호별 입력된 납입금정보 합산을 위한 storage
-    var bunyangInfo;// 계약정보
-    var bunyang_seq;// 계약번호
-    var total_price;// 총 분양대금
-    var contract_price;// 총 계약금
-    var balance_price;// 총 분양대금 - 계약금
-    var down_payment;// 기납입된 계약금
-    var balance_payment;// 기납입된 분양잔금
     
     $('#tblList tbody tr').each(function(idx) {
         var tr = $(this);
         var data = tr.find('select[name="bunyangSeq"]').select2('data');
         var inputPaymentAmount = tr.find('input[name="paymentAmount"]');
+        var bunyangInfo;// 계약정보
+        var bunyang_seq;// 계약번호
+        var total_price;// 총 분양대금
+        var contract_price;// 총 계약금
+        var balance_price;// 총 분양대금 - 계약금
+        var down_payment;// 기납입된 계약금
+        var balance_payment;// 기납입된 분양잔금
         if (data && data.length > 0) {
         	bunyangInfo = data[0];
             bunyang_seq = bunyangInfo['bunyang_seq'];
@@ -282,23 +282,23 @@ function _savePayment() {
         paymentMethods.push(payment_method);
     });
     
+    if(!bValidate) {
+    	return;
+    }
+    
     if (bunyangSeqs.length == 0) {
         common.showAlert('저장할 데이터가 없습니다.');
         return;
     }
     
-    if(!bValidate) {
-    	return;
-    }
-    
     // 계약건별로 입력된 금액에 대해 validation 체크 수행
     for(var key in summaryByBunyangSeq) {
-    	bunyangInfo = summaryByBunyangSeq[key];
-    	total_price = bunyangInfo['total_price'];
-        down_payment = bunyangInfo['down_payment'];
-        balance_payment = bunyangInfo['balance_payment'];
-        contract_price = bunyangInfo['contract_price'];
-        balance_price = bunyangInfo['balance_price'];
+    	var bunyangInfo = summaryByBunyangSeq[key];
+    	var total_price = bunyangInfo['total_price'];
+    	var down_payment = bunyangInfo['down_payment'];
+    	var balance_payment = bunyangInfo['balance_payment'];
+    	var contract_price = bunyangInfo['contract_price'];
+    	var balance_price = bunyangInfo['balance_price'];
         // 화면에서 입력된 계약금,분양잔금,관리비의 누적분
         var accum_down_payment = bunyangInfo['accum_down_payment'];
         var accum_balance_payment = bunyangInfo['accum_balance_payment'];
