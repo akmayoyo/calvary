@@ -6,6 +6,8 @@
 	<input type="hidden" id="pageIndex" name="pageIndex" value="${searchVo.pageIndex}">
 	<input type="hidden" id="searchKey" name="searchKey" value="${searchVo.searchKey}">
 	<input type="hidden" id="searchVal" name="searchVal" value="${searchVo.searchVal}">
+	<input type="hidden" id="progressStatus" name="progressStatus" value="${searchVo.progressStatus}">
+	<input type="hidden" id="bunyangTimes" name="bunyangTimes" value="${searchVo.bunyangTimes}">
 	<input type="hidden" id="countPerPage" name="countPerPage" value="${searchVo.countPerPage}">
 	<input type="hidden" id="totalCount" name="totalCount" value="${searchVo.totalCount}">
 	<input type="hidden" id="bunyangSeq" name="bunyangSeq" value="${bunyangSeq}">
@@ -178,8 +180,15 @@
     <div class="mt-30 text-center">
         <button id="btnEdit" type="button" class="btn btn-primary btn-lg">수정</button>
         <c:if test="${bunyangInfo.progress_status == 'N'}">
-        <button id="btnApproval" type="button" class="btn btn-info btn-lg" onclick="approval()">승인</button>
-        <button id="btnReject" type="button" class="btn btn-warning btn-lg" onclick="reject()">반려</button>
+        <button type="button" class="btn btn-info btn-lg" onclick="approval()">승인</button>
+        <button type="button" class="btn btn-warning btn-lg" onclick="reject()">반려</button>
+        <button type="button" class="btn btn-danger btn-lg" onclick="cancel()">취소</button>
+		</c:if>
+        <c:if test="${bunyangInfo.progress_status == 'A'}">
+        <button type="button" class="btn btn-danger btn-lg" onclick="cancel()">취소</button>
+		</c:if>
+		<c:if test="${bunyangInfo.progress_status == 'R'}">
+		<button type="button" class="btn btn-info btn-lg" onclick="approval()">승인</button>
 		</c:if>
         <button id="btnList" type="button" class="btn btn-default btn-lg">목록</button>
     </div>
@@ -257,6 +266,13 @@ function reject() {
 			}
 		});
 	}
+}
+
+/**
+ * 
+ */
+function cancel() {
+	
 }
 
 /**

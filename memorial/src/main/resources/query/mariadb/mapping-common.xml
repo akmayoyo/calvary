@@ -101,6 +101,7 @@
 			A.code_desc,
 	       	A.code_level,
 	       	A.parent_code_seq,
+	       	A.code_value,
 	       	A.display_order
 	  	FROM TB_COM_CODE A
 	  	WHERE A.parent_code_seq = #{parentCodeSeq}

@@ -667,3 +667,8 @@ tr.cancel td{
 	text-decoration:line-through;
 	background-color: #f0f0f0;
 }
+th.required:after {
+	content: '*';
+	margin-left: 3px;
+	color: #d74b4a;
+}

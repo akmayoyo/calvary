@@ -113,8 +113,10 @@ function _downloadExcel() {
 	var searchKeys = [""];
 	var searchValues = [""];
 	var queryId = "approval.getApprovalList";
-	var fileName = "사용승인관리.xlsx";
-	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName);
+	var title = "갈보리추모동산 사용승인현황";
+	var fileName = title + ".xlsx";
+	var sheetName = title;
+	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);
 }
 
 /** 

@@ -21,6 +21,8 @@ public class CalvaryConstants {
 	public static final String CODE_SEQ_CHURCH_OFFICER = "CHURCH_OFFICER";
 	/** 코드시퀀스 : 사용자관계 */
 	public static final String CODE_SEQ_USER_RELATION = "USER_RELATION";
+	/** 코드시퀀스 : 분양차수 */
+	public static final String CODE_SEQ_BUNYANG_TIMES = "BUNYANG_TIMES";
 	
 	
 	/** 신청형태 : 개별형 */

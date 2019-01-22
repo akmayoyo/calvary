@@ -67,7 +67,9 @@ public class AdminServiceImpl implements IAdminService {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
-		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		parameter.put("apply_user_name", searchVo.getSearchVal());
+		parameter.put("progressStatus", searchVo.getProgressStatus());
+		parameter.put("bunyangTimes", searchVo.getBunyangTimes());
 		List<Object> list = commonDao.selectList("admin.getApplyList", parameter); 
 		return list;
 	}

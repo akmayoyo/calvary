@@ -19,11 +19,19 @@
         		WHEN 'R' THEN '반려'
         		ELSE progress_status
         	END progress_status_exp
+        	,CASE progress_status
+        		WHEN 'A' THEN progress_update_date
+        		ELSE remarks
+        	END remarks_exp
     	FROM
 		    (SELECT
 			  a.bunyang_seq
-			  ,COALESCE(a.progress_status,'') || a.bunyang_seq bunyang_no
+			  ,a.bunyang_no
 			  ,a.product_type
+			  ,a.cancel_yn
+			  ,a.bunyang_times
+			  ,(SELECT remarks FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = a.progress_status) remarks
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = a.progress_status) progress_update_date
 			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
 			  ,a.couple_type_count
 			  ,a.single_type_count
@@ -93,9 +101,16 @@
 			WHERE a.progress_status in ('N', 'A', 'R')
 			) t
 		WHERE 1=1
-		<if test="apply_user_name != null">
+		<if test="apply_user_name != null and apply_user_name != ''">
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
 		</if>
+		<if test="progressStatus != null and progressStatus != '' and progressStatus != 'CA'">
+		AND progress_status = #{progressStatus}
+		</if>
+		<if test="progressStatus == 'CA'">
+		AND progress_status = 'A' AND cancel_yn = 'Y'
+		</if>
+		AND bunyang_times = #{bunyangTimes}
 		ORDER BY t.bunyang_seq
 		<if test="start != null">
 		LIMIT #{start}, #{count}
@@ -115,8 +130,9 @@
 		    (SELECT
 		      a.bunyang_seq as id
 			  ,a.bunyang_seq
-			  ,COALESCE(a.progress_status,'') || a.bunyang_seq bunyang_no
+			  ,a.bunyang_no
 			  ,a.product_type
+			  ,a.cancel_yn
 			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
 			  ,a.couple_type_count
 			  ,a.single_type_count
@@ -223,7 +239,9 @@
 		FROM
 		(SELECT 
 			a.bunyang_seq
+	       	,a.bunyang_no
 	       	,a.product_type
+	       	,a.cancel_yn
 	       	,b.user_id as apply_user_id
 	       	,b.user_name as apply_user_name
           	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name

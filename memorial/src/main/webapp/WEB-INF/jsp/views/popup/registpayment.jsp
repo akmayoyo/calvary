@@ -24,7 +24,8 @@
         <table id="tblList" class="table table-style table-bordered">
         	<colgroup>
         		<col width="20%">
-        		<col width="11%">
+        		<col width="8%">
+        		<col width="8%">
         		<col width="11%">
         		<col width="11%">
         		<col width="11%">
@@ -35,17 +36,18 @@
             <thead>
                 <tr>
                     <th scope="col" colspan="3">계약정보</th>
-                    <th scope="col" colspan="4">납입정보</th>
+                    <th scope="col" colspan="5">납부정보</th>
                     <th scope="col" rowspan="2"></th>
                 </tr>
                 <tr>
-                	<th scope="col">계약번호/신청자</th>
+                	<th scope="col" class="required">계약번호/신청자</th>
                     <th scope="col">총분양대금</th>
                     <th scope="col">기납부금액</th>
-                    <th scope="col">납입일</th>
-                    <th scope="col">납입금</th>
-                    <th scope="col">납입유형</th>
-                    <th scope="col">납부방법</th>
+                    <th scope="col" class="required">납부일</th>
+                    <th scope="col" class="required">납부자</th>
+                    <th scope="col" class="required">납부금</th>
+                    <th scope="col" class="required">납부유형</th>
+                    <th scope="col" class="required">납부방법</th>
                 </tr>
             </thead>
             <tbody>
@@ -84,11 +86,13 @@ function _addRow() {
     tr.append('<td><p name="totalPrice" class="form-control-static text-center"></td>');
  	// 기납부금액
     tr.append('<td><p name="totalPayment" class="form-control-static text-center"></td>');
-    // 납입일
-    tr.append('<td><div class="input-group date" data-provide="datepicker"><input name="paymentDate" type="text" class="form-control text-center"><div class="input-group-addon"><span class="glyphicon glyphicon-th"></span></div></div></td>');
-    // 납입금
+    // 납부일
+    tr.append('<td><div class="input-group date" data-provide="datepicker"><input name="paymentDate" type="text" class="form-control text-center"><div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div></div></td>');
+    // 납부자
+    tr.append('<td><div class="input-group"><input name="paymentUser" type="text" class="form-control text-center" readonly="readonly"><span class="input-group-btn"><button type="button" class="btn btn-default" onclick="_selectPaymentUser(this)"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></span></div></td>');
+    // 납부금
     tr.append('<td><input name="paymentAmount" type="text" class="form-control text-center"></td>');
-    // 납입유형
+    // 납부유형
     tr.append('<td><select name="paymentType" class="form-control"><option value="<%=CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT%>">계약금</option><option value="<%=CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT%>">분양잔금</option><option value="<%=CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT%>">관리비</option></select></td>');
     // 납부방법
     tr.append('<td><select name="paymentMethod" class="form-control"><option value="<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>">무통장/계좌이체</option><option value="<%=CalvaryConstants.PAYMENT_METHOD_CASH%>">현금납부</option></select></td>');
@@ -182,6 +186,47 @@ function _addRow() {
  */
 function _deleteRow(btn) {
     $(btn).parent("td").parent("tr").remove();
+}
+
+/**
+ * 납부자 선택 팝업 표시
+ */
+function _selectPaymentUser(btn) {
+	var winoption = {width:1240, height:830};
+	var param = {popupTitle: "납부자 입력"};
+	common.openWindow("${contextPath}/popup/selectuser", "popRegistPaymentUser", winoption, param);
+	// 납부자 입력 팝업 callback 함수
+	window.selectuserCallBack = function(type, item) {
+		var idx = 0, userId = '', userName = '', birthDate = '', email = '', mobile = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', diocese = '';
+		if(item && item.length > 0) {
+			var input = $(btn).parent('span').prev('input');
+			userId = item[idx++];
+			userName = item[idx++];
+			birthDate = item[idx++];
+			email = item[idx++];
+			mobile = item[idx++];
+			postNumber = item[idx++];
+			address1 = item[idx++];
+			address2 = item[idx++];
+			fulladdress = item[idx++];
+			churchOfficer = item[idx++];
+			churchOfficerName = item[idx++];
+			diocese = item[idx++];
+			input.attr('userId', userId);
+			input.attr('userName', userName);
+			input.attr('birthDate', birthDate);
+			input.attr('email', email);
+			input.attr('mobile', mobile);
+			input.attr('postNumber', postNumber);
+			input.attr('address1', address1);
+			input.attr('address2', address2);
+			input.attr('fulladdress', fulladdress);
+			input.attr('churchOfficer', churchOfficer);
+			input.attr('churchOfficerName', churchOfficerName);
+			input.attr('diocese', diocese);
+			input.val(userName);
+		}
+	};
 }
 
 /**

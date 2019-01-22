@@ -110,8 +110,10 @@ function _downloadExcel() {
 	var searchKeys = [""];
 	var searchValues = [""];
 	var queryId = "contract.getContractList";
-	var fileName = "사용계약관리.xlsx";
-	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName);
+	var title = "갈보리추모동산 계약현황";
+	var fileName = title + ".xlsx";
+	var sheetName = title;
+	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);
 }
 
 /** 

@@ -141,7 +141,7 @@
 	    });
 	};
 	
-	var exportExcel = function(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName) {
+	var exportExcel = function(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName) {
 		
 		var data = {};
 		data["excelHeaders"] = excelHeaders;
@@ -150,6 +150,8 @@
 		data["searchValues"] = searchValues;
 		data["queryId"] = queryId;
 		data["fileName"] = fileName;
+		data["title"] = title;
+		data["sheetName"] = sheetName;
 		
 		loading(true);
 		

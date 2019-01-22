@@ -38,7 +38,7 @@
 	            			<div class="input-group date" data-provide="datepicker" style="width: 225px;">
 							    <input id="tiPaymentDate" type="text" class="form-control">
 							    <div class="input-group-addon">
-							        <span class="glyphicon glyphicon-th"></span>
+							        <span class="glyphicon glyphicon-calendar"></span>
 							    </div>
 							</div>
 	            		</td>
@@ -150,7 +150,7 @@ function _search(pageIndex) {
  * 납입금 입력 팝업 표시
  */
 function _registPayment() {
-	var winoption = {width:1360, height:750};
+	var winoption = {width:1390, height:750};
 	common.openWindow("${contextPath}/popup/registpayment", "popRegistPayment", winoption, {});
 	// callback 함수
 	window.saveCallBack = function(result) {

@@ -17,6 +17,7 @@ import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -73,7 +74,9 @@ public class ExcelController {
 			@RequestParam(value="searchKeys[]") String[] searchKeys,
 			@RequestParam(value="searchValues[]") String[] searchValues,
 			@RequestParam(value="queryId") String queryId,
-			@RequestParam(value="fileName") String fileName
+			@RequestParam(value="fileName") String fileName,
+			@RequestParam(value="title") String title,
+			@RequestParam(value="sheetName") String sheetName
 			) {
 		
 		boolean bRslt = false;
@@ -87,7 +90,7 @@ public class ExcelController {
         // 셀 생성
         XSSFCell cell;
         
-        int rowIdx = 2;
+        int rowIdx = 1;
         int colIdx = 0;
         
         // 데이터 리스트
@@ -104,9 +107,35 @@ public class ExcelController {
         }
         List<Object> list = excelService.getExportDataList(queryId, queryParam);
         
-        XSSFFont bFont = workbook.createFont();
-        bFont.setBold(true);
+        String fontName = "맑은 고딕";
+        
+        XSSFFont headerFont = workbook.createFont();
+        XSSFFont titleFont = workbook.createFont();
+        XSSFFont rowFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerFont.setFontName(fontName);
+        titleFont.setBold(true);
+        titleFont.setFontName(fontName);
+        titleFont.setFontHeight((short) 350);
+        rowFont.setFontName(fontName);
+        
         Color borderColor = new Color(153, 153, 153);
+        
+        XSSFCellStyle titleStyle = workbook.createCellStyle();
+        titleStyle.setFillForegroundColor(new XSSFColor(new Color(197, 217, 241), workbook.getStylesSource().getIndexedColors()));
+        titleStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        titleStyle.setBorderTop(BorderStyle.THIN);
+        titleStyle.setBorderRight(BorderStyle.THIN);
+        titleStyle.setBorderBottom(BorderStyle.THIN);
+        titleStyle.setBorderLeft(BorderStyle.THIN);
+        titleStyle.setTopBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        titleStyle.setRightBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        titleStyle.setBottomBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        titleStyle.setLeftBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        titleStyle.setFont(titleFont);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        
         XSSFCellStyle headerStyle = workbook.createCellStyle();
         headerStyle.setFillForegroundColor(new XSSFColor(new Color(234, 234, 234), workbook.getStylesSource().getIndexedColors()));
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -118,9 +147,10 @@ public class ExcelController {
         headerStyle.setRightBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
         headerStyle.setBottomBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
         headerStyle.setLeftBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
-        headerStyle.setFont(bFont);
+        headerStyle.setFont(headerFont);
         headerStyle.setAlignment(HorizontalAlignment.CENTER);
         headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        
         XSSFCellStyle rowStyle = workbook.createCellStyle();
         rowStyle.setBorderTop(BorderStyle.THIN);
         rowStyle.setBorderRight(BorderStyle.THIN);
@@ -130,8 +160,28 @@ public class ExcelController {
         rowStyle.setRightBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
         rowStyle.setBottomBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
         rowStyle.setLeftBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        rowStyle.setFont(rowFont);
         rowStyle.setAlignment(HorizontalAlignment.CENTER);
         rowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        
+        // 시트명
+        workbook.setSheetName(workbook.getSheetIndex(sheet), sheetName);
+        
+        // 타이틀 생성
+        colIdx = 0;
+        row = sheet.createRow(rowIdx);
+        row.setHeightInPoints((3 * sheet.getDefaultRowHeightInPoints()));
+        for(colIdx = 0; colIdx < excelHeaders.length; colIdx++) {
+        	cell = row.createCell(colIdx);
+        	cell.setCellStyle(titleStyle);
+        	if(colIdx == 0) {
+        		cell.setCellValue(title);
+        	}
+        }
+        CellRangeAddress titleMergeRegion = new CellRangeAddress(rowIdx, rowIdx, 0, colIdx-1);
+        sheet.addMergedRegion(titleMergeRegion);
+        
+        rowIdx += 2;
         
         // 헤더 생성
         row = sheet.createRow(rowIdx++);

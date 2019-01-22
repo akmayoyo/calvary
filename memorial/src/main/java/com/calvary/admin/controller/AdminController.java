@@ -20,6 +20,7 @@ import com.calvary.admin.service.IAdminService;
 import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
+import com.calvary.common.util.CommonUtil;
 import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
 import com.calvary.excel.ExcelForms;
@@ -58,9 +59,14 @@ public class AdminController {
 	/** 
 	 * 분양신청관리 메인 페이지 
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=APPLY_MGMT_URL)
 	public Object applyMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		List<Object> bunyangTimesList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_BUNYANG_TIMES);
+		if(searchVo.getBunyangTimes() <= 0 && bunyangTimesList != null && bunyangTimesList.size() > 0) {
+			searchVo.setBunyangTimes(CommonUtil.convertToInt(((Map<String, Object>)bunyangTimesList.get(0)).get("code_seq")));
+		}
 		List<Object> applyList = adminService.getApplyList(searchVo);
 		searchVo.setTotalCount(commonService.getTotalCount());
 		ModelAndView mv = new ModelAndView();
@@ -71,6 +77,7 @@ public class AdminController {
 		mv.addObject("menuList", menuList);
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("applyList", applyList);
+		mv.addObject("bunyangTimesList", bunyangTimesList);
 		mv.setViewName(ROOT_URL + APPLY_MGMT_URL);
 		return mv;
 	}
