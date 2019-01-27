@@ -161,12 +161,16 @@ public class ExcelServiceImpl implements IExcelService {
 		int singleTypeCount = (int)bunyangInfo.get("single_type_count");
 		// 총기수
 		int bunyangCnt = coupleTypeCount*2+singleTypeCount;
+		// 기수당 단가
+		int pricePerCount = (int)bunyangInfo.get("price_per_count");
 		// 총분양대금
-		int totalPrice = bunyangCnt * CalvaryConstants.BUNYANG_PRICE_PER_UNIT;
+		int totalPrice = bunyangCnt * pricePerCount;
 		// 계약금
 		int contractPrice = (int)totalPrice/10;
 		// 잔금
 		int balancePrice = totalPrice - contractPrice;
+		// 번호(승인이후부터 생성됨)
+		String bunyangNo = (String)bunyangInfo.get("bunyang_no");
 		
 		int downPayment = CommonUtil.convertToInt(bunyangInfo.get("down_payment"));// 납부계약금
 		int balancePayment = CommonUtil.convertToInt(bunyangInfo.get("balance_payment"));// 납부잔금
@@ -200,7 +204,7 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(5);
 				cellnums.add(13);
-				cellvalues.add(bunyangSeq);
+				cellvalues.add(bunyangNo);
 			}
 			
 			// 신청자성명
@@ -212,7 +216,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(4);
-			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
+			cellvalues.add((String)applyUser.get("birth_date"));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -229,7 +233,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(11);
-			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
+			cellvalues.add((String)applyUser.get("mobile"));
 			
 			// 신청자  우편번호
 			sheetnums.add(0);
@@ -242,6 +246,12 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(10);
 			cellnums.add(2);
 			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
+			
+			// 전화
+			sheetnums.add(0);
+			rownums.add(10);
+			cellnums.add(convertColAlphabetToIndex("K"));
+			cellvalues.add((String)applyUser.get("phone"));
 			
 			// 신청자  이메일
 			sheetnums.add(0);
@@ -294,6 +304,11 @@ public class ExcelServiceImpl implements IExcelService {
 				rownums.add(25);
 				cellnums.add(11);
 				cellvalues.add("O");
+				// 관리비 납부 사용자명
+				sheetnums.add(0);
+				rownums.add(26);
+				cellnums.add(convertColAlphabetToIndex("M"));
+				cellvalues.add((String)bunyangInfo.get("maint_charger_name"));
 			}
 			
 			// 신청일
@@ -348,7 +363,7 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(13);
 				cellnums.add(4);
-				cellvalues.add(CommonUtil.getBirthDateFormatString((String)agentUser.get("birth_date")));
+				cellvalues.add((String)agentUser.get("birth_date"));
 				
 				// 신청자와의 관계
 				sheetnums.add(0);
@@ -360,7 +375,7 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(13);
 				cellnums.add(11);
-				cellvalues.add(CommonUtil.getMobileFormatString((String)agentUser.get("mobile")));
+				cellvalues.add((String)agentUser.get("mobile"));
 				
 				// 우편번호
 				sheetnums.add(0);
@@ -423,7 +438,7 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(startRowNum);
 					cellnums.add(4);
-					cellvalues.add(CommonUtil.getBirthDateFormatString((String)userMap.get("birth_date")));
+					cellvalues.add((String)userMap.get("birth_date"));
 					// 우편번호
 					sheetnums.add(0);
 					rownums.add(startRowNum);
@@ -448,7 +463,7 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(startRowNum);
 					cellnums.add(13);
-					cellvalues.add(CommonUtil.getMobileFormatString((String)userMap.get("mobile")));
+					cellvalues.add((String)userMap.get("mobile"));
 					// 이메일
 					sheetnums.add(0);
 					rownums.add(startRowNum);
@@ -479,11 +494,11 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("F"));
-			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
+			cellvalues.add((String)applyUser.get("birth_date"));
 			sheetnums.add(0);
 			rownums.add(52);
 			cellnums.add(convertColAlphabetToIndex("E"));
-			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
+			cellvalues.add((String)applyUser.get("birth_date"));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -500,7 +515,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("M"));
-			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
+			cellvalues.add((String)applyUser.get("mobile"));
 			
 			// 신청자  우편번호
 			sheetnums.add(0);
@@ -695,7 +710,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("F"));
-			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
+			cellvalues.add((String)applyUser.get("birth_date"));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -712,7 +727,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("M"));
-			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
+			cellvalues.add((String)applyUser.get("mobile"));
 			
 			// 신청자  우편번호
 			sheetnums.add(0);
@@ -827,7 +842,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("F"));
-			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
+			cellvalues.add((String)applyUser.get("birth_date"));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(18);
@@ -844,7 +859,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("M"));
-			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
+			cellvalues.add((String)applyUser.get("mobile"));
 			
 			// 신청자  우편번호
 			sheetnums.add(0);
@@ -919,7 +934,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("F"));
-			cellvalues.add(CommonUtil.getBirthDateFormatString((String)applyUser.get("birth_date")));
+			cellvalues.add((String)applyUser.get("birth_date"));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -936,7 +951,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("M"));
-			cellvalues.add(CommonUtil.getMobileFormatString((String)applyUser.get("mobile")));
+			cellvalues.add((String)applyUser.get("mobile"));
 			
 			// 신청자  우편번호
 			sheetnums.add(0);
