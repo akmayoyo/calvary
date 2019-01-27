@@ -475,29 +475,7 @@ function registUseUser(type) {
 			if(!item1 || item1.length == 0 || !item2 || item2.length == 0) {
 				return;
 			}
-			var useUser1;
-			if(isOneSelf) {// 본인등록인 경우
-				var idx = 0;
-				useUser1 = {};
-				useUser1['userName'] = applyUser['userName'];
-				useUser1['birthDate'] = applyUser['birthDate'];
-				useUser1['gender'] = applyUser['gender'];
-				useUser1['mobile'] = applyUser['mobile'];
-				useUser1['phone'] = applyUser['phone'];
-				useUser1['postNumber'] = applyUser['postNumber'];
-				useUser1['address1'] = applyUser['address1'];
-				useUser1['address2'] = applyUser['address2'];
-				useUser1['fulladdress'] = applyUser['fulladdress'];
-				useUser1['email'] = applyUser['email'];
-				useUser1['relationType'] = 'ONESELF';
-				useUser1['relationTypeName'] = '본인';
-				useUser1['isChurchPerson'] = item1[idx++];
-				useUser1['isMove'] = item1[idx++];
-				useUser1['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>';
-			} else {
-				useUser1 = getUseUser(item1);
-			}
-			
+			var useUser1 = getUseUser(item1);
 			var useUser2 = getUseUser(item2);
 			
 			bunyangRefUser.useUser.push(useUser1);
@@ -535,29 +513,7 @@ function registUseUser(type) {
 			if(!item1 || item1.length == 0) {
 				return;
 			}
-			var useUser1;
-			if(isOneSelf) {// 본인등록인 경우
-				var idx = 0;
-				useUser1 = {};
-				useUser1['userName'] = applyUser['userName'];
-				useUser1['birthDate'] = applyUser['birthDate'];
-				useUser1['gender'] = applyUser['gender'];
-				useUser1['mobile'] = applyUser['mobile'];
-				useUser1['phone'] = applyUser['phone'];
-				useUser1['postNumber'] = applyUser['postNumber'];
-				useUser1['address1'] = applyUser['address1'];
-				useUser1['address2'] = applyUser['address2'];
-				useUser1['fulladdress'] = applyUser['fulladdress'];
-				useUser1['email'] = applyUser['email'];
-				useUser1['relationType'] = 'ONESELF';
-				useUser1['relationTypeName'] = '본인';
-				useUser1['isChurchPerson'] = item1[idx++];
-				useUser1['isMove'] = item1[idx++];
-				useUser1['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>';
-			} else {
-				useUser1 = getUseUser(item1);
-			}
-			
+			var useUser1 = getUseUser(item1);
 			bunyangRefUser.useUser.push(useUser1);
 			
 			var tr1 = $('<tr/>');

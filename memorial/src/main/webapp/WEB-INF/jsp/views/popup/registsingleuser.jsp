@@ -454,6 +454,26 @@ function _confirm() {
 		// 이장여부
 		isMove = elMove.find('option:selected').val();
 		
+		var existDuplicatedUser = false;
+		
+		// 메인화면에 기등록된 사용자중에 중복된 사람이 있는지 체크
+		$('#userList li[refType="<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>"]').each(function(idx) {
+			// 중복체크는 성명,생년월일,성별,연락처로
+			if(userName == $(this).attr('userName') 
+					&& birthDate == $(this).attr('birthDate')
+					&& gender == $(this).attr('gender')
+					&& mobile == $(this).attr('mobile')
+			) {
+				existDuplicatedUser = true;
+				return false;
+			}
+		});
+		
+		if(existDuplicatedUser) {
+			common.showAlert('입력하신 사용자와 성명,생년월일,성별,연락처가 동일한 기등록 사용자가 있습니다.');
+			return;
+		}
+		
 	    selectedItems1.push(userName);
 	    selectedItems1.push(birthDate);
 	    selectedItems1.push(gender);
@@ -472,8 +492,24 @@ function _confirm() {
 	    selectedItems1.push(isChurchPerson);
 	    selectedItems1.push(isMove);
 	} else {
-		// 본인등록인 경우는 교인여부와 이장여부만
+		// 본인등록인 경우는 신청자 정보로
+		var applyUserInfo = getRefUserInfo('<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>');
 		isMove = $('#tblApplyUser').find('select[name="moveyn"]').find('option:selected').val();
+		selectedItems1.push(applyUserInfo.userName);
+	    selectedItems1.push(applyUserInfo.birthDate);
+	    selectedItems1.push(applyUserInfo.gender);
+	    selectedItems1.push(applyUserInfo.mobile);
+	    selectedItems1.push(applyUserInfo.phone);
+	    selectedItems1.push(applyUserInfo.postNumber);
+	    selectedItems1.push(applyUserInfo.address1);
+	    selectedItems1.push(applyUserInfo.address2);
+	    selectedItems1.push(applyUserInfo.fulladdress);
+	    selectedItems1.push(applyUserInfo.officer);
+	    selectedItems1.push(applyUserInfo.officerName);
+	    selectedItems1.push(applyUserInfo.diocese);
+	    selectedItems1.push(applyUserInfo.email);
+	    selectedItems1.push(applyUserInfo.relationType);
+	    selectedItems1.push(applyUserInfo.relationTypeName);
 		selectedItems1.push('Y');
 		selectedItems1.push(isMove);
 	}
