@@ -335,6 +335,11 @@ function _confirm() {
 	}
 	mobile = mobile + '-' + mobile2 + '-' + mobile3;
 	
+	if(!common.isValidMobile(mobile)) {
+		common.showAlert('휴대전화 양식이 올바르지 않습니다.');
+		return;
+	}
+	
 	// 전화
 	phone1 = $('#tiPhone1').val();
 	phone2 = $('#tiPhone2').val();
@@ -344,6 +349,11 @@ function _confirm() {
 		return;
 	}
 	phone = phone1 + '-' + phone2 + '-' + phone3;
+	
+	if(!common.isValidPhone(phone)) {
+		common.showAlert('전화 양식이 올바르지 않습니다.');
+		return;
+	}
 	
 	// 주소
 	postNumber = $('#tblUserInfo input[name="postNumber"]').val();

@@ -281,11 +281,22 @@
 	}
 	
 	var isValidMobile = function(mobile) {
-		var regExp = /^(010|011|016|017|018|019)\d{3,4}\d{4}$/;
+		var regExp = /^(010|011|016|017|018|019)-?\d{3,4}-?\d{4}$/;
 		if(!mobile) {
 			return false;
 		}
 		if (!mobile.match(regExp)) {
+			return false;
+		}
+		return true;
+	}
+	
+	var isValidPhone = function(phone) {
+		var regExp = /^\d{2,4}-?\d{3,4}-?\d{4}$/;
+		if(!phone) {
+			return false;
+		}
+		if (!phone.match(regExp)) {
 			return false;
 		}
 		return true;
@@ -353,6 +364,7 @@
 	common.datePicker = datePicker;
 	common.isValidMail = isValidMail;
 	common.isValidMobile = isValidMobile;
+	common.isValidPhone = isValidPhone;
 	common.isVisible = isVisible;
 
 	window.common = common;

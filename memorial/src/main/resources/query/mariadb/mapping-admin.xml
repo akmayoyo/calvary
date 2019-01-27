@@ -247,10 +247,12 @@
           	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
 	       	,a.service_charge_type
           	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
+          	,(SELECT user_name from TB_BUNYANG_REF_USER bru where bru.bunyang_seq = a.bunyang_seq and bru.is_maint_charger = 'Y' ) maint_charger_name
           	,a.couple_type_count
           	,a.single_type_count
           	,a.progress_status
-          	,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
+          	,a.price_per_count
+          	,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
           	,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
             ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
 	       	,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
@@ -290,22 +292,22 @@
 		    a.relation_type,
 			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.relation_type AND cc.parent_code_seq = 'USER_RELATION') relation_type_name,
 		    a.user_id,
-		    COALESCE(a.user_name, b.user_name) AS user_name,
-		    COALESCE(a.birth_date, b.birth_date) AS birth_date,
-		    COALESCE(a.gender, b.gender) AS gender,
-		    COALESCE(a.email, b.email) AS email,
-		    COALESCE(a.mobile, b.mobile) AS mobile,
-		    COALESCE(a.phone, b.phone) AS phone,
-		    COALESCE(a.post_number, b.post_number) AS post_number,
-		    COALESCE(a.address1, b.address1) AS address1,
-		    COALESCE(a.address2, b.address2) AS address2,
-           	b.church_officer,
-			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = b.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') church_officer_name,
-			b.diocese,
+		    a.user_name,
+		    a.birth_date,
+		    a.gender,
+		    a.email,
+		    a.mobile,
+		    a.phone,
+		    a.post_number,
+		    a.address1,
+		    a.address2,
+           	a.church_officer,
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') church_officer_name,
+			a.diocese,
 			a.is_church_person,
 			a.user_seq,
 			a.couple_seq
-		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_COM_USER b ON a.user_id = b.user_id
+		FROM TB_BUNYANG_REF_USER a
 		WHERE a.bunyang_seq = #{bunyangSeq}
     	AND a.ref_type = #{refType}
     	ORDER BY a.user_seq
@@ -324,14 +326,14 @@
 	
 	<!-- 분양정보 생성 -->
 	<insert id="createBunyangInfo" parameterType="map">
-		INSERT INTO TB_BUNYANG_INFO ( bunyang_seq,product_type,couple_type_count,single_type_count,service_charge_type,progress_status,regist_user_id,regist_date )
-		VALUES (#{bunyangSeq} , #{productType}, #{coupleTypeCount}, #{singleTypeCount}, #{serviceChargeType}, #{progressStatus}, #{registUserId}, CURRENT_TIMESTAMP )
+		INSERT INTO TB_BUNYANG_INFO ( bunyang_seq,product_type,couple_type_count,single_type_count,service_charge_type,progress_status,regist_user_id,regist_date,bunyang_times,price_per_count )
+		VALUES (#{bunyangSeq} , #{productType}, #{coupleTypeCount}, #{singleTypeCount}, #{serviceChargeType}, #{progressStatus}, #{registUserId}, CURRENT_TIMESTAMP, #{bunyangTimes}, #{pricePerCount})
 	</insert>
 	
 	<!-- 분양 관련 인명정보 생성 -->
 	<insert id="createBunyangRefUserInfo" parameterType="map">
-		INSERT INTO TB_BUNYANG_REF_USER ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person,user_seq,couple_seq )
-		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}, #{userId}, #{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson}, #{userSeq}, #{coupleSeq})
+		INSERT INTO TB_BUNYANG_REF_USER ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person,user_seq,couple_seq, is_move, is_maint_charger, church_officer, diocese )
+		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}, #{userId}, #{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson}, #{userSeq}, #{coupleSeq}, #{isMove}, #{isMaintCharger}, #{churchOfficer}, #{diocese})
 	</insert>
 	
 	<update id="updateBunyangFileSeq">

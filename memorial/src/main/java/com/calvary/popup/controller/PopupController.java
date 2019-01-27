@@ -75,6 +75,7 @@ public class PopupController {
 		mv.addObject("users", selectUserVo.getUsers());
 		mv.addObject("popupTitle", selectUserVo.getPopupTitle());
 		mv.addObject("popupType", selectUserVo.getPopupType());
+		mv.addObject("rowIdx", selectUserVo.getRowIdx());
 		if("couple".equals(selectUserVo.getPopupType())) {
 			mv.setViewName(ROOT_URL + "/registcoupleuser");
 		}else {

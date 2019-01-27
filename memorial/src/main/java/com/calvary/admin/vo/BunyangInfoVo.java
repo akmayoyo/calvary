@@ -18,6 +18,7 @@ public class BunyangInfoVo {
 	private String registDate;
 	private int bunyangTimes;
 	private String remarks;
+	private int pricePerCount;
 	
 	private BunyangUserVo applyUser;// 신청자
 	private BunyangUserVo agentUser;// 대리인
@@ -131,6 +132,12 @@ public class BunyangInfoVo {
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
 	}
+	public int getPricePerCount() {
+		return pricePerCount;
+	}
+	public void setPricePerCount(int pricePerCount) {
+		this.pricePerCount = pricePerCount;
+	}
 	@Override
 	public String toString() {
 		return "BunyangInfoVo [bunyangSeq=" + bunyangSeq + ", bunyangNo=" + bunyangNo + ", requestUserSeq="
@@ -139,7 +146,8 @@ public class BunyangInfoVo {
 				+ ", reqApprovalSeq=" + reqApprovalSeq + ", contractSeq=" + contractSeq + ", useApprovalSeq="
 				+ useApprovalSeq + ", progressStatus=" + progressStatus + ", registUserSeq=" + registUserSeq
 				+ ", registDate=" + registDate + ", bunyangTimes=" + bunyangTimes + ", remarks=" + remarks
-				+ ", applyUser=" + applyUser + ", agentUser=" + agentUser + ", useUsers=" + useUsers + "]";
+				+ ", pricePerCount=" + pricePerCount + ", applyUser=" + applyUser + ", agentUser=" + agentUser
+				+ ", useUsers=" + useUsers + "]";
 	}
 	
 }

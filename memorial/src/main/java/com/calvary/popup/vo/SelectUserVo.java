@@ -8,6 +8,7 @@ public class SelectUserVo {
 
 	private String popupTitle;
 	private String popupType;
+	private int rowIdx = -1;
 	List<BunyangUserVo> users;
 	public String getPopupTitle() {
 		return popupTitle;
@@ -21,6 +22,12 @@ public class SelectUserVo {
 	public void setPopupType(String popupType) {
 		this.popupType = popupType;
 	}
+	public int getRowIdx() {
+		return rowIdx;
+	}
+	public void setRowIdx(int rowIdx) {
+		this.rowIdx = rowIdx;
+	}
 	public List<BunyangUserVo> getUsers() {
 		return users;
 	}
@@ -29,7 +36,8 @@ public class SelectUserVo {
 	}
 	@Override
 	public String toString() {
-		return "SelectUserVo [popupTitle=" + popupTitle + ", popupType=" + popupType + ", users=" + users + "]";
+		return "SelectUserVo [popupTitle=" + popupTitle + ", popupType=" + popupType + ", rowIdx=" + rowIdx + ", users="
+				+ users + "]";
 	}
 	
 }

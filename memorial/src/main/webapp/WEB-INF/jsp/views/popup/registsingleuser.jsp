@@ -75,19 +75,19 @@
            			<td align="left" class="form-inline" >
            				<input name="postNumber" type="text" class="form-control readonlywhite" style="width: 150px;" readonly="readonly" placeholder="우편번호">
            				<button name="postSearch" type="button" class="btn btn-sm btn-primary" onclick="goJusoPopup(this)">검색</button>
-           				<input type="checkbox" class="form-control" id="chkAddress1" name="chkAddress" style="margin-left: 10px;">
-    					<label name="labelChkAddress" style="font-size: 13px; font-weight: normal;" for="chkAddress1">상동</label>
-    					<select name="autoAddress" class="form-control hidden" style="width: 135px; margin-left: 5px;">
+    					<select name="autoAddress" class="form-control" style="width: 135px; margin-left: 5px;">
     						<option value="">주소선택</option>
     						<c:forEach var="user" items="${users}">
+    							<c:if test="${user.relationType != 'ONESELF'}">
     							<option postNumber="${user.postNumber}" address1="${user.address1}" address2="${user.address2}">
     								${user.userName}
     								<c:choose>
     									<c:when test="${user.refType == 'APPLY_USER'}">(신청자)</c:when>
-    									<c:when test="${user.refType == 'AGENT_USER'}">(${user.relationType})</c:when>
-    									<c:when test="${user.refType == 'USE_USER'}">(${user.relationType})</c:when>
+    									<c:when test="${user.refType == 'AGENT_USER'}">(대리인)</c:when>
+    									<c:when test="${user.refType == 'USE_USER'}">(${user.relationTypeName})</c:when>
     								</c:choose>
     							</option>
+    							</c:if>
     						</c:forEach>
     					</select>
            				<br>
@@ -171,7 +171,7 @@
 		           			<td align="left" class="form-inline" >
 		           				<select name="moveyn" class="form-control" style="width: 80px;">
 		            				<option value="Y">Y</option>
-		            				<option value="N">N</option>
+		            				<option value="N" selected="selected">N</option>
 		            			</select>
 		           			</td>
 		           		</tr>
@@ -190,9 +190,10 @@
 	<ul id="userList" style="display: none;">
 		<c:forEach var="user" items="${users}">
 			<li refType="${user.refType}" userName="${user.userName}" birthDate="${user.birthDate }" gender="${user.gender }"
-			churchOfficer="${user.churchOfficer}" diocese="${user.diocese}" relationType="${user.relationType}"  
+			churchOfficer="${user.churchOfficer}" diocese="${user.diocese}" relationType="${user.relationType}" relationTypeName="${user.relationTypeName}"  
 			mobile="${user.mobile }" phone="${user.phone }" email="${user.email}"
-			postNumber="${user.postNumber }" address1="${user.address1 }" address2="${user.address2}"
+			postNumber="${user.postNumber }" address1="${user.address1 }" address2="${user.address2}" fulladdress="${user.fulladdress}"
+			isChurchPerson="${user.isChurchPerson}" isMove="${user.isMove}"
 			></li>
 		</c:forEach>
 	</ul>
@@ -202,7 +203,20 @@
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript">
+
+//신청자 정보
+var applyUserInfo;
+
 (function() {
+	
+	var tmp = getRefUserInfo('<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>');
+	if(tmp && tmp.length > 0) {
+		applyUserInfo = tmp[0];
+	}
+	
+	// 수정모드로 호출된 경우 기존 입력데이터 표시
+	setEditInfo();
+	
 	// 본인 체크박스 변경 이벤트
 	$('#chkOneSelf').change(chkOneSelfChangeHandler);
 	
@@ -213,24 +227,6 @@
 	
 	// 관계 변경이벤트
 	$('select[name="relation"]').change(relationTypeChangeHandler);
-	
-	// 주소 상동 체크박스 클릭
-	$('#chkAddress1, #chkAddress2').change(function() {
-		var checked = $(this).is(":checked");
-		var tbl;
-		if($(this).attr('id') == 'chkAddress1') {
-			tbl = $('#tblUser1');
-		} else if($(this).attr('id') == 'chkAddress2') {
-			tbl = $('#tblUser2');
-		}
-		if(tbl) {
-			if(checked) {
-	            $(tbl).find('select[name="autoAddress"]').removeClass("hidden");
-	        } else {
-	        	$(tbl).find('select[name="autoAddress"]').addClass("hidden");
-	        }
-		}
-	});
 	
 	// 주소 상동 select box change 이벤트
 	$('select[name="autoAddress"]').change(function() {
@@ -248,7 +244,14 @@
         common.closeWindow();
     });
     
-   	// 메인화면에서 기입력된 데이터가 있을 경우 초기입력해줌
+    $('select[name="birthYear"]').trigger('change');
+})();
+
+/**
+ * 수정모드로 호출된 경우 기존 입력데이터 표시
+ */
+function setEditInfo() {
+	// 메인화면에서 기입력된 데이터가 있을 경우 초기입력해줌
     var userInfo;
     if('${popupType}' == '1') {// 신청인
     	userInfo = getRefUserInfo('<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>');
@@ -326,21 +329,33 @@
     		}
     	}
     }
-    
-    $('select[name="birthYear"]').trigger('change');
-})();
+}
 
 /**
  * 본인 체크박스 변경이벤트 핸들러
  */
 function chkOneSelfChangeHandler(e) {
 	// 사용(봉안)대상자중 신청자 본인정보가 있는지 체크
-	var oneself = $('#userList li[relationType="ONESELF"]');
-	if(oneself.length > 0) {
+	var existOneSelf = false;
+	$('#userList li[refType="<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>"]').each(function(idx) {
+		var relationType = $(this).attr('relationType');
+		if(${rowIdx} < 0) {// 신규추가
+			if(relationType == 'ONESELF') {
+				existOneSelf = true;
+				return false;
+			}
+		} else {// 수정
+			if(relationType == 'ONESELF' && idx != ${rowIdx}) {
+				existOneSelf = true;
+				return false;
+			}
+		}
+	});
+	if(existOneSelf) {
 		common.showAlert('이미 본인으로 등록된 사용(봉안)대상자가 있습니다.');
-		$(this).prop('checked', false);
+		$('#chkOneSelf').prop('checked', false);
 	} else {
-		var checked = $(this).is(':checked');
+		var checked = $('#chkOneSelf').is(':checked');
 		if(checked) {
 			$('#tblUser1').addClass('hidden');
 			$('#tblApplyUser').removeClass('hidden');	
@@ -449,6 +464,11 @@ function _confirm() {
 		}
 		mobile = mobile + '-' + mobile2 + '-' + mobile3;
 		
+		if(!common.isValidMobile(mobile) && !common.isValidPhone(mobile)) {
+			common.showAlert('연락처 양식이 올바르지 않습니다.');
+			return;
+		}
+		
 		// 교인여부
 		isChurchPerson = elChurchperson.find('option:selected').val();
 		// 이장여부
@@ -458,6 +478,10 @@ function _confirm() {
 		
 		// 메인화면에 기등록된 사용자중에 중복된 사람이 있는지 체크
 		$('#userList li[refType="<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>"]').each(function(idx) {
+			// 수정모드로 표시된 경우 수정하려고 하는 행은 continue
+			if(${rowIdx} >= 0 && ${rowIdx} == idx) {
+				return true;
+			}
 			// 중복체크는 성명,생년월일,성별,연락처로
 			if(userName == $(this).attr('userName') 
 					&& birthDate == $(this).attr('birthDate')
@@ -493,25 +517,29 @@ function _confirm() {
 	    selectedItems1.push(isMove);
 	} else {
 		// 본인등록인 경우는 신청자 정보로
-		var applyUserInfo = getRefUserInfo('<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>');
-		isMove = $('#tblApplyUser').find('select[name="moveyn"]').find('option:selected').val();
-		selectedItems1.push(applyUserInfo.userName);
-	    selectedItems1.push(applyUserInfo.birthDate);
-	    selectedItems1.push(applyUserInfo.gender);
-	    selectedItems1.push(applyUserInfo.mobile);
-	    selectedItems1.push(applyUserInfo.phone);
-	    selectedItems1.push(applyUserInfo.postNumber);
-	    selectedItems1.push(applyUserInfo.address1);
-	    selectedItems1.push(applyUserInfo.address2);
-	    selectedItems1.push(applyUserInfo.fulladdress);
-	    selectedItems1.push(applyUserInfo.officer);
-	    selectedItems1.push(applyUserInfo.officerName);
-	    selectedItems1.push(applyUserInfo.diocese);
-	    selectedItems1.push(applyUserInfo.email);
-	    selectedItems1.push(applyUserInfo.relationType);
-	    selectedItems1.push(applyUserInfo.relationTypeName);
-		selectedItems1.push('Y');
-		selectedItems1.push(isMove);
+		if(applyUserInfo) {
+			isMove = $('#tblApplyUser').find('select[name="moveyn"]').find('option:selected').val();
+			selectedItems1.push(applyUserInfo.userName);
+		    selectedItems1.push(applyUserInfo.birthDate);
+		    selectedItems1.push(applyUserInfo.gender);
+		    selectedItems1.push(applyUserInfo.mobile);
+		    selectedItems1.push(applyUserInfo.phone);
+		    selectedItems1.push(applyUserInfo.postNumber);
+		    selectedItems1.push(applyUserInfo.address1);
+		    selectedItems1.push(applyUserInfo.address2);
+		    selectedItems1.push(applyUserInfo.fulladdress);
+		    selectedItems1.push(applyUserInfo.officer);
+		    selectedItems1.push(applyUserInfo.officerName);
+		    selectedItems1.push(applyUserInfo.diocese);
+		    selectedItems1.push(applyUserInfo.email);
+		    selectedItems1.push('ONESELF');
+		    selectedItems1.push('본인');
+			selectedItems1.push('Y');
+			selectedItems1.push(isMove);
+		}else {
+			common.showAlert('신청자 정보가 없어서 본인 등록이 불가합니다.');
+			return;
+		}
 	}
     
     var idx = 0;
@@ -604,8 +632,12 @@ function setUserInfo(userInfo, tbl) {
     	var address1 = userInfo.address1;
     	var address2 = userInfo.address2;
     	var email = userInfo.email;
+    	var isChurchPerson = userInfo.isChurchPerson;
+    	var isMove = userInfo.isMove;
     	var splited;
 		$(tbl).find('input[name="userName"]').val(userName);
+		$(tbl).find('select[name="relation"] option[value="' + relationType + '"]').attr('selected', 'selected');
+		$(tbl).find('select[name="relation"]').trigger('change');
 		if(birthDate) {
     		splited = birthDate.split('-');
     		if(splited && splited.length == 3) {
@@ -615,7 +647,16 @@ function setUserInfo(userInfo, tbl) {
     			$(tbl).find('select[name="birthDay"] option[value=' + parseInt(splited[2]) + ']').attr('selected', 'selected');
     		}
     	}
-		$('select[name="gender"] option[value=' + gender + ']').attr('selected', 'selected');
+		$(tbl).find('select[name="gender"] option[value="' + gender + '"]').attr('selected', 'selected');
+		if(postNumber) {
+			$(tbl).find('input[name="postNumber"]').val(postNumber);
+    	}
+    	if(address1) {
+    		$(tbl).find('input[name="address1"]').val(address1);
+    	}
+    	if(address2) {
+    		$(tbl).find('input[name="address2"]').val(address2);
+    	}
 		if(mobile) {
     		splited = mobile.split('-');
     		if(splited && splited.length == 3) {
@@ -632,15 +673,8 @@ function setUserInfo(userInfo, tbl) {
     			$(tbl).find('input[name="phone3"]').val(splited[2]);
     		}
     	}
-		if(postNumber) {
-			$(tbl).find('input[name="postNumber"]').val(postNumber);
-    	}
-    	if(address1) {
-    		$(tbl).find('input[name="address1"]').val(address1);
-    	}
-    	if(address2) {
-    		$(tbl).find('input[name="address2"]').val(address2);
-    	}
+		$(tbl).find('select[name="churchperson"] option[value="' + isChurchPerson + '"]').attr('selected', 'selected');
+		$(tbl).find('select[name="moveyn"] option[value="' + isMove + '"]').attr('selected', 'selected');
 	}
 }
 
@@ -662,8 +696,11 @@ function getRefUserInfo(refType) {
 		userInfo.postNumber = $(this).attr('postNumber');
 		userInfo.address1 = $(this).attr('address1');
 		userInfo.address2 = $(this).attr('address2');
+		userInfo.fulladdress = $(this).attr('fulladdress');
 		userInfo.email = $(this).attr('email');
 		userInfo.refType = $(this).attr('refType');
+		userInfo.isChurchPerson = $(this).attr('isChurchPerson');
+		userInfo.isMove = $(this).attr('isMove');
 		userInfoes.push(userInfo);
 	});
 	return userInfoes;

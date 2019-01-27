@@ -106,7 +106,7 @@
                     <th scope="col">주소</th>
                     <th scope="col">관계</th>
                     <th scope="col">교인여부</th>
-                    <th scope="col">이장여부</th>
+                    <th scope="col">이장대상</th>
                     <th scope="col"></th>
                 </tr>
             </thead>
@@ -133,7 +133,7 @@
 	           		<td align="left" class="form-inline">
 						<select id="selBunyangTimes" class="form-control" style="width: 110px;">
 							<c:forEach items="${bunyangTimesList}" var="bunyangTimesItem">
-								<option value="${bunyangTimesItem.code_value}">${bunyangTimesItem.code_name}</option>
+								<option value="${bunyangTimesItem.code_value}" codeSeq="${bunyangTimesItem.code_seq}">${bunyangTimesItem.code_name}</option>
 							</c:forEach>
 						</select>
 	           		</td>
@@ -193,8 +193,8 @@
 
 // 신청인,대리인,사용자정보
 var bunyangRefUser = {
-		applyUser:{},
-		agentUser:{},
+		applyUser:null,
+		agentUser:null,
 		useUser:[]
 };
 
@@ -215,7 +215,7 @@ var bunyangRefUser = {
 	$("input[name=rbServiceChargeType]:radio").change(function(e) {
 		var selectedVal = $(":input:radio[name=rbServiceChargeType]:checked").val();
 		if(selectedVal == '<%=CalvaryConstants.SERVICE_CHARGE_TYPE_REPRESENT%>') {
-			$('#selMaintCharger option[value=""]').attr('selected','selected');
+			//$('#selMaintCharger option[value=""]').attr('selected','selected');
 			$('#selMaintCharger').removeClass('hidden');
 		} else {
 			$('#selMaintCharger').addClass('hidden');
@@ -305,7 +305,7 @@ function updateBunyangInfo() {
 	$('#pGraveType').text(graveTypeExp);
 	
 	// 총 분양대금
-	var val = "₩" + $.number(totalPrice);
+	var val = "₩" + $.number(totalPrice)+'원';
 	$('#totalPrice').text(val);
 }
 
@@ -317,8 +317,10 @@ function updateSelectBoxMaintCharger() {
 	var options = '<option value="">선택</option>';
 	if(useUsers && useUsers.length > 0) {
 		$.each(useUsers, function(idx, item) {
-			var uid =  item['userName'] + item['birthDate'] + item['gender'] + item['mobile'];
-			options += '<option value="' + uid + '">' + item['userName'] + '</option>';
+			var delimiter = '__';
+			//var uid =  item['userName'] + delimiter + item['birthDate'] + delimiter + item['gender'] + delimiter + item['mobile'];
+			var uid =  item['userName'] + idx;
+			options += '<option value="' + uid + '" userName="' + item['userName'] + '" birthDate="' + item['birthDate'] + '" gender="' + item['gender'] + '" mobile="' + item['mobile'] + '">' + item['userName'] + '</option>';
 		});
 	}
 	var selectedVal = $('#selMaintCharger option:selected').val();
@@ -436,6 +438,7 @@ function registAgentUser() {
 			agentUser['isAgent'] = true;
 			agentUser['email'] = email;
 			agentUser['relationType'] = relationType;
+			agentUser['relationTypeName'] = relationTypeName;
 			agentUser['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER%>';
 			
 			tr.append('<td>'+userName+"</td>");
@@ -475,14 +478,18 @@ function registUseUser(type) {
 			if(!item1 || item1.length == 0 || !item2 || item2.length == 0) {
 				return;
 			}
+			var coupleTypeCount = $("#tblUseUser tbody tr td.coupletype").length;
+			var coupleSeq = coupleTypeCount+1;
 			var useUser1 = getUseUser(item1);
 			var useUser2 = getUseUser(item2);
+			useUser1['coupleSeq'] = coupleSeq;
+			useUser2['coupleSeq'] = coupleSeq;
 			
 			bunyangRefUser.useUser.push(useUser1);
 			bunyangRefUser.useUser.push(useUser2);
 			
-			var tr1 = $('<tr/>');
-			var tr2 = $('<tr/>');
+			var tr1 = $('<tr coupleSeq="'+coupleSeq+'"/>');
+			var tr2 = $('<tr coupleSeq="'+coupleSeq+'"/>');
 			tr1.append('<td rowspan="2" class="coupletype">부부형</td>');
 			tr1.append('<td name="userName">' + useUser1['userName'] + '</td>');
 			tr1.append('<td name="birthDate">' + useUser1['birthDate'] + '</td>');
@@ -491,7 +498,7 @@ function registUseUser(type) {
 			tr1.append('<td name="relation">' + useUser1['relationTypeName'] + '</td>');
 			tr1.append('<td name="ischurch">' + useUser1['isChurchPerson'] + '</td>');
 			tr1.append('<td>' + useUser1['isMove'] + '</td>');
-			tr1.append('<td rowspan="2" class="form-inline"><button type="button" class="btn btn-primary btn-sm" onclick="registUseUser(this)">수정</button><button type="button" class="btn btn-danger btn-sm" style="margin-left:3px;" onclick="deleteUseUserRow(this)">삭제</button></td>');
+			tr1.append('<td rowspan="2" class="form-inline"><button type="button" class="btn btn-primary btn-sm" onclick="editUseUser(this,\'couple\')">수정</button><button type="button" class="btn btn-danger btn-sm" style="margin-left:3px;" onclick="deleteUseUserRow(this)">삭제</button></td>');
 			
 			tr2.append('<td name="userName">' + useUser2['userName'] + '</td>');
 			tr2.append('<td name="birthDate">' + useUser2['birthDate'] + '</td>');
@@ -525,9 +532,95 @@ function registUseUser(type) {
 			tr1.append('<td name="relation">' + useUser1['relationTypeName'] + '</td>');
 			tr1.append('<td name="ischurch">' + useUser1['isChurchPerson'] + '</td>');
 			tr1.append('<td>' + useUser1['isMove'] + '</td>');
-			tr1.append('<td rowspan="1" class="form-inline"><button type="button" class="btn btn-primary btn-sm" onclick="registUseUser(this)">수정</button><button type="button" class="btn btn-danger btn-sm" style="margin-left:3px;" onclick="deleteUseUserRow(this)">삭제</button></td>');
+			tr1.append('<td rowspan="1" class="form-inline"><button type="button" class="btn btn-primary btn-sm" onclick="editUseUser(this, \'single\')">수정</button><button type="button" class="btn btn-danger btn-sm" style="margin-left:3px;" onclick="deleteUseUserRow(this)">삭제</button></td>');
 			
 			$("#tblUseUser tbody").append(tr1);
+			
+			updateBunyangInfo();
+			updateSelectBoxMaintCharger();
+		};
+	}
+}
+
+/**
+ * 사용(봉안)대상자 정보 수정
+ */
+function editUseUser(btn, type) {
+	// 선택한 행 index
+	var startIdx = $(btn).parent('td').parent('tr').index();
+	var count = $(btn).parent('td').attr('rowspan');
+	
+	var winoption = {width:1024, height:750};
+	if(type == 'single') {
+		winoption['height'] = 640;
+	}
+	var param = {popupTitle: "사용(봉안) 대상자 입력 " + (type == 'couple' ? "(부부형)" : "(1인형)"), popupType:type};
+	param = getUserParam(param);
+	param['rowIdx'] = startIdx;
+	common.openWindow("${contextPath}/popup/registuseuser", "popRegistUseUser", winoption, param);
+	
+	if(type == 'couple') {// 부부형
+		// 사용(봉안) 대상자 입력 팝업 callback 함수
+		window.selectuserCallBack = function(item1, item2, isOneSelf) {
+			if(!item1 || item1.length == 0 || !item2 || item2.length == 0) {
+				return;
+			}
+			var coupleSeq = $("#tblUseUser tbody tr").eq(startIdx).attr('coupleSeq');
+			var useUser1 = getUseUser(item1);
+			var useUser2 = getUseUser(item2);
+			useUser1['coupleSeq'] = coupleSeq;
+			useUser2['coupleSeq'] = coupleSeq;
+			
+			bunyangRefUser.useUser[startIdx] = useUser1;
+			bunyangRefUser.useUser[startIdx+1] = useUser2;
+			
+			var tr1 = $('<tr/>');
+			var tr2 = $('<tr/>');
+			tr1.append('<td rowspan="2" class="coupletype">부부형</td>');
+			tr1.append('<td name="userName">' + useUser1['userName'] + '</td>');
+			tr1.append('<td name="birthDate">' + useUser1['birthDate'] + '</td>');
+			tr1.append('<td name="mobile">' + useUser1['mobile'] + '</td>');
+			tr1.append('<td name="address" align="left">' + useUser1['fulladdress'] + '</td>');
+			tr1.append('<td name="relation">' + useUser1['relationTypeName'] + '</td>');
+			tr1.append('<td name="ischurch">' + useUser1['isChurchPerson'] + '</td>');
+			tr1.append('<td>' + useUser1['isMove'] + '</td>');
+			tr1.append('<td rowspan="2" class="form-inline"><button type="button" class="btn btn-primary btn-sm" onclick="editUseUser(this,\'couple\')">수정</button><button type="button" class="btn btn-danger btn-sm" style="margin-left:3px;" onclick="deleteUseUserRow(this)">삭제</button></td>');
+			
+			tr2.append('<td name="userName">' + useUser2['userName'] + '</td>');
+			tr2.append('<td name="birthDate">' + useUser2['birthDate'] + '</td>');
+			tr2.append('<td name="mobile">' + useUser2['mobile'] + '</td>');
+			tr2.append('<td name="address" align="left">' + useUser2['fulladdress'] + '</td>');
+			tr2.append('<td name="relation">' + useUser2['relationTypeName'] + '</td>');
+			tr2.append('<td name="ischurch">' + useUser2['isChurchPerson'] + '</td>');
+			tr2.append('<td>' + useUser2['isMove'] + '</td>');
+			
+			$("#tblUseUser tbody tr").eq(startIdx).replaceWith(tr1);
+			$("#tblUseUser tbody tr").eq(startIdx+1).replaceWith(tr2);
+			
+			updateBunyangInfo();
+			updateSelectBoxMaintCharger();
+		};
+	} else {// 1인형
+		// 사용(봉안) 대상자 입력 팝업 callback 함수
+		window.selectuserCallBack = function(item1, isOneSelf) {
+			if(!item1 || item1.length == 0) {
+				return;
+			}
+			var useUser1 = getUseUser(item1);
+			bunyangRefUser.useUser[startIdx] = useUser1;
+			
+			var tr1 = $('<tr/>');
+			tr1.append('<td rowspan="1" class="singletype">1인형</td>');
+			tr1.append('<td name="userName">' + useUser1['userName'] + '</td>');
+			tr1.append('<td name="birthDate">' + useUser1['birthDate'] + '</td>');
+			tr1.append('<td name="mobile">' + useUser1['mobile'] + '</td>');
+			tr1.append('<td name="address" align="left">' + useUser1['fulladdress'] + '</td>');
+			tr1.append('<td name="relation">' + useUser1['relationTypeName'] + '</td>');
+			tr1.append('<td name="ischurch">' + useUser1['isChurchPerson'] + '</td>');
+			tr1.append('<td>' + useUser1['isMove'] + '</td>');
+			tr1.append('<td rowspan="1" class="form-inline"><button type="button" class="btn btn-primary btn-sm" onclick="editUseUser(this, \'single\')">수정</button><button type="button" class="btn btn-danger btn-sm" style="margin-left:3px;" onclick="deleteUseUserRow(this)">삭제</button></td>');
+			
+			$("#tblUseUser tbody tr").eq(startIdx).replaceWith(tr1);
 			
 			updateBunyangInfo();
 			updateSelectBoxMaintCharger();
@@ -580,182 +673,94 @@ function getUseUser(item) {
 }
 
 /**
- * 사용 대상자 그리드에 부부형 또는 1인형 행을 생성  
- */
-function addUseUserRow(isCouple) {
-	if(isCouple) {
-		var tr1 = $('<tr/>');
-		var tr2 = $('<tr/>');
-		tr1.append('<td rowspan="2" class="coupletype">부부형</td>');
-		tr1.append('<td name="userName"></td>');
-		tr1.append('<td name="birthDate"></td>');
-		tr1.append('<td name="mobile"></td>');
-		tr1.append('<td name="address"></td>');
-		tr1.append('<td name="relation">'+getUserRelationSelect()+'</td>');
-		tr1.append('<td name="ischurch">'+getIsChurchSelect()+'</td>');
-		tr1.append('<td><button type="button" class="btn btn-primary btn-sm" onclick="registUseUser(this)">선택</button></td>');
-		tr1.append('<td rowspan="2"><button type="button" class="btn btn-default btn-sm" onclick="deleteUseUserRow(this)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>');
-		tr2.append('<td name="userName"></td>');
-		tr2.append('<td name="birthDate"></td>');
-		tr2.append('<td name="mobile"></td>');
-		tr2.append('<td name="address"></td>');
-		tr2.append('<td name="relation">'+getUserRelationSelect()+'</td>');
-		tr2.append('<td name="ischurch">'+getIsChurchSelect()+'</td>');
-		tr2.append('<td><button type="button" class="btn btn-primary btn-sm" onclick="registUseUser(this)">선택</button></td>');
-		$("#tblUseUser tbody").append(tr1);
-		$("#tblUseUser tbody").append(tr2);
-	} else {
-		var tr = $('<tr/>');
-		tr.append('<td class="singletype">1인형</td>');
-		tr.append('<td name="userName"></td>');
-		tr.append('<td name="birthDate"></td>');
-		tr.append('<td name="mobile"></td>');
-		tr.append('<td name="address"></td>');
-		tr.append('<td name="relation">'+getUserRelationSelect()+'</td>');
-		tr.append('<td name="ischurch">'+getIsChurchSelect()+'</td>');
-		tr.append('<td><button type="button" class="btn btn-primary btn-sm" onclick="registUseUser(this)">선택</button></td>');
-		tr.append('<td><button type="button" class="btn btn-default btn-sm" onclick="deleteUseUserRow(this)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>');
-		$("#tblUseUser tbody").append(tr);
-	}
-	//
-	updateBunyangInfo();
-}
-
-/**
  * 분양정보 저장
  */
 function saveApply() {
-	var tr, bunyangUser = {}, useUsers = [], bunyangInfo = {};
-	var coupleTypeCount = $("#tiCoupleTypeCount").val();
-	var singleTypeCount = $("#tiSingleTypeCount").val();
-	coupleTypeCount = coupleTypeCount ? parseInt(coupleTypeCount) : 0;
-	singleTypeCount = singleTypeCount ? parseInt(singleTypeCount) : 0;
+	var i = 0;
+	var idx = 0;
 	
-	// 신청자 정보
-	tr = $("#tblApplyUser tbody tr");
-	if(tr.exists()) {
-		bunyangUser = {};
-		bunyangUser["userId"] = tr.attr("userId");
-		if(!bunyangUser["userId"]) {// 등록교인이 아닌 경우만 기타 정보 저장
-			bunyangUser["userName"] = tr.attr("userName");
-			bunyangUser["birthDate"] = tr.attr("birthDate");
-			bunyangUser["email"] = tr.attr("email");
-			bunyangUser["mobile"] = tr.attr("mobile");
-			bunyangUser["postNumber"] = tr.attr("postNumber");
-			bunyangUser["address1"] = tr.attr("address1");
-			bunyangUser["address2"] = tr.attr("address2");
-			bunyangUser["churchOfficer"] = tr.attr("churchOfficer");	
-		}
-		bunyangUser["refType"] = "<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>";
-		
-		bunyangInfo["applyUser"] = bunyangUser;
-	} else {
+	var applyUser = bunyangRefUser.applyUser;
+	var agentUser = bunyangRefUser.agentUser;
+	var useUsers = bunyangRefUser.useUser;
+	
+	var coupleTypeCount = $("#tblUseUser tbody tr td.coupletype").length;
+	var singleTypeCount = $("#tblUseUser tbody tr td.singletype").length;
+	var maintCharger = $('#selMaintCharger option:selected').val();
+	var productType = $('#pProductType').val();
+	var serviceChargeType = $(":input:radio[name=rbServiceChargeType]:checked").val();
+	var bunyangTimes = $('#selBunyangTimes option:selected').attr('codeSeq');
+	var bunyangInfo = {};
+	var pricePerCount = 0;
+	
+	if(!applyUser || !applyUser.userName) {
 		common.showAlert("신청자 정보가 없습니다.");
 		return;
 	}
-	
-	// 대리인
-	tr = $("#tblAgentUser tbody tr");
-	if(tr.exists()) {
-		bunyangUser = {};
-		bunyangUser["userId"] = tr.attr("userId");
-		if(!bunyangUser["userId"]) {// 등록교인이 아닌 경우만 기타 정보 저장
-			bunyangUser["userName"] = tr.attr("userName");
-			bunyangUser["birthDate"] = tr.attr("birthDate");
-			bunyangUser["email"] = tr.attr("email");
-			bunyangUser["mobile"] = tr.attr("mobile");
-			bunyangUser["postNumber"] = tr.attr("postNumber");
-			bunyangUser["address1"] = tr.attr("address1");
-			bunyangUser["address2"] = tr.attr("address2");
-			bunyangUser["churchOfficer"] = tr.attr("churchOfficer");	
-		}
-		bunyangUser["refType"] = "<%=CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER%>";
-		bunyangUser["relationType"] = tr.find("td .relation option:selected").val();
-		if(!bunyangUser["relationType"]) {
-			common.showAlert("대리인의 신청자와의 관계를 입력해주세요.");
-			return;
-		}
-		bunyangUser["isChurchPerson"] = tr.find("td .ischurch option:selected").val();
-		
-		bunyangInfo["agentUser"] = bunyangUser;
-	}
-	
-	var selected = true;
-	var registeredRelation = true;
-	var coupleSeq = 0;
-	var coupleType = false;
-	
-	// 사용(봉안) 대상자
-	tr = $("#tblUseUser tbody tr");
-	if(tr.exists()) {
-		tr.each(function(idx){
-			if(!$(this).attr("selected")) {
-				selected = false;
-				return false;
-			}
-			if($(this).find('td.coupletype').length > 0 || $(this).prev('tr').find('td.coupletype').length > 0) {
-				coupleType = true;
-				if($(this).find('td.coupletype').length > 0) {
-					coupleSeq++;
-				}
-			}else {
-				coupleType = false;
-			}
-			bunyangUser = {};
-			bunyangUser["userId"] = $(this).attr("userId");
-			if(!bunyangUser["userId"]) {// 등록교인이 아닌 경우만 기타 정보 저장
-				bunyangUser["userName"] = $(this).attr("userName");
-				bunyangUser["birthDate"] = $(this).attr("birthDate");
-				bunyangUser["email"] = $(this).attr("email");
-				bunyangUser["mobile"] = $(this).attr("mobile");
-				bunyangUser["postNumber"] = $(this).attr("postNumber");
-				bunyangUser["address1"] = $(this).attr("address1");
-				bunyangUser["address2"] = $(this).attr("address2");
-				bunyangUser["churchOfficer"] = $(this).attr("churchOfficer");
-			}
-			bunyangUser["refType"] = "<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>";
-			bunyangUser["relationType"] = $(this).find("td[name='relation'] option:selected").val();
-			if(!bunyangUser["relationType"]) {
-				registeredRelation = false;
-				return false;
-			}
-			bunyangUser["isChurchPerson"] = $(this).find("td[name='ischurch'] option:selected").val();
-			if(coupleType) {
-				bunyangUser["coupleSeq"] = coupleSeq;
-			}
-			useUsers.push(bunyangUser);
-		});
-		if(!selected) {
-			common.showAlert("선택 버튼을 클릭하여 사용(봉안) 대상자를 입력해주세요.");
-			return;
-		}
-		if(!registeredRelation) {
-			common.showAlert("사용(봉안) 대상자의 신청자와의 관계를 입력해주세요.");
-			return;
-		}
-		bunyangInfo["useUsers"] = useUsers;
-	}else {
+	if(!useUsers || useUsers.length == 0) {
 		common.showAlert("사용(봉안) 대상자 정보가 없습니다.");
 		return;
 	}
 	
-	if(coupleTypeCount == 0 && singleTypeCount == 0) {
-		common.showAlert("부부형 또는 1인형 기수를 입력해주세요.");
-		return;
+	// 분양단가 직접입력 차수에서 단가체크
+	if(common.isVisible($('#tiBunyangPrice'))) {
+		if(!$('#tiBunyangPrice').val()){
+			common.showAlert("분양단가를 입력해주세요.");
+			$('#tiBunyangPrice').focus();
+			return;
+		}
+		pricePerCount = common.toNumeric($('#tiBunyangPrice').val());
+		if(!pricePerCount || pricePerCount <= 0) {
+			common.showAlert("분양단가가 올바르지 않습니다.");
+			$('#tiBunyangPrice').focus();
+			return;
+		}
+	} else {
+		pricePerCount = common.toNumeric($('#sBunyangPrice').text());
 	}
 	
-	if($(":input:radio[name=rdProductType]:checked").val() == '<%=CalvaryConstants.PRODUCT_TYPE_FAMILY%>') {
-		if(coupleTypeCount > 0 && singleTypeCount > 0) {
-			common.showAlert('가족형의 경우 부부형 또는 1인형 둘중 한가지만 선택가능합니다.');
+	for(i = 0; i < useUsers.length; i++) {
+		var user = useUsers[i];
+		user['isMaintCharger'] = 'N';
+	}
+	// 사용자중 관리비납부자로 선택된 사용자
+	if(serviceChargeType == '<%=CalvaryConstants.SERVICE_CHARGE_TYPE_REPRESENT%>') {
+		if(!maintCharger) {
+			common.showAlert("사용자중 관리비 납부자를 선택해주세요.");
+			$('#selMaintCharger').focus();
 			return;
+		}
+		var maintChargerName = $('#selMaintCharger option:selected').attr('userName');
+		var maintChargerBirthDate = $('#selMaintCharger option:selected').attr('birthDate');
+		var maintChargerGender = $('#selMaintCharger option:selected').attr('gender');
+		var maintChargerMobile = $('#selMaintCharger option:selected').attr('mobile');
+		
+		// 사용자중 관리비납부자로 선택된 사용자
+		for(var i = 0; i < useUsers.length; i++) {
+			var user = useUsers[i];
+			if(user.userName == maintChargerName 
+					&& user.birthDate == maintChargerBirthDate
+					&& user.gender == maintChargerGender
+					&& user.mobile == maintChargerMobile
+			) {
+				user['isMaintCharger'] = 'Y';
+			} else {
+				user['isMaintCharger'] = 'N';
+			}
 		}
 	}
 	
+	// 신청자,대리인,사용자
+	bunyangInfo["applyUser"] = applyUser;
+	bunyangInfo["agentUser"] = agentUser;
+	bunyangInfo["useUsers"] = useUsers;
+	
 	// 분양신청정보
-	bunyangInfo['productType'] = $(":input:radio[name=rdProductType]:checked").val();
-	bunyangInfo['serviceChargeType'] = $(":input:radio[name=rbServiceChargeType]:checked").val();
+	bunyangInfo['productType'] = productType;
+	bunyangInfo['serviceChargeType'] = serviceChargeType;
 	bunyangInfo['coupleTypeCount'] = coupleTypeCount;
 	bunyangInfo['singleTypeCount'] = singleTypeCount;
+	bunyangInfo['bunyangTimes'] = bunyangTimes;
+	bunyangInfo['pricePerCount'] = pricePerCount;
 	bunyangInfo['progressStatus'] = "<%=CalvaryConstants.PROGRESS_STATUS_NEW%>";
 	
 	// 저장 호출
@@ -813,7 +818,7 @@ function getIsChurchSelect() {
  */
 function deleteAgentUserRow(btn) {
 	deleteRow(btn);
-	bunyangRefUser.agentUser = {};
+	bunyangRefUser.agentUser = null;
 }
 
 /**
@@ -890,6 +895,7 @@ function getUserParam(param) {
 		param['users['+idx+'].postNumber'] = applyUser.postNumber;
 		param['users['+idx+'].address1'] = applyUser.address1;
 		param['users['+idx+'].address2'] = applyUser.address2;
+		param['users['+idx+'].fulladdress'] = applyUser.fulladdress;
 		param['users['+idx+'].email'] = applyUser.email;
 		param['users['+idx+'].refType'] = applyUser.refType;
 		idx++;
@@ -899,11 +905,13 @@ function getUserParam(param) {
 		param['users['+idx+'].birthDate'] = agentUser.birthDate;
 		param['users['+idx+'].gender'] = agentUser.gender;
 		param['users['+idx+'].relationType'] = agentUser.relationType;
+		param['users['+idx+'].relationTypeName'] = agentUser.relationTypeName;
 		param['users['+idx+'].mobile'] = agentUser.mobile;
 		param['users['+idx+'].phone'] = agentUser.phone;
 		param['users['+idx+'].postNumber'] = agentUser.postNumber;
 		param['users['+idx+'].address1'] = agentUser.address1;
 		param['users['+idx+'].address2'] = agentUser.address2;
+		param['users['+idx+'].fulladdress'] = agentUser.fulladdress;
 		param['users['+idx+'].email'] = agentUser.email;
 		param['users['+idx+'].refType'] = agentUser.refType;
 		idx++;
@@ -914,13 +922,17 @@ function getUserParam(param) {
 			param['users['+idx+'].birthDate'] = item.birthDate;
 			param['users['+idx+'].gender'] = item.gender;
 			param['users['+idx+'].relationType'] = item.relationType;
+			param['users['+idx+'].relationTypeName'] = item.relationTypeName;
 			param['users['+idx+'].mobile'] = item.mobile;
 			param['users['+idx+'].phone'] = item.phone;
 			param['users['+idx+'].postNumber'] = item.postNumber;
 			param['users['+idx+'].address1'] = item.address1;
 			param['users['+idx+'].address2'] = item.address2;
+			param['users['+idx+'].fulladdress'] = item.fulladdress;
 			param['users['+idx+'].email'] = item.email;
 			param['users['+idx+'].refType'] = item.refType;
+			param['users['+idx+'].isChurchPerson'] = item.isChurchPerson;
+			param['users['+idx+'].isMove'] = item.isMove;
 			idx++;
 		});
 	}

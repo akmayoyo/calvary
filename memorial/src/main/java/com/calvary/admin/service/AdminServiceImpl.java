@@ -123,6 +123,8 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("singleTypeCount", bunyangInfoVo.getSingleTypeCount());
 		param.put("serviceChargeType", bunyangInfoVo.getServiceChargeType());
 		param.put("progressStatus", bunyangInfoVo.getProgressStatus());
+		param.put("bunyangTimes", bunyangInfoVo.getBunyangTimes());
+		param.put("pricePerCount", bunyangInfoVo.getPricePerCount());
 		param.put("registUserId", SessionUtil.getCurrentUserId());
 		param.put("userId", SessionUtil.getCurrentUserId());
 		commonDao.insert("admin.createBunyangInfo", param);
@@ -236,6 +238,8 @@ public class AdminServiceImpl implements IAdminService {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("refType", bunyangUserVo.getRefType());
 		param.put("relationType", bunyangUserVo.getRelationType());
+		param.put("churchOfficer", bunyangUserVo.getChurchOfficer());
+		param.put("diocese", bunyangUserVo.getDiocese());
 		param.put("userId", bunyangUserVo.getUserId());
 		param.put("userName", bunyangUserVo.getUserName());
 		param.put("birthDate", bunyangUserVo.getBirthDate());
@@ -247,6 +251,8 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("address1", bunyangUserVo.getAddress1());
 		param.put("address2", bunyangUserVo.getAddress2());
 		param.put("isChurchPerson", bunyangUserVo.getIsChurchPerson());
+		param.put("isMove", bunyangUserVo.getIsMove());
+		param.put("isMaintCharger", bunyangUserVo.getIsMaintCharger());
 		if(bunyangUserVo.getCoupleSeq() >= 0) {
 			param.put("coupleSeq", bunyangUserVo.getCoupleSeq());
 		}

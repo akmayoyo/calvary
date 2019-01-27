@@ -13,12 +13,15 @@ public class BunyangUserVo {
 	private String postNumber;
 	private String address1;
 	private String address2;
+	private String fulladdress;
 	private String refType;
 	private String relationType;
+	private String relationTypeName;
 	private String churchOfficer;
 	private String diocese;
 	private String isChurchPerson;
 	private String isMove;
+	private String isMaintCharger;
 	private int coupleSeq = -1;
 	private String editing;
 	public String getUserId() {
@@ -135,13 +138,34 @@ public class BunyangUserVo {
 	public void setEditing(String editing) {
 		this.editing = editing;
 	}
+	
+	public String getFulladdress() {
+		return fulladdress;
+	}
+	public void setFulladdress(String fulladdress) {
+		this.fulladdress = fulladdress;
+	}
+	public String getRelationTypeName() {
+		return relationTypeName;
+	}
+	public void setRelationTypeName(String relationTypeName) {
+		this.relationTypeName = relationTypeName;
+	}
+	
+	public String getIsMaintCharger() {
+		return isMaintCharger;
+	}
+	public void setIsMaintCharger(String isMaintCharger) {
+		this.isMaintCharger = isMaintCharger;
+	}
 	@Override
 	public String toString() {
 		return "BunyangUserVo [bunyangSeq=" + bunyangSeq + ", userId=" + userId + ", userName=" + userName
 				+ ", birthDate=" + birthDate + ", gender=" + gender + ", email=" + email + ", mobile=" + mobile
 				+ ", phone=" + phone + ", postNumber=" + postNumber + ", address1=" + address1 + ", address2="
-				+ address2 + ", refType=" + refType + ", relationType=" + relationType + ", churchOfficer="
-				+ churchOfficer + ", diocese=" + diocese + ", isChurchPerson=" + isChurchPerson + ", isMove=" + isMove
+				+ address2 + ", fulladdress=" + fulladdress + ", refType=" + refType + ", relationType=" + relationType
+				+ ", relationTypeName=" + relationTypeName + ", churchOfficer=" + churchOfficer + ", diocese=" + diocese
+				+ ", isChurchPerson=" + isChurchPerson + ", isMove=" + isMove + ", isMaintCharger=" + isMaintCharger
 				+ ", coupleSeq=" + coupleSeq + ", editing=" + editing + "]";
 	}
 }
