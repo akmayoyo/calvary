@@ -15,8 +15,12 @@ public class BunyangUserVo {
 	private String address2;
 	private String refType;
 	private String relationType;
+	private String churchOfficer;
+	private String diocese;
 	private String isChurchPerson;
+	private String isMove;
 	private int coupleSeq = -1;
+	private String editing;
 	public String getUserId() {
 		return userId;
 	}
@@ -95,6 +99,18 @@ public class BunyangUserVo {
 	public void setBunyangSeq(String bunyangSeq) {
 		this.bunyangSeq = bunyangSeq;
 	}
+	public String getChurchOfficer() {
+		return churchOfficer;
+	}
+	public void setChurchOfficer(String churchOfficer) {
+		this.churchOfficer = churchOfficer;
+	}
+	public String getDiocese() {
+		return diocese;
+	}
+	public void setDiocese(String diocese) {
+		this.diocese = diocese;
+	}
 	public String getIsChurchPerson() {
 		return isChurchPerson;
 	}
@@ -107,12 +123,25 @@ public class BunyangUserVo {
 	public void setCoupleSeq(int coupleSeq) {
 		this.coupleSeq = coupleSeq;
 	}
+	public String getIsMove() {
+		return isMove;
+	}
+	public void setIsMove(String isMove) {
+		this.isMove = isMove;
+	}
+	public String getEditing() {
+		return editing;
+	}
+	public void setEditing(String editing) {
+		this.editing = editing;
+	}
 	@Override
 	public String toString() {
 		return "BunyangUserVo [bunyangSeq=" + bunyangSeq + ", userId=" + userId + ", userName=" + userName
 				+ ", birthDate=" + birthDate + ", gender=" + gender + ", email=" + email + ", mobile=" + mobile
 				+ ", phone=" + phone + ", postNumber=" + postNumber + ", address1=" + address1 + ", address2="
-				+ address2 + ", refType=" + refType + ", relationType=" + relationType + ", isChurchPerson="
-				+ isChurchPerson + ", coupleSeq=" + coupleSeq + "]";
+				+ address2 + ", refType=" + refType + ", relationType=" + relationType + ", churchOfficer="
+				+ churchOfficer + ", diocese=" + diocese + ", isChurchPerson=" + isChurchPerson + ", isMove=" + isMove
+				+ ", coupleSeq=" + coupleSeq + ", editing=" + editing + "]";
 	}
 }

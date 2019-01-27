@@ -5,7 +5,11 @@ import java.util.Map;
 
 public interface ICommonService {
 
+	public List<Object> getYearList();
+	
 	public List<Object> getChildCodeList(String parentCodeSeq);
+	
+	public List<Object> getRelationCodeList();
 	
 	public Map<String, Object> getMenuInfo(String menuSeq);
 	

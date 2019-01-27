@@ -15,12 +15,11 @@
         	END use_user_exp
         	,CASE progress_status
         		WHEN 'N' THEN '신청(미승인)'
-        		WHEN 'A' THEN '승인'
+        		WHEN 'A' THEN CASE WHEN cancel_yn = 'Y' THEN '취소' ELSE '승인' END
         		WHEN 'R' THEN '반려'
         		ELSE progress_status
         	END progress_status_exp
-        	,CASE progress_status
-        		WHEN 'A' THEN progress_update_date
+        	,CASE WHEN progress_status = 'A' AND cancel_yn != 'Y' THEN CONCAT('승인일자 : ', progress_update_date)
         		ELSE remarks
         	END remarks_exp
     	FROM
@@ -30,8 +29,8 @@
 			  ,a.product_type
 			  ,a.cancel_yn
 			  ,a.bunyang_times
-			  ,(SELECT remarks FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = a.progress_status) remarks
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = a.progress_status) progress_update_date
+			  ,(SELECT remarks FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) remarks
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) progress_update_date
 			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
 			  ,a.couple_type_count
 			  ,a.single_type_count
@@ -108,7 +107,7 @@
 		AND progress_status = #{progressStatus}
 		</if>
 		<if test="progressStatus == 'CA'">
-		AND progress_status = 'A' AND cancel_yn = 'Y'
+		AND cancel_yn = 'Y'
 		</if>
 		AND bunyang_times = #{bunyangTimes}
 		ORDER BY t.bunyang_seq
@@ -240,6 +239,7 @@
 		(SELECT 
 			a.bunyang_seq
 	       	,a.bunyang_no
+	       	,a.bunyang_times
 	       	,a.product_type
 	       	,a.cancel_yn
 	       	,b.user_id as apply_user_id
@@ -351,7 +351,10 @@
 	<!-- 분양정보 진행상태 업데이트 -->
 	<update id="updateBunyangProgressStatus">
 		UPDATE TB_BUNYANG_INFO a
-			SET progress_status = #{progressStatus}
+			<set>
+				<if test="progressStatus != null">progress_status=#{progressStatus},</if>
+				<if test="bunyangNo != null">bunyang_no=#{bunyangNo}</if>
+			</set>
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
 	
@@ -360,5 +363,30 @@
 		INSERT INTO TB_BUNYANG_HISTORY ( bunyang_seq,progress_status,update_user_id,update_date,remarks )
 		VALUES ( #{bunyangSeq}, #{progressStatus}, #{userId}, CURRENT_TIMESTAMP, #{remarks})
 	</insert>
+	
+	<!-- 분양차수중 최종 분양번호 +1 반환 -->
+	<select id="getNextBunyangNo" parameterType="map" resultType="map">
+		SELECT 
+			COALESCE(max(bunyang_no) + 1, CONCAT(#{bunyangTimes},'001')) as bunyang_no
+		FROM TB_BUNYANG_INFO a
+		WHERE a.bunyang_times = #{bunyangTimes}
+	</select>
+	
+	<!-- 분양정보삭제 -->
+	<delete id="deleteBunyangInfo" parameterType="map">
+		DELETE FROM TB_BUNYANG_INFO WHERE bunyang_seq = #{bunyangSeq}
+	</delete>
+	
+	<!-- 분양관련 사용자정보 삭제 -->
+	<delete id="deleteBunyangRefUser" parameterType="map">
+		DELETE FROM TB_BUNYANG_REF_USER WHERE bunyang_seq = #{bunyangSeq}
+	</delete>
+	
+	<!-- 분양취소 -->
+	<update id="cancelBunyangInfo" parameterType="map">
+		UPDATE TB_BUNYANG_INFO a
+		SET cancel_yn = 'Y'
+		WHERE a.bunyang_seq = #{bunyangSeq}
+	</update>
 
 </mapper>

@@ -123,9 +123,10 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("singleTypeCount", bunyangInfoVo.getSingleTypeCount());
 		param.put("serviceChargeType", bunyangInfoVo.getServiceChargeType());
 		param.put("progressStatus", bunyangInfoVo.getProgressStatus());
-		// TODO
 		param.put("registUserId", SessionUtil.getCurrentUserId());
+		param.put("userId", SessionUtil.getCurrentUserId());
 		commonDao.insert("admin.createBunyangInfo", param);
+		commonDao.insert("admin.createBunyangHistory", param);
 		
 		// 분양 관련 인명정보 생성(신청자)
 		param = getBunyangUserParam(applyUser, 1);
@@ -164,18 +165,68 @@ public class AdminServiceImpl implements IAdminService {
 	 * 분양정보 진행상태 업데이트
 	 */
 	@Transactional
-	public int updateBunyangProgressStatus(String bunyangSeq, String progressStatus, String updateUser) {
+	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser) {
 		Map<String, Object> param = new HashMap<String, Object>();
-		param.put("bunyangSeq", bunyangSeq);
-		param.put("progressStatus", progressStatus);
+		param.put("bunyangNo", bunyangInfoVo.getBunyangNo());
+		param.put("bunyangSeq", bunyangInfoVo.getBunyangSeq());
+		param.put("progressStatus", bunyangInfoVo.getProgressStatus());
 		param.put("userId", updateUser);
-		param.put("remarks", "");
+		param.put("remarks", bunyangInfoVo.getRemarks());
 		int iRslt = 0;
 		// 진행상태 업데이트
 		iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
 		// 변경이력
-		iRslt += commonDao.update("admin.createBunyangHistory", param);
+		iRslt += commonDao.insert("admin.createBunyangHistory", param);
 		return iRslt;
+	}
+	
+	/** 
+	 * 분양취소
+	 */
+	@Transactional
+	public int cancelBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangInfoVo.getBunyangSeq());
+		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_CA);
+		param.put("remarks", bunyangInfoVo.getRemarks());
+		param.put("userId", updateUser);
+		int iRslt = 0;
+		iRslt += commonDao.update("admin.cancelBunyangInfo", param);
+		// 변경이력
+		iRslt += commonDao.insert("admin.createBunyangHistory", param);
+		return iRslt;
+	}
+	
+	/** 
+	 * 분양정보삭제
+	 */
+	@Transactional
+	public int deleteBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangInfoVo.getBunyangSeq());
+		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_DEL);
+		param.put("remarks", bunyangInfoVo.getRemarks());
+		param.put("userId", updateUser);
+		int iRslt = 0;
+		iRslt += commonDao.delete("admin.deleteBunyangInfo", param);
+		iRslt += commonDao.delete("admin.deleteBunyangRefUser", param);
+		// 변경이력
+		iRslt += commonDao.insert("admin.createBunyangHistory", param);
+		return iRslt;
+	}
+	
+	/**
+	 * 분양차수중 최종 분양번호 +1 반환
+	 * @param bunyangTimes
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public String getNextBunyangNo(int bunyangTimes) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangTimes", bunyangTimes);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("admin.getNextBunyangNo", param);
+		String bunyangNo = (String)rtnMap.get("bunyang_no");
+		return bunyangNo;
 	}
 	
 	/** 
@@ -257,7 +308,10 @@ public class AdminServiceImpl implements IAdminService {
 		iRslt += commonDao.delete("contract.deleteDownPayment", param);
 		iRslt += commonDao.insert("contract.insertDownPayment", param);
 		// 분양상태를 계약상태로 업데이트
-		iRslt += updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_B, SessionUtil.getCurrentUserId());
+		BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
+		bunyangInfoVo.setBunyangSeq(bunyangSeq);
+		bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_B);
+		iRslt += updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
 		return iRslt;
 	}
 	
@@ -284,7 +338,10 @@ public class AdminServiceImpl implements IAdminService {
 		}	
 		if(isFullPayment) {
 			// 분양상태를 완납상태로 업데이트
-			iRslt += updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_C, SessionUtil.getCurrentUserId());
+			BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
+			bunyangInfoVo.setBunyangSeq(bunyangSeq);
+			bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_C);
+			iRslt += updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
 		}
 		return iRslt;
 	}
@@ -385,7 +442,7 @@ public class AdminServiceImpl implements IAdminService {
 		// 상태 업데이트
 		iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
 		// 변경이력
-		iRslt += commonDao.update("admin.createBunyangHistory", param);
+		iRslt += commonDao.insert("admin.createBunyangHistory", param);
 		
 		// 계약금 납부 정보 업데이트
 		param = new HashMap<String, Object>();

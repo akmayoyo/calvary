@@ -23,6 +23,19 @@
 		ORDER BY a.user_id
 	</select>
 	
+	<select id="getRefUserByNameAndBirthDate" parameterType="map" resultType="map">
+		SELECT 
+			a.user_id, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, 
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') as church_officer_name 
+		FROM TB_BUNYANG_REF_USER a
+		WHERE a.ref_type = #{refType} 
+		AND a.user_name = #{userName} 
+		AND a.birth_date = #{birthDate} 
+		AND a.gender = #{gender}
+		AND a.mobile = #{mobile}
+		LIMIT 0,1
+	</select>
+	
 	<select id="getUserByNameAndBirthDate" parameterType="map" resultType="map">
 		SELECT 
 			a.user_id, a.password, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date,
@@ -68,6 +81,17 @@
 		WHERE a.user_name = #{userName} AND a.birth_date = #{birthDate}
 	</select>
 	
+	<select id="checkDuplicatedBunyangUser" parameterType="map" resultType="map">
+		SELECT
+			COUNT(*) AS cnt
+		FROM TB_BUNYANG_REF_USER a
+		WHERE a.ref_type = #{refType} 
+		AND a.user_name = #{userName} 
+		AND a.birth_date = #{birthDate} 
+		AND a.gender = #{gender}
+		AND a.mobile = #{mobile}
+	</select>
+	
 	<!-- 사용자정보 생성 -->
 	<insert id="createUser" parameterType="map">
 		INSERT INTO TB_COM_USER( USER_ID,PASSWORD,USER_NAME,BIRTH_DATE,GENDER,EMAIL,MOBILE,PHONE,POST_NUMBER,ADDRESS1,ADDRESS2,CHURCH_OFFICER,DIOCESE,USER_STATUS,REGIST_DATE )
@@ -105,6 +129,36 @@
 	       	A.display_order
 	  	FROM TB_COM_CODE A
 	  	WHERE A.parent_code_seq = #{parentCodeSeq}
+	  	ORDER BY A.display_order
+	</select>
+	
+	<select id="getRelationCodeList" parameterType="String" resultType="map">
+		SELECT A.code_seq,
+			A.code_name,
+			A.code_desc,
+	       	A.gender,
+	       	A.couple_seq,
+	       	A.direction,
+	       	A.display_order
+	  	FROM TB_COM_RELATION_CODE A
+	  	ORDER BY A.display_order
+	</select>
+	
+	<select id="getRelationCoupleCodeList" parameterType="String" resultType="map">
+		SELECT A.couple_seq,
+			A.couple_name,
+			A.code_seq1,
+			A.code_seq2,
+            B.code_name code_name1,
+	       	B.gender gender1,
+	       	B.direction direction1,
+            C.code_name code_name2,
+	       	C.gender gender2,
+	       	C.direction direction2,
+	       	A.display_order
+	  	FROM TB_COM_RELATION_COUPLE_CODE A
+	  	INNER JOIN TB_COM_RELATION_CODE B ON A.code_seq1 = B.code_seq
+	  	INNER JOIN TB_COM_RELATION_CODE C ON A.code_seq2 = C.code_seq
 	  	ORDER BY A.display_order
 	</select>
 	
@@ -146,5 +200,12 @@
 			SET seq_num = COALESCE(seq_num,0)+1
 		WHERE a.seq_type = #{seqType}
 	</update>
+	
+	
+	<select id="getYearList" parameterType="map" resultType="map">
+		SELECT 
+			YEAR(CURDATE())- seq as year_val
+		FROM seq_0_to_110
+	</select>
 
 </mapper>

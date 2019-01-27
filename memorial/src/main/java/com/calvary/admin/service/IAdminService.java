@@ -59,7 +59,24 @@ public interface IAdminService {
 	/** 
 	 * 분양정보 진행상태 업데이트
 	 */
-	public int updateBunyangProgressStatus(String bunyangSeq, String progressStatus, String updateUser);
+	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser);
+	
+	/** 
+	 * 분양취소
+	 */
+	public int cancelBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser);
+	
+	/** 
+	 * 분양정보삭제
+	 */
+	public int deleteBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser);
+	
+	/**
+	 * 분양차수중 최종 분양번호 +1 반환
+	 * @param bunyangTimes
+	 * @return
+	 */
+	public String getNextBunyangNo(int bunyangTimes);
 	
 	
 	

@@ -75,6 +75,10 @@ public class CalvaryConstants {
 	public static final String PROGRESS_STATUS_E = "E";
 	/** 분양 진행상태 코드값 : 반려 */
 	public static final String PROGRESS_STATUS_R = "R";
+	/** 분양 진행상태 코드값 : 취소 */
+	public static final String PROGRESS_STATUS_CA = "CA";
+	/** 분양 진행상태 코드값 : 취소 */
+	public static final String PROGRESS_STATUS_DEL = "DEL";
 	
 	
 	/** 분양금 납부 타입 : 계약금 납부 */

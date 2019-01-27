@@ -4,6 +4,7 @@ import java.util.List;
 
 public class BunyangInfoVo {
 	private String bunyangSeq;
+	private String bunyangNo;
 	private String requestUserSeq;
 	private String productType;
 	private int coupleTypeCount;
@@ -15,6 +16,8 @@ public class BunyangInfoVo {
 	private String progressStatus;
 	private String registUserSeq;
 	private String registDate;
+	private int bunyangTimes;
+	private String remarks;
 	
 	private BunyangUserVo applyUser;// 신청자
 	private BunyangUserVo agentUser;// 대리인
@@ -25,6 +28,12 @@ public class BunyangInfoVo {
 	}
 	public void setBunyangSeq(String bunyangSeq) {
 		this.bunyangSeq = bunyangSeq;
+	}
+	public String getBunyangNo() {
+		return bunyangNo;
+	}
+	public void setBunyangNo(String bunyangNo) {
+		this.bunyangNo = bunyangNo;
 	}
 	public String getRequestUserSeq() {
 		return requestUserSeq;
@@ -110,13 +119,27 @@ public class BunyangInfoVo {
 	public void setUseUsers(List<BunyangUserVo> useUsers) {
 		this.useUsers = useUsers;
 	}
+	public int getBunyangTimes() {
+		return bunyangTimes;
+	}
+	public void setBunyangTimes(int bunyangTimes) {
+		this.bunyangTimes = bunyangTimes;
+	}
+	public String getRemarks() {
+		return remarks;
+	}
+	public void setRemarks(String remarks) {
+		this.remarks = remarks;
+	}
 	@Override
 	public String toString() {
-		return "BunyangInfoVo [bunyangSeq=" + bunyangSeq + ", requestUserSeq=" + requestUserSeq + ", productType="
-				+ productType + ", coupleTypeCount=" + coupleTypeCount + ", singleTypeCount=" + singleTypeCount
-				+ ", serviceChargeType=" + serviceChargeType + ", reqApprovalSeq=" + reqApprovalSeq + ", contractSeq="
-				+ contractSeq + ", useApprovalSeq=" + useApprovalSeq + ", progressStatus=" + progressStatus
-				+ ", registUserSeq=" + registUserSeq + ", registDate=" + registDate + ", applyUser=" + applyUser
-				+ ", agentUser=" + agentUser + ", useUsers=" + useUsers + "]";
+		return "BunyangInfoVo [bunyangSeq=" + bunyangSeq + ", bunyangNo=" + bunyangNo + ", requestUserSeq="
+				+ requestUserSeq + ", productType=" + productType + ", coupleTypeCount=" + coupleTypeCount
+				+ ", singleTypeCount=" + singleTypeCount + ", serviceChargeType=" + serviceChargeType
+				+ ", reqApprovalSeq=" + reqApprovalSeq + ", contractSeq=" + contractSeq + ", useApprovalSeq="
+				+ useApprovalSeq + ", progressStatus=" + progressStatus + ", registUserSeq=" + registUserSeq
+				+ ", registDate=" + registDate + ", bunyangTimes=" + bunyangTimes + ", remarks=" + remarks
+				+ ", applyUser=" + applyUser + ", agentUser=" + agentUser + ", useUsers=" + useUsers + "]";
 	}
+	
 }

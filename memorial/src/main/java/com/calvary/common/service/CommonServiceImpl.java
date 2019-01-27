@@ -18,8 +18,19 @@ public class CommonServiceImpl implements ICommonService {
 	private CommonDao commonDao;
 	
 	@Override
+	public List<Object> getYearList() {
+		List<Object> list = commonDao.selectList("common.getYearList", null);
+		return list;
+	}
+	
+	@Override
 	public List<Object> getChildCodeList(String parentCodeSeq) {
 		List<Object> list = commonDao.selectList("common.getChildCodeList", parentCodeSeq);
+		return list;
+	}
+	
+	public List<Object> getRelationCodeList() {
+		List<Object> list = commonDao.selectList("common.getRelationCodeList", null);
 		return list;
 	}
 	

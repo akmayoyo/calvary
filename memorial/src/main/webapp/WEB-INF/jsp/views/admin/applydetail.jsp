@@ -144,6 +144,10 @@
         	</colgroup>
             <tbody>
             	<tr>
+            		<th style="background-color: #f5f5f5;">분양차수</th>
+            		<td align="left" colspan="3">${bunyangInfo.bunyang_times}차</td>
+            	</tr>
+            	<tr>
             		<th style="background-color: #f5f5f5;">신청형태</th>
             		<td align="left" colspan="3">${bunyangInfo.product_type_name}</td>
             	</tr>
@@ -184,7 +188,7 @@
         <button type="button" class="btn btn-warning btn-lg" onclick="reject()">반려</button>
         <button type="button" class="btn btn-danger btn-lg" onclick="cancel()">취소</button>
 		</c:if>
-        <c:if test="${bunyangInfo.progress_status == 'A'}">
+        <c:if test="${bunyangInfo.progress_status == 'A' && bunyangInfo.cancel_yn != 'Y'}">
         <button type="button" class="btn btn-danger btn-lg" onclick="cancel()">취소</button>
 		</c:if>
 		<c:if test="${bunyangInfo.progress_status == 'R'}">
@@ -226,6 +230,7 @@ function approval() {
 		var bunyangInfo = {};
 		bunyangInfo["bunyangSeq"] = "${bunyangSeq}";
 		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_A%>";
+		bunyangInfo["bunyangTimes"] = ${bunyangInfo.bunyang_times};
 		// 저장 호출
 		common.ajax({
 			url:"${contextPath}/admin/approval", 
@@ -233,9 +238,13 @@ function approval() {
 			contentType: 'application/json',
 			success: function(result) {
 				if(result && result.result) {
-					common.showAlert("승인되었습니다.");
+					// 승인서 파일번호
+					var fileSeq = result.fileSeq;
+					if(confirm('승인되었습니다.\n승인서를 다운로드하시겠습니까?')) {
+						donwloadFile(fileSeq);
+					}
 					var frm = document.getElementById("frm");
-					frm.action = "${contextPath}/admin/applymgmt";
+					frm.action = "${contextPath}/admin/applydetail";
 					frm.submit();
 				}
 			}
@@ -247,10 +256,15 @@ function approval() {
  * 반려
  */
 function reject() {
-	if(confirm("반려하시겠습니까?")) {
+	var winoption = {width:600, height:265};
+	var param = {popupTitle: "반려 사유 입력"};
+	common.openWindow("${contextPath}/popup/registcomment", "popRegistComment", winoption, param);
+	// 신청자 입력 팝업 callback 함수
+	window.registCommentCallBack = function(val) {
 		var bunyangInfo = {};
 		bunyangInfo["bunyangSeq"] = "${bunyangSeq}";
 		bunyangInfo["progressStatus"] = "<%=CalvaryConstants.PROGRESS_STATUS_R%>";
+		bunyangInfo["remarks"] = val;
 		// 저장 호출
 		common.ajax({
 			url:"${contextPath}/admin/reject", 
@@ -265,14 +279,37 @@ function reject() {
 				}
 			}
 		});
-	}
+	};
 }
 
 /**
- * 
+ * 취소
  */
 function cancel() {
-	
+	var winoption = {width:600, height:265};
+	var param = {popupTitle: "취소 사유 입력"};
+	common.openWindow("${contextPath}/popup/registcomment", "popRegistComment", winoption, param);
+	// 신청자 입력 팝업 callback 함수
+	window.registCommentCallBack = function(val) {
+		var bunyangInfo = {};
+		bunyangInfo["bunyangSeq"] = "${bunyangSeq}";
+		bunyangInfo["progressStatus"] = "${bunyangInfo.progress_status}";
+		bunyangInfo["remarks"] = val;
+		// 저장 호출
+		common.ajax({
+			url:"${contextPath}/admin/cancel", 
+			data:JSON.stringify(bunyangInfo),
+			contentType: 'application/json',
+			success: function(result) {
+				if(result && result.result) {
+					common.showAlert("취소처리되었습니다.");
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/admin/applymgmt";
+					frm.submit();
+				}
+			}
+		});
+	};
 }
 
 /**

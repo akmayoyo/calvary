@@ -44,16 +44,15 @@
 			<table id="tblApplyList" class="table table-style table-bordered">
 				<thead>
 					<tr>
-						<th scope="col">승인번호</th>
-						<th scope="col">신청자</th>
-						<th scope="col">사용자</th>
-						<th scope="col">신청형태</th>
-						<th scope="col">부부형</th>
-						<th scope="col">1인형</th>
-						<th scope="col">신청일자</th>
-						<th scope="col">신청상태</th>
-						<th scope="col">비고</th>
-<!-- 						<th scope="col">승인/반려/취소</th> -->
+						<th scope="col" class="col-xs-1">승인번호</th>
+						<th scope="col" class="col-xs-1">신청자</th>
+						<th scope="col" class="col-xs-2">사용자</th>
+						<th scope="col" class="col-xs-1">신청형태</th>
+						<th scope="col" class="col-xs-1">부부형</th>
+						<th scope="col" class="col-xs-1">1인형</th>
+						<th scope="col" class="col-xs-1">신청일자</th>
+						<th scope="col" class="col-xs-1">신청상태</th>
+						<th scope="col" class="col-xs-2">비고</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -74,7 +73,7 @@
 	                    <td><p class="form-control-static">${apply.single_type_count}</p></td>
 	                    <td><p class="form-control-static">${apply.regist_date}</p></td>
 	                    <td><p class="form-control-static">${apply.progress_status_exp}</p></td>
-	                    <td align="left"><p class="form-control-static"><c:if test="${apply.progress_status=='A'}">승인일자 : </c:if>${apply.remarks_exp}</p>
+	                    <td align="left"><p class="form-control-static">${apply.remarks_exp}</p>
 	                    </td>
 <!-- 						<td style="text-decoration: none;"> -->
 <%-- 							<c:choose> --%>
@@ -154,8 +153,8 @@ function _applyRegist() {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호","신청자","사용자","신청형태","부부형","1인형","신청일자","신청상태","비고"];
-	var excelFields = ["bunyang_seq","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","regist_date","progress_status_exp","remarks_exp"];
+	var excelHeaders = ["승인번호","신청자","사용자","신청형태","부부형","1인형","신청일자","신청상태","비고"];
+	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","regist_date","progress_status_exp","remarks_exp"];
 	var searchKeys = ["bunyangTimes", "progressStatus", "apply_user_name"];
 	var bunyangTimes = $('select[name="bunyangTimes"] option:selected').val();
 	var progressStatus = $('select[name="progressStatus"] option:selected').val();
@@ -165,6 +164,7 @@ function _downloadExcel() {
 	var title = "갈보리추모동산 신청현황";
 	var fileName = title + ".xlsx";
 	var sheetName = title;
+	title += " (" + $('select[name="bunyangTimes"] option:selected').text() + ")";
 	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);
 }
 

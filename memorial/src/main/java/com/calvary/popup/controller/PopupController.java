@@ -7,22 +7,22 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.calvary.admin.service.IAdminService;
+import com.calvary.admin.vo.BunyangInfoVo;
+import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
-import com.calvary.common.util.CommonUtil;
 import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
-import com.calvary.common.vo.UserSearchVo;
 import com.calvary.excel.ExcelForms;
 import com.calvary.excel.service.IExcelService;
 import com.calvary.popup.service.IPopupService;
+import com.calvary.popup.vo.SelectUserVo;
 
 @Controller
 @RequestMapping(value=PopupController.ROOT_URL)
@@ -32,6 +32,7 @@ public class PopupController {
 	public static final String ROOT_URL = "/popup";
 	
 	public static final String SELECT_USER_URL = "/selectuser";
+	public static final String REGIST_USE_USER_URL = "/registuseuser";
 	public static final String CHECK_DUPLICATED_USER_URL = "/checkduplicateduser";
 	public static final String CONTRACT_CANCEL_URL = "/contractcancel";
 	public static final String USE_APPLY_URL = "/useapply";
@@ -41,6 +42,8 @@ public class PopupController {
 	public static final String SAVE_PAYMENT = "/savepayment";
 	/** 분양상세정보 페이지  URL */
 	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
+	/** comment 입력 팝업 URL */
+	public static final String REGIST_COMMENT_URL = "/registcomment";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -52,29 +55,40 @@ public class PopupController {
 	private IExcelService excelService;
 	
 	@RequestMapping(value=SELECT_USER_URL)
-	public Object selectUserHandler(SearchVo searchVo, String popupTitle) {
+	public Object selectUserHandler(SelectUserVo selectUserVo) {
 		ModelAndView mv = new ModelAndView();
-		List<Object> userList = popupService.getUserList(searchVo);
-		searchVo.setTotalCount(popupService.getUserListTotalCount(searchVo));
-		mv.addObject("userList", userList);
-		mv.addObject("officerList", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_CHURCH_OFFICER));
-		mv.addObject("searchVo", searchVo);
-		mv.addObject("popupTitle", popupTitle);
+		mv.addObject("yearList", commonService.getYearList());
+		mv.addObject("officerList", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_CHURCH_OFFICER));// 직분코드
+		mv.addObject("relationList", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_USER_RELATION));// 관계코드
+		mv.addObject("users", selectUserVo.getUsers());
+		mv.addObject("popupTitle", selectUserVo.getPopupTitle());
+		mv.addObject("popupType", selectUserVo.getPopupType());
 		mv.setViewName(ROOT_URL + SELECT_USER_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=REGIST_USE_USER_URL)
+	public Object registUseUserHandler(SelectUserVo selectUserVo) {
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("yearList", commonService.getYearList());
+		mv.addObject("relationList", commonService.getRelationCodeList());// 관계코드
+		mv.addObject("users", selectUserVo.getUsers());
+		mv.addObject("popupTitle", selectUserVo.getPopupTitle());
+		mv.addObject("popupType", selectUserVo.getPopupType());
+		if("couple".equals(selectUserVo.getPopupType())) {
+			mv.setViewName(ROOT_URL + "/registcoupleuser");
+		}else {
+			mv.setViewName(ROOT_URL + "/registsingleuser");
+		}
 		return mv;
 	}
 	
 	@RequestMapping(value=CHECK_DUPLICATED_USER_URL)
 	@ResponseBody
-	public Object checkDuplicatedUserHandler(String userName, String birthDate) {
+	public Object checkDuplicatedUserHandler(BunyangUserVo bunyangUserVo) {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		boolean bRslt = popupService.checkDuplicatedUser(userName, birthDate);
-		Map<String, Object> user = null;
-		if(bRslt) {
-			user = popupService.getUserByNameAndBirthDate(userName, birthDate);
-		}
-		rtnMap.put("isduplicated", bRslt);
-		rtnMap.put("user", user);
+		Map<String, Object> duplicatedUser = popupService.getRefUserByNameAndBirthDate(bunyangUserVo);
+		rtnMap.put("duplicatedUser", duplicatedUser);
 		return rtnMap;
 	}
 	
@@ -172,7 +186,10 @@ public class PopupController {
 		if(contractBunyangSeqs != null && contractBunyangSeqs.length > 0) {
 			for(i = 0; i < contractBunyangSeqs.length; i++) {
 				bunyangSeq = contractBunyangSeqs[i];
-				iRslt += adminService.updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_B, SessionUtil.getCurrentUserId());
+				BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
+				bunyangInfoVo.setBunyangSeq(bunyangSeq);
+				bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_B);
+				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
 				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
 				if(!StringUtils.isEmpty(fileSeq)) {
 					Map<String, Object> param = new HashMap<String, Object>();
@@ -186,7 +203,10 @@ public class PopupController {
 		if(fullPaymentBunyangSeqs != null && fullPaymentBunyangSeqs.length > 0) {
 			for(i = 0; i < fullPaymentBunyangSeqs.length; i++) {
 				bunyangSeq = fullPaymentBunyangSeqs[i];
-				iRslt += adminService.updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_C, SessionUtil.getCurrentUserId());
+				BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
+				bunyangInfoVo.setBunyangSeq(bunyangSeq);
+				bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_C);
+				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
 				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "");
 				if(!StringUtils.isEmpty(fileSeq)) {
 					Map<String, Object> param = new HashMap<String, Object>();
@@ -222,6 +242,17 @@ public class PopupController {
 		mv.addObject("balancePaymentList", adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 잔금납부내역
 		mv.addObject("totalPaymentInfo", adminService.getTotalPayment(bunyangSeq));
 		mv.setViewName(ROOT_URL + BUNYANG_INFO_URL);
+		return mv;
+	}
+	
+	/** 
+	 * comment 입력 팝업 URL
+	 */
+	@RequestMapping(value=REGIST_COMMENT_URL)
+	public Object registCommentHandler(String popupTitle) {
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("popupTitle", popupTitle);
+		mv.setViewName(ROOT_URL + REGIST_COMMENT_URL);
 		return mv;
 	}
 	

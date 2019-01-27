@@ -291,6 +291,14 @@
 		return true;
 	}
 	
+	var isVisible = function(el) {
+	    if (el.length > 0 && el.css('visibility') !== 'hidden' && el.css('display') !== 'none') {
+	        return true;
+	    } else {
+	        return false;
+	    }
+	}
+	
 	var datePicker = function(el, opt) {
 		opt = opt || {};
 		opt = $.extend(true, {
@@ -345,6 +353,7 @@
 	common.datePicker = datePicker;
 	common.isValidMail = isValidMail;
 	common.isValidMobile = isValidMobile;
+	common.isVisible = isVisible;
 
 	window.common = common;
 })();

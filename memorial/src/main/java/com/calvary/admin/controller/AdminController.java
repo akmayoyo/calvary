@@ -55,6 +55,8 @@ public class AdminController {
 	public static final String APPROVAL_URL = "/approval";
 	/** 반려 URL */
 	public static final String REJECT_URL = "/reject";
+	/** 취소 URL */
+	public static final String CANCEL_URL = "/cancel";
 	
 	/** 
 	 * 분양신청관리 메인 페이지 
@@ -88,6 +90,7 @@ public class AdminController {
 	@RequestMapping(value=APPLY_REGIST_URL)
 	public Object applyRegistHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		List<Object> bunyangTimesList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_BUNYANG_TIMES);
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
@@ -96,6 +99,7 @@ public class AdminController {
 		mv.addObject("submenuName", "분양 신청 등록");
 		mv.addObject("menuList", menuList);
 		mv.addObject("codeUserRelation", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_USER_RELATION));
+		mv.addObject("bunyangTimesList", bunyangTimesList);
 		mv.setViewName(ROOT_URL + APPLY_REGIST_URL);
 		return mv;
 	}
@@ -157,21 +161,23 @@ public class AdminController {
 	@ResponseBody
 	public Object approvalHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
 		boolean bRslt = false;
-		String bunyangSeq = bunyangInfoVo.getBunyangSeq();
-		String progressStatus = bunyangInfoVo.getProgressStatus();
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangSeq, progressStatus, SessionUtil.getCurrentUserId());
+		String bunyangNo = adminService.getNextBunyangNo(bunyangInfoVo.getBunyangTimes());
+		bunyangInfoVo.setBunyangNo(bunyangNo);
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
+		String approvalFileSeq = null;
 		if(iRslt > 0) {
-			String approvalFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, "");
+			approvalFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangInfoVo.getBunyangSeq(), "");
 			if(!StringUtils.isEmpty(approvalFileSeq)) {
 				Map<String, Object> param = new HashMap<String, Object>();
-				param.put("bunyangSeq", bunyangSeq);
+				param.put("bunyangSeq", bunyangInfoVo.getBunyangSeq());
 				param.put("file_seq_approval", approvalFileSeq);
 				iRslt = adminService.updateBunyangFileSeq(param);
 				bRslt = iRslt > 0;
 			}
 		}
 		rtnMap.put("result", bRslt);
+		rtnMap.put("fileSeq", approvalFileSeq);
 		return rtnMap;
 	}
 	
@@ -182,21 +188,29 @@ public class AdminController {
 	@ResponseBody
 	public Object rejectHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
 		boolean bRslt = false;
-		String bunyangSeq = bunyangInfoVo.getBunyangSeq();
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
+		bRslt = iRslt > 0;
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 취소
+	 */
+	@RequestMapping(value=CANCEL_URL)
+	@ResponseBody
+	public Object cancelHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
+		boolean bRslt = false;
 		String progressStatus = bunyangInfoVo.getProgressStatus();
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangSeq, progressStatus, SessionUtil.getCurrentUserId());
-		if(iRslt > 0) {
-			String approvalFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, "");
-//			if(!StringUtils.isEmpty(approvalFileSeq)) {
-//				Map<String, Object> param = new HashMap<String, Object>();
-//				param.put("bunyangSeq", bunyangSeq);
-//				param.put("file_seq_approval", approvalFileSeq);
-//				iRslt = adminService.updateBunyangFileSeq(param);
-//				bRslt = iRslt > 0;
-//			}
-			bRslt = iRslt > 0;
+		int iRslt = 0;
+		if(CalvaryConstants.PROGRESS_STATUS_NEW.equals(progressStatus)) {// 신청(미승인)건은 데이터삭제
+			iRslt = adminService.deleteBunyangInfo(bunyangInfoVo, SessionUtil.getCurrentUserId());
+		} else {// 그외건은 상태를 취소상태로 변경
+			iRslt = adminService.cancelBunyangInfo(bunyangInfoVo, SessionUtil.getCurrentUserId());
 		}
+		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
@@ -397,7 +411,10 @@ public class AdminController {
 	public Object useApprovalHandler(String bunyangSeq) {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_D, SessionUtil.getCurrentUserId());
+		BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
+		bunyangInfoVo.setBunyangSeq(bunyangSeq);
+		bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_D);
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
 		if(iRslt > 0) {
 			String fileSeq = excelService.createBunyangExcelForm(ExcelForms.USE_APPROVAL_FORM, bunyangSeq, "");
 			if(!StringUtils.isEmpty(fileSeq)) {

@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.dao.CommonDao;
 import com.calvary.common.vo.SearchVo;
@@ -43,6 +44,19 @@ public class PopupServiceImpl implements IPopupService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
+	public Map<String, Object> getRefUserByNameAndBirthDate(BunyangUserVo bunyangUserVo) {
+		Map<String, Object> searchParam = new HashMap<String, Object>();
+		searchParam.put("refType", bunyangUserVo.getRefType());
+		searchParam.put("userName", bunyangUserVo.getUserName());
+		searchParam.put("birthDate", bunyangUserVo.getBirthDate());
+		searchParam.put("gender", bunyangUserVo.getGender());
+		searchParam.put("mobile", bunyangUserVo.getMobile());
+		Map<String, Object> map = (HashMap<String, Object>)commonDao.selectOne("common.getRefUserByNameAndBirthDate", searchParam);
+		return map;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
 	public Map<String, Object> getUserByNameAndBirthDate(String userName, String birthDate) {
 		Map<String, Object> searchParam = new HashMap<String, Object>();
 		searchParam.put("userName", userName);
@@ -53,12 +67,15 @@ public class PopupServiceImpl implements IPopupService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean checkDuplicatedUser(String userName, String birthDate) {
+	public boolean checkDuplicatedUser(BunyangUserVo bunyangUserVo) {
 		boolean isDuplicated = false;
 		Map<String, Object> searchParam = new HashMap<String, Object>();
-		searchParam.put("userName", userName);
-		searchParam.put("birthDate", birthDate);
-		Map<String, Object> map = (HashMap<String, Object>)commonDao.selectOne("common.checkDuplicatedUser", searchParam);
+		searchParam.put("refType", bunyangUserVo.getRefType());
+		searchParam.put("userName", bunyangUserVo.getUserName());
+		searchParam.put("birthDate", bunyangUserVo.getBirthDate());
+		searchParam.put("gender", bunyangUserVo.getGender());
+		searchParam.put("mobile", bunyangUserVo.getMobile());
+		Map<String, Object> map = (HashMap<String, Object>)commonDao.selectOne("common.checkDuplicatedBunyangUser", searchParam);
 		if(map != null && map.containsKey("cnt")) {
 			isDuplicated = (long)map.get("cnt") > 0;
 		}
