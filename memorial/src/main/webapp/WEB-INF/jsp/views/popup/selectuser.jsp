@@ -167,6 +167,7 @@
 	
 </div>
 
+<script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript">
@@ -412,13 +413,18 @@ function _confirm() {
     userVo['birthDate'] = birthDate;
     userVo['gender'] = gender;
     userVo['mobile'] = mobile;
+    if('${popupType}' == '1') {
+    	userVo['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>';	
+    }else if('${popupType}' == '2') {
+    	userVo['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER%>';	
+    }
     
     common.ajax({
 		url:"${contextPath}/popup/checkduplicateduser", 
 		data:userVo,
 		success: function(result) {
 			if(result && result.duplicatedUser) {
-				common.showAlert('입력하신 신청자와 동일한 신청가 있습니다.');
+				common.showAlert('입력하신 성명/생년월일/휴대번호로 이미 등록된 정보가 있습니다.');	
 			}else {
 				var selectedItems = [];
     	        selectedItems.push(userName);
@@ -452,15 +458,28 @@ function _confirm() {
  * 도로명주소 Open API 팝업호출
  */
 function goJusoPopup(btn){
-	var winoption = {width:570, height:420};
-	common.openWindow("${contextPath}/popup/jusopopup.jsp", "jusopopup", winoption, {});
-	window.jusoCallBack = function(roadFullAddr,roadAddrPart1,addrDetail,roadAddrPart2,engAddr, jibunAddr, zipNo, admCd, rnMgtSn, bdMgtSn , detBdNmList, bdNm, bdKdcd, siNm, sggNm, emdNm, liNm, rn, udrtYn, buldMnnm, buldSlno, mtYn, lnbrMnnm, lnbrSlno, emdNo){
-		var td = $(btn).parent('td');
-		td.find('input[name="postNumber"]').val(zipNo);
-		td.find('input[name="address1"]').val(roadAddrPart1 + roadAddrPart2);
-		td.find('input[name="address2"]').val(addrDetail);
-		td.find('input[name="address2"]').focus();
-	};
+// 	var winoption = {width:570, height:420};
+// 	common.openWindow("${contextPath}/popup/jusopopup.jsp", "jusopopup", winoption, {});
+// 	window.jusoCallBack = function(roadFullAddr,roadAddrPart1,addrDetail,roadAddrPart2,engAddr, jibunAddr, zipNo, admCd, rnMgtSn, bdMgtSn , detBdNmList, bdNm, bdKdcd, siNm, sggNm, emdNm, liNm, rn, udrtYn, buldMnnm, buldSlno, mtYn, lnbrMnnm, lnbrSlno, emdNo){
+// 		var td = $(btn).parent('td');
+// 		td.find('input[name="postNumber"]').val(zipNo);
+// 		td.find('input[name="address1"]').val(roadAddrPart1 + roadAddrPart2);
+// 		td.find('input[name="address2"]').val(addrDetail);
+// 		td.find('input[name="address2"]').focus();
+// 	};
+	new daum.Postcode({
+        oncomplete: function(data) {
+        	var td = $(btn).parent('td');
+        	var postNumber = data.zonecode;
+        	var address1 = data.address;
+        	if(data.buildingName) {
+        		address1 += '(' + data.buildingName + ')';
+        	}
+        	td.find('input[name="postNumber"]').val(postNumber);
+        	td.find('input[name="address1"]').val(address1);
+        	td.find('input[name="address2"]').focus();
+        }
+    }).open();
 }
 
 /**

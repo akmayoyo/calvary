@@ -63,7 +63,7 @@
 			,case when t1.total_price = 0 then null else round(t2.total_payment/t1.total_price*100,1) end as payment_rate
 		from
 		(select 
-			sum((COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000) as total_price 
+			sum((COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count)) as total_price 
 		from TB_BUNYANG_INFO a 
 		where a.PROGRESS_STATUS not in('E', 'R')
 		) t1,

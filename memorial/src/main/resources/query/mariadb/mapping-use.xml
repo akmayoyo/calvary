@@ -66,7 +66,7 @@
     	FROM
 		    (SELECT
 			  a.bunyang_seq
-			  ,COALESCE(a.progress_status,'') || a.bunyang_seq bunyang_no
+			  ,a.bunyang_no
 			  ,a.product_type
 			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
 			  ,a.couple_type_count
@@ -89,7 +89,7 @@
 			  ,a.regist_user_id
 			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
 		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
-		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
+		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
 			  ,CASE WHEN progress_status = 'D' THEN 'Y' ELSE 'N' END AS approval_yn
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date

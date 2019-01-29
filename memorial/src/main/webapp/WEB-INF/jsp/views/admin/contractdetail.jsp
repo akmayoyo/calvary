@@ -19,6 +19,15 @@
     <div class="clearfix"></div>
     <div class="table-responsive">
         <table id="tblApplyUser" class="table table-style">
+        	<colgroup>
+        		<col width="7%">
+        		<col width="13%">
+        		<col width="13%">
+        		<col width="13%">
+        		<col width="30%">
+        		<col width="7%">
+        		<col width="7%">
+        	</colgroup>
             <thead>
                 <tr>
                     <th scope="col">성명</th>
@@ -54,6 +63,15 @@
 	    <div class="clearfix"></div>
 	    <div class="table-responsive">
 	        <table id="tblAgentUser" class="table table-style">
+	        	<colgroup>
+	        		<col width="7%">
+	        		<col width="13%">
+	        		<col width="13%">
+	        		<col width="13%">
+	        		<col width="30%">
+	        		<col width="7%">
+	        		<col width="7%">
+	        	</colgroup>
 	            <thead>
 	                <tr>
 	                    <th scope="col">성명</th>
@@ -89,6 +107,15 @@
     <div class="clearfix"></div>
     <div class="table-responsive">
         <table id="tblUseUser" class="table table-style table-bordered">
+        	<colgroup>
+        		<col width="7%">
+        		<col width="13%">
+        		<col width="13%">
+        		<col width="13%">
+        		<col width="30%">
+        		<col width="7%">
+        		<col width="7%">
+        	</colgroup>
             <thead>
                 <tr>
                     <th scope="col">장묘형태</th>
@@ -143,6 +170,14 @@
         		<col width="32%">
         	</colgroup>
             <tbody>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">분양차수</th>
+            		<td align="left" colspan="3">${bunyangInfo.bunyang_times}차</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">분양단가</th>
+            		<td align="left" colspan="3">₩${cutil:getThousandSeperatorFormatString(bunyangInfo.price_per_count)}원</td>
+            	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">신청형태</th>
             		<td align="left" colspan="3">${bunyangInfo.product_type_name}</td>

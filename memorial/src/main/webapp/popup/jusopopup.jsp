@@ -38,15 +38,15 @@
 
 %>
 </head>
-<script language="javascript">
+<script type="text/javascript">
 // opener관련 오류가 발생하는 경우 아래 주석을 해지하고, 사용자의 도메인정보를 입력합니다. ("주소입력화면 소스"도 동일하게 적용시켜야 합니다.)
-//document.domain = "abc.go.kr";
+document.domain = "calvarydev.cafe24.com";
 
 function init(){
 	var url = location.href;
 	// 인증키 입력
-	var confmKey = "U01TX0FVVEgyMDE5MDEyNDIwMDY0MDEwODQ3Nzc=";// 개발
-	//var confmKey = "U01TX0FVVEgyMDE5MDEyNzIxMTExMjEwODQ4MTE=";// 운영
+	//var confmKey = "U01TX0FVVEgyMDE5MDEyNDIwMDY0MDEwODQ3Nzc=";// 개발
+	var confmKey = "U01TX0FVVEgyMDE5MDEyNzIxMTExMjEwODQ4MTE=";// 운영
 	var resultType = "4"; // 도로명주소 검색결과 화면 출력내용, 1 : 도로명, 2 : 도로명+지번, 3 : 도로명+상세건물명, 4 : 도로명+지번+상세건물명
 	var inputYn= "<%=inputYn%>";
 	if(inputYn != "Y"){

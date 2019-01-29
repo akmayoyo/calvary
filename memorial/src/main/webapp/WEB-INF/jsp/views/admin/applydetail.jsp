@@ -16,7 +16,15 @@
 <div class="col-md-9">
     <!-- 신청자 -->
     <div>
-    	<div class="pull-left"><h4>신청자</h4></div>
+    	<div class="pull-left">
+    		<p style="font-weight: bold; font-size: 18px; margin: 10px 8px 8px 0; display: inline-block;">신청자</p>
+    		<c:choose>
+    			<c:when test="${bunyangInfo.progress_status == 'N'}"><span class="label label-success">신청</span></c:when>
+    			<c:when test="${bunyangInfo.cancel_yn == 'Y'}"><span class="label label-danger">취소</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'A' && bunyangInfo.cancel_yn != 'Y'}"><span class="label label-info">승인</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'R'}"><span class="label label-warning">반려</span></c:when>
+    		</c:choose>
+    	</div>
     </div>
     <div class="clearfix"></div>
     <div class="table-responsive">
@@ -72,7 +80,6 @@
 	        		<col width="13%">
 	        		<col width="30%">
 	        		<col width="7%">
-	        		<col width="7%">
 	        	</colgroup>
 	            <thead>
 	                <tr>
@@ -82,7 +89,6 @@
 	                    <th scope="col">이메일</th>
 	                    <th scope="col">주소</th>
 	                    <th scope="col">관계</th>
-                    	<th scope="col">교인여부</th>
 	                </tr>
 	            </thead>
 	            <tbody>
@@ -92,9 +98,8 @@
 	            		<td>${cutil:getBirthDateFormatString(agent.birth_date)}</td>
 	            		<td>${cutil:getMobileFormatString(agent.mobile)}</td>
 	            		<td>${agent.email}</td>
-	            		<td>(${agent.post_number}) ${agent.address1} ${agent.address2}</td>
+	            		<td align="left">(${agent.post_number}) ${agent.address1} ${agent.address2}</td>
 	            		<td>${agent.relation_type_name}</td>
-	            		<td>${agent.is_church_person}</td>
 	            	</tr>
 	            	</c:forEach>
 	            </tbody>
@@ -110,13 +115,14 @@
     <div class="table-responsive">
         <table id="tblUseUser" class="table table-style table-bordered">
         	<colgroup>
-        		<col width="7%">
-        		<col width="13%">
-        		<col width="13%">
-        		<col width="13%">
+        		<col width="8%">
+        		<col width="8%">
+        		<col width="10%">
+        		<col width="12%">
         		<col width="30%">
-        		<col width="7%">
-        		<col width="7%">
+        		<col width="8%">
+        		<col width="8%">
+        		<col width="8%">
         	</colgroup>
             <thead>
                 <tr>
@@ -127,6 +133,7 @@
                     <th scope="col">주소</th>
                     <th scope="col">관계</th>
                     <th scope="col">교인여부</th>
+                    <th scope="col">이장대상</th>
                 </tr>
             </thead>
             <tbody>
@@ -146,9 +153,10 @@
             		<td>${use.user_name}</td>
             		<td>${cutil:getBirthDateFormatString(use.birth_date)}</td>
             		<td>${cutil:getMobileFormatString(use.mobile)}</td>
-            		<td>(${use.post_number}) ${use.address1} ${use.address2}</td>
+            		<td align="left">(${use.post_number}) ${use.address1} ${use.address2}</td>
             		<td>${use.relation_type_name}</td>
             		<td>${use.is_church_person}</td>
+            		<td>${use.is_move}</td>
             	</tr>
             	</c:forEach>
             </tbody>
@@ -199,6 +207,12 @@
             			일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price)})
             		</td>
             	</tr>
+            	<c:if test="${not empty bunyangInfo.remarks_exp}">
+            	<tr>
+            		<th style="background-color: #f5f5f5;">비고</th>
+            		<td align="left" colspan="3">${bunyangInfo.remarks_exp}</td>
+            	</tr>
+            	</c:if>
             </tbody>
         </table>
     </div>

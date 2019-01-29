@@ -19,7 +19,7 @@
         		WHEN 'R' THEN '반려'
         		ELSE progress_status
         	END progress_status_exp
-        	,CASE WHEN progress_status = 'A' AND cancel_yn != 'Y' THEN CONCAT('승인일자 : ', progress_update_date)
+        	,CASE WHEN progress_status = 'A' AND (cancel_yn is null or cancel_yn != 'Y') THEN CONCAT('승인일자 : ', progress_update_date)
         		ELSE remarks
         	END remarks_exp
     	FROM
@@ -47,6 +47,7 @@
 			  ,d.user_id use_user_id
 			  ,d.user_name use_user_name
 			  ,d.relation_type use_user_relation
+			  ,is_move
 			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
 			  ,d.cnt use_user_cnt
 			  ,a.regist_user_id
@@ -82,6 +83,7 @@
 				  	,user_id
 					,user_name
 					,relation_type
+					,is_move
 					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
                     ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
 				FROM      
@@ -89,7 +91,8 @@
 						 bunyang_seq
 					   	,user_id
 					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
-					   	,relation_type 
+					   	,relation_type
+					   	,is_move 
 					FROM TB_BUNYANG_REF_USER a
 					WHERE a.ref_type = 'USE_USER'
 					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
@@ -104,7 +107,7 @@
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
 		</if>
 		<if test="progressStatus != null and progressStatus != '' and progressStatus != 'CA'">
-		AND progress_status = #{progressStatus}
+		AND progress_status = #{progressStatus} AND (cancel_yn is null or cancel_yn = 'N')
 		</if>
 		<if test="progressStatus == 'CA'">
 		AND cancel_yn = 'Y'
@@ -157,7 +160,7 @@
 			  ,a.regist_user_id
 			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
 		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
-		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * 2000000 AS total_price
+		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
 		      ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
               ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
 			  ,CASE WHEN progress_status = 'D' THEN 'Y' ELSE 'N' END AS approval_yn
@@ -235,6 +238,9 @@
 	<select id="getBunyangInfo" parameterType="String" resultType="map">
 		SELECT
 			t.*
+			,CASE WHEN progress_status = 'A' AND (cancel_yn is null or cancel_yn != 'Y') THEN CONCAT('승인일자 : ', progress_update_date)
+        		ELSE remarks
+        	END remarks_exp
 		FROM
 		(SELECT 
 			a.bunyang_seq
@@ -245,6 +251,8 @@
 	       	,b.user_id as apply_user_id
 	       	,b.user_name as apply_user_name
           	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
+          	,(SELECT remarks FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) remarks
+          	,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) progress_update_date
 	       	,a.service_charge_type
           	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
           	,(SELECT user_name from TB_BUNYANG_REF_USER bru where bru.bunyang_seq = a.bunyang_seq and bru.is_maint_charger = 'Y' ) maint_charger_name
@@ -306,7 +314,8 @@
 			a.diocese,
 			a.is_church_person,
 			a.user_seq,
-			a.couple_seq
+			a.couple_seq,
+			a.is_move
 		FROM TB_BUNYANG_REF_USER a
 		WHERE a.bunyang_seq = #{bunyangSeq}
     	AND a.ref_type = #{refType}

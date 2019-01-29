@@ -35,7 +35,7 @@
             			<select name="relation" class="form-control" style="width: 80px;">
             				<option value="">선택</option>
             				<c:forEach items="${relationList}" var="relationItem">
-            					<c:if test="${not empty relationItem.couple_seq && relationItem.code_seq != 'ONESELF' && relationItem.code_seq != 'BAEUJA'}">
+            					<c:if test="${not empty relationItem.couple_seq && relationItem.code_seq != 'ONESELF'}">
             						<option value="${relationItem.code_seq}" coupleSeq="${relationItem.couple_seq}" gender="${relationItem.gender}">${relationItem.code_name}</option>
             					</c:if>
             				</c:forEach>
@@ -200,6 +200,7 @@
 	
 </div>
 
+<script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript">
@@ -251,84 +252,42 @@ var applyUserInfo;
  * 수정모드로 호출된 경우 기존 입력데이터 표시
  */
 function setEditInfo() {
-	// 메인화면에서 기입력된 데이터가 있을 경우 초기입력해줌
-    var userInfo;
-    if('${popupType}' == '1') {// 신청인
-    	userInfo = getRefUserInfo('<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>');
-    } else if('${popupType}' == '2') {// 대리인
-    	userInfo = getRefUserInfo('<%=CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER%>');
-    }
-    if(userInfo && userInfo.length > 0 && userInfo[0].userName) {
-    	$('#tiUserName').val(userInfo[0].userName);
-    	var birthDate = userInfo[0].birthDate;
-    	var gender = userInfo[0].gender;
-    	var churchOfficer = userInfo[0].churchOfficer;
-    	var diocese = userInfo[0].diocese;
-    	var relationType = userInfo[0].relationType;
-    	var mobile = userInfo[0].mobile;
-    	var phone = userInfo[0].phone;
-    	var postNumber = userInfo[0].postNumber;
-    	var address1 = userInfo[0].address1;
-    	var address2 = userInfo[0].address2;
-    	var email = userInfo[0].email;
-    	var splited;
-    	if(birthDate) {
-    		splited = birthDate.split('-');
-    		if(splited && splited.length == 3) {
-    			$('#selBirthYear option[value=' + splited[0] + ']').attr('selected', 'selected');
-            	$('#selBirthMonth option[value=' + parseInt(splited[1]) + ']').attr('selected', 'selected');
-            	$('#selBirthYear').trigger('change');
-            	$('#selBirthDay option[value=' + parseInt(splited[2]) + ']').attr('selected', 'selected');
-    		}
-    	}
-    	$('#selGender option[value=' + gender + ']').attr('selected', 'selected');
-    	
-    	if('${popupType}' == '1') {// 신청인
-    		if(churchOfficer) {
-    			$('#selOfficer option[value="' + churchOfficer + '"]').attr('selected', 'selected');	
-    		}
-    		if(diocese) {
-    			$('#tiDiocese').val(diocese);
-    		}
-    	}else if('${popupType}' == '2') {// 대리인
-    		if(relationType) {
-    			$('#selAgentRealtion option[value="' + relationType + '"]').attr('selected', 'selected');	
-    		}
-    	}
-    	if(mobile) {
-    		splited = mobile.split('-');
-    		if(splited && splited.length == 3) {
-    			$('#selMobile1 option[value=' + splited[0] + ']').attr('selected', 'selected');
-            	$('#tiMobile2').val(splited[1]);
-            	$('#tiMobile3').val(splited[2]);
-    		}
-    	}
-    	if(phone) {
-    		splited = phone.split('-');
-    		if(splited && splited.length == 3) {
-            	$('#tiPhone1').val(splited[0]);
-            	$('#tiPhone2').val(splited[1]);
-            	$('#tiPhone3').val(splited[2]);
-    		}
-    	}
-    	if(postNumber) {
-    		$('#tblUserInfo input[name="postNumber"]').val(postNumber);
-    	}
-    	if(address1) {
-    		$('#tblUserInfo input[name="address1"]').val(address1);
-    	}
-    	if(address2) {
-    		$('#tblUserInfo input[name="address2"]').val(address2);
-    	}
-    	if(email) {
-    		splited = email.split('@');
-    		if(splited && splited.length == 2) {
-            	$('#tiEmailAddr').val(splited[0]);
-            	$('#tiEmailDomain').val(splited[1]);
-            	$('#selEmailDomain option[value="' + splited[1] + '"]').attr('selected', 'selected');
-    		}
-    	}
-    }
+	// 메인화면에서 선택한 그리드 행 index 가 있을 경우 수정모드임
+	if(${rowIdx} < 0) {
+		return;
+	}
+	$('#userList li[refType="<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>"]').each(function(idx) {
+		var tbl;
+		if(idx == ${rowIdx}) {// 사용자1
+			tbl = $('#tblUser1');
+		} else {
+			return true;
+		}
+		var userInfo = {};
+		userInfo.userName = $(this).attr('userName');
+		userInfo.birthDate = $(this).attr('birthDate');
+		userInfo.gender = $(this).attr('gender');
+		userInfo.churchOfficer = $(this).attr('churchOfficer');
+		userInfo.diocese = $(this).attr('diocese');
+		userInfo.relationType = $(this).attr('relationType');
+		userInfo.mobile = $(this).attr('mobile');
+		userInfo.phone = $(this).attr('phone');
+		userInfo.postNumber = $(this).attr('postNumber');
+		userInfo.address1 = $(this).attr('address1');
+		userInfo.address2 = $(this).attr('address2');
+		userInfo.fulladdress = $(this).attr('fulladdress');
+		userInfo.email = $(this).attr('email');
+		userInfo.refType = $(this).attr('refType');
+		userInfo.isChurchPerson = $(this).attr('isChurchPerson');
+		userInfo.isMove = $(this).attr('isMove');
+		if(userInfo.relationType == 'ONESELF') {
+			$('#chkOneSelf').prop('checked', true);
+			chkOneSelfChangeHandler();
+			$('#tblApplyUser').find('select[name="moveyn"] option[value="' + userInfo.isMove + '"]').attr('selected', 'selected');
+		} else {
+			setUserInfo(userInfo, tbl);	
+		}
+	});
 }
 
 /**
@@ -494,7 +453,7 @@ function _confirm() {
 		});
 		
 		if(existDuplicatedUser) {
-			common.showAlert('입력하신 사용자와 성명,생년월일,성별,연락처가 동일한 기등록 사용자가 있습니다.');
+			common.showAlert('이미 입력된 사용자입니다.');
 			return;
 		}
 		
@@ -563,7 +522,7 @@ function _confirm() {
     		data:userVo,
     		success: function(result) {
     			if(result && result.duplicatedUser) {
-    				common.showAlert('입력하신 사용자와 동일한 사용자가 있습니다.');
+    				common.showAlert('입력하신 성명/생년월일/연락처로 이미 다른 분양건에 등록된 사용자가 있습니다.');
     			}else {
     				if(window.opener && window.opener.selectuserCallBack != 'undefined') {
 	        			window.opener.selectuserCallBack(selectedItems1, isOneSelf);
@@ -582,15 +541,28 @@ function _confirm() {
  * 도로명주소 Open API 팝업호출
  */
 function goJusoPopup(btn) {
-	var winoption = {width:570, height:420};
-	common.openWindow("${contextPath}/popup/jusopopup.jsp", "jusopopup", winoption, {});
-	window.jusoCallBack = function(roadFullAddr,roadAddrPart1,addrDetail,roadAddrPart2,engAddr, jibunAddr, zipNo, admCd, rnMgtSn, bdMgtSn , detBdNmList, bdNm, bdKdcd, siNm, sggNm, emdNm, liNm, rn, udrtYn, buldMnnm, buldSlno, mtYn, lnbrMnnm, lnbrSlno, emdNo){
-		var td = $(btn).parent('td');
-		td.find('input[name="postNumber"]').val(zipNo);
-		td.find('input[name="address1"]').val(roadAddrPart1 + roadAddrPart2);
-		td.find('input[name="address2"]').val(addrDetail);
-		td.find('input[name="address2"]').focus();
-	};
+// 	var winoption = {width:570, height:420};
+// 	common.openWindow("${contextPath}/popup/jusopopup.jsp", "jusopopup", winoption, {});
+// 	window.jusoCallBack = function(roadFullAddr,roadAddrPart1,addrDetail,roadAddrPart2,engAddr, jibunAddr, zipNo, admCd, rnMgtSn, bdMgtSn , detBdNmList, bdNm, bdKdcd, siNm, sggNm, emdNm, liNm, rn, udrtYn, buldMnnm, buldSlno, mtYn, lnbrMnnm, lnbrSlno, emdNo){
+// 		var td = $(btn).parent('td');
+// 		td.find('input[name="postNumber"]').val(zipNo);
+// 		td.find('input[name="address1"]').val(roadAddrPart1 + roadAddrPart2);
+// 		td.find('input[name="address2"]').val(addrDetail);
+// 		td.find('input[name="address2"]').focus();
+// 	};
+	new daum.Postcode({
+        oncomplete: function(data) {
+        	var td = $(btn).parent('td');
+        	var postNumber = data.zonecode;
+        	var address1 = data.address;
+        	if(data.buildingName) {
+        		address1 += '(' + data.buildingName + ')';
+        	}
+        	td.find('input[name="postNumber"]').val(postNumber);
+        	td.find('input[name="address1"]').val(address1);
+        	td.find('input[name="address2"]').focus();
+        }
+    }).open();
 }
 
 /**
@@ -643,7 +615,8 @@ function setUserInfo(userInfo, tbl) {
     		if(splited && splited.length == 3) {
     			$(tbl).find('select[name="birthYear"] option[value=' + splited[0] + ']').attr('selected', 'selected');
     			$(tbl).find('select[name="birthMonth"] option[value=' + parseInt(splited[1]) + ']').attr('selected', 'selected');
-    			$(tbl).find('select[name="birthYear"]').trigger('change');
+    			generateDays($(tbl).find('select[name="birthYear"]'));
+    			//$(tbl).find('select[name="birthYear"]').trigger('change');
     			$(tbl).find('select[name="birthDay"] option[value=' + parseInt(splited[2]) + ']').attr('selected', 'selected');
     		}
     	}

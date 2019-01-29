@@ -48,7 +48,7 @@
 					<c:forEach items="${contractList}" var="contract">
 					<c:set var="contract_price" value="${cutil:getDownPayment(contract.total_price)}"/><!-- 계약금 -->
 					<tr class="clickable-row" bunyangSeq="${contract.bunyang_seq}">
-	                    <td>${contract.bunyang_seq}</td>
+	                    <td>${contract.bunyang_no}</td>
 	                    <td>${contract.apply_user_name}</td>
 	                    <td>${contract.use_user_exp}</td>
 	                    <td>${contract.product_type_name}</td>

@@ -75,8 +75,6 @@
            			<td align="left" class="form-inline" >
            				<input name="postNumber" type="text" class="form-control readonlywhite" style="width: 150px;" readonly="readonly" placeholder="우편번호">
            				<button name="postSearch" type="button" class="btn btn-sm btn-primary" onclick="goJusoPopup(this)">검색</button>
-           				<input type="checkbox" class="form-control" id="chkAddress1" name="chkAddress" style="margin-left: 10px;">
-    					<label name="labelChkAddress" style="font-size: 13px; font-weight: normal;" for="chkAddress1">부부동일</label>
     					<select name="autoAddress" class="form-control" style="width: 135px; margin-left: 5px;">
     						<option value="">주소선택</option>
     						<c:forEach var="user" items="${users}">
@@ -200,7 +198,12 @@
             	</tr>
             	<tr>
            			<th class="required">관계</th>
-            		<td id="tdRelation" align="left" class="form-inline"></td>
+            		<td id="tdRelation" align="left" class="form-inline">
+            			<select id="selUser2Relation" class="form-control" style="width: 80px;">
+            				<option value="JABU">자부</option>
+            				<option value="JASEO">자서</option>
+            			</select>
+            		</td>
            		</tr>
             	<tr>
             		<th class="required">생년월일</th>
@@ -236,7 +239,7 @@
            				<input name="postNumber" type="text" class="form-control readonlywhite" style="width: 150px;" readonly="readonly" placeholder="우편번호">
            				<button name="postSearch" type="button" class="btn btn-sm btn-primary" onclick="goJusoPopup(this)">검색</button>
            				<input type="checkbox" class="form-control" id="chkAddress2" name="chkAddress" style="margin-left: 10px;">
-    					<label name="labelChkAddress" style="font-size: 13px; font-weight: normal;" for="chkAddress2">부부동일</label>
+    					<label name="labelChkAddress" style="font-size: 13px; font-weight: normal;" for="chkAddress2">상동</label>
     					<select name="autoAddress" class="form-control" style="width: 135px; margin-left: 5px;">
     						<option value="">주소선택</option>
     						<c:forEach var="user" items="${users}">
@@ -289,7 +292,7 @@
         </table>
     </div><!-- 부부형 사용자 2. -->
     
-    <div class="text-center" style="margin-top: 20px; margin-bottom: 10px;">
+    <div class="text-center" style="margin-top: 5px; margin-bottom: 10px;">
 		<button type="button" class="btn btn-primary btn-lg" onclick="_confirm();">확인</button>
 		<button type="button" class="btn btn-default btn-lg btnClose">닫기</button>
 	</div>
@@ -308,6 +311,7 @@
 	
 </div>
 
+<script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript">
@@ -492,6 +496,24 @@ function relationTypeChangeHandler(e) {
 			return false;
 		}
 	});
+// 	if(value == 'JA') {	
+// 		$('#tdRelation').text('');
+// 		$('#tdRelation').attr('relationType','');
+// 		$('#selUser2Relation').show();
+// 	} else {
+// 		$('#selUser2Relation').addClass('hidden');
+// 		// 사용자1에서 선택한 관계와 부부 관계에 있는 관계값을 사용자2에 표시
+// 		$(this).find('option').each(function(idx) {
+// 			var value2 = $(this).val();
+// 			var coupleSeq2 = $(this).attr('coupleSeq');
+// 			var gender2 = $(this).attr('gender');
+// 			if(coupleSeq == coupleSeq2 && value != value2) {
+// 				$('#tdRelation').text($(this).text());
+// 				$('#tdRelation').attr('relationType',value2);
+// 				return false;
+// 			}
+// 		});
+// 	}
 }
 
 /**
@@ -755,7 +777,7 @@ function _confirm() {
 		}
 	});
 	if(existDuplicatedUser) {
-		common.showAlert('입력하신 사용자와 성명,생년월일,성별,연락처가 동일한 기등록 사용자가 있습니다.');
+		common.showAlert('이미 입력된 사용자입니다.');
 		return;
 	}
 	
@@ -805,7 +827,7 @@ function _confirm() {
     		data:userVo,
     		success: function(result) {
     			if(result && result.duplicatedUser) {
-    				common.showAlert('입력하신 사용자와 동일한 사용자가 있습니다.');
+    				common.showAlert('입력하신 '+userVo['userName']+'/'+userVo['birthDate']+'/'+userVo['mobile']+' 정보로 이미 다른 분양건에 등록된 사용자가 있습니다.');
     			}else {
     				if(window.opener && window.opener.selectuserCallBack != 'undefined') {
 	        			window.opener.selectuserCallBack(selectedItems1, selectedItems2, isOneSelf);
@@ -830,7 +852,7 @@ function _confirm() {
     		data:userVo,
     		success: function(result) {
     			if(result && result.duplicatedUser) {
-    				common.showAlert('입력하신 사용자와 동일한 사용자가 있습니다.');
+    				common.showAlert('입력하신 '+userVo['userName']+'/'+userVo['birthDate']+'/'+userVo['mobile']+' 정보로 이미 다른 분양건에 등록된 사용자가 있습니다.');
     			}else {
     				userVo = {};
     			    userVo['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>';
@@ -843,7 +865,7 @@ function _confirm() {
     					data:userVo,
     					success: function(result) {
     						if(result && result.duplicatedUser) {
-    							common.showAlert('입력하신 사용자와 동일한 사용자가 있습니다.');
+    							common.showAlert('입력하신 '+userVo['userName']+'/'+userVo['birthDate']+'/'+userVo['mobile']+' 정보로 이미 다른 분양건에 등록된 사용자가 있습니다.');
     						}else {
     							if(window.opener && window.opener.selectuserCallBack != 'undefined') {
     			        			window.opener.selectuserCallBack(selectedItems1, selectedItems2, isOneSelf);
@@ -867,15 +889,29 @@ function _confirm() {
  * 도로명주소 Open API 팝업호출
  */
 function goJusoPopup(btn) {
-	var winoption = {width:570, height:420};
-	common.openWindow("${contextPath}/popup/jusopopup.jsp", "jusopopup", winoption, {});
-	window.jusoCallBack = function(roadFullAddr,roadAddrPart1,addrDetail,roadAddrPart2,engAddr, jibunAddr, zipNo, admCd, rnMgtSn, bdMgtSn , detBdNmList, bdNm, bdKdcd, siNm, sggNm, emdNm, liNm, rn, udrtYn, buldMnnm, buldSlno, mtYn, lnbrMnnm, lnbrSlno, emdNo){
-		var td = $(btn).parent('td');
-		td.find('input[name="postNumber"]').val(zipNo);
-		td.find('input[name="address1"]').val(roadAddrPart1 + roadAddrPart2);
-		td.find('input[name="address2"]').val(addrDetail);
-		td.find('input[name="address2"]').focus();
-	};
+// 	var winoption = {width:570, height:420};
+// 	common.openWindow("${contextPath}/popup/jusopopup.jsp", "jusopopup", winoption, {});
+// 	window.jusoCallBack = function(roadFullAddr,roadAddrPart1,addrDetail,roadAddrPart2,engAddr, jibunAddr, zipNo, admCd, rnMgtSn, bdMgtSn , detBdNmList, bdNm, bdKdcd, siNm, sggNm, emdNm, liNm, rn, udrtYn, buldMnnm, buldSlno, mtYn, lnbrMnnm, lnbrSlno, emdNo){
+// 		var td = $(btn).parent('td');
+// 		td.find('input[name="postNumber"]').val(zipNo);
+// 		td.find('input[name="address1"]').val(roadAddrPart1 + roadAddrPart2);
+// 		td.find('input[name="address2"]').val(addrDetail);
+// 		td.find('input[name="address2"]').focus();
+// 	};
+
+	new daum.Postcode({
+        oncomplete: function(data) {
+        	var td = $(btn).parent('td');
+        	var postNumber = data.zonecode;
+        	var address1 = data.address;
+        	if(data.buildingName) {
+        		address1 += '(' + data.buildingName + ')';
+        	}
+        	td.find('input[name="postNumber"]').val(postNumber);
+        	td.find('input[name="address1"]').val(address1);
+        	td.find('input[name="address2"]').focus();
+        }
+    }).open();
 }
 
 /**
@@ -928,7 +964,8 @@ function setUserInfo(userInfo, tbl) {
     		if(splited && splited.length == 3) {
     			$(tbl).find('select[name="birthYear"] option[value=' + splited[0] + ']').attr('selected', 'selected');
     			$(tbl).find('select[name="birthMonth"] option[value=' + parseInt(splited[1]) + ']').attr('selected', 'selected');
-    			$(tbl).find('select[name="birthYear"]').trigger('change');
+    			generateDays($(tbl).find('select[name="birthYear"]'));
+    			//$(tbl).find('select[name="birthYear"]').trigger('change');
     			$(tbl).find('select[name="birthDay"] option[value=' + parseInt(splited[2]) + ']').attr('selected', 'selected');
     		}
     	}
