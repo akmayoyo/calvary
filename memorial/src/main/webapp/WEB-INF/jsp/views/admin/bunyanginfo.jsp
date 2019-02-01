@@ -19,6 +19,15 @@
     <div class="clearfix"></div>
     <div class="table-responsive">
         <table id="tblApplyUser" class="table table-style">
+        	<colgroup>
+        		<col width="7%">
+        		<col width="13%">
+        		<col width="13%">
+        		<col width="13%">
+        		<col width="30%">
+        		<col width="7%">
+        		<col width="7%">
+        	</colgroup>
             <thead>
                 <tr>
                     <th scope="col">성명</th>
@@ -37,7 +46,7 @@
             		<td>${cutil:getBirthDateFormatString(apply.birth_date)}</td>
             		<td>${cutil:getMobileFormatString(apply.mobile)}</td>
             		<td>${apply.email}</td>
-            		<td>(${apply.post_number}) ${apply.address1} ${apply.address2}</td>
+            		<td align="left">(${apply.post_number}) ${apply.address1} ${apply.address2}</td>
             		<td>${apply.church_officer_name}</td>
             		<td>${apply.diocese}</td>
             	</tr>
@@ -54,6 +63,14 @@
 	    <div class="clearfix"></div>
 	    <div class="table-responsive">
 	        <table id="tblAgentUser" class="table table-style">
+	        	<colgroup>
+	        		<col width="7%">
+	        		<col width="13%">
+	        		<col width="13%">
+	        		<col width="13%">
+	        		<col width="30%">
+	        		<col width="7%">
+	        	</colgroup>
 	            <thead>
 	                <tr>
 	                    <th scope="col">성명</th>
@@ -62,7 +79,6 @@
 	                    <th scope="col">이메일</th>
 	                    <th scope="col">주소</th>
 	                    <th scope="col">관계</th>
-                    	<th scope="col">교인여부</th>
 	                </tr>
 	            </thead>
 	            <tbody>
@@ -72,9 +88,8 @@
 	            		<td>${cutil:getBirthDateFormatString(agent.birth_date)}</td>
 	            		<td>${cutil:getMobileFormatString(agent.mobile)}</td>
 	            		<td>${agent.email}</td>
-	            		<td>(${agent.post_number}) ${agent.address1} ${agent.address2}</td>
+	            		<td align="left">(${agent.post_number}) ${agent.address1} ${agent.address2}</td>
 	            		<td>${agent.relation_type_name}</td>
-	            		<td>${agent.is_church_person}</td>
 	            	</tr>
 	            	</c:forEach>
 	            </tbody>
@@ -89,6 +104,16 @@
     <div class="clearfix"></div>
     <div class="table-responsive">
         <table id="tblUseUser" class="table table-style table-bordered">
+        	<colgroup>
+        		<col width="8%">
+        		<col width="8%">
+        		<col width="10%">
+        		<col width="12%">
+        		<col width="30%">
+        		<col width="8%">
+        		<col width="8%">
+        		<col width="8%">
+        	</colgroup>
             <thead>
                 <tr>
                     <th scope="col">장묘형태</th>
@@ -98,6 +123,7 @@
                     <th scope="col">주소</th>
                     <th scope="col">관계</th>
                     <th scope="col">교인여부</th>
+                    <th scope="col">이장대상</th>
                 </tr>
             </thead>
             <tbody>
@@ -120,6 +146,7 @@
             		<td>(${use.post_number}) ${use.address1} ${use.address2}</td>
             		<td>${use.relation_type_name}</td>
             		<td>${use.is_church_person}</td>
+            		<td>${use.is_move}</td>
             	</tr>
             	</c:forEach>
             </tbody>
@@ -142,8 +169,8 @@
         	</colgroup>
             <tbody>
             	<tr>
-            		<th style="background-color: #f5f5f5;">신청번호</th>
-            		<td align="left" colspan="3">${bunyangInfo.bunyang_seq}</td>
+            		<th style="background-color: #f5f5f5;">번호</th>
+            		<td align="left" colspan="3">${bunyangInfo.bunyang_no}</td>
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">신청형태</th>

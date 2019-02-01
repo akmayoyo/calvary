@@ -30,9 +30,14 @@
 					<div class="input-group">
 						<input type="text" name="searchVal" class="form-control" value="${searchVo.searchVal}">
 						<span class="input-group-btn pl-10">
-							<button class="btn btn-primary" type="button" onclick="_search()">조회</button>
-							<button class="btn btn-primary" type="button" style="margin-left: 4px;" onclick="_applyRegist()">신청</button>
-							<button class="btn btn-success" type="button" style="margin-left: 4px;" onclick="_downloadExcel()">Excel</button>
+							<button class="btn btn-primary" type="button" onclick="_search()" style="width: 70px;">조회</button>
+							<button class="btn btn-primary" type="button" style="margin-left: 4px; padding: 6px 8px 6px 12px; width: 70px;" onclick="_applyRegist()">
+								등록
+							</button>
+							<button class="btn btn-primary" type="button" style="margin-left: 4px; padding: 6px 8px 6px 12px;" onclick="_registBunyangExcel()">
+								엑셀등록
+							</button>
+							<button class="btn btn-success" type="button" style="margin-left: 4px; width: 70px;" onclick="_downloadExcel()">Excel</button>
 						</span>
 					</div>
 				</div>
@@ -75,28 +80,6 @@
 	                    <td><p class="form-control-static">${apply.progress_status_exp}</p></td>
 	                    <td align="left"><p class="form-control-static">${apply.remarks_exp}</p>
 	                    </td>
-<!-- 						<td style="text-decoration: none;"> -->
-<%-- 							<c:choose> --%>
-<%-- 								<c:when test="${apply.progress_status == 'N'}"><!-- 신청(미승인) --> --%>
-<!-- 									<div class="btn-group"> -->
-<!-- 										<button class="btn btn-info btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onclick="_actionClick(event)"> -->
-<!-- 									    선택<span class="caret" style="margin-left: 5px;"></span> -->
-<!-- 									  	</button> -->
-<!-- 										<ul class="dropdown-menu"> -->
-<!-- 											<li><a href="javascript:void(0)" onclick="_approval(this, event)">승인</a></li> -->
-<!-- 											<li><a href="javascript:void(0)" onclick="_approval(this, event)">반려</a></li> -->
-<!-- 											<li><a href="javascript:void(0)" onclick="_approval(this, event)">취소</a></li> -->
-<!-- 									    </ul> -->
-<!-- 									</div> -->
-<%-- 								</c:when> --%>
-<%-- 								<c:when test="${apply.progress_status == 'R'}"><!-- 반려 --> --%>
-<!-- 									<button type="button" class="btn btn-info btn-sm" onclick="_approval(this, event)">승인</button> -->
-<%-- 								</c:when> --%>
-<%-- 								<c:when test="${apply.progress_status == 'A'}"><!-- 승인 --> --%>
-<!-- 									<button type="button" class="btn btn-danger btn-sm" onclick="_cancel(this, event)">취소</button> -->
-<%-- 								</c:when> --%>
-<%-- 							</c:choose> --%>
-<!-- 						</td> -->
 					</tr>
 					</c:forEach>
 				</tbody>
@@ -233,18 +216,11 @@ function _reject(btn) {
 }
 
 /**
- * 취소
+ * 분양정보 등록(엑셀업로드)
  */
-function _cancel(btn) {
-	
-}
-
-/**
- * 승인/반려/취소란의 버튼클릭
- */
-function _actionClick(event) {
-	// 그리드 클릭 이벤트로 상세페이지 이동안하도록 이벤트 막음
-	//event.stopPropagation();
+function _registBunyangExcel() {
+	var winoption = {width:600, height:300};
+	common.openWindow("${contextPath}/popup/registBunyangExcel", "popRegistBunyangExcel", winoption, {});
 }
 
 </script>

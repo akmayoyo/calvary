@@ -147,7 +147,7 @@ public class ExcelServiceImpl implements IExcelService {
 		param.put("bunyangSeq", bunyangSeq);
 		
 		// 분양정보
-		Map<String, Object> bunyangInfo = (HashMap<String, Object>) commonDao.selectOne("admin.getBunyangInfo", bunyangSeq);
+		Map<String, Object> bunyangInfo = (HashMap<String, Object>) commonDao.selectOne("admin.getBunyangInfo", param);
 		// 신청자정보
 		param.put("refType", CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER);
 		Map<String, Object> applyUser = (HashMap<String, Object>) commonDao.selectOne("admin.getBunyangRefUserInfo",  param);

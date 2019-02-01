@@ -44,6 +44,8 @@ public class PopupController {
 	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
 	/** comment 입력 팝업 URL */
 	public static final String REGIST_COMMENT_URL = "/registcomment";
+	/** 분양정보 엑셀업로드 등록 팝업 URL */
+	public static final String REGIST_BUNYANG_EXCEL_URL = "/registBunyangExcel";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -190,7 +192,7 @@ public class PopupController {
 				BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
 				bunyangInfoVo.setBunyangSeq(bunyangSeq);
 				bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_B);
-				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
+				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
 				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
 				if(!StringUtils.isEmpty(fileSeq)) {
 					Map<String, Object> param = new HashMap<String, Object>();
@@ -207,7 +209,7 @@ public class PopupController {
 				BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
 				bunyangInfoVo.setBunyangSeq(bunyangSeq);
 				bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_C);
-				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
+				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
 				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "");
 				if(!StringUtils.isEmpty(fileSeq)) {
 					Map<String, Object> param = new HashMap<String, Object>();
@@ -247,13 +249,23 @@ public class PopupController {
 	}
 	
 	/** 
-	 * comment 입력 팝업 URL
+	 * comment 입력 팝업
 	 */
 	@RequestMapping(value=REGIST_COMMENT_URL)
 	public Object registCommentHandler(String popupTitle) {
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("popupTitle", popupTitle);
 		mv.setViewName(ROOT_URL + REGIST_COMMENT_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 분양정보 엑셀업로드 등록 팝업
+	 */
+	@RequestMapping(value=REGIST_BUNYANG_EXCEL_URL)
+	public Object registBunyangExcelHandler() {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName(ROOT_URL + REGIST_BUNYANG_EXCEL_URL);
 		return mv;
 	}
 	

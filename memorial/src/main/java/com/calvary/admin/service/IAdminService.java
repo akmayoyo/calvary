@@ -36,6 +36,11 @@ public interface IAdminService {
 	public Map<String, Object> getBunyangInfo(String bunyangSeq);
 	
 	/** 
+	 * 분양 정보 조회 
+	 */
+	public Map<String, Object> getBunyangInfoByNo(String bunyangNo);
+	
+	/** 
 	 * 분양관련 사용자 정보 조회 
 	 */
 	public List<Object> getBunyangRefUserInfo(String bunyangSeq, String refType);
@@ -49,7 +54,7 @@ public interface IAdminService {
 	 * 분양신청 정보 저장
 	 * @param bunyangInfoVo
 	 */
-	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo);
+	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateDate);
 	
 	/** 
 	 * 분양 양식파일 고유번호 업데이트
@@ -59,7 +64,7 @@ public interface IAdminService {
 	/** 
 	 * 분양정보 진행상태 업데이트
 	 */
-	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser);
+	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser, String updateDate);
 	
 	/** 
 	 * 분양취소
@@ -98,11 +103,11 @@ public interface IAdminService {
 	/** 
 	 * 계약금 납부 내역 업데이트
 	 */
-	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate);
+	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String createDate, String updateDate, boolean isContracted);
 	/** 
 	 * 잔금 납부 내역 업데이트
 	 */
-	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, boolean isFullPayment);
+	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, String createDate, boolean isFullPayment);
 	/** 
 	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
 	 */

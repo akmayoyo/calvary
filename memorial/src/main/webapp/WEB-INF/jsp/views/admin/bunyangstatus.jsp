@@ -92,7 +92,7 @@
 				<tbody>
 					<c:forEach items="${bunyangList}" var="bunyangItem">
 						<tr bunyangSeq="${bunyangItem.bunyang_seq}" <c:if test="${bunyangItem.progress_status == 'E' || bunyangItem.progress_status == 'R'}">class="cancel"</c:if>>
-							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.bunyang_seq}</a></td>
+							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.bunyang_no}</a></td>
 							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.apply_user_name}</a></td>
 							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.use_user_exp}</a></td>
 							<td>${bunyangItem.product_type_name}</td>
@@ -151,12 +151,14 @@ function _search(pageIndex) {
  */
 function _downloadExcel() {
 	var excelHeaders = ["번호", "신청자", "사용자", "신청형태", "부부형", "1인형", "신청일자", "계약일자","완납일자","사용승인일자"];
-	var excelFields = ["bunyang_seq","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","regist_date","contract_date","full_payment_date","use_approval_date"];
+	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","regist_date","contract_date","full_payment_date","use_approval_date"];
 	var searchKeys = [""];
 	var searchValues = [""];
 	var queryId = "admin.getBunyangList";
-	var fileName = "분양현황.xlsx";
-	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName);
+	var title = "갈보리추모동산 분양현황";
+	var fileName = title + ".xlsx";
+	var sheetName = title;
+	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);
 }
 
 /**

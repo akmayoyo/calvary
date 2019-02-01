@@ -136,7 +136,7 @@ public class AdminController {
 	public Object saveApplyHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		String bunyangSeq = adminService.createBunyangInfo(bunyangInfoVo);
+		String bunyangSeq = adminService.createBunyangInfo(bunyangInfoVo, null);
 		if(!StringUtils.isEmpty(bunyangSeq)) {
 			String applyFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, "");
 			String useUserFileSeq = excelService.createBunyangExcelForm(ExcelForms.USE_USER_FORM, bunyangSeq, "");
@@ -164,7 +164,7 @@ public class AdminController {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		String bunyangNo = adminService.getNextBunyangNo(bunyangInfoVo.getBunyangTimes());
 		bunyangInfoVo.setBunyangNo(bunyangNo);
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
 		String approvalFileSeq = null;
 		if(iRslt > 0) {
 			approvalFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangInfoVo.getBunyangSeq(), "");
@@ -189,7 +189,7 @@ public class AdminController {
 	public Object rejectHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
 		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);
 		return rtnMap;
@@ -287,7 +287,7 @@ public class AdminController {
 	public Object apprContractHandler(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate) {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateDownPayment(bunyangSeq, paymentAmount, paymentMethod, paymentDate);
+		int iRslt = adminService.updateDownPayment(bunyangSeq, paymentAmount, paymentMethod, paymentDate, null, null, true);
 		if(iRslt > 0) {
 			String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
 			if(!StringUtils.isEmpty(fileSeq)) {
@@ -316,7 +316,7 @@ public class AdminController {
 			) {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateBalancePayment(bunyangSeq, paymentAmount, paymentMethod, paymentDate, isFullPayment);
+		int iRslt = adminService.updateBalancePayment(bunyangSeq, paymentAmount, paymentMethod, paymentDate, null, isFullPayment);
 		if(iRslt > 0) {
 			String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
 			if(!StringUtils.isEmpty(fileSeq)) {
@@ -414,7 +414,7 @@ public class AdminController {
 		BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
 		bunyangInfoVo.setBunyangSeq(bunyangSeq);
 		bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_D);
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
 		if(iRslt > 0) {
 			String fileSeq = excelService.createBunyangExcelForm(ExcelForms.USE_APPROVAL_FORM, bunyangSeq, "");
 			if(!StringUtils.isEmpty(fileSeq)) {

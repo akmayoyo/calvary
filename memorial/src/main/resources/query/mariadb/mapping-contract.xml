@@ -135,7 +135,7 @@
 	<insert id="insertDownPayment" parameterType="map">
 		INSERT INTO TB_BUNYANG_PAYMENT_HISTORY 
 		(bunyang_seq, payment_type, payment_amount, payment_method, payment_date, create_user, create_date) 
-		values (#{bunyangSeq}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, DATE_FORMAT(#{paymentDate}, '%Y%m%d'), #{createUser}, CURRENT_TIMESTAMP)
+		values (#{bunyangSeq}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, STR_TO_DATE(REGEXP_REPLACE(#{paymentDate}, '[^0-9]+', ''), '%Y%m%d'), #{createUser}, COALESCE(STR_TO_DATE(REGEXP_REPLACE(#{createDate}, '[^0-9]+', ''), '%Y%m%d'),CURRENT_TIMESTAMP))
 	</insert>
 	
     <!-- 계약금 납부 내역 삭제 -->

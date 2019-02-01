@@ -114,7 +114,7 @@
 	<insert id="insertCancelPayment" parameterType="map">
 		INSERT INTO TB_BUNYANG_PAYMENT_HISTORY 
 		(bunyang_seq, payment_type, payment_amount, payment_method, payment_date, create_user, create_date) 
-		values (#{bunyangSeq}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, DATE_FORMAT(#{paymentDate}, '%Y%m%d'), #{createUser}, CURRENT_TIMESTAMP)
+		values (#{bunyangSeq}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, STR_TO_DATE(REGEXP_REPLACE(#{paymentDate}, '[^0-9]+', ''), '%Y%m%d'), #{createUser}, CURRENT_TIMESTAMP)
 	</insert>
 	
 	<!-- 해약 내용 업데이트 -->
@@ -125,7 +125,7 @@
 			cancel_bank = #{cancelBank},
 			cancel_account = #{cancelAccount},
 			cancel_account_holder = #{cancelAccountHolder},
-			cancel_deposit_plan_date = DATE_FORMAT(#{cancelDepositPlanDate}, '%Y%m%d')
+			cancel_deposit_plan_date = STR_TO_DATE(#{cancelDepositPlanDate}, '%Y%m%d')
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
     

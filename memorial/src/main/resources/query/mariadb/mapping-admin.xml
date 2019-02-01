@@ -235,7 +235,7 @@
 	</select>
 
 	<!-- 분양 정보 -->
-	<select id="getBunyangInfo" parameterType="String" resultType="map">
+	<select id="getBunyangInfo" parameterType="map" resultType="map">
 		SELECT
 			t.*
 			,CASE WHEN progress_status = 'A' AND (cancel_yn is null or cancel_yn != 'Y') THEN CONCAT('승인일자 : ', progress_update_date)
@@ -288,7 +288,14 @@
 			FROM TB_BUNYANG_REF_USER a
 			WHERE ref_type = 'APPLY_USER'
 			) b ON a.bunyang_seq = b.bunyang_seq
-	  	WHERE a.bunyang_seq = #{bunyangSeq}
+	  	WHERE 1=1
+	  	<if test="bunyangSeq != null and bunyangSeq != ''">
+	  	AND a.bunyang_seq = #{bunyangSeq}
+	  	</if>
+	  	<if test="bunyangNo != null and bunyangNo != ''">
+	  	AND a.bunyang_no = #{bunyangNo}
+	  	</if>
+	  	LIMIT 0,1
 	  	) t
 	</select>
 	
@@ -336,7 +343,7 @@
 	<!-- 분양정보 생성 -->
 	<insert id="createBunyangInfo" parameterType="map">
 		INSERT INTO TB_BUNYANG_INFO ( bunyang_seq,product_type,couple_type_count,single_type_count,service_charge_type,progress_status,regist_user_id,regist_date,bunyang_times,price_per_count )
-		VALUES (#{bunyangSeq} , #{productType}, #{coupleTypeCount}, #{singleTypeCount}, #{serviceChargeType}, #{progressStatus}, #{registUserId}, CURRENT_TIMESTAMP, #{bunyangTimes}, #{pricePerCount})
+		VALUES (#{bunyangSeq} , #{productType}, #{coupleTypeCount}, #{singleTypeCount}, #{serviceChargeType}, #{progressStatus}, #{registUserId}, COALESCE(STR_TO_DATE(REGEXP_REPLACE(#{registDate}, '[^0-9]+', ''), '%Y%m%d'),CURRENT_TIMESTAMP), #{bunyangTimes}, #{pricePerCount})
 	</insert>
 	
 	<!-- 분양 관련 인명정보 생성 -->
@@ -372,7 +379,7 @@
 	<!-- 분양상태변경 이력 생성 -->
 	<insert id="createBunyangHistory" parameterType="map">
 		INSERT INTO TB_BUNYANG_HISTORY ( bunyang_seq,progress_status,update_user_id,update_date,remarks )
-		VALUES ( #{bunyangSeq}, #{progressStatus}, #{userId}, CURRENT_TIMESTAMP, #{remarks})
+		VALUES ( #{bunyangSeq}, #{progressStatus}, #{userId}, COALESCE(STR_TO_DATE(REGEXP_REPLACE(#{updateDate}, '[^0-9]+', ''), '%Y%m%d'),CURRENT_TIMESTAMP), #{remarks})
 	</insert>
 	
 	<!-- 분양차수중 최종 분양번호 +1 반환 -->

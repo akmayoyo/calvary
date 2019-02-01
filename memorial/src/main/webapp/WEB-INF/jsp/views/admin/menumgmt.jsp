@@ -141,7 +141,7 @@ function importExcel(importType) {
 	}
    	$.ajax({
    		dataType : 'text',
-        url:"/excel/importExcel",
+        url:"/excel/importBunyangExcel",
         data:fileFrm,
         type : "POST",
         enctype: 'multipart/form-data',

@@ -75,8 +75,12 @@ public class CommonUtil {
 		if(!StringUtils.isEmpty(sRtn)) {
 			sRtn = sRtn.replaceAll("[^\\d]", "");
 		}
-		if(!StringUtils.isEmpty(sRtn) && sRtn.length() == 11) {
-			sRtn = String.format("%s-%s-%s", sRtn.substring(0, 3), sRtn.substring(3, 7), sRtn.substring(7, 11));
+		if(!StringUtils.isEmpty(sRtn)) {
+			if(sRtn.length() == 10) {
+				sRtn = String.format("%s-%s-%s", sRtn.substring(0, 3), sRtn.substring(3, 6), sRtn.substring(6, 10));
+			} else if(sRtn.length() == 11) {
+				sRtn = String.format("%s-%s-%s", sRtn.substring(0, 3), sRtn.substring(3, 7), sRtn.substring(7, 11));
+			}
 		}
 		return sRtn;
 	}

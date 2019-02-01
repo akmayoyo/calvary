@@ -79,7 +79,20 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getBunyangInfo(String bunyangSeq) {
-		Map<String, Object> rtn = (HashMap<String, Object>)commonDao.selectOne("admin.getBunyangInfo", bunyangSeq); 
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		Map<String, Object> rtn = (HashMap<String, Object>)commonDao.selectOne("admin.getBunyangInfo", param); 
+		return rtn;
+	}
+	
+	/** 
+	 * 분양 정보 조회 
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getBunyangInfoByNo(String bunyangNo) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangNo", bunyangNo);
+		Map<String, Object> rtn = (HashMap<String, Object>)commonDao.selectOne("admin.getBunyangInfo", param); 
 		return rtn;
 	}
 	
@@ -107,7 +120,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * @param bunyangInfoVo
 	 */
 	@Transactional
-	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo) {
+	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateDate) {
 		String sRtn = "";
 		BunyangUserVo applyUser = bunyangInfoVo.getApplyUser();
 		BunyangUserVo agentUser = bunyangInfoVo.getAgentUser();
@@ -126,6 +139,7 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("bunyangTimes", bunyangInfoVo.getBunyangTimes());
 		param.put("pricePerCount", bunyangInfoVo.getPricePerCount());
 		param.put("registUserId", SessionUtil.getCurrentUserId());
+		param.put("updateDate", updateDate);
 		param.put("userId", SessionUtil.getCurrentUserId());
 		commonDao.insert("admin.createBunyangInfo", param);
 		commonDao.insert("admin.createBunyangHistory", param);
@@ -167,12 +181,13 @@ public class AdminServiceImpl implements IAdminService {
 	 * 분양정보 진행상태 업데이트
 	 */
 	@Transactional
-	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser) {
+	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser, String updateDate) {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("bunyangNo", bunyangInfoVo.getBunyangNo());
 		param.put("bunyangSeq", bunyangInfoVo.getBunyangSeq());
 		param.put("progressStatus", bunyangInfoVo.getProgressStatus());
 		param.put("userId", updateUser);
+		param.put("updateDate", updateDate);
 		param.put("remarks", bunyangInfoVo.getRemarks());
 		int iRslt = 0;
 		// 진행상태 업데이트
@@ -301,7 +316,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 계약금 납부 내역 업데이트
 	 */
 	@Transactional
-	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate) {
+	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String createDate, String updateDate, boolean isContracted) {
 		Map<String, Object> param = new HashMap<String, Object>();
 		int iRslt = 0;
 		// 계약금 납부 정보 업데이트
@@ -310,14 +325,17 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("paymentAmount", paymentAmount);
 		param.put("paymentMethod", paymentMethod);
 		param.put("paymentDate", paymentDate);
+		param.put("createDate", createDate);
 		param.put("createUser", SessionUtil.getCurrentUser().getUserId());
 		iRslt += commonDao.delete("contract.deleteDownPayment", param);
 		iRslt += commonDao.insert("contract.insertDownPayment", param);
-		// 분양상태를 계약상태로 업데이트
-		BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
-		bunyangInfoVo.setBunyangSeq(bunyangSeq);
-		bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_B);
-		iRslt += updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
+		if(isContracted) {
+			// 분양상태를 계약상태로 업데이트
+			BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
+			bunyangInfoVo.setBunyangSeq(bunyangSeq);
+			bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_B);
+			iRslt += updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), updateDate);
+		}
 		return iRslt;
 	}
 	
@@ -325,7 +343,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 잔금 납부 내역 업데이트
 	 */
 	@Transactional
-	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, boolean isFullPayment) {
+	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, String createDate, boolean isFullPayment) {
 		Map<String, Object> param = new HashMap<String, Object>();
 		int iRslt = 0;
 		param.put("bunyangSeq", bunyangSeq);
@@ -339,6 +357,7 @@ public class AdminServiceImpl implements IAdminService {
 				param.put("paymentAmount", paymentAmount[i]);
 				param.put("paymentMethod", paymentMethod[i]);
 				param.put("paymentDate", paymentDate[i]);
+				param.put("createDate", null);
 				iRslt += commonDao.insert("contract.insertDownPayment", param);
 			}
 		}	
@@ -347,7 +366,7 @@ public class AdminServiceImpl implements IAdminService {
 			BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
 			bunyangInfoVo.setBunyangSeq(bunyangSeq);
 			bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_C);
-			iRslt += updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId());
+			iRslt += updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), createDate);
 		}
 		return iRslt;
 	}
