@@ -8,9 +8,12 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -624,6 +627,108 @@ public class ExcelController {
 		}
 		return resultCode;
 	}
+	
+	
+	/** 
+	 * 입출금 Excel 파일을 읽어 리스트 반환
+	 */
+	@RequestMapping(value="/importPaymentExcel", method=RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> importPaymentExcel(MultipartHttpServletRequest request) throws Exception{
+		MultipartFile file = request.getFile("file");
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean isError = false;
+		List<Object> rtnList = new ArrayList<Object>();
+		InputStream is = null;
+		XSSFWorkbook wb = null;
+		XSSFSheet sheet = null;
+		try {
+			is = file.getInputStream();
+			wb = new XSSFWorkbook(is);
+			SimpleDateFormat ymd = null;
+			int rows = 0;
+			int startRow = 1;
+			int rowIdx = 0;
+			
+			String bank = request.getParameter("bank");
+			Date fromDt = null;
+			Date toDt = null;
+			
+			// 신한은행 엑셀
+			if("SHINHAN".equals(bank)) {
+				ymd = new SimpleDateFormat("yyyyMMddhhmmss");
+				fromDt = ymd.parse(request.getParameter("fromDt") + "000000");
+				toDt = ymd.parse(request.getParameter("toDt") + "235959");
+				
+				sheet = wb.getSheetAt(0);
+				rows = sheet.getPhysicalNumberOfRows();
+				for(rowIdx = startRow; rowIdx < rows; rowIdx++) {
+					XSSFRow row = sheet.getRow(rowIdx);
+					String paymentDateOrg = row.getCell(convertColAlphabetToIndex("A")).getStringCellValue();
+					String paymentDate = paymentDateOrg;
+					if(!StringUtils.isEmpty(paymentDate)) {
+						paymentDate = paymentDate.replaceAll("\\D", "");
+					}
+					if(StringUtils.isEmpty(paymentDate)) {
+						continue;
+					}
+					Date tmpDate = ymd.parse(paymentDate);
+					if(tmpDate.compareTo(fromDt) < 0 || toDt.compareTo(tmpDate) < 0) {
+						continue;
+					}
+					int paymentAmount = 0;
+					String paymentDivision = "";
+					int depositAmount = (int)row.getCell(convertColAlphabetToIndex("C")).getNumericCellValue();
+					int withdrawalAmount = (int)row.getCell(convertColAlphabetToIndex("D")).getNumericCellValue();
+					if(depositAmount > 0) {
+						paymentAmount = depositAmount;
+						paymentDivision = CalvaryConstants.PAYMENT_DIVISION_DEPOSIT;
+					}else if(withdrawalAmount > 0) {
+						paymentAmount = withdrawalAmount;
+						paymentDivision = CalvaryConstants.PAYMENT_DIVISION_WITHDRAWAL;
+					}
+					String content = row.getCell(convertColAlphabetToIndex("E")).getStringCellValue();
+					// 내용으로부터  신청자,계약번호를 추출
+					String applyUserName = content;
+					String bunyangNo = "";
+					content = CommonUtil.nullToEmpty(content);
+					content = content.replaceAll("\\p{Z}","");// 공백제거
+					Pattern pattern = Pattern.compile("[ABCD]?[0-9]{4}[ABCD]?");
+					Matcher matcher = pattern.matcher(content);
+					if(matcher.find()) {
+						bunyangNo = matcher.group();
+						if(!StringUtils.isEmpty(bunyangNo)) {
+							applyUserName = applyUserName.replace(bunyangNo, "");
+							bunyangNo = bunyangNo.replaceAll("\\D", "");
+						}
+					}
+					List<Object> bunyangInfoList = adminService.getExcelBunyangSelectList(applyUserName, bunyangNo);
+					Map<String, Object> tmp = new HashMap<String, Object>();
+					tmp.put("paymentDate", paymentDateOrg);
+					tmp.put("paymentAmount", paymentAmount);
+					tmp.put("paymentDivision", paymentDivision);
+					tmp.put("content", content);
+					tmp.put("bunyangNo", bunyangNo);
+					tmp.put("bunyangInfoList", bunyangInfoList);
+					rtnList.add(tmp);
+				}
+			}
+		} catch (Exception e) {
+			isError = true;
+			logger.error("payment excel upload failed!!", e);
+		} finally {
+			if(is != null) {
+				is.close();
+			}
+			if(wb != null) {
+				wb.close();
+			}
+		}
+		rtnMap.put("isError", isError);
+		rtnMap.put("rtnList", rtnList);
+		return rtnMap;
+	}
+	
 	
 	/** 
 	 * 엑셀업데이트

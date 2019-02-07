@@ -226,7 +226,7 @@
 		AND bunyang_seq like CONCAT('%',#{bunyang_seq},'%')
 		</if>
 		<if test="searchVal != null and searchVal != ''">
-		AND (apply_user_name like CONCAT('%',#{searchVal},'%') OR bunyang_seq like CONCAT('%',#{searchVal},'%'))
+		AND (apply_user_name like CONCAT('%',#{searchVal},'%') OR bunyang_no like CONCAT('%',#{searchVal},'%'))
 		</if>
 		ORDER BY t.bunyang_seq
 		<if test="start != null">
@@ -406,5 +406,5 @@
 		SET cancel_yn = 'Y'
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
-
+	
 </mapper>

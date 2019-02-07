@@ -374,15 +374,18 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
 	 */
-	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentType) {
+	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentDivision, String paymentType, String paymentUser, String remark) {
 		Map<String, Object> param = new HashMap<String, Object>();
 		int iRslt = 0;
 		// 계약금 납부 정보 업데이트
 		param.put("bunyangSeq", bunyangSeq);
+		param.put("paymentDivision", paymentDivision);
 		param.put("paymentType", paymentType);
+		param.put("paymentUser", paymentUser);
 		param.put("paymentAmount", paymentAmount);
 		param.put("paymentMethod", paymentMethod);
 		param.put("paymentDate", paymentDate);
+		param.put("remark", remark);
 		param.put("createUser", SessionUtil.getCurrentUser().getUserId());
 		iRslt = commonDao.insert("contract.insertDownPayment", param);
 		return iRslt;
@@ -497,6 +500,17 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("fromDt", searchVo.getFromDt());
 		parameter.put("toDt", searchVo.getToDt());
 		List<Object> list = commonDao.selectList("payment.getPaymentList", parameter); 
+		return list;
+	}
+	
+	/** 
+	 * 입출금 엑셀업로드에서 계약정보 선택을 위한 리스트 조회 
+	 */
+	public List<Object> getExcelBunyangSelectList(String applyUserName, String bunyangNo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("apply_user_name", applyUserName);
+		parameter.put("bunyang_no", bunyangNo);
+		List<Object> list = commonDao.selectList("payment.getExcelBunyangSelectList", parameter); 
 		return list;
 	}
 	

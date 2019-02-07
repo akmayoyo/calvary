@@ -593,7 +593,7 @@ public class AdminController {
 	 * 납부관리 메인 페이지 
 	 */
 	@RequestMapping(value=PAYMENT_MGMT_URL)
-	public Object paymentMgmtHandler(SearchVo searchVo, String paymentType) {
+	public Object paymentMgmtHandler(SearchVo searchVo, String paymentDivision, String paymentType) {
 		SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
 		// 검색기간은 default 1주일
 		if(StringUtils.isEmpty(searchVo.getFromDt()) && StringUtils.isEmpty(searchVo.getToDt())) {
@@ -604,6 +604,8 @@ public class AdminController {
 		}
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> paymentList = adminService.getPaymentList(searchVo, paymentType);
+		List<Object> depositTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_DEPOSIT_TYPE);
+		List<Object> withdrawalTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_WITHDRAWAL_TYPE);
 		searchVo.setTotalCount(commonService.getTotalCount());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
@@ -612,8 +614,11 @@ public class AdminController {
 		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
 		mv.addObject("searchVo", searchVo);
+		mv.addObject("paymentDivision", paymentDivision);
 		mv.addObject("paymentType", paymentType);
 		mv.addObject("paymentList", paymentList);
+		mv.addObject("depositTypeList", depositTypeList);
+		mv.addObject("withdrawalTypeList", withdrawalTypeList);
 		mv.setViewName(ROOT_URL + PAYMENT_MGMT_URL);
 		return mv;
 	}

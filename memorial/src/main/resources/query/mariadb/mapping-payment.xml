@@ -9,7 +9,11 @@
 		SELECT 
 			SQL_CALC_FOUND_ROWS
 			a.bunyang_seq
+			,b.bunyang_no
+		    ,a.payment_division
+		    ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.payment_division) payment_division_name
 		    ,a.payment_type
+		    ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.parent_code_seq = a.payment_division and cc.code_seq = a.payment_type) payment_type_name
 		    ,a.payment_amount
 		    ,a.payment_method
 		    ,DATE_FORMAT(a.payment_date, '%Y-%m-%d') AS payment_date
@@ -17,11 +21,11 @@
 		    ,a.create_user
 		    ,(SELECT cu.user_name FROM TB_COM_USER cu WHERE cu.user_id = a.create_user) create_user_name
 		    ,DATE_FORMAT(a.create_date, '%Y-%m-%d') AS create_date
-		    ,FOUND_ROWS() total_count
-		FROM TB_BUNYANG_PAYMENT_HISTORY a
+		    ,remarks
+		FROM TB_BUNYANG_PAYMENT_HISTORY a INNER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
 		WHERE 1=1
-		<if test="bunyangSeq != null and bunyangSeq != ''">
-		AND a.bunyang_seq = #{bunyangSeq}
+		<if test="bunyangNo != null and bunyangNo != ''">
+		AND b.bunyang_no = #{bunyangNo}
 		</if>
 		<if test="paymentType != null and paymentType != ''">
 		AND a.payment_type = #{paymentType}
@@ -40,6 +44,40 @@
 		<if test="start != null">
 		LIMIT #{start}, #{count}
 		</if>
+	</select>
+	
+	<!-- 입출금 엑셀업로드에서 계약정보 선택을 위한 리스트 조회 -->
+	<select id="getExcelBunyangSelectList" parameterType="map" resultType="map">
+		SELECT
+			a.bunyang_seq
+			,a.bunyang_no
+			,b.user_name apply_user_name
+			,b.mobile apply_user_mobile 
+			,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
+		    ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
+            ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
+		FROM TB_BUNYANG_INFO a INNER JOIN TB_BUNYANG_REF_USER b ON a.bunyang_seq = b.bunyang_seq AND b.ref_type = 'APPLY_USER'
+		WHERE a.bunyang_no = #{bunyang_no}
+		UNION
+		SELECT
+			t.*
+		FROM
+			(SELECT
+				t.*
+			FROM
+			(SELECT
+				a.bunyang_seq
+				,a.bunyang_no
+				,b.user_name apply_user_name
+				,b.mobile apply_user_mobile 
+				,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
+		    	,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
+            	,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
+			FROM TB_BUNYANG_INFO a INNER JOIN TB_BUNYANG_REF_USER b ON a.bunyang_seq = b.bunyang_seq AND b.ref_type = 'APPLY_USER'
+			) t
+			WHERE t.apply_user_name = #{apply_user_name}
+			ORDER BY bunyang_no, apply_user_name
+		) t
 	</select>
 
 </mapper>

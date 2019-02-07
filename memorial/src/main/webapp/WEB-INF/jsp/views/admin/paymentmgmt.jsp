@@ -3,7 +3,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <form id="frm" method="post">
 	<input type="hidden" id="pageIndex" name="pageIndex" value="${searchVo.pageIndex}">
-	<input type="hidden" id="searchKey" name="searchKey" value="bunyangSeq">
+	<input type="hidden" id="searchKey" name="searchKey" value="bunyangNo">
 	<input type="hidden" id="fromDt" name="fromDt" value="${searchVo.fromDt}">
 	<input type="hidden" id="toDt" name="toDt" value="${searchVo.toDt}">
 	<!-- 그리드 샘플 -->
@@ -19,22 +19,24 @@
 	        	</colgroup>
 	            <tbody>
 	            	<tr>
-	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">신청번호</p></th>
-	            		<td><input name="searchVal" class="form-control" type="text" style="width: 225px;" value="${searchVo.searchVal}"></td>
-	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">납부유형</p></th>
+	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">입출구분</p></th>
+	            		<td>
+	            			<select name="paymentDivision" class="form-control" style="width: 225px;">
+	            				<option value="">전체</option>
+	            				<option value="DEPOSIT" <c:if test="${paymentDivision == 'DEPOSIT'}">selected</c:if>>입금</option>
+	            				<option value="WITHDRAWAL" <c:if test="${paymentDivision == 'WITHDRAWAL'}">selected</c:if>>출금</option>
+	            			</select>
+	            		</td>
+	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">입출금유형</p></th>
 	            		<td>
 	            			<select name="paymentType" class="form-control" style="width: 225px;">
-	            				<option value="">전체</option>
-	            				<option value="DOWN_PAYMENT" <c:if test="${paymentType == 'DOWN_PAYMENT'}">selected</c:if>>계약금</option>
-	            				<option value="BALANCE_PAYMENT" <c:if test="${paymentType == 'BALANCE_PAYMENT'}">selected</c:if>>분양잔금</option>
-	            				<option value="MAINT_PAYMENT" <c:if test="${paymentType == 'MAINT_PAYMENT'}">selected</c:if>>관리비</option>
-	            				<option value="CANCEL_PAYMENT" <c:if test="${paymentType == 'CANCEL_PAYMENT'}">selected</c:if>>해약금</option>
+	            				
 	            			</select>
 	            		</td>
 	            	</tr>
 	            	<tr>
 	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">납부기간</p></th>
-	            		<td colspan="3">
+	            		<td>
 	            			<div class="input-group date" data-provide="datepicker" style="width: 225px;">
 							    <input id="tiPaymentDate" type="text" class="form-control">
 							    <div class="input-group-addon">
@@ -42,48 +44,53 @@
 							    </div>
 							</div>
 	            		</td>
+	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">계약번호</p></th>
+	            		<td><input name="searchVal" class="form-control" type="text" style="width: 225px;" value="${searchVo.searchVal}"></td>
 	            	</tr>
 	            </tbody>
 	        </table>
 	    </div>
 	    
 	    <div class="text-right" style="margin-top: 10px;">
-	    	<button class="btn btn-primary" type="button" onclick="_search()">조회</button>
-			<button class="btn btn-primary" type="button" onclick="_registPayment()">등록</button>
-			<button class="btn btn-success" type="button" onclick="_downloadExcel()">Excel</button>
+	    	<button class="btn btn-primary" type="button" onclick="_search()" style="width: 70px;">조회</button>
+			<button class="btn btn-primary" type="button" style="width: 70px;" onclick="_registPayment()">등록</button>
+			<button class="btn btn-primary" type="button" onclick="_registPaymentExcel()">엑셀등록</button>
+			<button class="btn btn-success" type="button" style="width: 70px;" onclick="_downloadExcel()">Excel</button>
 	    </div>
 	    
 		<!-- 테이블 -->
 		<div class="table-responsive" style="margin-top: 10px;">
-			<table id="tblApplyList" class="table table-style">
+			<table id="tblApplyList" class="table table-style table-bordered">
+				<colgroup>
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="10%">
+	        		<col width="25%">
+	        	</colgroup>
 				<thead>
 					<tr>
-						<th scope="col">신청번호</th>
-						<th scope="col">납부유형</th>
-						<th scope="col">납부금액</th>
-						<th scope="col">납부일</th>
-						<th scope="col">확인자</th>
-						<th scope="col">확인일</th>
+						<th scope="col">입출일자</th>
+						<th scope="col">금액</th>
+						<th scope="col">입출구분</th>
+						<th scope="col">계약번호</th>
+						<th scope="col">입금자</th>
+						<th scope="col">입출금유형</th>
+						<th scope="col">비고</th>
 					</tr>
 				</thead>
 				<tbody>
 					<c:forEach items="${paymentList}" var="payment">
 					<tr>
-						<td>${payment.bunyang_seq }</td>
-						<td>
-						<c:set var="paymentType" value="${payment.payment_type}"/>
-						<c:choose>
-							<c:when test="${paymentType == 'DOWN_PAYMENT'}">계약금</c:when>
-							<c:when test="${paymentType == 'BALANCE_PAYMENT'}">분양잔금</c:when>
-							<c:when test="${paymentType == 'CANCEL_PAYMENT'}">해약금</c:when>
-							<c:when test="${paymentType == 'MAINT_PAYMENT'}">관리비</c:when>
-							<c:otherwise>${paymentType}</c:otherwise>
-						</c:choose>
-						</td>
-						<td>₩${cutil:getThousandSeperatorFormatString(payment.payment_amount)}원</td>
-						<td>${payment.payment_date }</td>
-						<td>${payment.create_user_name }</td>
-						<td>${payment.create_date }</td>
+						<td>${payment.payment_date}</td>
+						<td align="right">${cutil:getThousandSeperatorFormatString(payment.payment_amount)}</td>
+						<td>${payment.payment_division_name}</td>
+						<td>${payment.bunyang_no}</td>
+						<td>${payment.payment_user}</td>
+						<td>${payment.payment_type_name}</td>
+						<td align="left">${payment.remarks}</td>
 					</tr>
 					</c:forEach>
 				</tbody>
@@ -96,6 +103,18 @@
 	
 	</div>
 </form>
+
+<ul id="DEPOSITList" style="display: none;">
+	<c:forEach items="${depositTypeList}" var="typeItem">
+	<li code_seq="${typeItem.code_seq}" code_name="${typeItem.code_name}"></li>
+	</c:forEach>
+</ul>
+<ul id="WITHDRAWALList" style="display: none;">
+	<c:forEach items="${withdrawalTypeList}" var="typeItem">
+	<li code_seq="${typeItem.code_seq}" code_name="${typeItem.code_name}"></li>
+	</c:forEach>
+</ul>
+
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/moment.min.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/daterangepicker.js"></script>
@@ -120,6 +139,26 @@
 		option['endDate'] = toDt;
 	}
 	common.datePicker($("#tiPaymentDate"),option);
+	
+	$('select[name="paymentDivision"]').change(function(e) {
+		var paymentTypeList = '<option value="">전체</option>';
+		var selected = $(this).find('option:selected').val();
+		if(selected) {
+			$('#'+selected+'List li').each(function(idx) {
+				paymentTypeList += '<option value="' + $(this).attr('code_seq') + '">' + $(this).attr('code_name') + '</option>';
+			});
+		}else {
+			$('#DEPOSITList li').each(function(idx) {
+				paymentTypeList += '<option value="' + $(this).attr('code_seq') + '">' + $(this).attr('code_name') + '</option>';
+			});
+			$('#WITHDRAWALList li').each(function(idx) {
+				paymentTypeList += '<option value="' + $(this).attr('code_seq') + '">' + $(this).attr('code_name') + '</option>';
+			});
+		}
+		$('select[name="paymentType"]').html(paymentTypeList);
+	});
+	
+	$('select[name="paymentDivision"]').trigger('change');
 	
 })();
 
@@ -147,11 +186,25 @@ function _search(pageIndex) {
 }
 
 /**
- * 납입금 입력 팝업 표시
+ * 등록 팝업 표시
  */
 function _registPayment() {
 	var winoption = {width:1390, height:750};
 	common.openWindow("${contextPath}/popup/registpayment", "popRegistPayment", winoption, {});
+	// callback 함수
+	window.saveCallBack = function(result) {
+		if(result && result.result) {
+			_search();
+    	}
+	};
+}
+
+/**
+ * 엑셀등록 팝업 표시
+ */
+function _registPaymentExcel() {
+	var winoption = {width:1390, height:750};
+	common.openWindow("${contextPath}/popup/registPaymentExcel", "popRegistPaymentExcel", winoption, {});
 	// callback 함수
 	window.saveCallBack = function(result) {
 		if(result && result.result) {

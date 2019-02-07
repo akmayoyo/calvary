@@ -23,6 +23,12 @@ public class CalvaryConstants {
 	public static final String CODE_SEQ_USER_RELATION = "USER_RELATION";
 	/** 코드시퀀스 : 분양차수 */
 	public static final String CODE_SEQ_BUNYANG_TIMES = "BUNYANG_TIMES";
+	/** 코드시퀀스 : 입금유형 */
+	public static final String CODE_SEQ_DEPOSIT_TYPE = "DEPOSIT";
+	/** 코드시퀀스 : 출금유형 */
+	public static final String CODE_SEQ_WITHDRAWAL_TYPE = "WITHDRAWAL";
+	/** 코드시퀀스 : 입금은행 */
+	public static final String CODE_SEQ_DEPOSIT_BANK = "DEPOSIT_BANK";
 	
 	
 	/** 신청형태 : 개별형 */
@@ -95,6 +101,12 @@ public class CalvaryConstants {
 	public static final String PAYMENT_METHOD_TRANSFER = "TRANSFER";
 	/** 납부 방법 : 현금 */
 	public static final String PAYMENT_METHOD_CASH = "CASH";
+	
+	
+	/** 입출구분 : 입금 */
+	public static final String PAYMENT_DIVISION_DEPOSIT = "DEPOSIT";
+	/** 입출구분 : 출금 */
+	public static final String PAYMENT_DIVISION_WITHDRAWAL = "WITHDRAWAL";
 	
 	
 	/** 

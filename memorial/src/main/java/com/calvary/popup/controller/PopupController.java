@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -40,12 +41,15 @@ public class PopupController {
 	public static final String ASSIGN_GRAVE = "/assigngrave";
 	public static final String REGIST_PAYMENT = "/registpayment";
 	public static final String SAVE_PAYMENT = "/savepayment";
+	public static final String SAVE_PAYMENT_ONE = "/savepaymentone";
 	/** 분양상세정보 페이지  URL */
 	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
 	/** comment 입력 팝업 URL */
 	public static final String REGIST_COMMENT_URL = "/registcomment";
 	/** 분양정보 엑셀업로드 등록 팝업 URL */
 	public static final String REGIST_BUNYANG_EXCEL_URL = "/registBunyangExcel";
+	/** 입출금 엑셀업로드 등록 팝업 URL */
+	public static final String REGIST_PAYMENT_EXCEL_URL = "/registPaymentExcel";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -158,8 +162,12 @@ public class PopupController {
 	
 	@RequestMapping(value=REGIST_PAYMENT)
 	public Object registPaymentHandler() {
+		List<Object> depositTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_DEPOSIT_TYPE);
+		List<Object> withdrawalTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_WITHDRAWAL_TYPE);
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName(ROOT_URL + REGIST_PAYMENT);
+		mv.addObject("depositTypeList", depositTypeList);
+		mv.addObject("withdrawalTypeList", withdrawalTypeList);
 		return mv;
 	}
 	
@@ -169,8 +177,11 @@ public class PopupController {
 			@RequestParam(value="bunyangSeqs[]") String[] bunyangSeqs,
 			@RequestParam(value="paymentDates[]") String[] paymentDates,
 			@RequestParam(value="paymentAmounts[]") int[] paymentAmounts,
+			@RequestParam(value="paymentDivisions[]") String[] paymentDivisions,
 			@RequestParam(value="paymentTypes[]") String[] paymentTypes,
+			@RequestParam(value="paymentUsers[]") String[] paymentUsers,
 			@RequestParam(value="paymentMethods[]") String[] paymentMethods,
+			@RequestParam(value="remarks[]") String[] remarks,
 			@RequestParam(value="contractBunyangSeqs[]", required=false) String[] contractBunyangSeqs,
 			@RequestParam(value="fullPaymentBunyangSeqs[]", required=false) String[] fullPaymentBunyangSeqs
 			) {
@@ -182,46 +193,75 @@ public class PopupController {
 		// 납입금 정보 생성
 		if(bunyangSeqs != null && bunyangSeqs.length > 0) {
 			for(i = 0; i < bunyangSeqs.length; i++) {
-				iRslt += adminService.createPaymentHistory(bunyangSeqs[i], paymentAmounts[i], paymentMethods[i], paymentDates[i], paymentTypes[i]);
+				iRslt += adminService.createPaymentHistory(bunyangSeqs[i], paymentAmounts[i], paymentMethods[i], paymentDates[i], paymentDivisions[i], paymentTypes[i], paymentUsers[i], remarks[i]);
 			}
 		}
-		// 계약금 납부가 된 건에 대해 계약상태로 업데이트
-		if(contractBunyangSeqs != null && contractBunyangSeqs.length > 0) {
-			for(i = 0; i < contractBunyangSeqs.length; i++) {
-				bunyangSeq = contractBunyangSeqs[i];
-				BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
-				bunyangInfoVo.setBunyangSeq(bunyangSeq);
-				bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_B);
-				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
-				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
-				if(!StringUtils.isEmpty(fileSeq)) {
-					Map<String, Object> param = new HashMap<String, Object>();
-					param.put("bunyangSeq", bunyangSeq);
-					param.put("file_seq_contract", fileSeq);
-					iRslt += adminService.updateBunyangFileSeq(param);
-				}
-			}
-		}
-		// 잔금 완납된 건에 대해 완납상태로 업데이트
-		if(fullPaymentBunyangSeqs != null && fullPaymentBunyangSeqs.length > 0) {
-			for(i = 0; i < fullPaymentBunyangSeqs.length; i++) {
-				bunyangSeq = fullPaymentBunyangSeqs[i];
-				BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
-				bunyangInfoVo.setBunyangSeq(bunyangSeq);
-				bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_C);
-				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
-				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "");
-				if(!StringUtils.isEmpty(fileSeq)) {
-					Map<String, Object> param = new HashMap<String, Object>();
-					param.put("bunyangSeq", bunyangSeq);
-					param.put("file_seq_full_payment", fileSeq);
-					iRslt += adminService.updateBunyangFileSeq(param);
-				}
-			}
-		}
+		// 계약금 납부가 된 건에 대해 계약상태로 업데이트(현재는 자동 상태 변경은 안하지만 혹시몰라 남겨둠)
+//		if(contractBunyangSeqs != null && contractBunyangSeqs.length > 0) {
+//			for(i = 0; i < contractBunyangSeqs.length; i++) {
+//				bunyangSeq = contractBunyangSeqs[i];
+//				BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
+//				bunyangInfoVo.setBunyangSeq(bunyangSeq);
+//				bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_B);
+//				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
+//				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
+//				if(!StringUtils.isEmpty(fileSeq)) {
+//					Map<String, Object> param = new HashMap<String, Object>();
+//					param.put("bunyangSeq", bunyangSeq);
+//					param.put("file_seq_contract", fileSeq);
+//					iRslt += adminService.updateBunyangFileSeq(param);
+//				}
+//			}
+//		}
+		// 잔금 완납된 건에 대해 완납상태로 업데이트(현재는 자동 상태 변경은 안하지만 혹시몰라 남겨둠)
+//		if(fullPaymentBunyangSeqs != null && fullPaymentBunyangSeqs.length > 0) {
+//			for(i = 0; i < fullPaymentBunyangSeqs.length; i++) {
+//				bunyangSeq = fullPaymentBunyangSeqs[i];
+//				BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
+//				bunyangInfoVo.setBunyangSeq(bunyangSeq);
+//				bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_C);
+//				iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
+//				String fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "");
+//				if(!StringUtils.isEmpty(fileSeq)) {
+//					Map<String, Object> param = new HashMap<String, Object>();
+//					param.put("bunyangSeq", bunyangSeq);
+//					param.put("file_seq_full_payment", fileSeq);
+//					iRslt += adminService.updateBunyangFileSeq(param);
+//				}
+//			}
+//		}
 		
 		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
+	@RequestMapping(value=SAVE_PAYMENT_ONE)
+	@ResponseBody
+	public Object savePaymentOneHandler(
+			@RequestParam(value="bunyangSeq") String bunyangSeq,
+			@RequestParam(value="paymentDate") String paymentDate,
+			@RequestParam(value="paymentAmount") int paymentAmount,
+			@RequestParam(value="paymentDivision") String paymentDivision,
+			@RequestParam(value="paymentType") String paymentType,
+			@RequestParam(value="paymentUser") String paymentUser,
+			@RequestParam(value="paymentMethod") String paymentMethod,
+			@RequestParam(value="remark") String remark
+			) {
+		boolean bRslt = false;
+		String errorMessage = "";
+		try {
+			int iRslt = 0;
+			iRslt += adminService.createPaymentHistory(bunyangSeq, paymentAmount, paymentMethod, paymentDate, paymentDivision, paymentType, paymentUser, remark);
+			bRslt = iRslt > 0;
+		} catch(Exception e) {
+			bRslt = false;
+			errorMessage = e.getMessage();
+			LoggerFactory.getLogger("ERROR_LOGGER").error("Error Occured!!", e);
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("result", bRslt);
+		rtnMap.put("errorMessage", errorMessage);
 		return rtnMap;
 	}
 	
@@ -266,6 +306,22 @@ public class PopupController {
 	public Object registBunyangExcelHandler() {
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName(ROOT_URL + REGIST_BUNYANG_EXCEL_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 입출금 엑셀업로드 등록 팝업
+	 */
+	@RequestMapping(value=REGIST_PAYMENT_EXCEL_URL)
+	public Object registPaymentExcelHandler() {
+		List<Object> bankList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_DEPOSIT_BANK);
+		List<Object> depositTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_DEPOSIT_TYPE);
+		List<Object> withdrawalTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_WITHDRAWAL_TYPE);
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("bankList", bankList);
+		mv.addObject("depositTypeList", depositTypeList);
+		mv.addObject("withdrawalTypeList", withdrawalTypeList);
+		mv.setViewName(ROOT_URL + REGIST_PAYMENT_EXCEL_URL);
 		return mv;
 	}
 	

@@ -111,7 +111,7 @@ public interface IAdminService {
 	/** 
 	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
 	 */
-	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentType);
+	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentDivision, String paymentType, String paymentUser, String remark);
 	
 	
 	//===============================================================================
@@ -159,6 +159,11 @@ public interface IAdminService {
 	 * 납부내역조회 
 	 */
 	public List<Object> getPaymentList(SearchVo searchVo, String paymentType);
+	
+	/** 
+	 * 입출금 엑셀업로드에서 계약정보 선택을 위한 리스트 조회 
+	 */
+	public List<Object> getExcelBunyangSelectList(String applyUserName, String bunyangNo);
 	
 	
 	//===============================================================================
