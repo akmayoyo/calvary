@@ -22,13 +22,16 @@
 		    ,(SELECT cu.user_name FROM TB_COM_USER cu WHERE cu.user_id = a.create_user) create_user_name
 		    ,DATE_FORMAT(a.create_date, '%Y-%m-%d') AS create_date
 		    ,remarks
-		FROM TB_BUNYANG_PAYMENT_HISTORY a INNER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
+		FROM TB_BUNYANG_PAYMENT_HISTORY a LEFT OUTER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
 		WHERE 1=1
 		<if test="bunyangNo != null and bunyangNo != ''">
 		AND b.bunyang_no = #{bunyangNo}
 		</if>
 		<if test="paymentType != null and paymentType != ''">
 		AND a.payment_type = #{paymentType}
+		</if>
+		<if test="paymentDivision != null and paymentDivision != ''">
+		AND a.payment_division = #{paymentDivision}
 		</if>
 		<if test="fromDt != null and fromDt != ''">
 		<![CDATA[
@@ -40,7 +43,7 @@
 		AND payment_date < DATE_ADD(STR_TO_DATE(#{toDt}, '%Y%m%d'), INTERVAL 1 DAY)
 		]]>
 		</if>
-		ORDER BY a.payment_date DESC, a.bunyang_seq
+		ORDER BY a.payment_date DESC, b.bunyang_no
 		<if test="start != null">
 		LIMIT #{start}, #{count}
 		</if>

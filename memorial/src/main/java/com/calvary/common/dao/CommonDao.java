@@ -18,7 +18,7 @@ public class CommonDao {
 	 * @param queryId mapping query id
 	 * @param parameter query parameter 
 	 */
-	public int insert(String queryId, Object parameter) {
+	public int insert(String queryId, Object parameter) throws Exception {
 		return sqlSessionTemplate.insert(queryId, parameter);
 	}
 	

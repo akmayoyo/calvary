@@ -122,7 +122,6 @@
 	</div>
 </form>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
-<script type="text/javascript" src="${contextPath}/resources/js/jquery.fileDownload.js"></script>
 <script type="text/javascript">
 (function(){
 	// 페이징 표시 설정

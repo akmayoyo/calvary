@@ -12,6 +12,7 @@
 <script type="text/javascript" src="${contextPath}/resources/js/jquery-3.3.1.min.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/bootstrap/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/jquery.bootpag.min.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/jquery.fileDownload.js"></script>
 <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 <!--[if lt IE 9]>

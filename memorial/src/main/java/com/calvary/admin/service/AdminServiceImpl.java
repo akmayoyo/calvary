@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.calvary.admin.vo.BunyangInfoVo;
@@ -120,7 +121,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * @param bunyangInfoVo
 	 */
 	@Transactional
-	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateDate) {
+	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateDate) throws Exception {
 		String sRtn = "";
 		BunyangUserVo applyUser = bunyangInfoVo.getApplyUser();
 		BunyangUserVo agentUser = bunyangInfoVo.getAgentUser();
@@ -181,7 +182,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 분양정보 진행상태 업데이트
 	 */
 	@Transactional
-	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser, String updateDate) {
+	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser, String updateDate) throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("bunyangNo", bunyangInfoVo.getBunyangNo());
 		param.put("bunyangSeq", bunyangInfoVo.getBunyangSeq());
@@ -201,7 +202,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 분양취소
 	 */
 	@Transactional
-	public int cancelBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser) {
+	public int cancelBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser) throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("bunyangSeq", bunyangInfoVo.getBunyangSeq());
 		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_CA);
@@ -218,7 +219,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 분양정보삭제
 	 */
 	@Transactional
-	public int deleteBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser) {
+	public int deleteBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser) throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("bunyangSeq", bunyangInfoVo.getBunyangSeq());
 		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_DEL);
@@ -316,7 +317,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 계약금 납부 내역 업데이트
 	 */
 	@Transactional
-	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String createDate, String updateDate, boolean isContracted) {
+	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String createDate, String updateDate, boolean isContracted) throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
 		int iRslt = 0;
 		// 계약금 납부 정보 업데이트
@@ -343,7 +344,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 잔금 납부 내역 업데이트
 	 */
 	@Transactional
-	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, String createDate, boolean isFullPayment) {
+	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, String createDate, boolean isFullPayment) throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
 		int iRslt = 0;
 		param.put("bunyangSeq", bunyangSeq);
@@ -374,7 +375,7 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
 	 */
-	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentDivision, String paymentType, String paymentUser, String remark) {
+	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentDivision, String paymentType, String paymentUser, String remark) throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
 		int iRslt = 0;
 		// 계약금 납부 정보 업데이트
@@ -388,6 +389,32 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("remark", remark);
 		param.put("createUser", SessionUtil.getCurrentUser().getUserId());
 		iRslt = commonDao.insert("contract.insertDownPayment", param);
+		return iRslt;
+	}
+	
+	/** 
+	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
+	 */
+	@Transactional(rollbackFor=Exception.class)
+	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks) throws Exception {
+		int iRslt = 0;
+		if(bunyangSeqs != null && bunyangSeqs.length > 0) {
+			for(int i = 0; i < bunyangSeqs.length; i++) {
+				Map<String, Object> param = new HashMap<String, Object>();
+				// 계약금 납부 정보 업데이트
+				param.put("bunyangSeq", bunyangSeqs[i]);
+				param.put("paymentDivision", paymentDivisions[i]);
+				param.put("paymentType", paymentTypes[i]);
+				param.put("paymentUser", paymentUsers[i]);
+				param.put("paymentAmount", paymentAmounts[i]);
+				param.put("paymentMethod", paymentMethods[i]);
+				param.put("paymentDate", paymentDates[i]);
+				param.put("remark", remarks[i]);
+				param.put("createUser", SessionUtil.getCurrentUser().getUserId());
+				iRslt += commonDao.insert("contract.insertDownPayment", param);
+				//createPaymentHistory(bunyangSeqs[i], paymentAmounts[i], paymentMethods[i], paymentDates[i], paymentDivisions[i], paymentTypes[i], paymentUsers[i], remarks[i]);
+			}
+		}
 		return iRslt;
 	}
 	
@@ -491,12 +518,13 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 납부내역조회 
 	 */
-	public List<Object> getPaymentList(SearchVo searchVo, String paymentType) {
+	public List<Object> getPaymentList(SearchVo searchVo, String paymentType, String paymentDivision) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		parameter.put("paymentType", paymentType);
+		parameter.put("paymentDivision", paymentDivision);
 		parameter.put("fromDt", searchVo.getFromDt());
 		parameter.put("toDt", searchVo.getToDt());
 		List<Object> list = commonDao.selectList("payment.getPaymentList", parameter); 

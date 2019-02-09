@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,7 +59,12 @@ public class FileServiceImpl implements IFileService {
 		parameter.put("filePath", filePath);
 		parameter.put("fileName", fileName);
 		parameter.put("realFileName", realFileName);
-		int iRslt = commonDao.insert("common.createFileInfo", parameter);
+		int iRslt = 0;
+		try {
+			iRslt = commonDao.insert("common.createFileInfo", parameter);
+		} catch (Exception e) {
+			LoggerFactory.getLogger("ERROR_LOGGER").error("error occured to createFileInfo!!", e);
+		}
 		return iRslt > 0;
 	}
 	

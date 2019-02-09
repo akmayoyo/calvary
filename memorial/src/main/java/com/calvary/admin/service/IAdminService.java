@@ -1,9 +1,11 @@
 package com.calvary.admin.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.calvary.admin.vo.BunyangInfoVo;
+import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
 
 public interface IAdminService {
@@ -54,7 +56,7 @@ public interface IAdminService {
 	 * 분양신청 정보 저장
 	 * @param bunyangInfoVo
 	 */
-	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateDate);
+	public String createBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateDate) throws Exception;
 	
 	/** 
 	 * 분양 양식파일 고유번호 업데이트
@@ -64,17 +66,17 @@ public interface IAdminService {
 	/** 
 	 * 분양정보 진행상태 업데이트
 	 */
-	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser, String updateDate);
+	public int updateBunyangProgressStatus(BunyangInfoVo bunyangInfoVo, String updateUser, String updateDate) throws Exception;
 	
 	/** 
 	 * 분양취소
 	 */
-	public int cancelBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser);
+	public int cancelBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser) throws Exception;
 	
 	/** 
 	 * 분양정보삭제
 	 */
-	public int deleteBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser);
+	public int deleteBunyangInfo(BunyangInfoVo bunyangInfoVo, String updateUser) throws Exception;
 	
 	/**
 	 * 분양차수중 최종 분양번호 +1 반환
@@ -103,15 +105,20 @@ public interface IAdminService {
 	/** 
 	 * 계약금 납부 내역 업데이트
 	 */
-	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String createDate, String updateDate, boolean isContracted);
+	public int updateDownPayment(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String createDate, String updateDate, boolean isContracted) throws Exception;
 	/** 
 	 * 잔금 납부 내역 업데이트
 	 */
-	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, String createDate, boolean isFullPayment);
+	public int updateBalancePayment(String bunyangSeq, int[] paymentAmount, String[] paymentMethod, String[] paymentDate, String createDate, boolean isFullPayment) throws Exception;
 	/** 
 	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
 	 */
-	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentDivision, String paymentType, String paymentUser, String remark);
+	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentDivision, String paymentType, String paymentUser, String remark) throws Exception;
+	
+	/** 
+	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
+	 */
+	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks) throws Exception;
 	
 	
 	//===============================================================================
@@ -158,7 +165,7 @@ public interface IAdminService {
 	/** 
 	 * 납부내역조회 
 	 */
-	public List<Object> getPaymentList(SearchVo searchVo, String paymentType);
+	public List<Object> getPaymentList(SearchVo searchVo, String paymentType, String paymentDivision);
 	
 	/** 
 	 * 입출금 엑셀업로드에서 계약정보 선택을 위한 리스트 조회 

@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
@@ -26,6 +27,7 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
+import org.apache.poi.xssf.usermodel.XSSFDataFormat;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -33,13 +35,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -154,6 +152,11 @@ public class ExcelController {
         titleStyle.setAlignment(HorizontalAlignment.CENTER);
         titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         
+        XSSFCellStyle dateTitleStyle = workbook.createCellStyle();
+        dateTitleStyle.setFont(headerFont);
+        dateTitleStyle.setAlignment(HorizontalAlignment.CENTER);
+        dateTitleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        
         XSSFCellStyle headerStyle = workbook.createCellStyle();
         headerStyle.setFillForegroundColor(new XSSFColor(new Color(234, 234, 234), workbook.getStylesSource().getIndexedColors()));
         headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
@@ -182,6 +185,22 @@ public class ExcelController {
         rowStyle.setAlignment(HorizontalAlignment.CENTER);
         rowStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         
+        XSSFDataFormat format = workbook.createDataFormat();
+        
+        XSSFCellStyle numericStyle = workbook.createCellStyle();
+        numericStyle.setBorderTop(BorderStyle.THIN);
+        numericStyle.setBorderRight(BorderStyle.THIN);
+        numericStyle.setBorderBottom(BorderStyle.THIN);
+        numericStyle.setBorderLeft(BorderStyle.THIN);
+        numericStyle.setTopBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        numericStyle.setRightBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        numericStyle.setBottomBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        numericStyle.setLeftBorderColor(new XSSFColor(borderColor, workbook.getStylesSource().getIndexedColors()));
+        numericStyle.setFont(rowFont);
+        numericStyle.setDataFormat(format.getFormat("#,##0"));
+        numericStyle.setAlignment(HorizontalAlignment.RIGHT);
+        numericStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        
         // 시트명
         workbook.setSheetName(workbook.getSheetIndex(sheet), sheetName);
         
@@ -199,7 +218,13 @@ public class ExcelController {
         CellRangeAddress titleMergeRegion = new CellRangeAddress(rowIdx, rowIdx, 0, colIdx-1);
         sheet.addMergedRegion(titleMergeRegion);
         
-        rowIdx += 2;
+        rowIdx++;
+        
+        // 엑셀 출력일자 표시
+        row = sheet.createRow(rowIdx++);
+        cell = row.createCell(excelHeaders.length-1);
+    	cell.setCellStyle(dateTitleStyle);
+    	cell.setCellValue("일자 : " + new SimpleDateFormat("yy-MM-dd HH:mm:ss").format(new Date()));
         
         // 헤더 생성
         row = sheet.createRow(rowIdx++);
@@ -220,13 +245,19 @@ public class ExcelController {
                 	cell.setCellStyle(rowStyle);
                 	Object objTmp = map.get(excelFields[colIdx]);
                 	if(objTmp instanceof Integer) {
-                		cell.setCellValue(String.valueOf(objTmp));
+                		cell.setCellStyle(numericStyle);
+                		cell.setCellType(CellType.NUMERIC);
+                		cell.setCellValue((double)(int)objTmp);
                 	}else if(objTmp instanceof String) {
                 		cell.setCellValue((String)objTmp);
                 	}else if(objTmp instanceof Long) {
-                		cell.setCellValue(String.valueOf(objTmp));
+                		cell.setCellStyle(numericStyle);
+                		cell.setCellType(CellType.NUMERIC);
+                		cell.setCellValue((double)(long)objTmp);
                 	}else if(objTmp instanceof BigDecimal) {
-                		cell.setCellValue(objTmp == null ? "" : ((BigDecimal)objTmp).toString());
+                		cell.setCellStyle(numericStyle);
+                		cell.setCellType(CellType.NUMERIC);
+                		cell.setCellValue(objTmp == null ? null : ((BigDecimal)objTmp).doubleValue());
                 	}else {
                 		cell.setCellValue((String)objTmp);
                 	}
@@ -236,7 +267,11 @@ public class ExcelController {
         
         // 너비 조정
         for(colIdx = 0; colIdx < excelHeaders.length; colIdx++) {
-        	sheet.setColumnWidth(colIdx, 4500);
+        	if(colIdx == excelHeaders.length -1) {
+        		sheet.setColumnWidth(colIdx, 5500);
+        	} else {
+        		sheet.setColumnWidth(colIdx, 4500);
+        	}
         }
         
         try {
@@ -656,7 +691,7 @@ public class ExcelController {
 			
 			// 신한은행 엑셀
 			if("SHINHAN".equals(bank)) {
-				ymd = new SimpleDateFormat("yyyyMMddhhmmss");
+				ymd = new SimpleDateFormat("yyyyMMddHHmmss");
 				fromDt = ymd.parse(request.getParameter("fromDt") + "000000");
 				toDt = ymd.parse(request.getParameter("toDt") + "235959");
 				

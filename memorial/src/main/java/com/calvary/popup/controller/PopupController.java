@@ -184,18 +184,21 @@ public class PopupController {
 			@RequestParam(value="remarks[]") String[] remarks,
 			@RequestParam(value="contractBunyangSeqs[]", required=false) String[] contractBunyangSeqs,
 			@RequestParam(value="fullPaymentBunyangSeqs[]", required=false) String[] fullPaymentBunyangSeqs
-			) {
+			) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		boolean bRslt = false;
 		int iRslt = 0;
 		int i = 0;
 		String bunyangSeq = null;
 		// 납입금 정보 생성
-		if(bunyangSeqs != null && bunyangSeqs.length > 0) {
-			for(i = 0; i < bunyangSeqs.length; i++) {
-				iRslt += adminService.createPaymentHistory(bunyangSeqs[i], paymentAmounts[i], paymentMethods[i], paymentDates[i], paymentDivisions[i], paymentTypes[i], paymentUsers[i], remarks[i]);
-			}
-		}
+//		if(bunyangSeqs != null && bunyangSeqs.length > 0) {
+//			for(i = 0; i < bunyangSeqs.length; i++) {
+//				iRslt += adminService.createPaymentHistory(bunyangSeqs[i], paymentAmounts[i], paymentMethods[i], paymentDates[i], paymentDivisions[i], paymentTypes[i], paymentUsers[i], remarks[i]);
+//			}
+//		}
+		
+		iRslt = adminService.createPaymentHistory(bunyangSeqs, paymentAmounts, paymentMethods, paymentDates, paymentDivisions, paymentTypes, paymentUsers, remarks);
+		
 		// 계약금 납부가 된 건에 대해 계약상태로 업데이트(현재는 자동 상태 변경은 안하지만 혹시몰라 남겨둠)
 //		if(contractBunyangSeqs != null && contractBunyangSeqs.length > 0) {
 //			for(i = 0; i < contractBunyangSeqs.length; i++) {

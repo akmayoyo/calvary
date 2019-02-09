@@ -6,6 +6,9 @@
 	<input type="hidden" id="searchKey" name="searchKey" value="bunyangNo">
 	<input type="hidden" id="fromDt" name="fromDt" value="${searchVo.fromDt}">
 	<input type="hidden" id="toDt" name="toDt" value="${searchVo.toDt}">
+	<input type="hidden" id="paymentDivision" name="paymentDivision" value="${paymentDivision}">
+	<input type="hidden" id="paymentType" name="paymentType" value="${paymentType}">
+	<input type="hidden" id="parentCodeSeq" name="parentCodeSeq" value="${parentCodeSeq}">
 	<!-- 그리드 샘플 -->
 	<div class="col-md-9">
 		<!-- 검색 -->
@@ -21,21 +24,21 @@
 	            	<tr>
 	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">입출구분</p></th>
 	            		<td>
-	            			<select name="paymentDivision" class="form-control" style="width: 225px;">
+	            			<select id="selPaymentDivision" class="form-control" style="width: 225px;">
 	            				<option value="">전체</option>
-	            				<option value="DEPOSIT" <c:if test="${paymentDivision == 'DEPOSIT'}">selected</c:if>>입금</option>
-	            				<option value="WITHDRAWAL" <c:if test="${paymentDivision == 'WITHDRAWAL'}">selected</c:if>>출금</option>
+	            				<option value="<%=CalvaryConstants.PAYMENT_DIVISION_DEPOSIT%>">입금</option>
+	            				<option value="<%=CalvaryConstants.PAYMENT_DIVISION_WITHDRAWAL %>">출금</option>
 	            			</select>
 	            		</td>
-	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">입출금유형</p></th>
+	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">입출유형</p></th>
 	            		<td>
-	            			<select name="paymentType" class="form-control" style="width: 225px;">
+	            			<select id="selPaymentType" class="form-control" style="width: 225px;">
 	            				
 	            			</select>
 	            		</td>
 	            	</tr>
 	            	<tr>
-	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">납부기간</p></th>
+	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">입출금기간</p></th>
 	            		<td>
 	            			<div class="input-group date" data-provide="datepicker" style="width: 225px;">
 							    <input id="tiPaymentDate" type="text" class="form-control">
@@ -73,23 +76,23 @@
 				<thead>
 					<tr>
 						<th scope="col">입출일자</th>
-						<th scope="col">금액</th>
+						<th scope="col">입출금액</th>
 						<th scope="col">입출구분</th>
+						<th scope="col">입출유형</th>
 						<th scope="col">계약번호</th>
 						<th scope="col">입금자</th>
-						<th scope="col">입출금유형</th>
 						<th scope="col">비고</th>
 					</tr>
 				</thead>
 				<tbody>
 					<c:forEach items="${paymentList}" var="payment">
-					<tr>
+					<tr bunyangSeq="${payment.bunyang_seq}">
 						<td>${payment.payment_date}</td>
 						<td align="right">${cutil:getThousandSeperatorFormatString(payment.payment_amount)}</td>
 						<td>${payment.payment_division_name}</td>
-						<td>${payment.bunyang_no}</td>
-						<td>${payment.payment_user}</td>
 						<td>${payment.payment_type_name}</td>
+						<td><a href="javascript:void(0);" class="tbllink" style="color: #337ab7;" onclick="_showBunyangInfo(this)">${payment.bunyang_no}</a></td>
+						<td>${payment.payment_user}</td>
 						<td align="left">${payment.remarks}</td>
 					</tr>
 					</c:forEach>
@@ -106,12 +109,12 @@
 
 <ul id="DEPOSITList" style="display: none;">
 	<c:forEach items="${depositTypeList}" var="typeItem">
-	<li code_seq="${typeItem.code_seq}" code_name="${typeItem.code_name}"></li>
+	<li code_seq="${typeItem.code_seq}" code_name="${typeItem.code_name}" parent_code_seq="${typeItem.parent_code_seq}" parent_code_name="입금"></li>
 	</c:forEach>
 </ul>
 <ul id="WITHDRAWALList" style="display: none;">
 	<c:forEach items="${withdrawalTypeList}" var="typeItem">
-	<li code_seq="${typeItem.code_seq}" code_name="${typeItem.code_name}"></li>
+	<li code_seq="${typeItem.code_seq}" code_name="${typeItem.code_name}" parent_code_seq="${typeItem.parent_code_seq}" parent_code_name="출금"></li>
 	</c:forEach>
 </ul>
 
@@ -140,35 +143,77 @@
 	}
 	common.datePicker($("#tiPaymentDate"),option);
 	
-	$('select[name="paymentDivision"]').change(function(e) {
-		var paymentTypeList = '<option value="">전체</option>';
-		var selected = $(this).find('option:selected').val();
-		if(selected) {
-			$('#'+selected+'List li').each(function(idx) {
-				paymentTypeList += '<option value="' + $(this).attr('code_seq') + '">' + $(this).attr('code_name') + '</option>';
-			});
-		}else {
-			$('#DEPOSITList li').each(function(idx) {
-				paymentTypeList += '<option value="' + $(this).attr('code_seq') + '">' + $(this).attr('code_name') + '</option>';
-			});
-			$('#WITHDRAWALList li').each(function(idx) {
-				paymentTypeList += '<option value="' + $(this).attr('code_seq') + '">' + $(this).attr('code_name') + '</option>';
-			});
-		}
-		$('select[name="paymentType"]').html(paymentTypeList);
+	$('#selPaymentDivision').change(function(e) {
+		filterPaymentType();
 	});
 	
-	$('select[name="paymentDivision"]').trigger('change');
+	$('#selPaymentDivision option[value="${paymentDivision}"]').attr('selected', 'selected');
+	
+	filterPaymentType('${parentCodeSeq}', '${paymentType}');
 	
 })();
+
+/**
+ * 입출구분에 따라 입출유형 filter
+ */
+function filterPaymentType(parent_code_seq, code_seq) {
+	var selected = $('#selPaymentDivision').find('option:selected').val();
+	var paymentType = $('#selPaymentType');
+	paymentType.html('');
+	paymentType.append($('<option value="">전체</option>'));
+	var option;
+	if(selected) {
+		$('#'+selected+'List li').each(function(idx) {
+			option = getPaymentTypeOption($(this),false);
+			if(option.val() == code_seq && option.attr('parent_code_seq') == parent_code_seq) {
+				option.attr('selected', 'selected');
+			}
+			paymentType.append(option);
+		});
+	}else {
+		$('#DEPOSITList li').each(function(idx) {
+			option = getPaymentTypeOption($(this),true);
+			if(option.val() == code_seq && option.attr('parent_code_seq') == parent_code_seq) {
+				option.attr('selected', 'selected');
+			}
+			paymentType.append(option);
+		});
+		$('#WITHDRAWALList li').each(function(idx) {
+			option = getPaymentTypeOption($(this),true);
+			if(option.val() == code_seq && option.attr('parent_code_seq') == parent_code_seq) {
+				option.attr('selected', 'selected');
+			}
+			paymentType.append(option);
+		});
+	}
+}
+
+/**
+ * 입출유형 option 반환
+ */
+function getPaymentTypeOption(el, addprefix) {
+	var code_seq = $(el).attr('code_seq');
+	var code_name = $(el).attr('code_name');
+	var parent_code_seq = $(el).attr('parent_code_seq');
+	var parent_code_name = $(el).attr('parent_code_name');
+	var option = $('<option/>');
+	var text = code_name;
+	if(addprefix) {
+		text = '(' + parent_code_name + ') - ' + text;
+	}
+	option.val(code_seq);
+	option.text(text);
+	option.attr('parent_code_seq', parent_code_seq);
+	return option;
+}
 
 /**
  * 조회
  */
 function _search(pageIndex) {
 	var dateData = $('#tiPaymentDate').data('daterangepicker');
-	var fromDt = '';
-	var toDt = '';
+	var fromDt = '', toDt = '', paymentDivision = '', paymentType = '', parentCodeSeq = '';
+	
 	if(dateData) {
 		if(dateData.startDate) {
 			fromDt = dateData.startDate.format('YYYYMMDD');
@@ -177,9 +222,15 @@ function _search(pageIndex) {
 			toDt = dateData.endDate.format('YYYYMMDD');
 		}
 	}
+	paymentDivision = $('#selPaymentDivision option:selected').val();
+	paymentType = $('#selPaymentType option:selected').val();
+	parentCodeSeq = $('#selPaymentType option:selected').attr('parent_code_seq');
 	$("#pageIndex").val(pageIndex ? pageIndex : 1);
 	$("#fromDt").val(fromDt);
 	$("#toDt").val(toDt);
+	$("#paymentDivision").val(paymentDivision);
+	$("#paymentType").val(paymentType);
+	$("#parentCodeSeq").val(parentCodeSeq);
 	var frm = document.getElementById("frm");
 	frm.action = "${contextPath}/admin/paymentmgmt";
 	frm.submit();
@@ -217,13 +268,24 @@ function _registPaymentExcel() {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호","신청자","사용자","신청형태","부부형","1인형","신청일자","신청상태"];
-	var excelFields = ["bunyang_seq","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","regist_date","progress_status_exp"];
-	var searchKeys = [""];
-	var searchValues = [""];
-	var queryId = "admin.getApplyList";
-	var fileName = "분양신청관리.xlsx";
-	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName);
+	var excelHeaders = ["입출일자","입출금액","입출구분","입출유형","계약번호","입금자","비고"];
+	var excelFields = ["payment_date","payment_amount","payment_division_name","payment_type_name","bunyang_no","payment_user","remarks"];
+	var searchKeys = ["bunyangNo", "paymentType", "paymentDivision", "fromDt", "toDt"];
+	var searchValues = ["${searchVo.searchVal}", "${paymentType}", "${parentCodeSeq}", "${searchVo.fromDt}", "${searchVo.toDt}"];
+	var queryId = "payment.getPaymentList";
+	var title = "갈보리추모동산 납부현황";
+	var fileName = title + ".xlsx";
+	var sheetName = title;
+	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);
+}
+
+/**
+ * 분양 상세정보를 팝업으로 표시
+ */
+function _showBunyangInfo(el) {
+	var bunyangSeq = $(el).parent('td').parent('tr').attr('bunyangSeq');
+	var winoption = {width:1120, height:750};
+	common.openWindow("${contextPath}/popup/bunyanginfo", "popBunyangInfo", winoption, {bunyangSeq:bunyangSeq});
 }
 
 </script>

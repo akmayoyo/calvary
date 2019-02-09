@@ -23,14 +23,15 @@
     <div class="table-responsive" style="margin-top: 10px;">
         <table id="tblList" class="table table-style table-bordered">
         	<colgroup>
-        		<col width="12%">
-        		<col width="10%">
+        		<col width="11%">
+        		<col width="9%">
         		<col width="8%">
         		<col width="8%">
-        		<col width="10%">
-        		<col width="20%">
-        		<col width="20%">
-        		<col width="5%">
+        		<col width="11%">
+        		<col width="8%">
+        		<col width="18%">
+        		<col width="18%">
+        		<col width="3%">
         	</colgroup>
             <thead>
                 <tr>
@@ -38,8 +39,9 @@
                     <th scope="col" class="required">입출금액</th>
                     <th scope="col" class="required">입출구분</th>
                     <th scope="col" class="required">입출유형</th>
+                    <th scope="col" class="required">납부방법</th>
                     <th scope="col" class="required">입금자</th>
-                    <th scope="col" class="required">계약정보</th>
+                    <th scope="col">계약정보</th>
                     <th scope="col">비고</th>
                     <th scope="col"></th>
                 </tr>
@@ -92,14 +94,14 @@ function _addRow() {
     tr.append('<td><select name="paymentDivision" type="text" class="form-control text-center"><option value="DEPOSIT" selected>입금</option><option value="WITHDRAWAL">출금</option></td>');
 	// 입출유형
     tr.append('<td><select name="paymentType" class="form-control"></select></td>');
+ 	// 납부방법
+    tr.append('<td><select name="paymentMethod" class="form-control"><option value="<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>">무통장/계좌이체</option><option value="<%=CalvaryConstants.PAYMENT_METHOD_CASH%>">현금납부</option></select></td>');
     // 입금자
     tr.append('<td><input name="paymentUser" type="text" class="form-control text-center"></td>');
     // 계약정보
     tr.append('<td><select style="width:100%;" name="bunyangSeq" class="form-control"></select></td>');
  	// 비고
-    tr.append('<td><input name="remark" type="text" class="form-control"></td>');
-    // 납부방법
-    //tr.append('<td><select name="paymentMethod" class="form-control"><option value="<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>">무통장/계좌이체</option><option value="<%=CalvaryConstants.PAYMENT_METHOD_CASH%>">현금납부</option></select></td>');
+    tr.append('<td><input name="remark" type="text" class="form-control" placeholder="20자 이내" maxlength="20"></td>');
     // 삭제버튼
     tr.append('<td><button type="button" class="btn btn-default btn-sm" onclick="_deleteRow(this)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>');
 
@@ -132,6 +134,7 @@ function _addRow() {
         escapeMarkup: function(markup) {
             return markup;
         },
+        allowClear: true,
         minimumInputLength: 1,
         templateResult: formatRepo,
         templateSelection: formatRepoSelection,
@@ -163,9 +166,7 @@ function _addRow() {
     	var total_price = data['total_price'];
     	var down_payment = data['down_payment'];
     	var balance_payment = data['balance_payment'];
-    	if(!$(tr).find('input[name="paymentUser"]').val()) {
-    		$(tr).find('input[name="paymentUser"]').val(data['apply_user_name']);
-    	}
+    	$(tr).find('input[name="paymentUser"]').val(data['apply_user_name']);
     	//$(tr).find('p[name="totalPrice"]').text("₩" + $.number(total_price));
     	//$(tr).find('p[name="totalPayment"]').text("₩" + $.number(down_payment+balance_payment));
     });
@@ -178,7 +179,7 @@ function _addRow() {
         var val = $(this).val();
         val = common.toNumeric(val);
         if (val) {
-            val = "₩" + $.number(val);
+            val = $.number(val);
         }
         $(this).val(val);
     }).focusin(function(e) {
@@ -279,7 +280,7 @@ function _savePayment() {
         var data = tr.find('select[name="bunyangSeq"]').select2('data');
         var inputPaymentAmount = tr.find('input[name="paymentAmount"]');
         var bunyangInfo;// 계약정보
-        var bunyang_seq;// 계약seq
+        var bunyang_seq = ' ';// 계약seq
         var bunyang_no;// 계약번호
         var progress_status;// 진행상태
         var total_price;// 총 분양대금
@@ -304,17 +305,20 @@ function _savePayment() {
         var payment_type = tr.find('select[name="paymentType"] option:selected').val();
         var payment_user = tr.find('input[name="paymentUser"]').val();
         var remark = tr.find('input[name="remark"]').val();
-        var payment_method = "<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>";
+        if(!remark) {
+        	remark = ' ';
+        }
+        var payment_method = tr.find('select[name="paymentMethod"] option:selected').val();
         
         payment_amount = payment_amount ? parseInt(payment_amount) : payment_amount;
 
         // 필수입력 체크
-        if(!bunyang_seq) {
-        	tr.find('select[name="bunyangSeq"]').select2('open');
-        	common.showAlert('계약정보를 입력해주세요.');
-        	bValidate = false;
-        	return false;
-        }
+//         if(!bunyang_seq) {
+//         	tr.find('select[name="bunyangSeq"]').select2('open');
+//         	common.showAlert('계약정보를 입력해주세요.');
+//         	bValidate = false;
+//         	return false;
+//         }
         if(!payment_date) {
         	tr.find('input[name="paymentDate"]').focus();
         	common.showAlert('입출일자를 입력해주세요.');
@@ -328,22 +332,31 @@ function _savePayment() {
         	return false;
         }
         if(!payment_division) {
+        	tr.find('select[name="paymentDivision"]').focus();
         	common.showAlert('입출구분을 입력해주세요.');
         	bValidate = false;
         	return false;
         }
         if(!payment_type) {
+        	tr.find('select[name="paymentType"]').focus();
         	common.showAlert('입출유형을 입력해주세요.');
         	bValidate = false;
         	return false;
         }
         if(!payment_method) {
+        	tr.find('select[name="paymentMethod"]').focus();
         	common.showAlert('납부방법을 입력해주세요.');
         	bValidate = false;
         	return false;
         }
+        if(!payment_user) {
+        	tr.find('input[name="paymentUser"]').focus();
+        	common.showAlert('입금자를 입력해주세요.');
+        	bValidate = false;
+        	return false;
+        }
         // 동일 계약건에 대해 복수개 입력가능하기 때문에 입력된 납입금의 validation 체크는 누적 데이터를 생성후 마지막에 수행함
-        if(!summaryByBunyangSeq.hasOwnProperty(bunyang_seq)) {
+        if(bunyang_seq && !summaryByBunyangSeq.hasOwnProperty(bunyang_seq)) {
         	summaryByBunyangSeq[bunyang_seq] = {};
         	summaryByBunyangSeq[bunyang_seq]['bunyang_no'] = bunyang_no;// 계약번호
         	summaryByBunyangSeq[bunyang_seq]['progress_status'] = progress_status;// 진행상태
@@ -357,13 +370,15 @@ function _savePayment() {
         	summaryByBunyangSeq[bunyang_seq]['accum_maint_payment'] = 0;// 화면에서 입력된 누적관리비
         }
         
-     	// 납입금 누적정보 생성
-        if(payment_type == '<%=CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT%>') {// 계약금
-        	summaryByBunyangSeq[bunyang_seq]['accum_down_payment'] += payment_amount; 
-        } else if(payment_type == '<%=CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT%>') {// 분양잔금
-        	summaryByBunyangSeq[bunyang_seq]['accum_balance_payment'] += payment_amount; 
-        } else if(payment_type == '<%=CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT%>') {// 관리비
-        	summaryByBunyangSeq[bunyang_seq]['accum_maint_payment'] += payment_amount; 
+        if(bunyang_seq) {
+        	// 납입금 누적정보 생성
+            if(payment_type == '<%=CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT%>') {// 계약금
+            	summaryByBunyangSeq[bunyang_seq]['accum_down_payment'] += payment_amount; 
+            } else if(payment_type == '<%=CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT%>') {// 분양잔금
+            	summaryByBunyangSeq[bunyang_seq]['accum_balance_payment'] += payment_amount; 
+            } else if(payment_type == '<%=CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT%>') {// 관리비
+            	summaryByBunyangSeq[bunyang_seq]['accum_maint_payment'] += payment_amount; 
+            }	
         }
         bunyangSeqs.push(bunyang_seq);
         paymentDates.push(payment_date);

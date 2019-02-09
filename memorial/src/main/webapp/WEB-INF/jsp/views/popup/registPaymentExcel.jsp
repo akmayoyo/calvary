@@ -78,7 +78,6 @@
         		<col width="23%">
         		<col width="20%">
         		<col width="3%">
-        		<col width="3%">
         	</colgroup>
             <thead>
                 <tr>
@@ -90,7 +89,6 @@
                     <th scope="col">내용</th>
                     <th scope="col">계약정보</th>
                     <th scope="col">비고</th>
-                    <th scope="col"></th>
                     <th scope="col"></th>
                 </tr>
             </thead>
@@ -249,13 +247,11 @@ function displayExcelRow(excelList) {
 	 	// 내용
 	    tr.append('<td><span name="content">' + content + '</span></td>');
 	 	// 계약정보
-	    tr.append('<td class="form-inline"><select name="bunyangInfo" class="form-control" style="width:245px;"></select><button type="button" data-toggle="tooltip" title="다른 계약정보 찾기" class="btn btn-default btn-sm" onclick="_searchBunyangInfo(this)" style="margin-left:3px; padding: 7px 10px; "><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></td>');
+	    tr.append('<td><select name="bunyangInfo" class="form-control"></select></td>');
 	 	// 비고
 	    tr.append('<td><input name="remark" type="text" class="form-control"></td>');
 	    // 삭제버튼
 	    tr.append('<td><button type="button" class="btn btn-default btn-sm" data-toggle="tooltip" title="삭제" onclick="_deleteRow(this)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>');
-	    // 저장결과 아이콘 표시
-	    tr.append('<td><div name="saveresult"></div></td>');
 
 	    var paymentTypeOptions = '<option value="">선택</option>';
 	    
@@ -331,7 +327,7 @@ function _savePayment() {
     $('#tblList tbody tr').each(function(idx) {
         var tr = $(this);
         var bunyangInfo;// 계약정보
-        var bunyang_seq = '';// 계약seq
+        var bunyang_seq = ' ';// 계약seq
         var bunyang_no;// 계약번호
         var total_price;// 총 분양대금
         var contract_price;// 총 계약금
@@ -362,6 +358,9 @@ function _savePayment() {
         var content = tr.find('span[name="content"]').text();
         var payment_user = apply_user_name ? apply_user_name : content;
         var remark = tr.find('input[name="remark"]').val();
+        if(!remark) {
+        	remark = ' ';
+        }
         var payment_method = "<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>";
         var rowNo = tr.find('span[name="rowNo"]').text();
         
@@ -452,8 +451,37 @@ function _savePayment() {
        	}
     }
     
+    var paymentInfo = {};
+    paymentInfo['bunyangSeqs'] = bunyangSeqs;
+    paymentInfo['paymentDates'] = paymentDates;
+    paymentInfo['paymentAmounts'] = paymentAmounts;
+    paymentInfo['paymentDivisions'] = paymentDivisions;
+    paymentInfo['paymentTypes'] = paymentTypes;
+    paymentInfo['paymentUsers'] = paymentUsers;
+    paymentInfo['paymentMethods'] = paymentMethods;
+    paymentInfo['remarks'] = remarks;
+    
+    common.ajax({
+		url:"${contextPath}/popup/savepayment", 
+		data:paymentInfo,
+		success: function(result) {
+			if(result.result) {
+				common.showAlert('저장되었습니다.');
+				if (window.opener && window.opener.saveCallBack != 'undefined') {
+		            window.opener.saveCallBack(result);
+		            common.closeWindow();
+		        }
+    		} else {
+    			common.showAlert('저장에 실패하였습니다.');
+    		}
+		},
+		error: function(xhr, status, message) {
+			common.showAlert('저장시 에러가 발생하였습니다.');
+		}
+	});
+    
     // 한건씩 저장
-    saveRecursive(bunyangSeqs, paymentDates, paymentAmounts, paymentDivisions, paymentTypes, paymentUsers, paymentMethods, remarks, rowNumbers);
+    //saveRecursive(bunyangSeqs, paymentDates, paymentAmounts, paymentDivisions, paymentTypes, paymentUsers, paymentMethods, remarks, rowNumbers);
 }
 
 /**

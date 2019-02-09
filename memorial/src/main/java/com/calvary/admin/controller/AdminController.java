@@ -133,7 +133,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=SAVE_APPLY_URL)
 	@ResponseBody
-	public Object saveApplyHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
+	public Object saveApplyHandler(@RequestBody BunyangInfoVo bunyangInfoVo) throws Exception {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		String bunyangSeq = adminService.createBunyangInfo(bunyangInfoVo, null);
@@ -159,7 +159,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPROVAL_URL)
 	@ResponseBody
-	public Object approvalHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
+	public Object approvalHandler(@RequestBody BunyangInfoVo bunyangInfoVo) throws Exception {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		String bunyangNo = adminService.getNextBunyangNo(bunyangInfoVo.getBunyangTimes());
@@ -186,7 +186,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=REJECT_URL)
 	@ResponseBody
-	public Object rejectHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
+	public Object rejectHandler(@RequestBody BunyangInfoVo bunyangInfoVo) throws Exception {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
@@ -200,7 +200,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=CANCEL_URL)
 	@ResponseBody
-	public Object cancelHandler(@RequestBody BunyangInfoVo bunyangInfoVo) {
+	public Object cancelHandler(@RequestBody BunyangInfoVo bunyangInfoVo) throws Exception {
 		boolean bRslt = false;
 		String progressStatus = bunyangInfoVo.getProgressStatus();
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -284,7 +284,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPR_CONTRACT_URL)
 	@ResponseBody
-	public Object apprContractHandler(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate) {
+	public Object apprContractHandler(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate) throws Exception {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		int iRslt = adminService.updateDownPayment(bunyangSeq, paymentAmount, paymentMethod, paymentDate, null, null, true);
@@ -313,7 +313,7 @@ public class AdminController {
 			@RequestParam(value="paymentMethod[]", required=false) String[] paymentMethod,
 			@RequestParam(value="paymentDate[]", required=false) String[] paymentDate,
 			@RequestParam(value="isFullPayment") boolean isFullPayment
-			) {
+			) throws Exception {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		int iRslt = adminService.updateBalancePayment(bunyangSeq, paymentAmount, paymentMethod, paymentDate, null, isFullPayment);
@@ -408,7 +408,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=USE_APPROVAL_URL)
 	@ResponseBody
-	public Object useApprovalHandler(String bunyangSeq) {
+	public Object useApprovalHandler(String bunyangSeq) throws Exception {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
@@ -593,7 +593,7 @@ public class AdminController {
 	 * 납부관리 메인 페이지 
 	 */
 	@RequestMapping(value=PAYMENT_MGMT_URL)
-	public Object paymentMgmtHandler(SearchVo searchVo, String paymentDivision, String paymentType) {
+	public Object paymentMgmtHandler(SearchVo searchVo, String paymentDivision, String paymentType, String parentCodeSeq) {
 		SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
 		// 검색기간은 default 1주일
 		if(StringUtils.isEmpty(searchVo.getFromDt()) && StringUtils.isEmpty(searchVo.getToDt())) {
@@ -602,10 +602,14 @@ public class AdminController {
 			searchVo.setFromDt(sf.format(cl.getTime()));
 			searchVo.setToDt(sf.format(new Date()));
 		}
+		String searchPaymentDivision = paymentDivision;
+		if(StringUtils.isEmpty(searchPaymentDivision)) {
+			searchPaymentDivision = parentCodeSeq;
+		}
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
-		List<Object> paymentList = adminService.getPaymentList(searchVo, paymentType);
 		List<Object> depositTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_DEPOSIT_TYPE);
 		List<Object> withdrawalTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_WITHDRAWAL_TYPE);
+		List<Object> paymentList = adminService.getPaymentList(searchVo, paymentType, searchPaymentDivision);
 		searchVo.setTotalCount(commonService.getTotalCount());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
@@ -616,6 +620,7 @@ public class AdminController {
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("paymentDivision", paymentDivision);
 		mv.addObject("paymentType", paymentType);
+		mv.addObject("parentCodeSeq", parentCodeSeq);
 		mv.addObject("paymentList", paymentList);
 		mv.addObject("depositTypeList", depositTypeList);
 		mv.addObject("withdrawalTypeList", withdrawalTypeList);

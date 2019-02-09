@@ -356,7 +356,6 @@
     
 </div>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
-<script type="text/javascript" src="${contextPath}/resources/js/jquery.fileDownload.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/moment.min.js"></script>
 <script type="text/javascript">
 // init 함수
