@@ -17,7 +17,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -229,6 +228,11 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(8);
 			cellnums.add(4);
 			cellvalues.add((String)applyUser.get("birth_date"));
+			// 신청자 성별
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(6);
+			cellvalues.add((String)applyUser.get("gender"));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -289,14 +293,14 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(20);
 				cellnums.add(8);
-				cellvalues.add(String.valueOf(coupleTypeCount));
+				cellvalues.add(coupleTypeCount);
 			}
 			
 			if(singleTypeCount > 0) {
 				sheetnums.add(0);
 				rownums.add(20);
 				cellnums.add(11);
-				cellvalues.add(String.valueOf(singleTypeCount));
+				cellvalues.add(singleTypeCount);
 			}
 			
 			// 관리비 납부형태
@@ -348,19 +352,27 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(21);
 				cellnums.add(1);
-				cellvalues.add(String.valueOf(bunyangCnt));
+				cellvalues.add(bunyangCnt);
 				
 				// 총분양가
 				sheetnums.add(0);
 				rownums.add(37);
+				cellnums.add(2);
+				cellvalues.add(totalPrice);
+				sheetnums.add(0);
+				rownums.add(37);
 				cellnums.add(5);
-				cellvalues.add(String.format("%,d", totalPrice));
+				cellvalues.add(totalPrice);
 				
 				// 총계약금
 				sheetnums.add(0);
 				rownums.add(38);
+				cellnums.add(2);
+				cellvalues.add(contractPrice);
+				sheetnums.add(0);
+				rownums.add(38);
 				cellnums.add(5);
-				cellvalues.add(String.format("%,d", contractPrice));
+				cellvalues.add(contractPrice);
 			}
 			
 			// 대리인신청시 대리인 정보
@@ -376,6 +388,12 @@ public class ExcelServiceImpl implements IExcelService {
 				rownums.add(13);
 				cellnums.add(4);
 				cellvalues.add((String)agentUser.get("birth_date"));
+				
+				// 성별
+				sheetnums.add(0);
+				rownums.add(13);
+				cellnums.add(6);
+				cellvalues.add(agentUser.get("gender"));
 				
 				// 신청자와의 관계
 				sheetnums.add(0);
@@ -436,6 +454,7 @@ public class ExcelServiceImpl implements IExcelService {
 				cellvalues.add((String)applyUser.get("user_name"));
 				for(i = 0; i < useUserList.size(); i++, startRowNum++) {
 					Map<String, Object> userMap = (HashMap<String, Object>)useUserList.get(i);
+					int coupleSeq = CommonUtil.convertToInt(userMap.get("couple_seq"));
 					// 사용자성명
 					sheetnums.add(0);
 					rownums.add(startRowNum);
@@ -451,6 +470,11 @@ public class ExcelServiceImpl implements IExcelService {
 					rownums.add(startRowNum);
 					cellnums.add(4);
 					cellvalues.add((String)userMap.get("birth_date"));
+					// 생년월일
+					sheetnums.add(0);
+					rownums.add(startRowNum);
+					cellnums.add(5);
+					cellvalues.add(userMap.get("gender"));
 					// 우편번호
 					sheetnums.add(0);
 					rownums.add(startRowNum);
@@ -461,8 +485,25 @@ public class ExcelServiceImpl implements IExcelService {
 					rownums.add(startRowNum);
 					cellnums.add(7);
 					cellvalues.add(CommonUtil.nullToEmpty(userMap.get("address1")) + CommonUtil.nullToEmpty(userMap.get("address2")));
-					// 신청유형 TODO
-					// 부부표시 TODO
+					
+					// 신청유형
+					if(coupleSeq > 0) {
+						sheetnums.add(0);
+						rownums.add(startRowNum);
+						cellnums.add(8);
+						cellvalues.add("O");
+						// 부부표시
+						sheetnums.add(0);
+						rownums.add(startRowNum);
+						cellnums.add(10);
+						cellvalues.add(coupleSeq);
+					} else {
+						sheetnums.add(0);
+						rownums.add(startRowNum);
+						cellnums.add(9);
+						cellvalues.add("O");
+					}
+					
 					// 갈보리 교인여부
 					String isChurchPerson = (String)userMap.get("is_church_person");
 					if("Y".equals(isChurchPerson)) {
@@ -481,6 +522,14 @@ public class ExcelServiceImpl implements IExcelService {
 					rownums.add(startRowNum);
 					cellnums.add(16);
 					cellvalues.add((String)userMap.get("email"));
+					// 이장여부
+					String isMove = (String)userMap.get("is_move");
+					if("Y".equals(isMove)) {
+						sheetnums.add(0);
+						rownums.add(startRowNum);
+						cellnums.add(17);
+						cellvalues.add("O");
+					}
 				}
 			}
 		}else if(ExcelForms.CONTRACT_FORM.equals(excelForm)) {// 분양계약서

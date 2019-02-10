@@ -24,7 +24,8 @@
 						<option value="<%=CalvaryConstants.PROGRESS_STATUS_A %>" <c:if test="${searchVo.progressStatus == 'A'}">selected</c:if>>신청승인</option>
 						<option value="<%=CalvaryConstants.PROGRESS_STATUS_B %>" <c:if test="${searchVo.progressStatus == 'B'}">selected</c:if>>계약완료</option>
 						<option value="B0" <c:if test="${searchVo.progressStatus == 'B0'}">selected</c:if>>계약미진행</option>
-						<option value="CA" <c:if test="${searchVo.progressStatus == 'CA'}">selected</c:if>>계약취소</option>
+						<option value="E" <c:if test="${searchVo.progressStatus == 'E'}">selected</c:if>>계약취소</option>
+						<option value="C" <c:if test="${searchVo.progressStatus == 'C'}">selected</c:if>>완납</option>
 					</select>
 				</div>
 				<div class="col-xs-8 col-md-8 pl-0">

@@ -13,10 +13,43 @@
 	<input type="hidden" id="bunyangSeq" name="bunyangSeq" value="${bunyangSeq}">
 </form>
 
+<c:set var="contract_price" value="${cutil:getDownPayment(bunyangInfo.total_price)}"/><!-- 계약금 -->
+
 <div class="col-md-9">
+
     <!-- 신청자 -->
     <div>
-    	<div class="pull-left"><h4>신청자</h4></div>
+    	<div class="pull-left">
+    		<h4>신청자
+    		<c:choose>
+    			<c:when test="${bunyangInfo.progress_status == 'A'}">
+    				<c:choose>
+    					<c:when test="${bunyangInfo.down_payment >= contract_price}">
+    					<c:set var="statusExp" value="계약미진행"/>
+    					<c:set var="statusClass" value="label-info"/>
+    					</c:when>
+    					<c:otherwise>
+    					<c:set var="statusExp" value="신청승인"/>
+    					<c:set var="statusClass" value="label-info"/>
+    					</c:otherwise>
+    				</c:choose>
+    			</c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'B'}">
+    			<c:set var="statusExp" value="계약완료"/>
+    			<c:set var="statusClass" value="label-info"/>
+    			</c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'C'}">
+    			<c:set var="statusExp" value="완납"/>
+    			<c:set var="statusClass" value="label-info"/>
+    			</c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'E'}">
+    			<c:set var="statusExp" value="계약취소"/>
+    			<c:set var="statusClass" value="label-danger"/>
+    			</c:when>
+    		</c:choose>
+    		<span class="label ${statusClass}" style="margin-left: 10px; font-weight: normal;">${bunyangInfo.bunyang_times}차-${statusExp}</span>
+    		</h4>
+    	</div>
     </div>
     <div class="clearfix"></div>
     <div class="table-responsive">
@@ -155,8 +188,6 @@
         </table>
     </div>
 
-	<c:set var="contract_price" value="${cutil:getDownPayment(bunyangInfo.total_price)}"/><!-- 계약금 -->
-
 	<!-- 동산 신청 정보 -->
 	<div style="margin-top: 35px;">
 		<div class="pull-left"><h4>동산 신청 정보</h4></div>	
@@ -172,6 +203,10 @@
         		<col width="32%">
         	</colgroup>
             <tbody>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">계약번호</th>
+            		<td align="left" colspan="3">${bunyangInfo.bunyang_no}</td>
+            	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">분양차수</th>
             		<td align="left" colspan="3">${bunyangInfo.bunyang_times}차</td>
