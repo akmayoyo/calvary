@@ -284,13 +284,24 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 사용계약리스트 조회 
 	 */
-	public List<Object> getContractList(SearchVo searchVo) {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getContractList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
-		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		parameter.put("apply_user_name", searchVo.getSearchVal());
+		parameter.put("progressStatus", searchVo.getProgressStatus());
+		parameter.put("bunyangTimes", searchVo.getBunyangTimes());
 		List<Object> list = commonDao.selectList("contract.getContractList", parameter); 
-		return list;
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getContractList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
 	}
 	
 	/** 
@@ -518,7 +529,8 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 납부내역조회 
 	 */
-	public List<Object> getPaymentList(SearchVo searchVo, String paymentType, String paymentDivision) {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getPaymentList(SearchVo searchVo, String paymentType, String paymentDivision) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
@@ -528,7 +540,15 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("fromDt", searchVo.getFromDt());
 		parameter.put("toDt", searchVo.getToDt());
 		List<Object> list = commonDao.selectList("payment.getPaymentList", parameter); 
-		return list;
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getPaymentList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
 	}
 	
 	/** 

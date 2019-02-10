@@ -18,7 +18,7 @@ public interface IExcelService {
 	 * @param cellvalues 셀값
 	 * @return true/false 
 	 */
-	public boolean updateExcelCellValue(File excelFile, List<Integer> sheetnums, List<Integer> rownums, List<Integer> cellnums, List<String> cellvalues);
+	public boolean updateExcelCellValue(File excelFile, List<Integer> sheetnums, List<Integer> rownums, List<Integer> cellnums, List<Object> cellvalues);
 	
 	/** 
 	 * Export 할 데이터 리스트 조회  

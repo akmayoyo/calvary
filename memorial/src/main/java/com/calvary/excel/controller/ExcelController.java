@@ -318,7 +318,7 @@ public class ExcelController {
 			wb = new XSSFWorkbook(is);
 			Map<String, Object> param = null;
 			Map<String, Object> tmp = null;
-			SimpleDateFormat ymd = new SimpleDateFormat("yyyy-MM-dd");
+			String dateFmt = "yyyy-MM-dd";
 			int sheetIdx = 0;
 			int rows = 0;
 			int idx = 0;
@@ -344,7 +344,7 @@ public class ExcelController {
 			//////////////////////////// 신청자 ////////////////////////////
 			BunyangUserVo applyUserVo = new BunyangUserVo();
 			applyUserVo.setUserName(sheet.getRow(8).getCell(convertColAlphabetToIndex("B")).getStringCellValue());// 신청자성명
-			applyUserVo.setBirthDate(ymd.format(sheet.getRow(8).getCell(convertColAlphabetToIndex("E")).getDateCellValue()));// 생년월일
+			applyUserVo.setBirthDate(getExcelDateValue(sheet.getRow(8).getCell(convertColAlphabetToIndex("E")).getDateCellValue(), dateFmt));// 생년월일
 			applyUserVo.setGender(String.valueOf((int)sheet.getRow(8).getCell(convertColAlphabetToIndex("G")).getNumericCellValue()));// 성별
 			applyUserVo.setChurchOfficer(codeNameToCodeSeq(sheet.getRow(8).getCell(convertColAlphabetToIndex("H")).getStringCellValue(), churchOfficerCodeList));// 직분
 			applyUserVo.setDiocese(String.valueOf((int)sheet.getRow(8).getCell(convertColAlphabetToIndex("K")).getNumericCellValue()));// 교구
@@ -378,7 +378,7 @@ public class ExcelController {
 			bunyangInfoVo.setBunyangTimes(1);// 분양차수
 			bunyangInfoVo.setPricePerCount(2000000);// 1기당가격
 			
-			requestDate = ymd.format(sheet.getRow(30).getCell(convertColAlphabetToIndex("G")).getDateCellValue());// 신청일
+			requestDate = getExcelDateValue(sheet.getRow(30).getCell(convertColAlphabetToIndex("G")).getDateCellValue(), dateFmt);// 신청일
 			
 			//////////////////////////// 대리인 ////////////////////////////
 			userName = sheet.getRow(13).getCell(convertColAlphabetToIndex("B")).getStringCellValue();
@@ -389,7 +389,7 @@ public class ExcelController {
 				}
 				BunyangUserVo agentUserVo = new BunyangUserVo();
 				agentUserVo.setUserName(userName);// 대리인명
-				agentUserVo.setBirthDate(ymd.format(sheet.getRow(13).getCell(convertColAlphabetToIndex("E")).getDateCellValue()));// 생년월일
+				agentUserVo.setBirthDate(getExcelDateValue(sheet.getRow(13).getCell(convertColAlphabetToIndex("E")).getDateCellValue(), dateFmt));// 생년월일
 				agentUserVo.setGender(String.valueOf((int)sheet.getRow(13).getCell(convertColAlphabetToIndex("G")).getNumericCellValue()));// 성별
 				agentUserVo.setRelationType(codeNameToCodeSeq(sheet.getRow(13).getCell(convertColAlphabetToIndex("H")).getStringCellValue(), relationCodeList));// 신청자와의 관계
 				agentUserVo.setMobile(CommonUtil.getMobileFormatString("0" + String.valueOf((int)sheet.getRow(13).getCell(convertColAlphabetToIndex("L")).getNumericCellValue())));// 휴대전화
@@ -425,7 +425,7 @@ public class ExcelController {
 					useUser.setIsMaintCharger("Y");
 				}
 				useUser.setRelationType(codeNameToCodeSeq(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("D")).getStringCellValue(), relationCodeList));
-				useUser.setBirthDate(ymd.format(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("E")).getDateCellValue()));
+				useUser.setBirthDate(getExcelDateValue(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("E")).getDateCellValue(), dateFmt));
 				useUser.setGender(String.valueOf((int)sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("F")).getNumericCellValue()));
 				useUser.setPostNumber(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("G")).getStringCellValue());
 				useUser.setAddress1(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("H")).getStringCellValue());
@@ -459,7 +459,7 @@ public class ExcelController {
 			//============================== Sheet3. 신청승인서 ==============================// 
 			sheet = wb.getSheetAt(sheetIdx++);
 			String bunyangNo = String.valueOf((int)sheet.getRow(5).getCell(convertColAlphabetToIndex("N")).getNumericCellValue());// 승인번호
-			String approvalDate = ymd.format(sheet.getRow(30).getCell(convertColAlphabetToIndex("G")).getDateCellValue());// 승인일자
+			String approvalDate = getExcelDateValue(sheet.getRow(30).getCell(convertColAlphabetToIndex("G")).getDateCellValue(), dateFmt);// 승인일자
 			
 			
 			
@@ -489,9 +489,9 @@ public class ExcelController {
 			
 			// 계약금
 			downPaymentAmount = (int)sheet.getRow(67).getCell(convertColAlphabetToIndex("L")).getNumericCellValue();// 납부금액
-			downPaymentDate = ymd.format(sheet.getRow(67).getCell(convertColAlphabetToIndex("I")).getDateCellValue());// 납부일자
-			downPaymentConfirmDate = ymd.format(sheet.getRow(26).getCell(convertColAlphabetToIndex("D")).getDateCellValue());// 확인일자
-			contractDate = ymd.format(sheet.getRow(46).getCell(convertColAlphabetToIndex("H")).getDateCellValue());// 계약일자
+			downPaymentDate = getExcelDateValue(sheet.getRow(67).getCell(convertColAlphabetToIndex("I")).getDateCellValue(), dateFmt);// 납부일자
+			downPaymentConfirmDate = getExcelDateValue(sheet.getRow(26).getCell(convertColAlphabetToIndex("D")).getDateCellValue(), dateFmt);// 확인일자
+			contractDate = getExcelDateValue(sheet.getRow(46).getCell(convertColAlphabetToIndex("H")).getDateCellValue(), dateFmt);// 계약일자
 			if("O".equals(sheet.getRow(24).getCell(convertColAlphabetToIndex("H")).getStringCellValue())) {// 무통장입금/계좌이체
 				downPaymentMethod = CalvaryConstants.PAYMENT_METHOD_TRANSFER;
 			}else if("O".equals(sheet.getRow(24).getCell(convertColAlphabetToIndex("N")).getStringCellValue())) {// 현금납부
@@ -514,7 +514,7 @@ public class ExcelController {
 				if(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("I")).getDateCellValue() == null) {
 					break;
 				}
-				paymentDate = ymd.format(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("I")).getDateCellValue());//실납입일
+				paymentDate = getExcelDateValue(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("I")).getDateCellValue(), dateFmt);//실납입일
 				paymentAmount = (int)sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("L")).getNumericCellValue();// 납입금
 				sumBalancePayment += paymentAmount;
 				balancePaymentDates.add(paymentDate);
@@ -531,7 +531,7 @@ public class ExcelController {
 			String fullPaymentDate = null;
 			sheet = wb.getSheetAt(sheetIdx++);
 			if(isFullPayment) {
-				fullPaymentDate = ymd.format(sheet.getRow(29).getCell(convertColAlphabetToIndex("G")).getDateCellValue());// 완납 확인일자
+				fullPaymentDate = getExcelDateValue(sheet.getRow(29).getCell(convertColAlphabetToIndex("G")).getDateCellValue(), dateFmt);// 완납 확인일자
 			}
 			
 			
@@ -777,11 +777,22 @@ public class ExcelController {
 			List<Integer> sheetnums, 
 			List<Integer> rownums, 
 			List<Integer> cellnums, 
-			List<String> cellvalues
+			List<Object> cellvalues
 			) {
 		File file = new File(filePath);
 		excelService.updateExcelCellValue(file, sheetnums, rownums, cellnums, cellvalues);
 		return String.valueOf(true);
+	}
+	
+	/** 
+	 * 
+	 */
+	private String getExcelDateValue(Date val, String fmt) {
+		String sRtn = "";
+		if(val != null) {
+			sRtn = new SimpleDateFormat(fmt).format(val);
+		}
+		return sRtn;
 	}
 	
 	

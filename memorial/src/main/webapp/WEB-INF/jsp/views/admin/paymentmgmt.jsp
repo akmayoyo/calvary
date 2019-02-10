@@ -65,13 +65,13 @@
 		<div class="table-responsive" style="margin-top: 10px;">
 			<table id="tblApplyList" class="table table-style table-bordered">
 				<colgroup>
+	        		<col width="13%">
 	        		<col width="10%">
 	        		<col width="10%">
 	        		<col width="10%">
 	        		<col width="10%">
 	        		<col width="10%">
-	        		<col width="10%">
-	        		<col width="25%">
+	        		<col width="22%">
 	        	</colgroup>
 				<thead>
 					<tr>

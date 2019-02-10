@@ -1,6 +1,7 @@
 package com.calvary.admin.controller;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -231,11 +232,18 @@ public class AdminController {
 	/** 
 	 * 사용계약관리 메인 페이지 
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=CONTRACT_MGMT_URL)
 	public Object contractMgmtHandler(SearchVo searchVo) {
+		if(StringUtils.isEmpty(searchVo.getProgressStatus())) {// 초기 상태값은 신청승인
+			searchVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_A);
+		}
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
-		List<Object> contractList = adminService.getContractList(searchVo);
-		searchVo.setTotalCount(commonService.getTotalCount());
+		List<Object> bunyangTimesList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_BUNYANG_TIMES);
+		Map<String, Object> rtnMap = adminService.getContractList(searchVo);
+		List<Object> contractList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_02");
@@ -244,6 +252,7 @@ public class AdminController {
 		mv.addObject("menuList", menuList);
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("contractList", contractList);
+		mv.addObject("bunyangTimesList", bunyangTimesList);
 		mv.setViewName(ROOT_URL + CONTRACT_MGMT_URL);
 		return mv;
 	}
@@ -269,11 +278,9 @@ public class AdminController {
 		mv.addObject("agentUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER));// 대리신청인정보
 		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
 		mv.addObject("fileList", adminService.getBunyangFileList(bunyangSeq));// 분양 파일 양식 리스트
-		paymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);// 계약금 납부내역
-		if(paymentList != null && paymentList.size() > 0) {
-			mv.addObject("downPaymentInfo", paymentList.get(0));// 계약금 납부내역
-		}
-		mv.addObject("balancePaymentList", adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 잔금납부내역
+		paymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);// 계약금
+		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 분양잔금
+		mv.addObject("paymentList", paymentList);
 		mv.addObject("totalPaymentInfo", adminService.getTotalPayment(bunyangSeq));
 		mv.setViewName(ROOT_URL + CONTRACT_DETAIL_URL);
 		return mv;
@@ -284,21 +291,45 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPR_CONTRACT_URL)
 	@ResponseBody
-	public Object apprContractHandler(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate) throws Exception {
+	public Object apprContractHandler(String bunyangSeq, String progressStatus) throws Exception {
 		boolean bRslt = false;
+		String fileSeq = null;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		int iRslt = adminService.updateDownPayment(bunyangSeq, paymentAmount, paymentMethod, paymentDate, null, null, true);
+		Map<String, Object> param = null;
+		BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
+		bunyangInfoVo.setBunyangSeq(bunyangSeq);
+		bunyangInfoVo.setProgressStatus(progressStatus);
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
 		if(iRslt > 0) {
-			String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
-			if(!StringUtils.isEmpty(fileSeq)) {
-				Map<String, Object> param = new HashMap<String, Object>();
-				param.put("bunyangSeq", bunyangSeq);
-				param.put("file_seq_contract", fileSeq);
-				iRslt = adminService.updateBunyangFileSeq(param);
-				bRslt = iRslt > 0;
+			if(CalvaryConstants.PROGRESS_STATUS_B.equals(progressStatus)) {
+				fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
+				if(!StringUtils.isEmpty(fileSeq)) {
+					param = new HashMap<String, Object>();
+					param.put("bunyangSeq", bunyangSeq);
+					param.put("file_seq_contract", fileSeq);
+					iRslt = adminService.updateBunyangFileSeq(param);
+				}
+				bRslt = true;
+			} else if(CalvaryConstants.PROGRESS_STATUS_C.equals(progressStatus)) {
+				fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
+				if(!StringUtils.isEmpty(fileSeq)) {
+					param = new HashMap<String, Object>();
+					param.put("bunyangSeq", bunyangSeq);
+					param.put("file_seq_contract", fileSeq);
+					iRslt = adminService.updateBunyangFileSeq(param);
+				}
+				fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "");
+				if(!StringUtils.isEmpty(fileSeq)) {
+					param = new HashMap<String, Object>();
+					param.put("bunyangSeq", bunyangSeq);
+					param.put("file_seq_full_payment", fileSeq);
+					iRslt = adminService.updateBunyangFileSeq(param);
+				}
+				bRslt = true;
 			}
 		}
 		rtnMap.put("result", bRslt);
+		rtnMap.put("fileSeq", fileSeq);
 		return rtnMap;
 	}
 	
@@ -592,6 +623,7 @@ public class AdminController {
 	/** 
 	 * 납부관리 메인 페이지 
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=PAYMENT_MGMT_URL)
 	public Object paymentMgmtHandler(SearchVo searchVo, String paymentDivision, String paymentType, String parentCodeSeq) {
 		SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
@@ -609,8 +641,10 @@ public class AdminController {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> depositTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_DEPOSIT_TYPE);
 		List<Object> withdrawalTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_WITHDRAWAL_TYPE);
-		List<Object> paymentList = adminService.getPaymentList(searchVo, paymentType, searchPaymentDivision);
-		searchVo.setTotalCount(commonService.getTotalCount());
+		Map<String, Object> rtnMap = adminService.getPaymentList(searchVo, paymentType, searchPaymentDivision);
+		List<Object> paymentList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_06");

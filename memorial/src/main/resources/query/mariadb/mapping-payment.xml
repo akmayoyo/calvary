@@ -16,7 +16,7 @@
 		    ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.parent_code_seq = a.payment_division and cc.code_seq = a.payment_type) payment_type_name
 		    ,a.payment_amount
 		    ,a.payment_method
-		    ,DATE_FORMAT(a.payment_date, '%Y-%m-%d') AS payment_date
+		    ,DATE_FORMAT(a.payment_date, '%Y-%m-%d %H:%i:%s') AS payment_date
 		    ,a.payment_user
 		    ,a.create_user
 		    ,(SELECT cu.user_name FROM TB_COM_USER cu WHERE cu.user_id = a.create_user) create_user_name

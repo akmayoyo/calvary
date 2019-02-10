@@ -2,33 +2,17 @@
     PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="contract">
+<mapper namespace="totalcount">
 
-
-    <!-- 사용계약리스트 조회 -->
+	<!-- 
+	페이징쿼리에서 전체 행수 조회를 위한 쿼리 정의
+	SQL_CALC_FOUND_ROWS+FOUND_ROWS 로 가져오던게 갑자기 안돼서 원인을 못찾아 일단 행수 조회를 위한 쿼리를 메인쿼리와 쌍으로 정의함  
+	-->
+	
+	<!-- 사용계약리스트 조회 -->
     <select id="getContractList" parameterType="map" resultType="map">
     	SELECT
-    		SQL_CALC_FOUND_ROWS
-    		t.*
-    		,CASE 
-        		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
-          		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
-        	END use_user_exp
-        	,down_payment + balance_payment AS total_payment
-        	,CASE WHEN down_payment >= (total_price/10) THEN 'Y' ELSE 'N' END AS contract_yn
-        	,CASE WHEN down_payment + balance_payment >= total_price THEN 'Y' ELSE 'N' END AS full_payment_yn
-        	,CASE 
-        		WHEN progress_status = 'A' THEN CASE WHEN down_payment >= (total_price/10) THEN '계약미진행' ELSE '신청승인' END
-        		WHEN progress_status = 'B' THEN '계약완료'
-        		WHEN progress_status = 'C' THEN '완납'
-        		WHEN progress_status = 'E' THEN '계약취소'
-        	END progress_status_exp
-        	,CASE 
-        		WHEN progress_status = 'A' THEN CASE WHEN down_payment >= (total_price/10) THEN down_payment_date ELSE approval_date END
-        		WHEN progress_status = 'B' THEN contract_date
-        		WHEN progress_status = 'C' THEN fullpayment_date
-        		WHEN progress_status = 'E' THEN cancel_date
-        	END action_date
+    		COUNT(1) as total_count 
     	FROM
 		    (SELECT
 			  a.bunyang_seq
@@ -117,9 +101,7 @@
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
 		</if>
 		<if test='progressStatus == "A"'>
-		<![CDATA[
-		AND progress_status = 'A' AND down_payment < (total_price / 10)
-		]]>
+		AND progress_status = 'A'
 		</if>
 		<if test='progressStatus == "B"'>
 		AND progress_status = 'B'
@@ -138,57 +120,37 @@
 		<if test="bunyangTimes != null and bunyangTimes > 0">
 		AND bunyang_times = #{bunyangTimes}
 		</if>
-		ORDER BY t.bunyang_seq
-		<if test="start != null">
-		LIMIT #{start}, #{count}
-		</if>
     </select>
-    
-    <!-- 대금납부내역조회 -->
-    <select id="getPaymentHistory" parameterType="map" resultType="map">
-    	SELECT 
-			a.bunyang_seq
-		  	,a.payment_division
-		    ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.payment_division) payment_division_name
-		    ,a.payment_type
-		    ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.parent_code_seq = a.payment_division and cc.code_seq = a.payment_type) payment_type_name
-		  	,a.payment_method
-		  	,a.payment_amount
-		  	,DATE_FORMAT(a.payment_date, '%Y-%m-%d %H:%i:%s') AS payment_date
-		  	,DATE_FORMAT(a.payment_date, '%Y-%m-%d') AS payment_date_short
-		  	,a.payment_user 
-		  	,a.create_user
-		  	,(SELECT user_name FROM TB_COM_USER cu where cu.user_id = a.create_user) create_user_name
-		  	,DATE_FORMAT(a.create_date, '%Y-%m-%d') AS create_date
-		  	,(SELECT SUM(payment_amount) FROM TB_BUNYANG_PAYMENT_HISTORY s WHERE s.bunyang_seq = a.bunyang_seq AND s.payment_type = a.payment_type) total_amount
-		FROM TB_BUNYANG_PAYMENT_HISTORY a
-		WHERE bunyang_seq = #{bunyangSeq}
-		<if test="paymentType != null and paymentType != ''">
-		and payment_type = #{paymentType}
-		</if>
-		ORDER BY a.payment_date, a.create_date
-    </select>
-    
-    <!-- 총대금납부금액조회 -->
-    <select id="getTotalPayment" parameterType="String" resultType="map">
-    	SELECT 
-			COALESCE(SUM(payment_amount), 0) total_amount
-		FROM TB_BUNYANG_PAYMENT_HISTORY a
-		WHERE bunyang_seq = #{bunyangSeq}
-		AND payment_type in('DOWN_PAYMENT','BALANCE_PAYMENT')
-    </select>
-    
-    <!-- 계약금 납부 내역 -->
-	<insert id="insertDownPayment" parameterType="map">
-		INSERT INTO TB_BUNYANG_PAYMENT_HISTORY 
-		(bunyang_seq, payment_division, payment_type, payment_amount, payment_method, payment_date, payment_user, create_user, create_date, remarks) 
-		values (#{bunyangSeq}, #{paymentDivision}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, STR_TO_DATE(REGEXP_REPLACE(#{paymentDate}, '[^0-9]+', ''), '%Y%m%d%H%i%s'), #{paymentUser}, #{createUser}, COALESCE(STR_TO_DATE(REGEXP_REPLACE(#{createDate}, '[^0-9]+', ''), '%Y%m%d%H%i%s'),CURRENT_TIMESTAMP), #{remark})
-	</insert>
 	
-    <!-- 계약금 납부 내역 삭제 -->
-	<delete id="deleteDownPayment" parameterType="map">
-		DELETE FROM TB_BUNYANG_PAYMENT_HISTORY WHERE bunyang_seq = #{bunyangSeq} and payment_type = #{paymentType}
-	</delete>
-    
-
+	<!-- 납부내역조회  -->	
+	<select id="getPaymentList" parameterType="map" resultType="map">
+		SELECT
+			COUNT(1) as total_count 
+		FROM
+		(SELECT
+			a.bunyang_seq
+		FROM TB_BUNYANG_PAYMENT_HISTORY a LEFT OUTER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
+		WHERE 1=1
+		<if test="bunyangNo != null and bunyangNo != ''">
+		AND b.bunyang_no = #{bunyangNo}
+		</if>
+		<if test="paymentType != null and paymentType != ''">
+		AND a.payment_type = #{paymentType}
+		</if>
+		<if test="paymentDivision != null and paymentDivision != ''">
+		AND a.payment_division = #{paymentDivision}
+		</if>
+		<if test="fromDt != null and fromDt != ''">
+		<![CDATA[
+		AND payment_date >= STR_TO_DATE(#{fromDt}, '%Y%m%d')
+		]]>
+		</if>
+		<if test="toDt != null and toDt != ''">
+		<![CDATA[
+		AND payment_date < DATE_ADD(STR_TO_DATE(#{toDt}, '%Y%m%d'), INTERVAL 1 DAY)
+		]]>
+		</if>
+		) t
+	</select>
+	
 </mapper>

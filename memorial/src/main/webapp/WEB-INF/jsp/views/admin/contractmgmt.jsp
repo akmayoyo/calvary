@@ -6,20 +6,33 @@
 	<input type="hidden" id="bunyangSeq" name="bunyangSeq">
 	<!-- 그리드 샘플 -->
 	<div class="col-md-9">
+	
 		<!-- 검색 -->
 		<div class="bx-border p-20 mb-20">
 			<div class="row">
-				<div class="col-xs-4 col-md-3 pr-10">
-					<select name="searchKey" class="form-control">
-						<option value="apply_user_name">신청자</option>
+				<div class="col-xs-2 col-md-2 pr-10">
+					<select name="bunyangTimes" class="form-control">
+						<option value="0">분양차수 : 전체</option>
+						<c:forEach items="${bunyangTimesList}" var="bunyangTimesItem">
+						<option value="${bunyangTimesItem.code_seq}" <c:if test="${searchVo.bunyangTimes == bunyangTimesItem.code_seq}">selected</c:if>>분양차수 : ${bunyangTimesItem.code_name}</option>
+						</c:forEach>
 					</select>
 				</div>
-				<div class="col-xs-8 col-md-9 pl-0">
+				<div class="col-xs-2 col-md-2 pr-10 pl-0">
+					<select name="progressStatus" class="form-control">
+						<option value="All">전체</option>
+						<option value="<%=CalvaryConstants.PROGRESS_STATUS_A %>" <c:if test="${searchVo.progressStatus == 'A'}">selected</c:if>>신청승인</option>
+						<option value="<%=CalvaryConstants.PROGRESS_STATUS_B %>" <c:if test="${searchVo.progressStatus == 'B'}">selected</c:if>>계약완료</option>
+						<option value="B0" <c:if test="${searchVo.progressStatus == 'B0'}">selected</c:if>>계약미진행</option>
+						<option value="CA" <c:if test="${searchVo.progressStatus == 'CA'}">selected</c:if>>계약취소</option>
+					</select>
+				</div>
+				<div class="col-xs-8 col-md-8 pl-0">
 					<div class="input-group">
 						<input type="text" name="searchVal" class="form-control" value="${searchVo.searchVal}">
 						<span class="input-group-btn pl-10">
-							<button class="btn btn-primary" type="button" onclick="_search()">조회</button>
-							<button class="btn btn-success" type="button" style="margin-left: 4px;" onclick="_downloadExcel()">Excel</button>
+							<button class="btn btn-primary" type="button" onclick="_search()" style="width: 70px;">조회</button>
+							<button class="btn btn-success" type="button" style="margin-left: 4px; width: 70px;" onclick="_downloadExcel()">Excel</button>
 						</span>
 					</div>
 				</div>
@@ -38,10 +51,11 @@
 						<th scope="col">부부형</th>
 						<th scope="col">1인형</th>
 						<th scope="col">총분양대금</th>
+						<th scope="col">상태</th>
 						<th scope="col">납부금액</th>
-						<th scope="col">계약여부</th>
+						<th scope="col">계약금<br>납부여부</th>
 						<th scope="col">완납여부</th>
-						<th scope="col"></th>
+						<th scope="col">처리일자</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -55,9 +69,11 @@
 	                    <td>${contract.couple_type_count}</td>
 	                    <td>${contract.single_type_count}</td>
 	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_price)}</td>
+	                    <td>${contract.progress_status_exp}</td>
 	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_payment)}</td>
 	                    <td><c:if test="${contract.contract_yn == 'Y'}">O</c:if></td>
 	                    <td><c:if test="${contract.full_payment_yn == 'Y'}">O</c:if></td>
+	                    <td>${contract.action_date}</td>
 					</tr>
 					</c:forEach>
 				</tbody>
@@ -104,12 +120,12 @@ function _search(pageIndex) {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호", "신청자", "사용자", "신청형태", "부부형", "1인형", "총 분양대금", "납부금액", "계약여부", "완납여부"];
-	var excelFields = ["bunyang_seq","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","total_price","total_payment","contract_yn","full_payment_yn"];
-	var searchKeys = [""];
-	var searchValues = [""];
+	var excelHeaders = ["번호","신청자","사용자","신청형태","부부형","1인형","총분양대금","상태","납부금액","계약여부","완납여부","처리일자"];
+	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","total_price","progress_status_exp","total_payment","contract_yn","full_payment_yn","action_date"];
+	var searchKeys = ["apply_user_name", "progressStatus", "bunyangTimes"];
+	var searchValues = ["${searchVo.searchVal}", "${searchVo.progressStatus}", "${searchVo.bunyangTimes}"];
 	var queryId = "contract.getContractList";
-	var title = "갈보리추모동산 계약현황";
+	var title = "갈보리추모동산 사용계약현황";
 	var fileName = title + ".xlsx";
 	var sheetName = title;
 	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);

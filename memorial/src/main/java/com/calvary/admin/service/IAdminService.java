@@ -93,7 +93,7 @@ public interface IAdminService {
 	/** 
 	 * 사용계약리스트 조회 
 	 */
-	public List<Object> getContractList(SearchVo searchVo);
+	public Map<String, Object> getContractList(SearchVo searchVo);
 	/** 
 	 * 대금납부내역조회
 	 */
@@ -165,7 +165,7 @@ public interface IAdminService {
 	/** 
 	 * 납부내역조회 
 	 */
-	public List<Object> getPaymentList(SearchVo searchVo, String paymentType, String paymentDivision);
+	public Map<String, Object> getPaymentList(SearchVo searchVo, String paymentType, String paymentDivision);
 	
 	/** 
 	 * 입출금 엑셀업로드에서 계약정보 선택을 위한 리스트 조회 

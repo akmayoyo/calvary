@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -63,7 +65,7 @@ public class ExcelServiceImpl implements IExcelService {
 	 * @return true/false 
 	 */
 	@Override
-	public boolean updateExcelCellValue(File excelFile, List<Integer> sheetnums, List<Integer> rownums, List<Integer> cellnums, List<String> cellvalues) {
+	public boolean updateExcelCellValue(File excelFile, List<Integer> sheetnums, List<Integer> rownums, List<Integer> cellnums, List<Object> cellvalues) {
 		FileInputStream fis = null;
 		FileOutputStream fos = null;
 		XSSFWorkbook workbook = null;
@@ -76,7 +78,7 @@ public class ExcelServiceImpl implements IExcelService {
             		int sheetnum = sheetnums.get(i);
             		int rownum = rownums.get(i);
             		int cellnum = cellnums.get(i);
-            		String cellvalue = cellvalues.get(i);
+            		Object cellvalue = cellvalues.get(i);
             		XSSFSheet sheet = workbook.getSheetAt(sheetnum);
                     XSSFRow row = sheet.getRow(rownum);
                     XSSFCell cell = null;
@@ -87,7 +89,17 @@ public class ExcelServiceImpl implements IExcelService {
                     if(cell == null) {
                     	cell = row.createCell(cellnum);
                     }
-                    cell.setCellValue(cellvalue);
+                    if(cellvalue instanceof Integer) {
+                		cell.setCellValue((double)(int)cellvalue);
+                	}else if(cellvalue instanceof String) {
+                		cell.setCellValue((String)cellvalue);
+                	}else if(cellvalue instanceof Long) {
+                		cell.setCellValue((double)(long)cellvalue);
+                	}else if(cellvalue instanceof BigDecimal) {
+                		cell.setCellValue(cellvalue == null ? null : ((BigDecimal)cellvalue).doubleValue());
+                	}else {
+                		cell.setCellValue((String)cellvalue);
+                	}
             	}
             }
             fos =new FileOutputStream(excelFile);
@@ -141,7 +153,7 @@ public class ExcelServiceImpl implements IExcelService {
 		List<Integer> sheetnums = new ArrayList<Integer>();
 		List<Integer> rownums = new ArrayList<Integer>();
 		List<Integer> cellnums = new ArrayList<Integer>();
-		List<String> cellvalues = new ArrayList<String>();
+		List<Object> cellvalues = new ArrayList<Object>();
 		
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("bunyangSeq", bunyangSeq);
@@ -480,7 +492,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(5);
 			cellnums.add(convertColAlphabetToIndex("O"));
-			cellvalues.add(bunyangSeq);
+			cellvalues.add(bunyangNo);
 			// 신청자성명
 			sheetnums.add(0);
 			rownums.add(8);
@@ -499,6 +511,11 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(52);
 			cellnums.add(convertColAlphabetToIndex("E"));
 			cellvalues.add((String)applyUser.get("birth_date"));
+			// 신청자 성별
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("H"));
+			cellvalues.add((String)applyUser.get("gender"));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -533,6 +550,12 @@ public class ExcelServiceImpl implements IExcelService {
 			cellnums.add(convertColAlphabetToIndex("E"));
 			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
 			
+			// 신청자  전화번호
+			sheetnums.add(0);
+			rownums.add(10);
+			cellnums.add(convertColAlphabetToIndex("L"));
+			cellvalues.add((String)applyUser.get("phone"));
+			
 			// 신청자  이메일
 			sheetnums.add(0);
 			rownums.add(10);
@@ -556,50 +579,56 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(15);
 				cellnums.add(convertColAlphabetToIndex("J"));
-				cellvalues.add(String.valueOf(coupleTypeCount));
+				cellvalues.add(coupleTypeCount);
 			}
 			if(singleTypeCount > 0) {
 				sheetnums.add(0);
 				rownums.add(15);
 				cellnums.add(convertColAlphabetToIndex("M"));
-				cellvalues.add(String.valueOf(singleTypeCount));
+				cellvalues.add(singleTypeCount);
 			}
 			
 			// 총기수
 			sheetnums.add(0);
 			rownums.add(16);
 			cellnums.add(convertColAlphabetToIndex("C"));
-			cellvalues.add(String.valueOf(bunyangCnt));
+			cellvalues.add(bunyangCnt);
 			
 			// 총분양가
 			sheetnums.add(0);
 			rownums.add(17);
 			cellnums.add(convertColAlphabetToIndex("E"));
-			cellvalues.add("일금:" + totalPriceH + "원");
+			//cellvalues.add("일금:" + totalPriceH + "원");
+			cellvalues.add(totalPrice);
 			sheetnums.add(0);
 			rownums.add(17);
 			cellnums.add(convertColAlphabetToIndex("H"));
-			cellvalues.add("(₩" + totalPriceF + ")");
+			//cellvalues.add("(₩" + totalPriceF + ")");
+			cellvalues.add(totalPrice);
 			
 			// 총계약금
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("E"));
-			cellvalues.add("일금:" + contractPriceH + "원");
+			//cellvalues.add("일금:" + contractPriceH + "원");
+			cellvalues.add(contractPrice);
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("H"));
-			cellvalues.add("(₩" + contractPriceF + ")");
+			//cellvalues.add("(₩" + contractPriceF + ")");
+			cellvalues.add(contractPrice);
 			
 			// 잔금
 			sheetnums.add(0);
 			rownums.add(19);
 			cellnums.add(convertColAlphabetToIndex("E"));
-			cellvalues.add("일금:" + balancePriceH + "원");
+			//cellvalues.add("일금:" + balancePriceH + "원");
+			cellvalues.add(balancePrice);
 			sheetnums.add(0);
 			rownums.add(19);
 			cellnums.add(convertColAlphabetToIndex("H"));
-			cellvalues.add("(₩" + balancePriceF + ")");
+			//cellvalues.add("(₩" + balancePriceF + ")");
+			cellvalues.add(balancePrice);
 			
 			// 계약금 납부내역
 			List<Object> downPaymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);
@@ -608,8 +637,9 @@ public class ExcelServiceImpl implements IExcelService {
 			if(downPaymentList != null && downPaymentList.size() > 0) {
 				for(i = 0; i < downPaymentList.size(); i++) {
 					tmp = (HashMap<String, Object>)downPaymentList.get(i);
-					String paymentDate = (String)tmp.get("payment_date");
+					String paymentDate = (String)tmp.get("payment_date_short");
 					int paymentAmount = CommonUtil.convertToInt(tmp.get("payment_amount"));
+					int totalAmount = CommonUtil.convertToInt(tmp.get("total_amount"));
 					String paymentMethod = (String)tmp.get("payment_method");
 					String createUser = (String)tmp.get("create_user_name");
 					String createDate = (String)tmp.get("create_date");
@@ -627,15 +657,18 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(22);
 					cellnums.add(convertColAlphabetToIndex("K"));
-					cellvalues.add("일금:" + CommonUtil.convertPriceToHangul(paymentAmount) + "원");
+					//cellvalues.add("일금:" + CommonUtil.convertPriceToHangul(paymentAmount) + "원");
+					cellvalues.add(paymentAmount);
 					sheetnums.add(0);
 					rownums.add(22);
 					cellnums.add(convertColAlphabetToIndex("M"));
-					cellvalues.add("(₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount) + ")");
+					//cellvalues.add("(₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount) + ")");
+					cellvalues.add(paymentAmount);
 					sheetnums.add(0);
 					rownums.add(paymentRnum);
 					cellnums.add(convertColAlphabetToIndex("L"));
-					cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
+					//cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
+					cellvalues.add(paymentAmount);
 					
 					// 납부방법
 					if(CalvaryConstants.PAYMENT_METHOD_TRANSFER.equals(paymentMethod)) {// 이체
@@ -660,6 +693,18 @@ public class ExcelServiceImpl implements IExcelService {
 					cellnums.add(convertColAlphabetToIndex("H"));
 					cellvalues.add(createDate);
 					
+					// 계약금미납,완납,과납
+					sheetnums.add(0);
+					rownums.add(26);
+					cellnums.add(convertColAlphabetToIndex("O"));
+					if(totalAmount == contractPrice) {
+						cellvalues.add("계약금완납");
+					} else if(totalAmount > contractPrice) {
+						cellvalues.add("계약금과납");
+					} else {
+						cellvalues.add("계약금미납");
+					}
+					
 					// 확인자
 					sheetnums.add(0);
 					rownums.add(26);
@@ -675,7 +720,7 @@ public class ExcelServiceImpl implements IExcelService {
 			if(balancePaymentList != null && balancePaymentList.size() > 0) {
 				for(i = 0; i < balancePaymentList.size(); i++) {
 					tmp = (HashMap<String, Object>)balancePaymentList.get(i);
-					String paymentDate = (String)tmp.get("payment_date");
+					String paymentDate = (String)tmp.get("payment_date_short");
 					int paymentAmount = CommonUtil.convertToInt(tmp.get("payment_amount"));
 					
 					// 납부일자
@@ -687,7 +732,8 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(68+i);
 					cellnums.add(convertColAlphabetToIndex("L"));
-					cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
+					//cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
+					cellvalues.add(paymentAmount);
 					
 					paymentRnum++;
 				}
@@ -700,7 +746,7 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(5);
 			cellnums.add(convertColAlphabetToIndex("O"));
-			cellvalues.add(bunyangSeq);
+			cellvalues.add(bunyangNo);
 			// 신청자성명
 			sheetnums.add(0);
 			rownums.add(8);
@@ -711,6 +757,11 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("F"));
 			cellvalues.add((String)applyUser.get("birth_date"));
+			// 신청자 성별
+			sheetnums.add(0);
+			rownums.add(8);
+			cellnums.add(convertColAlphabetToIndex("H"));
+			cellvalues.add((String)applyUser.get("gender"));
 			// 신청자 직분
 			sheetnums.add(0);
 			rownums.add(8);
@@ -741,6 +792,12 @@ public class ExcelServiceImpl implements IExcelService {
 			cellnums.add(convertColAlphabetToIndex("D"));
 			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
 			
+			// 신청자  전화번호
+			sheetnums.add(0);
+			rownums.add(10);
+			cellnums.add(convertColAlphabetToIndex("L"));
+			cellvalues.add((String)applyUser.get("phone"));
+			
 			// 신청자  이메일
 			sheetnums.add(0);
 			rownums.add(10);
@@ -764,50 +821,50 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(15);
 				cellnums.add(convertColAlphabetToIndex("J"));
-				cellvalues.add(String.valueOf(coupleTypeCount));
+				cellvalues.add(coupleTypeCount);
 			}
 			if(singleTypeCount > 0) {
 				sheetnums.add(0);
 				rownums.add(15);
 				cellnums.add(convertColAlphabetToIndex("M"));
-				cellvalues.add(String.valueOf(singleTypeCount));
+				cellvalues.add(singleTypeCount);
 			}
 			
 			// 총기수
 			sheetnums.add(0);
 			rownums.add(16);
 			cellnums.add(convertColAlphabetToIndex("C"));
-			cellvalues.add(String.valueOf(bunyangCnt));
+			cellvalues.add(bunyangCnt);
 			
 			// 총분양가
 			sheetnums.add(0);
 			rownums.add(17);
 			cellnums.add(convertColAlphabetToIndex("E"));
-			cellvalues.add("일금:" + totalPriceH + "원");
+			cellvalues.add(totalPrice);
 			sheetnums.add(0);
 			rownums.add(17);
 			cellnums.add(convertColAlphabetToIndex("H"));
-			cellvalues.add("(₩" + totalPriceF + ")");
+			cellvalues.add(totalPrice);
 			
 			// 총계약금
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("E"));
-			cellvalues.add("일금:" + contractPriceH + "원");
+			cellvalues.add(contractPrice);
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("H"));
-			cellvalues.add("(₩" + contractPriceF + ")");
+			cellvalues.add(contractPrice);
 			
 			// 잔금
 			sheetnums.add(0);
 			rownums.add(19);
 			cellnums.add(convertColAlphabetToIndex("E"));
-			cellvalues.add("일금:" + balancePriceH + "원");
+			cellvalues.add(balancePrice);
 			sheetnums.add(0);
 			rownums.add(19);
 			cellnums.add(convertColAlphabetToIndex("H"));
-			cellvalues.add("(₩" + balancePriceF + ")");
+			cellvalues.add(balancePrice);
 			
 			// 완납문구
 			sheetnums.add(0);
