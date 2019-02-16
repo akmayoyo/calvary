@@ -11,10 +11,26 @@
 	<input type="hidden" id="bunyangSeq" name="bunyangSeq" value="${bunyangSeq}">
 </form>
 
+<c:set var="contract_price" value="${cutil:getDownPayment(bunyangInfo.total_price)}"/><!-- 계약금 -->
+
 <div class="col-md-9">
     <!-- 신청자 -->
     <div>
-    	<div class="pull-left"><h4>신청자</h4></div>
+    	<div class="pull-left">
+    		<h4>신청자
+    		<c:choose>
+    			<c:when test="${bunyangInfo.progress_status == 'C'}">
+    			<c:set var="statusExp" value="미승인"/>
+    			<c:set var="statusClass" value="label-info"/>
+    			</c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'D'}">
+    			<c:set var="statusExp" value="승인"/>
+    			<c:set var="statusClass" value="label-info"/>
+    			</c:when>
+    		</c:choose>
+    		<span class="label ${statusClass}" style="margin-left: 10px; font-weight: normal;">${bunyangInfo.bunyang_times}차-${statusExp}</span>
+    		</h4>
+    	</div>
     </div>
     <div class="clearfix"></div>
     <div class="table-responsive">
@@ -105,30 +121,38 @@
     <div class="table-responsive">
         <table id="tblUseUser" class="table table-style table-bordered">
         	<colgroup>
+        		<col width="5%">
+        		<col width="5%">
         		<col width="8%">
         		<col width="8%">
-        		<col width="10%">
-        		<col width="12%">
-        		<col width="30%">
-        		<col width="8%">
-        		<col width="8%">
+        		<col width="15%">
+        		<col width="5%">
+        		<col width="5%">
+        		<col width="5%">
+        		<col width="9%">
+        		<col width="9%">
+        		<col width="5%">
         		<col width="8%">
         	</colgroup>
             <thead>
                 <tr>
-                    <th scope="col">장묘형태</th>
+                    <th scope="col">장묘<br>형태</th>
                     <th scope="col">성명</th>
                     <th scope="col">생년월일</th>
                     <th scope="col">휴대전화</th>
                     <th scope="col">주소</th>
                     <th scope="col">관계</th>
-                    <th scope="col">교인여부</th>
-                    <th scope="col">이장대상</th>
+                    <th scope="col">교인<br>여부</th>
+                    <th scope="col">이장<br>대상</th>
+                    <th scope="col">승인<br>번호</th>
+                    <th scope="col">승인<br>일자</th>
+                    <th scope="col">승인<br>처리</th>
+                    <th scope="col">승인서<br>출력일자</th>
                 </tr>
             </thead>
             <tbody>
             	<c:forEach items="${useUser}" var="use" varStatus="status">
-            	<tr>
+            	<tr userId="${use.user_id}">
             		<c:choose>
             			<c:when test="${!empty use.couple_seq}">
             				<c:set var="nextVal" value="${useUser[status.count]}"/>
@@ -147,13 +171,49 @@
             		<td>${use.relation_type_name}</td>
             		<td>${use.is_church_person}</td>
             		<td>${use.is_move}</td>
+            		<td>
+            			<c:choose>
+            				<c:when test="${not empty use.approval_no}">
+            					${use.approval_no}
+            				</c:when>
+            				<c:when test="${empty use.approval_no}">
+            					<input name="user_approval_no" type="text" class="form-control">
+            				</c:when>
+            			</c:choose>
+            		</td>
+            		<td>
+            			<c:choose>
+            				<c:when test="${not empty use.approval_no}">
+            					${use.approval_date}
+            				</c:when>
+            				<c:when test="${empty use.approval_no}">
+            					<input name="user_approval_date" type="text" class="form-control">
+            				</c:when>
+            			</c:choose>
+            		</td>
+            		<td>
+            			<c:choose>
+            				<c:when test="${empty use.approval_assign_date}">
+            					<c:choose>
+		            				<c:when test="${not empty use.approval_no}">
+		            					<button type="button" class="btn btn-primary btn-sm" onclick="_exportUserApproval(this)">출력</button>
+		            				</c:when>
+		            				<c:when test="${empty use.approval_no}">
+		            					<button type="button" class="btn btn-primary btn-sm" onclick="_saveUserApproval(this)">저장</button>
+		            				</c:when>
+		            			</c:choose>
+            				</c:when>
+            				<c:otherwise>
+            					<span class="label label-info">승인완료</span>
+            				</c:otherwise>
+            			</c:choose>
+            		</td>
+            		<td>${use.approval_assign_date}</td>
             	</tr>
             	</c:forEach>
             </tbody>
         </table>
     </div>
-
-	<c:set var="contract_price" value="${cutil:getDownPayment(bunyangInfo.total_price)}"/><!-- 계약금 -->
 
 	<!-- 동산 신청 정보 -->
 	<div style="margin-top: 35px;">
@@ -164,12 +224,24 @@
     <div class="table-responsive" style="border-top: 1px solid #999;">
         <table class="table table-style" style="border-top: 0;">
         	<colgroup>
-        		<col width="18%">
-        		<col width="32%">
+        		<col width="10%">
+        		<col width="40%">
         		<col width="18%">
         		<col width="32%">
         	</colgroup>
             <tbody>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">계약번호</th>
+            		<td align="left" colspan="3">${bunyangInfo.bunyang_no}</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">분양차수</th>
+            		<td align="left" colspan="3">${bunyangInfo.bunyang_times}차</td>
+            	</tr>
+            	<tr>
+            		<th style="background-color: #f5f5f5;">분양단가</th>
+            		<td align="left" colspan="3">₩${cutil:getThousandSeperatorFormatString(bunyangInfo.price_per_count)}원</td>
+            	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">신청형태</th>
             		<td align="left" colspan="3">${bunyangInfo.product_type_name}</td>
@@ -192,70 +264,20 @@
             	<tr>
             		<th style="background-color: #f5f5f5;">계약금</th>
             		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(contract_price)})
+            		<c:choose>
+            			<c:when test="${bunyangInfo.down_payment >= contract_price}"><span class="label label-info" style="margin-left: 3px;">완납</span></c:when>
+            			<c:otherwise><span class="label label-warning" style="margin-left: 3px;">미납</span></c:otherwise>
+            		</c:choose>
             		</td>
             	</tr>
             	<tr>
             		<th style="background-color: #f5f5f5;">잔금</th>
             		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price - contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price - contract_price)})
+            		<c:choose>
+            			<c:when test="${(bunyangInfo.balance_payment+bunyangInfo.down_payment) >= bunyangInfo.total_price}"><span class="label label-info" style="margin-left: 3px;">완납</span></c:when>
+            			<c:otherwise><span class="label label-warning" style="margin-left: 3px;">미납</span></c:otherwise>
+            		</c:choose>
 					</td>
-            	</tr>
-            </tbody>
-        </table>
-    </div>
-    
-    <!-- 계약금 납부 내역 -->
-	<div style="margin-top: 35px;">
-		<div class="pull-left"><h4>계약금 납부 내역</h4></div>
-	</div>
-    <div class="clearfix"></div>
-    
-    <div class="table-responsive" style="border-top: 1px solid #999;">
-        <table class="table table-style" style="border-top: 0;">
-        	<colgroup>
-        		<col width="18%">
-        		<col width="32%">
-        		<col width="18%">
-        		<col width="32%">
-        	</colgroup>
-            <tbody>
-            	<tr>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부상태</p></th>
-            		<td align="left">
-            			<p class="form-control-static" style="display: inline-block;">
-            				<c:choose>
-								<c:when test="${downPaymentInfo.payment_amount > 0}">
-									<span class="label label-info">완납</span>
-								</c:when>
-								<c:otherwise>
-									<span class="label label-warning">미납</span>
-								</c:otherwise>
-							</c:choose>
-            			</p>
-            		</td>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부금액</p></th>
-            		<td align="left"><p class="form-control-static" style="display: inline-block;">일금 : ${cutil:convertPriceToHangul(downPaymentInfo.payment_amount)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(downPaymentInfo.payment_amount)})</p></td>
-            	</tr>
-            	<tr>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부일자</p></th>
-            		<td align="left">
-           				<p class="form-control-static" style="display: inline-block;">${downPaymentInfo.payment_date}</p>
-            		</td>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">납부방법</p></th>
-            		<td align="left">
-           				<p class="form-control-static" style="display: inline-block;">
-           					<c:choose>
-           						<c:when test="${downPaymentInfo.payment_method == 'TRANSFER'}">무통장입금/계좌이체</c:when>
-           						<c:when test="${downPaymentInfo.payment_method == 'CASH'}">현금납부</c:when>
-           						<c:otherwise>${downPaymentInfo.payment_method}</c:otherwise>
-           					</c:choose>
-           				</p>
-            		</td>
-            	</tr>
-            	<tr>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">확인일자</p></th>
-            		<td align="left"><p class="form-control-static" style="display: inline-block;">${downPaymentInfo.create_date }</p></td>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static" style="display: inline-block;">확인자</p></th>
-            		<td align="left"><p class="form-control-static" style="display: inline-block;">${downPaymentInfo.create_user_name}</p></td>
             	</tr>
             </tbody>
         </table>
@@ -263,37 +285,44 @@
     
     <!-- 잔금 납부 내역 -->
 	<div style="margin-top: 35px;">
-		<div class="pull-left"><h4>잔금 납부 내역 (총 ₩${cutil:getThousandSeperatorFormatString(totalPaymentInfo.total_amount)})</h4></div>
+		<div class="pull-left"><h4>납부 내역 (총 ₩${cutil:getThousandSeperatorFormatString(totalPaymentInfo.total_amount)})</h4></div>
 	</div>
     <div class="clearfix"></div>
     <div class="table-responsive">
-        <table class="table table-style">
+        <table class="table table-style table-bordered">
+        	<colgroup>
+        		<col width="10%">
+        		<col width="18%">
+        		<col width="18%">
+        		<col width="18%">
+        		<col width="18%">
+        		<col width="18%">
+        	</colgroup>
             <thead>
                 <tr>
                     <th scope="col">회차</th>
                     <th scope="col">납입일</th>
                     <th scope="col">납입금</th>
                     <th scope="col">납입유형</th>
+                    <th scope="col">납부방법</th>
+                    <th scope="col">입금자</th>
                 </tr>
             </thead>
             <tbody id="tbodyPayment">
-            	<tr>
-            		<td><p class="form-control-static" style="display: inline-block;">1</p></td>
-            		<td><p class="form-control-static" style="display: inline-block;">${downPaymentInfo.payment_date}</p></td>
-            		<td><p class="form-control-static" style="display: inline-block;">₩${cutil:getThousandSeperatorFormatString(downPaymentInfo.payment_amount)}</p></td>
-            		<td><p class="form-control-static" style="display: inline-block;">계약금</p></td>
-            	</tr>
-            	<c:forEach items="${balancePaymentList}" var="balancePayment" varStatus="status">
-            	<tr>
-            		<td><p class="form-control-static" style="display: inline-block;">${status.count+1}</p></td>
-            		<td align="center">
-            			<p class="form-control-static" style="display: inline-block;">${balancePayment.payment_date}</p>
-            		</td>
-            		<td align="center">
-            			<p class="form-control-static" style="display: inline-block;">₩${cutil:getThousandSeperatorFormatString(balancePayment.payment_amount)}</p>
-            		</td>
-            		<td><p class="form-control-static" style="display: inline-block;">중도금</p></td>
-            	</tr>
+            	<c:forEach items="${paymentList}" var="payment" varStatus="status">
+            		<tr>
+            			<td>${status.count}</td>
+	            		<td>${payment.payment_date}</td>
+	            		<td align="right">${cutil:getThousandSeperatorFormatString(payment.payment_amount)}</td>
+	            		<td>${payment.payment_type_name}</td>
+	            		<td>
+	            			<c:choose>
+	            				<c:when test="${payment.payment_method == 'TRANSFER'}">무통장/계좌이체</c:when>
+	            				<c:when test="${payment.payment_method == 'CASH'}">현금</c:when>
+	            			</c:choose>
+	            		</td>
+	            		<td>${payment.payment_user}</td>
+            		</tr>
             	</c:forEach>
             </tbody>
         </table>
@@ -312,9 +341,8 @@
 	</ul>
 
     <div class="mt-30 text-center">
-        <button id="btnEdit" type="button" class="btn btn-primary btn-lg">수정</button>
         <c:if test="${bunyangInfo.progress_status != 'D'}">
-        <button id="btnContract" type="button" class="btn btn-info btn-lg" onclick="approval()">사용승인</button>
+        <button id="btnContract" type="button" class="btn btn-info btn-lg" onclick="approval()">저장</button>
         </c:if>
         <button id="btnList" type="button" class="btn btn-default btn-lg" onclick="goToList()">목록</button>
     </div>
@@ -322,12 +350,88 @@
 </div>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/moment.min.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/daterangepicker.js"></script>
 <script type="text/javascript">
 // init 함수
 (function(){
-	
+	var option = {};
+	option['singleDatePicker'] = true;
+	common.datePicker($('input[name="user_approval_date"]'),option);
 	
 })();
+
+/**
+ * 사용자승인번호 및 승인일자 저장
+ */
+function _saveUserApproval(btn) {
+	var tr = $(btn).parent('td').parent('tr');
+	var userId = tr.attr('userId');
+	var approvalNo = tr.find('input[name="user_approval_no"]').val();
+	var dateData = tr.find('input[name="user_approval_date"]').data('daterangepicker');
+	var approvalDate;
+	if(dateData) {
+		if(dateData.startDate) {
+			approvalDate = dateData.startDate.format('YYYYMMDD');
+		}
+	}
+	if(!approvalNo) {
+		tr.find('input[name="user_approval_no"]').focus();
+		common.showAlert('승인번호를 입력하세요.');
+		return;
+	}
+	if(!approvalDate) {
+		tr.find('input[name="user_approval_date"]').focus();
+		common.showAlert('승인일자를 입력하세요.');
+		return;
+	}
+	var data = {};
+	data["bunyangSeq"] = '${bunyangSeq}';
+	data["userId"] = userId;
+	data["approvalNo"] = approvalNo;
+	data["approvalDate"] = approvalDate;
+	// 저장 호출
+	common.ajax({
+		url:"${contextPath}/admin/saveUserApproval", 
+		data:data,
+		success: function(result) {
+			if(result && result.result) {
+				common.showAlert("저장되었습니다.");
+				var frm = document.getElementById("frm");
+				frm.action = "${contextPath}/admin/approvaldetail";
+				frm.submit();
+			}
+		}
+	});
+}
+
+/**
+ * 사용자승인서 출력
+ */
+function _exportUserApproval(btn) {
+	var tr = $(btn).parent('td').parent('tr');
+	var userId = tr.attr('userId');
+	var data = {};
+	data["bunyangSeq"] = '${bunyangSeq}';
+	data["userId"] = userId;
+	// 저장 호출
+	common.ajax({
+		url:"${contextPath}/admin/exportUserApproval", 
+		data:data,
+		success: function(result) {
+			if(result && result.result) {
+				// 승인서 파일번호
+				var fileSeq = result.fileSeq;
+				donwloadFile(fileSeq);
+				setTimeout(function(){
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/admin/approvaldetail";
+					frm.submit();
+				}, 100);
+			}
+		}
+	});
+}
+
 
 /**
  * 목록 클릭
@@ -342,21 +446,25 @@ function goToList() {
  * 사용 승인
  */
 function approval() {
-	var data = {};
-	data["bunyangSeq"] = '${bunyangSeq}';
-	// 저장 호출
-	common.ajax({
-		url:"${contextPath}/admin/useapproval", 
-		data:data,
-		success: function(result) {
-			if(result && result.result) {
-				common.showAlert("사용승인되었습니다.");
-				var frm = document.getElementById("frm");
-				frm.action = "${contextPath}/admin/approvaldetail";
-				frm.submit();
+	if(${bunyangInfo.use_user_cnt} > 0 && ${bunyangInfo.use_user_cnt} == ${bunyangInfo.approval_use_user_cnt}) {
+		var data = {};
+		data["bunyangSeq"] = '${bunyangSeq}';
+		// 저장 호출
+		common.ajax({
+			url:"${contextPath}/admin/approvalBunyangInfo", 
+			data:data,
+			success: function(result) {
+				if(result && result.result) {
+					common.showAlert("사용승인되었습니다.");
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/admin/approvaldetail";
+					frm.submit();
+				}
 			}
-		}
-	});
+		});	
+	} else {
+		common.showAlert('사용(봉안) 대상자의 승인서가 모두 출력되어야 저장이 가능합니다.');
+	}
 }
 
 /**

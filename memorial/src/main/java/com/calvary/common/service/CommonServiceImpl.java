@@ -46,7 +46,7 @@ public class CommonServiceImpl implements ICommonService {
 	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional
-	public long getSeqNexVal(String seqType) {
+	public long getSeqNexVal(String seqType) throws Exception{
 		long seq = 0;
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("seqType", seqType);

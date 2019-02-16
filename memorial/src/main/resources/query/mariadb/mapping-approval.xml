@@ -14,11 +14,17 @@
         		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
           		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
         	END use_user_exp
+        	,CASE 
+        		WHEN progress_status = 'C' THEN '미승인'
+        		WHEN progress_status = 'D' THEN '승인'
+        	END progress_status_exp
     	FROM
 		    (SELECT
 			  a.bunyang_seq
 			  ,a.bunyang_no
 			  ,a.product_type
+			  ,a.bunyang_times
+			  ,CASE WHEN a.progress_status = 'C' THEN 1 ELSE 2 END as display_order
 			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
 			  ,a.couple_type_count
 			  ,a.single_type_count
@@ -49,7 +55,7 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,user_name
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -59,7 +65,7 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,user_name
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -81,7 +87,7 @@
 					(SELECT 
 						 bunyang_seq
 					   	,user_id
-					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+					   	,user_name
 					   	,relation_type 
 					FROM TB_BUNYANG_REF_USER a
 					WHERE a.ref_type = 'USE_USER'
@@ -96,11 +102,131 @@
 		<if test="apply_user_name != null">
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
 		</if>
-		ORDER BY t.bunyang_seq
+		<if test="bunyangTimes != null and bunyangTimes > 0">
+		AND bunyang_times = #{bunyangTimes}
+		</if>
+		<if test="progressStatus != null and progressStatus != ''">
+		AND progress_status = #{progressStatus}
+		</if>
+		ORDER BY t.display_order, t.bunyang_no
 		<if test="start != null">
 		LIMIT #{start}, #{count}
 		</if>
     </select>
     
+    <!-- 사용승인리스트(엑셀) 조회 -->
+    <select id="getApprovalExcelList" parameterType="map" resultType="map">
+    	SELECT
+    		t.*
+    		,CASE 
+        		WHEN progress_status = 'C' THEN '미승인'
+        		WHEN progress_status = 'D' THEN '승인'
+        	END progress_status_exp
+    	FROM
+		    (SELECT
+			  a.bunyang_seq
+			  ,a.bunyang_no
+			  ,a.product_type
+			  ,a.bunyang_times
+			  ,CASE WHEN a.progress_status = 'C' THEN 1 ELSE 2 END as display_order
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
+			  ,a.couple_type_count
+			  ,a.single_type_count
+			  ,a.service_charge_type
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
+			  ,a.progress_status
+			  ,b.user_id apply_user_id
+			  ,b.user_name apply_user_name
+			  ,b.relation_type apply_user_relation
+			  ,c.user_id agent_user_id
+			  ,c.user_name agent_user_name
+			  ,c.relation_type agent_user_relation
+			  ,(SELECT MAX(code_name) FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = c.relation_type) agent_user_relation_name
+			  ,d.user_id use_user_id
+			  ,d.user_name use_user_name
+			  ,d.relation_type use_user_relation
+			  ,(SELECT MAX(code_name) FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = d.relation_type) use_user_relation_name
+			  ,d.mobile use_user_mobile
+			  ,d.birth_date as use_user_birth_date
+		      ,d.approval_no as use_user_approval_no
+			  ,d.post_number as use_user_post_number
+			  ,d.couple_seq
+			  ,d.user_seq
+			  ,CONCAT(COALESCE(d.address1,''), COALESCE(d.address2,'')) as use_user_address
+		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
+			  ,CASE WHEN progress_status = 'D' THEN 'Y' ELSE 'N' END AS approval_yn
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
+			FROM TB_BUNYANG_INFO a INNER JOIN       
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,user_name
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'APPLY_USER'
+			) b ON a.bunyang_seq = b.bunyang_seq  
+			LEFT OUTER JOIN
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,user_name
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'AGENT_USER'
+			) c ON a.bunyang_seq = c.bunyang_seq
+			INNER JOIN
+			(SELECT
+				bunyang_seq
+			  	,user_id
+			  	,user_name
+				,relation_type
+				,mobile
+				,concat(birth_date,'(',case when gender = 1 then '남' else '여' end,')') as birth_date
+				,approval_no
+				,post_number
+				,address1
+				,address2
+				,couple_seq
+				,user_seq
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'USE_USER'
+			) d ON a.bunyang_seq = d.bunyang_seq
+			WHERE a.progress_status in ('C', 'D')
+			) t
+		WHERE 1=1
+		<if test="apply_user_name != null">
+		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		<if test="bunyangTimes != null and bunyangTimes > 0">
+		AND bunyang_times = #{bunyangTimes}
+		</if>
+		<if test="progressStatus != null and progressStatus != ''">
+		AND progress_status = #{progressStatus}
+		</if>
+		ORDER BY t.display_order, t.bunyang_no, t.couple_seq, t.user_seq
+    </select>
+    
+    <!-- 사용(봉안)자 승인 -->
+	<update id="approvalUser" parameterType="map">
+		UPDATE TB_BUNYANG_REF_USER a
+		SET approval_no = #{approvalNo},
+		approval_date = #{approvalDate}
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		AND a.ref_type = 'USE_USER'
+		AND a.user_id = #{userId}
+	</update>
+	
+    <!-- 사용(봉안)자 승인서 출력일자 업데이트 -->
+	<update id="updateApprovalAssignDate" parameterType="map">
+		UPDATE TB_BUNYANG_REF_USER a
+		SET approval_assign_date = CURRENT_TIMESTAMP
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		AND a.ref_type = 'USE_USER'
+		AND a.user_id = #{userId}
+	</update>
 
 </mapper>

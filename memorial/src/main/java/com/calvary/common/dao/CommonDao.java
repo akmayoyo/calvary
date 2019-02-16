@@ -27,7 +27,7 @@ public class CommonDao {
 	 * @param queryId mapping query id
 	 * @param parameter query parameter 
 	 */
-	public int update(String queryId, Object parameter) {
+	public int update(String queryId, Object parameter) throws Exception {
 		return sqlSessionTemplate.update(queryId, parameter);
 	}
 	
@@ -36,7 +36,7 @@ public class CommonDao {
 	 * @param queryId mapping query id
 	 * @param parameter query parameter 
 	 */
-	public int delete(String queryId, Object parameter) {
+	public int delete(String queryId, Object parameter) throws Exception {
 		return sqlSessionTemplate.delete(queryId, parameter);
 	}
 	

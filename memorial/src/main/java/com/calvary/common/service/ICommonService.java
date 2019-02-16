@@ -13,7 +13,7 @@ public interface ICommonService {
 	
 	public Map<String, Object> getMenuInfo(String menuSeq);
 	
-	public long getSeqNexVal(String seqType);
+	public long getSeqNexVal(String seqType) throws Exception;
 	
 	/**
 	 * 페이징에서 사용할 전제 행 개수를 반환

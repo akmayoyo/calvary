@@ -33,6 +33,9 @@
 		AND a.birth_date = #{birthDate} 
 		AND a.gender = #{gender}
 		AND a.mobile = #{mobile}
+		<if test="userId != null and userId != ''">
+	  	AND a.user_id != #{userId}
+	  	</if>
 		LIMIT 0,1
 	</select>
 	

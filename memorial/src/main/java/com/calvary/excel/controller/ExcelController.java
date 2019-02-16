@@ -553,8 +553,8 @@ public class ExcelController {
 			int iRslt = 0;
 			if(!StringUtils.isEmpty(bunyangSeq)) {
 				bunyangInfoVo.setBunyangSeq(bunyangSeq);
-				String applyFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, "");
-				String useUserFileSeq = excelService.createBunyangExcelForm(ExcelForms.USE_USER_FORM, bunyangSeq, "");
+				String applyFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, "", "");
+				String useUserFileSeq = excelService.createBunyangExcelForm(ExcelForms.USE_USER_FORM, bunyangSeq, "", "");
 				if(!StringUtils.isEmpty(applyFileSeq) && !StringUtils.isEmpty(useUserFileSeq)) {
 					param = new HashMap<String, Object>();
 					param.put("bunyangSeq", bunyangSeq);
@@ -571,7 +571,7 @@ public class ExcelController {
 				iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), approvalDate);
 				String approvalFileSeq = null;
 				if(iRslt > 0) {
-					approvalFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangInfoVo.getBunyangSeq(), "");
+					approvalFileSeq = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangInfoVo.getBunyangSeq(), "", "");
 					if(!StringUtils.isEmpty(approvalFileSeq)) {
 						param = new HashMap<String, Object>();
 						param.put("bunyangSeq", bunyangInfoVo.getBunyangSeq());
@@ -588,7 +588,7 @@ public class ExcelController {
 				}
 				iRslt = adminService.updateDownPayment(bunyangSeq, downPaymentAmount, downPaymentMethod, downPaymentDate, downPaymentConfirmDate, contractDate, isContracted);
 				if(iRslt > 0) {
-					String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
+					String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "", "");
 					if(!StringUtils.isEmpty(fileSeq)) {
 						param = new HashMap<String, Object>();
 						param.put("bunyangSeq", bunyangSeq);
@@ -609,7 +609,7 @@ public class ExcelController {
 						isFullPayment
 						);
 				if(iRslt > 0) {
-					String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "");
+					String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "", "");
 					if(!StringUtils.isEmpty(fileSeq)) {
 						param = new HashMap<String, Object>();
 						param.put("bunyangSeq", bunyangSeq);
@@ -617,7 +617,7 @@ public class ExcelController {
 						iRslt = adminService.updateBunyangFileSeq(param);
 					}
 					if(isFullPayment) {
-						fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "");
+						fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "", "");
 						if(!StringUtils.isEmpty(fileSeq)) {
 							param = new HashMap<String, Object>();
 							param.put("bunyangSeq", bunyangSeq);
@@ -849,7 +849,7 @@ public class ExcelController {
 	@RequestMapping(value="/createRequestForm")
 	@ResponseBody
 	public String createFileFormTestHandler(String bunyangSeq, String fileSeq) {
-		String rtn = excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, fileSeq);
+		String rtn = excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, fileSeq, "");
 		return rtn;
 	}
 		

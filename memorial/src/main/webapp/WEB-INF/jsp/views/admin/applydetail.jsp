@@ -172,8 +172,8 @@
     <div class="table-responsive" style="border-top: 1px solid #999;">
         <table class="table table-style" style="border-top: 0;">
         	<colgroup>
-        		<col width="18%">
-        		<col width="32%">
+        		<col width="10%">
+        		<col width="40%">
         		<col width="18%">
         		<col width="32%">
         	</colgroup>
@@ -289,14 +289,25 @@ function approval() {
 					var fileSeq = result.fileSeq;
 					if(confirm('승인되었습니다.\n승인서를 다운로드하시겠습니까?')) {
 						donwloadFile(fileSeq);
+						setTimeout(function(){
+							refresh();
+						}, 100);
+					} else {
+						refresh();
 					}
-					var frm = document.getElementById("frm");
-					frm.action = "${contextPath}/admin/applydetail";
-					frm.submit();
 				}
 			}
 		});
 	}
+}
+
+/**
+ * 
+ */
+function refresh() {
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/admin/applydetail";
+	frm.submit();
 }
 
 /**

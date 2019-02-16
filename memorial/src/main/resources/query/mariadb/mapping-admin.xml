@@ -57,7 +57,7 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,user_name
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -67,7 +67,7 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,user_name
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -90,7 +90,7 @@
 					(SELECT 
 						 bunyang_seq
 					   	,user_id
-					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+					   	,user_name
 					   	,relation_type
 					   	,is_move 
 					FROM TB_BUNYANG_REF_USER a
@@ -173,10 +173,10 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
-				,CASE WHEN user_id IS NULL THEN birth_date ELSE (SELECT birth_date FROM TB_COM_USER b WHERE a.user_id = b.user_id) END birth_date
-				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT church_officer FROM TB_COM_USER b WHERE a.user_id = b.user_id) END church_officer
-				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT diocese FROM TB_COM_USER b WHERE a.user_id = b.user_id) END diocese
+				,user_name
+				,birth_date
+				,church_officer
+				,diocese
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -186,7 +186,7 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,user_name
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -208,7 +208,7 @@
 					(SELECT 
 						 bunyang_seq
 					   	,user_id
-					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+					   	,user_name
 					   	,relation_type 
 					FROM TB_BUNYANG_REF_USER a
 					WHERE a.ref_type = 'USE_USER'
@@ -268,6 +268,14 @@
 	       	,cancel_bank
 	       	,cancel_account
 	       	,cancel_account_holder
+	       	,file_seq_apply
+			,file_seq_use_user
+			,file_seq_approval
+			,file_seq_contract
+			,file_seq_full_payment
+			,file_seq_use_approval
+			,file_seq_cancel
+			,file_seq_reject
 	       	,DATE_FORMAT(a.cancel_deposit_plan_date, '%Y-%m-%d') AS cancel_deposit_plan_date
 	       	,DATE_FORMAT(a.cancel_deposit_confirm_date, '%Y-%m-%d') AS cancel_deposit_confirm_date
 	       	,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'A') apply_approval_date
@@ -275,14 +283,16 @@
 			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
 			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
 			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E') cancel_approval_date
+			,(SELECT COUNT(1) FROM TB_BUNYANG_REF_USER bru WHERE bru.bunyang_seq = a.bunyang_seq AND bru.ref_type = 'USE_USER') use_user_cnt
+			,(SELECT COUNT(1) FROM TB_BUNYANG_REF_USER bru WHERE bru.bunyang_seq = a.bunyang_seq AND bru.ref_type = 'USE_USER' and approval_file_seq is not null) approval_use_user_cnt
 	  	FROM TB_BUNYANG_INFO a INNER JOIN       
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
-				,CASE WHEN user_id IS NULL THEN birth_date ELSE (SELECT birth_date FROM TB_COM_USER b WHERE a.user_id = b.user_id) END birth_date
-				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT church_officer FROM TB_COM_USER b WHERE a.user_id = b.user_id) END church_officer
-				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT diocese FROM TB_COM_USER b WHERE a.user_id = b.user_id) END diocese
+				,user_name
+				,birth_date
+				,church_officer
+				,diocese
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -322,11 +332,53 @@
 			a.is_church_person,
 			a.user_seq,
 			a.couple_seq,
-			a.is_move
+			a.is_move,
+			a.approval_no,
+			DATE_FORMAT(a.approval_date, '%Y-%m-%d') as approval_date,
+			DATE_FORMAT(a.approval_assign_date, '%Y-%m-%d %H:%i:%s') as approval_assign_date,
+			approval_file_seq,
+			is_maint_charger
 		FROM TB_BUNYANG_REF_USER a
 		WHERE a.bunyang_seq = #{bunyangSeq}
     	AND a.ref_type = #{refType}
+    	<if test="userId != null and userId != ''">
+	  	AND a.user_id = #{userId}
+	  	</if>
     	ORDER BY a.user_seq
+	</select>
+	
+	<!-- 배우자 정보 조회 -->
+	<select id="getCoupleUserInfo" parameterType="map" resultType="map">
+		SELECT 
+			a.bunyang_seq,
+		    a.ref_type,
+		    a.relation_type,
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.relation_type AND cc.parent_code_seq = 'USER_RELATION') relation_type_name,
+		    a.user_id,
+		    a.user_name,
+		    a.birth_date,
+		    a.gender,
+		    a.email,
+		    a.mobile,
+		    a.phone,
+		    a.post_number,
+		    a.address1,
+		    a.address2,
+           	a.church_officer,
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') church_officer_name,
+			a.diocese,
+			a.is_church_person,
+			a.user_seq,
+			a.couple_seq,
+			a.is_move,
+			a.approval_no,
+			DATE_FORMAT(a.approval_date, '%Y-%m-%d') as approval_date,
+			DATE_FORMAT(a.approval_assign_date, '%Y-%m-%d %H:%i:%s') as approval_assign_date
+		FROM TB_BUNYANG_REF_USER a
+		WHERE a.bunyang_seq = #{bunyangSeq}
+    	AND a.ref_type = #{refType}
+    	AND a.user_id != #{userId}
+	  	AND a.couple_seq = #{coupleSeq}
 	</select>
 	
 	<!-- 분양정보의 신청서,승인서등 관련 파일양식 조회 -->
@@ -337,7 +389,8 @@
 		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_contract FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
 		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_full_payment FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
 		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_use_approval FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
-		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_cancel FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq})
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_cancel FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
+		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq IN (SELECT approval_file_seq FROM TB_BUNYANG_REF_USER a WHERE a.bunyang_seq = #{bunyangSeq} and a.ref_type = 'USE_USER' and approval_file_seq is not null)
 	</select>
 	
 	<!-- 분양정보 생성 -->
@@ -349,7 +402,9 @@
 	<!-- 분양 관련 인명정보 생성 -->
 	<insert id="createBunyangRefUserInfo" parameterType="map">
 		INSERT INTO TB_BUNYANG_REF_USER ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person,user_seq,couple_seq, is_move, is_maint_charger, church_officer, diocese )
-		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}, #{userId}, #{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson}, #{userSeq}, #{coupleSeq}, #{isMove}, #{isMaintCharger}, #{churchOfficer}, #{diocese})
+		VALUES ( #{bunyangSeq}, #{refType}, #{relationType}
+		,(SELECT CONCAT('USER', LPAD(COALESCE(CAST(REPLACE(MAX(USER_ID),'USER','') AS INT)+1, 1), 7, '0')) FROM TB_BUNYANG_REF_USER t)
+		,#{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson}, #{userSeq}, #{coupleSeq}, #{isMove}, #{isMaintCharger}, #{churchOfficer}, #{diocese})
 	</insert>
 	
 	<update id="updateBunyangFileSeq">
@@ -364,6 +419,15 @@
 				<if test="file_seq_cancel != null">file_seq_cancel=#{file_seq_cancel}</if>
 			</set> 
 		WHERE a.bunyang_seq = #{bunyangSeq}
+	</update>
+	
+	<!-- 사용(봉안)자 사용승인서 파일seq 업데이트 -->
+	<update id="updateUseUserFileSeq">
+		UPDATE TB_BUNYANG_REF_USER a
+			SET approval_file_seq = #{fileSeq}
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		AND a.ref_type = 'USE_USER'
+		AND a.user_id = #{userId}
 	</update>
 	
 	<!-- 분양정보 진행상태 업데이트 -->

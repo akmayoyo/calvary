@@ -9,17 +9,27 @@
 		<!-- 검색 -->
 		<div class="bx-border p-20 mb-20">
 			<div class="row">
-				<div class="col-xs-4 col-md-3 pr-10">
-					<select name="searchKey" class="form-control">
-						<option value="apply_user_name">신청자</option>
+				<div class="col-xs-2 col-md-2 pr-10">
+					<select name="bunyangTimes" class="form-control">
+						<option value="0">분양차수 : 전체</option>
+						<c:forEach items="${bunyangTimesList}" var="bunyangTimesItem">
+						<option value="${bunyangTimesItem.code_seq}" <c:if test="${searchVo.bunyangTimes == bunyangTimesItem.code_seq}">selected</c:if>>분양차수 : ${bunyangTimesItem.code_name}</option>
+						</c:forEach>
 					</select>
 				</div>
-				<div class="col-xs-8 col-md-9 pl-0">
+				<div class="col-xs-2 col-md-2 pr-10 pl-0">
+					<select name="progressStatus" class="form-control">
+						<option value="">전체</option>
+						<option value="<%=CalvaryConstants.PROGRESS_STATUS_C %>" <c:if test="${searchVo.progressStatus == 'C'}">selected</c:if>>미승인</option>
+						<option value="<%=CalvaryConstants.PROGRESS_STATUS_D %>" <c:if test="${searchVo.progressStatus == 'D'}">selected</c:if>>승인</option>
+					</select>
+				</div>
+				<div class="col-xs-8 col-md-8 pl-0">
 					<div class="input-group">
 						<input type="text" name="searchVal" class="form-control" value="${searchVo.searchVal}">
 						<span class="input-group-btn pl-10">
-							<button class="btn btn-primary" type="button" onclick="_search()">조회</button>
-							<button class="btn btn-success" type="button" style="margin-left: 4px;" onclick="_downloadExcel()">Excel</button>
+							<button class="btn btn-primary" type="button" onclick="_search()" style="width: 70px;">조회</button>
+							<button class="btn btn-success" type="button" style="margin-left: 4px; width: 70px;" onclick="_downloadExcel()">Excel</button>
 						</span>
 					</div>
 				</div>
@@ -38,29 +48,27 @@
 						<th scope="col">부부형</th>
 						<th scope="col">1인형</th>
 						<th scope="col">총분양대금</th>
+						<th scope="col">상태</th>
 						<th scope="col">계약일자</th>
 						<th scope="col">완납일자</th>
 						<th scope="col">사용승인일자</th>
-						<th scope="col"></th>
 					</tr>
 				</thead>
 				<tbody>
 					<c:forEach items="${approvalList}" var="approval">
 					<c:set var="contract_price" value="${cutil:getDownPayment(approval.total_price)}"/><!-- 계약금 -->
 					<tr class="clickable-row" bunyangSeq="${approval.bunyang_seq}">
-	                    <td><p class="form-control-static">${approval.bunyang_seq}</p></td>
-	                    <td><p class="form-control-static">${approval.apply_user_name}</p></td>
-	                    <td><p class="form-control-static">${approval.use_user_exp}</p></td>
-	                    <td><p class="form-control-static">${approval.product_type_name}</p></td>
-	                    <td><p class="form-control-static">${approval.couple_type_count}</p></td>
-	                    <td><p class="form-control-static">${approval.single_type_count}</p></td>
-	                    <td><p class="form-control-static">${cutil:getThousandSeperatorFormatString(approval.total_price)}</p></td>
-	                    <td><p class="form-control-static">${approval.contract_date}</p></td>
-	                    <td><p class="form-control-static">${approval.full_payment_date}</p></td>
-	                    <td><p class="form-control-static">${approval.use_approval_date}</p></td>
-	                    <td>
-	                    	<button type="button" class="btn btn-info btn-sm" <c:if test="${approval.approval_yn == 'Y'}">style="visibility: hidden;"</c:if> onclick="_approval(this, event)">사용승인</button></td>
-	                    </td>
+	                    <td>${approval.bunyang_no}</td>
+	                    <td>${approval.apply_user_name}</td>
+	                    <td>${approval.use_user_exp}</td>
+	                    <td>${approval.product_type_name}</td>
+	                    <td>${approval.couple_type_count}</td>
+	                    <td>${approval.single_type_count}</td>
+	                    <td>${cutil:getThousandSeperatorFormatString(approval.total_price)}</td>
+	                    <td>${approval.progress_status_exp}</td>
+	                    <td>${approval.contract_date}</td>
+	                    <td>${approval.full_payment_date}</td>
+	                    <td>${approval.use_approval_date}</td>
 					</tr>
 					</c:forEach>
 				</tbody>
@@ -107,11 +115,19 @@ function _search(pageIndex) {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호", "신청자", "사용자", "신청형태", "부부형", "1인형", "총 분양대금", "계약일자","완납일자","사용승인일자"];
-	var excelFields = ["bunyang_seq","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","total_price","contract_date","full_payment_date","use_approval_date"];
-	var searchKeys = [""];
-	var searchValues = [""];
-	var queryId = "approval.getApprovalList";
+	var excelHeaders = [
+		"번호", "신청자", "신청형태", "부부형", "1인형"
+		,"총 분양대금","상태", "계약일자","완납일자","사용승인일자"
+		,"사용(봉안)자","관계","생년월일","승인번호","연락처","우편번호","주소"
+		];
+	var excelFields = [
+		"bunyang_no","apply_user_name","product_type_name","couple_type_count","single_type_count"
+		,"total_price","progress_status_exp","contract_date","full_payment_date","use_approval_date"
+		,"use_user_name","use_user_relation_name","use_user_birth_date","use_user_approval_no","use_user_mobile","use_user_post_number","use_user_address"
+		];
+	var searchKeys = ["apply_user_name", "progressStatus", "bunyangTimes"];
+	var searchValues = ["${searchVo.searchVal}", "${searchVo.progressStatus}", "${searchVo.bunyangTimes}"];
+	var queryId = "approval.getApprovalExcelList";
 	var title = "갈보리추모동산 사용승인현황";
 	var fileName = title + ".xlsx";
 	var sheetName = title;

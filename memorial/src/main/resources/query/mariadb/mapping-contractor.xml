@@ -4,12 +4,156 @@
 
 <mapper namespace="contractor">
 
-	<!-- 계약자 업데이트 -->
-	<update id="updateApplyUser" parameterType="map">
-		UPDATE TB_BUNYANG_REF_USER a
-			SET user_id = #{userId}
-		WHERE a.bunyang_seq = #{bunyangSeq}
-		and a.ref_type = 'APPLY_USER'
+	<!-- 계약자관리 리스트 조회 -->
+    <select id="getContractorList" parameterType="map" resultType="map">
+    	SELECT
+    		SQL_CALC_FOUND_ROWS
+    		t.*
+    		,CASE 
+        		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
+          		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
+        	END use_user_exp
+        	,down_payment + balance_payment AS total_payment
+        	,CASE WHEN down_payment >= (total_price/10) THEN 'Y' ELSE 'N' END AS contract_yn
+        	,CASE WHEN down_payment + balance_payment >= total_price THEN 'Y' ELSE 'N' END AS full_payment_yn
+        	,CASE 
+        		WHEN progress_status = 'A' THEN '계약미승인'
+        		WHEN progress_status in ('B', 'C') THEN '계약완료'
+        		WHEN progress_status = 'E' THEN '계약해약'
+        	END progress_status_exp
+        	,CASE 
+        		WHEN progress_status in ('B', 'C') THEN contract_date
+        		WHEN progress_status = 'E' THEN cancel_date
+        	END action_date
+    	FROM
+		    (SELECT
+			  a.bunyang_seq
+			  ,a.bunyang_no
+			  ,a.bunyang_times
+			  ,a.product_type
+			  ,a.cancel_yn
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
+			  ,a.couple_type_count
+			  ,a.single_type_count
+			  ,a.service_charge_type
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
+			  ,a.progress_status
+			  ,b.user_id apply_user_id
+			  ,b.user_name apply_user_name
+			  ,b.relation_type apply_user_relation
+			  ,c.user_id agent_user_id
+			  ,c.user_name agent_user_name
+			  ,c.relation_type agent_user_relation
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = c.relation_type AND cc.parent_code_seq = 'USER_RELATION') agent_user_relation_name
+			  ,d.user_id use_user_id
+			  ,d.user_name use_user_name
+			  ,d.relation_type use_user_relation
+			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
+			  ,d.cnt use_user_cnt
+			  ,d.approval_user_cnt
+			  ,a.regist_user_id
+			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
+		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
+			  ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
+              ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
+              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'A') approval_date
+              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'B') contract_date
+              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'C') fullpayment_date
+              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'E') cancel_date
+              ,(SELECT DATE_FORMAT(MAX(payment_date), '%Y-%m-%d') FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment_date
+			FROM TB_BUNYANG_INFO a INNER JOIN       
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,user_name
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'APPLY_USER'
+			) b ON a.bunyang_seq = b.bunyang_seq  
+			LEFT OUTER JOIN
+			(SELECT
+				bunyang_seq
+			  	,user_id
+				,user_name
+			  	,ref_type
+				,relation_type
+			FROM TB_BUNYANG_REF_USER a
+			WHERE ref_type = 'AGENT_USER'
+			) c ON a.bunyang_seq = c.bunyang_seq
+			INNER JOIN
+			(SELECT
+				*
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER' and approval_no is not null) approval_user_cnt
+			FROM
+				(SELECT
+					bunyang_seq
+				  	,user_id
+					,user_name
+					,relation_type
+					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+                    ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
+				FROM      
+					(SELECT 
+						 bunyang_seq
+					   	,user_id
+					   	,user_name
+					   	,relation_type 
+					FROM TB_BUNYANG_REF_USER a
+					WHERE a.ref_type = 'USE_USER'
+					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
+				ORDER BY bunyang_seq, CASE WHEN relation_type = 'ONESELF' THEN 1 ELSE 2 end, user_name
+			  ) t
+			  WHERE rn = 1
+			) d ON a.bunyang_seq = d.bunyang_seq
+			WHERE a.progress_status in ('A', 'B', 'C', 'E')
+			) t
+		WHERE (cancel_yn is null or cancel_yn != 'Y') AND down_payment > 0
+		<if test="apply_user_name != null and apply_user_name != ''">
+		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		<if test='progressStatus == "B"'>
+		AND progress_status in ('B', 'C') AND approval_user_cnt = 0
+		</if>
+		<if test='progressStatus == "E"'>
+		AND progress_status = 'E'
+		</if>
+		<if test='progressStatus == "B0"'>
+		<![CDATA[
+		AND progress_status = 'A'
+		]]>
+		</if>
+		<if test="bunyangTimes != null and bunyangTimes > 0">
+		AND bunyang_times = #{bunyangTimes}
+		</if>
+		ORDER BY t.bunyang_seq
+		<if test="start != null">
+		LIMIT #{start}, #{count}
+		</if>
+    </select>
+	
+	<!-- 신청자/대리인/사용자 정보 업데이트 -->
+	<update id="updateContractUser" parameterType="map">
+		UPDATE TB_BUNYANG_REF_USER 
+		SET RELATION_TYPE = #{relationType},USER_NAME = #{userName},BIRTH_DATE = #{birthDate}
+		,GENDER = #{gender},EMAIL = #{email},MOBILE = #{mobile},PHONE = #{phone}
+		,POST_NUMBER = #{postNumber},ADDRESS1 = #{address1},ADDRESS2 = #{address2},IS_CHURCH_PERSON = #{isChurchPerson}
+		,CHURCH_OFFICER = #{churchOfficer},DIOCESE = #{diocese},IS_MOVE = #{isMove},IS_MAINT_CHARGER = #{isMaintCharger}
+		WHERE user_id = #{userId}
 	</update>
+	
+	<!-- 계약 정보 업데이트 -->
+	<update id="updateContractInfo" parameterType="map">
+		UPDATE TB_BUNYANG_INFO 
+		SET SERVICE_CHARGE_TYPE = #{serviceChargeType}
+		WHERE bunyang_seq = #{bunyangSeq}
+	</update>
+	
+	<!-- 대리인 정보 삭제 -->
+	<delete id="deleteAgentUser" parameterType="map">
+		DELETE FROM TB_BUNYANG_REF_USER WHERE bunyang_seq = #{bunyangSeq} AND ref_type = 'AGENT_USER'
+	</delete>
     
 </mapper>

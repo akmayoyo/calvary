@@ -633,8 +633,9 @@ function editUseUser(btn, type) {
  */
 function getUseUser(item) {
 	var useUser = {};
-	var idx = 0, userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', diocese = '', relationType = '', relationTypeName = '', isChurchPerson = '', isMove = '';
+	var idx = 0, userId = '', userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', diocese = '', relationType = '', relationTypeName = '', isChurchPerson = '', isMove = '';
 	if(item && item.length > 0) {
+		userId = item[idx++];
 		userName = item[idx++];
 		birthDate = item[idx++];
 		gender = item[idx++];

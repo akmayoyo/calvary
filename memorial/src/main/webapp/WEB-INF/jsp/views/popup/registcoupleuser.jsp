@@ -27,7 +27,7 @@
             <tbody>
             	<tr>
             		<th class="required">사용(봉안)자명</th>
-            		<td><input name="userName" class="form-control" type="text" style="width: 173px;" autofocus="autofocus"></td>
+            		<td><input name="userId" type="hidden"><input name="userName" class="form-control" type="text" style="width: 173px;" autofocus="autofocus"></td>
             	</tr>
             	<tr>
            			<th class="required">관계</th>
@@ -194,7 +194,7 @@
             <tbody>
             	<tr>
             		<th class="required">사용(봉안)자명</th>
-            		<td><input name="userName" class="form-control" type="text" style="width: 173px;" autofocus="autofocus"></td>
+            		<td><input name="userId" type="hidden"><input name="userName" class="form-control" type="text" style="width: 173px;" autofocus="autofocus"></td>
             	</tr>
             	<tr>
            			<th class="required">관계</th>
@@ -300,7 +300,7 @@
 	<!-- 메인화면에서 입력한 사용자 정보 참조용 -->
 	<ul id="userList" style="display: none;">
 		<c:forEach var="user" items="${users}">
-			<li refType="${user.refType}" userName="${user.userName}" birthDate="${user.birthDate }" gender="${user.gender }"
+			<li refType="${user.refType}" userId="${user.userId}" userName="${user.userName}" birthDate="${user.birthDate }" gender="${user.gender }"
 			churchOfficer="${user.churchOfficer}" diocese="${user.diocese}" relationType="${user.relationType}" relationTypeName="${user.relationTypeName}"  
 			mobile="${user.mobile }" phone="${user.phone }" email="${user.email}"
 			postNumber="${user.postNumber }" address1="${user.address1 }" address2="${user.address2}" fulladdress="${user.fulladdress}"
@@ -413,6 +413,7 @@ function setEditInfo() {
 			return true;
 		}
 		var userInfo = {};
+		userInfo.userId = $(this).attr('userId');
 		userInfo.userName = $(this).attr('userName');
 		userInfo.birthDate = $(this).attr('birthDate');
 		userInfo.gender = $(this).attr('gender');
@@ -521,9 +522,10 @@ function relationTypeChangeHandler(e) {
  */
 function _confirm() {
 	
-	var userName, birthDate, gender, mobile, mobile2, mobile3, phone, phone1, phone2, phone3, postNumber, address1, address2, fulladdress, officer, officerName, diocese, email, relationType, relationTypeName = '', isChurchPerson = '', isMove = '';
+	var userId, userName, birthDate, gender, mobile, mobile2, mobile3, phone, phone1, phone2, phone3, postNumber, address1, address2, fulladdress, officer, officerName, diocese, email, relationType, relationTypeName = '', isChurchPerson = '', isMove = '';
 	
 	//============================= 사용자1 =============================//
+	var elUserId = $('#tblUser1').find('input[name="userId"]');	
 	var elUserName = $('#tblUser1').find('input[name="userName"]');	
 	var elBirthYear = $('#tblUser1').find('select[name="birthYear"]');	
 	var elBirthMonth = $('#tblUser1').find('select[name="birthMonth"]');	
@@ -547,6 +549,7 @@ function _confirm() {
 	var selectedItems1 = [];
 	// 본인선택이 아닌경우
 	if(!isOneSelf) {
+		userId = elUserId.val();
 		// 성명
 		userName = elUserName.val();
 		if(!userName) {
@@ -620,7 +623,7 @@ function _confirm() {
 		// 메인화면에 기등록된 사용자중에 중복된 사람이 있는지 체크
 		$('#userList li[refType="<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>"]').each(function(idx) {
 			// 수정모드로 표시된 경우 수정하려고 하는 행은 continue
-			if(${rowIdx} >= 0 && (${rowIdx} == idx || ${rowIdx} == idx+1)) {
+			if(${rowIdx} >= 0 && (${rowIdx} == idx || ${rowIdx} == idx-1)) {
 				return true;
 			}
 			// 중복체크는 성명,생년월일,성별,연락처로
@@ -637,7 +640,7 @@ function _confirm() {
 			common.showAlert('입력하신 사용자와 성명,생년월일,성별,연락처가 동일한 기등록 사용자가 있습니다.');
 			return;
 		}
-		
+	    selectedItems1.push(userId);
 	    selectedItems1.push(userName);
 	    selectedItems1.push(birthDate);
 	    selectedItems1.push(gender);
@@ -659,6 +662,7 @@ function _confirm() {
 		// 본인등록인 경우는 신청자 정보로
 		if(applyUserInfo) {
 			isMove = $('#tblApplyUser').find('select[name="moveyn"]').find('option:selected').val();
+			selectedItems1.push(applyUserInfo.userId);
 			selectedItems1.push(applyUserInfo.userName);
 		    selectedItems1.push(applyUserInfo.birthDate);
 		    selectedItems1.push(applyUserInfo.gender);
@@ -684,6 +688,7 @@ function _confirm() {
     
   	//============================= 사용자2 =============================//
     
+    elUserId = $('#tblUser2').find('input[name="userId"]');	
     elUserName = $('#tblUser2').find('input[name="userName"]');	
 	elBirthYear = $('#tblUser2').find('select[name="birthYear"]');	
 	elBirthMonth = $('#tblUser2').find('select[name="birthMonth"]');	
@@ -698,7 +703,7 @@ function _confirm() {
 	elPhone3 = $('#tblUser2').find('input[name="phone3"]');
 	elChurchperson = $('#tblUser2').find('select[name="churchperson"]');
 	elMove = $('#tblUser2').find('select[name="moveyn"]');
-	
+	userId = elUserId.val();
 	// 성명
 	userName = elUserName.val();
 	if(!userName) {
@@ -733,7 +738,7 @@ function _confirm() {
 		elAddress2.focus();
 		return;
 	}
-	fulladdress = '(' + postNumber + ') ' + address1 + ' ' + address2;
+	fulladdress = '(' + postNumber + ')' + address1 + '' + address2;
 	
 	// 연락처
 	mobile = elPhone1.val();
@@ -766,6 +771,10 @@ function _confirm() {
 	
 	// 메인화면에 기등록된 사용자중에 중복된 사람이 있는지 체크
 	$('#userList li[refType="<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>"]').each(function(idx) {
+		// 수정모드로 표시된 경우 수정하려고 하는 행은 continue
+		if(${rowIdx} >= 0 && (${rowIdx} == idx || ${rowIdx} == idx-1)) {
+			return true;
+		}
 		// 중복체크는 성명,생년월일,성별,연락처로
 		if(userName == $(this).attr('userName') 
 				&& birthDate == $(this).attr('birthDate')
@@ -793,6 +802,7 @@ function _confirm() {
 	}
 	
 	var selectedItems2 = [];
+    selectedItems2.push(userId);
     selectedItems2.push(userName);
     selectedItems2.push(birthDate);
     selectedItems2.push(gender);
@@ -816,7 +826,9 @@ function _confirm() {
     
     if(isOneSelf) {
     	userVo = {};
+    	idx = 0;
         userVo['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>';
+        userVo['userId'] = selectedItems2[idx++];
         userVo['userName'] = selectedItems2[idx++];
         userVo['birthDate'] = selectedItems2[idx++];
         userVo['gender'] = selectedItems2[idx++];
@@ -841,7 +853,9 @@ function _confirm() {
     	});
     } else {
     	userVo = {};
+    	idx = 0;
         userVo['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>';
+        userVo['userId'] = selectedItems1[idx++];
         userVo['userName'] = selectedItems1[idx++];
         userVo['birthDate'] = selectedItems1[idx++];
         userVo['gender'] = selectedItems1[idx++];
@@ -855,7 +869,9 @@ function _confirm() {
     				common.showAlert('입력하신 '+userVo['userName']+'/'+userVo['birthDate']+'/'+userVo['mobile']+' 정보로 이미 다른 분양건에 등록된 사용자가 있습니다.');
     			}else {
     				userVo = {};
+    				idx = 0;
     			    userVo['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>';
+    			    userVo['userId'] = selectedItems2[idx++];
     			    userVo['userName'] = selectedItems2[idx++];
     			    userVo['birthDate'] = selectedItems2[idx++];
     			    userVo['gender'] = selectedItems2[idx++];
@@ -941,6 +957,7 @@ function generateDays(el) {
  */
 function setUserInfo(userInfo, tbl) {
 	if(userInfo) {
+		var userId = userInfo.userId ? userInfo.userId : '';
 		var userName = userInfo.userName;
 		var birthDate = userInfo.birthDate;
     	var gender = userInfo.gender;
@@ -956,6 +973,7 @@ function setUserInfo(userInfo, tbl) {
     	var isChurchPerson = userInfo.isChurchPerson;
     	var isMove = userInfo.isMove;
     	var splited;
+		$(tbl).find('input[name="userId"]').val(userId);
 		$(tbl).find('input[name="userName"]').val(userName);
 		$(tbl).find('select[name="relation"] option[value="' + relationType + '"]').attr('selected', 'selected');
 		$(tbl).find('select[name="relation"]').trigger('change');
@@ -1007,6 +1025,7 @@ function getRefUserInfo(refType) {
 	var userInfoes = [];
 	$('#userList li[refType="' + refType + '"]').each(function(idx) {
 		var userInfo = {};
+		userInfo.userId = $(this).attr('userId') ? $(this).attr('userId') : '';
 		userInfo.userName = $(this).attr('userName');
 		userInfo.birthDate = $(this).attr('birthDate');
 		userInfo.gender = $(this).attr('gender');

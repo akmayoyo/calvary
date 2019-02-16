@@ -21,7 +21,12 @@
 	        	</colgroup>
 	            <tbody>
 	            	<tr>
-	            		<th class="required">신청자성명</th>
+	            		<th class="required">
+	            		<c:choose>
+	            		<c:when test="${popupType == '1'}">신청자성명</c:when>
+	            		<c:when test="${popupType == '2'}">대리인성명</c:when>
+	            		</c:choose>
+	            		</th>
 	            		<td><input id="tiUserName" class="form-control" type="text" style="width: 200px;" autofocus="autofocus"></td>
 	            	</tr>
 	            	<tr>
@@ -157,7 +162,7 @@
 	<!-- 메인화면에서 입력한 사용자 정보 참조용 -->
 	<ul id="userList" style="display: none;">
 		<c:forEach var="user" items="${users}">
-			<li refType="${user.refType}" userName="${user.userName}" birthDate="${user.birthDate }" gender="${user.gender }"
+			<li userId="${user.userId}" refType="${user.refType}" userName="${user.userName}" birthDate="${user.birthDate }" gender="${user.gender }"
 			churchOfficer="${user.churchOfficer}" diocese="${user.diocese}" relationType="${user.relationType}"  
 			mobile="${user.mobile }" phone="${user.phone }" email="${user.email}"
 			postNumber="${user.postNumber }" address1="${user.address1 }" address2="${user.address2}"
@@ -409,6 +414,7 @@ function _confirm() {
     }
     
     var userVo = {};
+    userVo['userId'] = '${selectedUserId}';
     userVo['userName'] = userName;
     userVo['birthDate'] = birthDate;
     userVo['gender'] = gender;
@@ -511,6 +517,7 @@ function getRefUserInfo(refType) {
 	var userInfoes = [];
 	$('#userList li[refType="' + refType + '"]').each(function(idx) {
 		var userInfo = {};
+		userInfo.userId = $(this).attr('userId');
 		userInfo.userName = $(this).attr('userName');
 		userInfo.birthDate = $(this).attr('birthDate');
 		userInfo.gender = $(this).attr('gender');

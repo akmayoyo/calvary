@@ -128,5 +128,20 @@
 			cancel_deposit_plan_date = STR_TO_DATE(#{cancelDepositPlanDate}, '%Y%m%d')
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
+	
+	<!-- 해약 정보 조회 -->
+	<select id="getCancelInfo" parameterType="map" resultType="map">
+		SELECT 
+			bunyang_seq
+		    ,update_user_id
+		    ,(select b.USER_NAME FROM TB_COM_USER b where b.user_id = a.update_user_id) update_user_name
+		    ,DATE_FORMAT(update_date, '%Y-%m-%d') as update_date
+		    ,remarks 
+		FROM TB_BUNYANG_HISTORY a 
+		WHERE PROGRESS_STATUS = 'E' 
+		AND a.BUNYANG_SEQ = #{bunyangSeq}
+		ORDER BY UPDATE_DATE DESC 
+		LIMIT 0,1
+	</select>
     
 </mapper>

@@ -101,8 +101,12 @@
             		</td>
             	</tr>
             	<tr>
+            		<th style="background-color: #f5f5f5;"><p class="form-control-static">해약일자</p></th>
+            		<td align="left">
+            			<input id="tiCancelDate" class="form-control" type="text">
+            		</td>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static">해약사유</p></th>
-            		<td align="left" colspan="5">
+            		<td align="left" colspan="3">
             			<input id="tiCancelReason" class="form-control" type="text">
             		</td>
             	</tr>
@@ -111,7 +115,7 @@
     </div>
 
 	<div class="mt-30 text-center">
-    	<button id="btnConfrim" type="button" class="btn btn-warning btn-lg" onclick="_cancel()">해약</button>
+    	<button id="btnConfrim" type="button" class="btn btn-danger btn-lg" onclick="_cancel()">해약</button>
         <button type="button" class="btn btn-default btn-lg btnClose" onclick="_close()">취소</button>
 	</div>
 
@@ -122,24 +126,41 @@
 <script type="text/javascript" src="${contextPath}/resources/js/daterangepicker.js"></script>
 <script type="text/javascript">
 (function(){
-	
 	common.datePicker($("#tiDepositDate"));
-	
+	common.datePicker($("#tiCancelDate"));
 })();
 
 /**
  * 해약
  */
 function _cancel() {
+	var data = {};
+	data['bunyangSeq'] = '${bunyangInfo.bunyang_seq}';
+	data['depositAmount'] = ${cancelReturn};
+	data['depositPlanDate'] = $("#tiDepositDate").data('daterangepicker').startDate.format('YYYYMMDD');
+	data['depositBank'] = $("#tiDepositBank").val();
+	data['depositAccount'] = $("#tiDepositAccount").val();
+	data['accountHolder'] = $("#tiAccountHolder").val();
+	data['cancelDate'] = $("#tiCancelDate").data('daterangepicker').startDate.format('YYYYMMDD');;
+	data['cancelReason'] = $("#tiCancelReason").val();
+	
+	if(!data['depositBank']) {
+		common.showAlert('입금은행을 입력해주세요.');
+		$("#tiDepositBank").focus();
+		return;
+	}
+	if(!data['depositAccount']) {
+		common.showAlert('입금계좌를 입력해주세요.');
+		$("#tiDepositAccount").focus();
+		return;
+	}
+	if(!data['accountHolder']) {
+		common.showAlert('예금주를 입력해주세요.');
+		$("#tiAccountHolder").focus();
+		return;
+	}
+	
 	if(confirm('해당계약건을 해약하시겠습니까?')) {
-		var data = {};
-		data['bunyangSeq'] = '${bunyangInfo.bunyang_seq}';
-		data['depositAmount'] = ${cancelReturn};
-		data['depositPlanDate'] = $("#tiDepositDate").data('daterangepicker').startDate.format('YYYYMMDD');
-		data['depositBank'] = $("#tiDepositBank").val();
-		data['depositAccount'] = $("#tiDepositAccount").val();
-		data['accountHolder'] = $("#tiAccountHolder").val();
-		data['cancelReason'] = $("#tiCancelReason").val();
 		common.ajax({
     		url:"${contextPath}/admin/cancelapproval", 
     		data:data,

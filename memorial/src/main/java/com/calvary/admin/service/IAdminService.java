@@ -1,11 +1,10 @@
 package com.calvary.admin.service;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.calvary.admin.vo.BunyangInfoVo;
-import com.calvary.common.util.SessionUtil;
+import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.vo.SearchVo;
 
 public interface IAdminService {
@@ -48,6 +47,16 @@ public interface IAdminService {
 	public List<Object> getBunyangRefUserInfo(String bunyangSeq, String refType);
 	
 	/** 
+	 * 분양관련 사용자 정보 조회 
+	 */
+	public Map<String, Object> getBunyangRefUserInfo(String bunyangSeq, String refType, String userId);
+	
+	/** 
+	 * 배우자 정보 조회 
+	 */
+	public Map<String, Object> getCoupleUserInfo(String bunyangSeq, String refType, String userId, int coupleSeq);
+	
+	/** 
 	 * 분양정보의 신청서,승인서등 관련 파일양식 조회
 	 */
 	public List<Object> getBunyangFileList(String bunyangSeq);
@@ -61,7 +70,12 @@ public interface IAdminService {
 	/** 
 	 * 분양 양식파일 고유번호 업데이트
 	 */
-	public int updateBunyangFileSeq(Map<String, Object> param);
+	public int updateBunyangFileSeq(Map<String, Object> param) throws Exception;
+	
+	/** 
+	 * 사용(봉안)자 사용승인서 파일seq 업데이트
+	 */
+	public int updateUseUserFileSeq(String fileSeq, String bunyangSeq, String userId) throws Exception;
 	
 	/** 
 	 * 분양정보 진행상태 업데이트
@@ -127,16 +141,41 @@ public interface IAdminService {
 	/** 
 	 * 사용승인리스트 조회 
 	 */
-	public List<Object> getApprovalList(SearchVo searchVo);
+	public Map<String, Object> getApprovalList(SearchVo searchVo);
+	
+	/** 
+	 *  사용(봉안)자 승인
+	 */
+	public int approvalUser(String bunyangSeq, String userId, String approvalNo, String approvalDate) throws Exception;
+	
+	/** 
+	 *  사용(봉안)자 승인서 출력일자 업데이트
+	 */
+	public int updateApprovalAssignDate(String bunyangSeq, String userId) throws Exception;
 	
 	
 	//===============================================================================
 	// 계약자관리
 	//===============================================================================
 	/** 
-	 * 계약자변경 
+	 * 계약자관리 리스트 조회 
 	 */
-	public int updateApplyUser(String bunyangSeq, String userId);
+	public Map<String, Object> getContractorList(SearchVo searchVo);
+	
+	/** 
+	 * 대리인 정보 삭제
+	 */
+	public int deleteAgentUser(String bunyangSeq) throws Exception;
+	
+	/** 
+	 * 신청자/대리인/사용자 정보 변경 
+	 */
+	public int updateContractUser(BunyangUserVo userVo) throws Exception;
+	
+	/** 
+	 * 계약정보 및 관련 사용자 정보 업데이트
+	 */
+	public int updateContractInfo(BunyangInfoVo bunyangInfoVo) throws Exception;
 	
 	
 	//===============================================================================
@@ -156,6 +195,7 @@ public interface IAdminService {
 			,String depositBank
 			,String depositAccount
 			,String accountHolder
+			,String cancelDate
 			,String cancelReason) throws Exception;
 	
 	
@@ -199,12 +239,12 @@ public interface IAdminService {
 	/** 
 	 * 동산 배정(개별형)
 	 */
-	public int assignEachGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs);
+	public int assignEachGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs) throws Exception;
 	
 	/** 
 	 * 동산 배정(가족형)
 	 */
-	public int assignFamilyGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs);
+	public int assignFamilyGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs) throws Exception;
 	
 	/** 
 	 * 사용가능한 동산 정보 조회

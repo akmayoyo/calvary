@@ -28,6 +28,6 @@ public interface IExcelService {
 	/** 
 	 * 분양 파일 서식 정보 생성 또는 업데이트 
 	 */
-	public String createBunyangExcelForm(ExcelForms excelForm, String bunyangSeq, String fileSeq);
+	public String createBunyangExcelForm(ExcelForms excelForm, String bunyangSeq, String fileSeq, String userId);
 	
 }

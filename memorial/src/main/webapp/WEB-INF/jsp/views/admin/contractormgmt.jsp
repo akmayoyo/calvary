@@ -6,20 +6,32 @@
 	<input type="hidden" id="bunyangSeq" name="bunyangSeq">
 	<!-- 그리드 샘플 -->
 	<div class="col-md-9">
+	
 		<!-- 검색 -->
 		<div class="bx-border p-20 mb-20">
 			<div class="row">
-				<div class="col-xs-4 col-md-3 pr-10">
-					<select name="searchKey" class="form-control">
-						<option value="apply_user_name">신청자</option>
+				<div class="col-xs-2 col-md-2 pr-10">
+					<select name="bunyangTimes" class="form-control">
+						<option value="0">분양차수 : 전체</option>
+						<c:forEach items="${bunyangTimesList}" var="bunyangTimesItem">
+						<option value="${bunyangTimesItem.code_seq}" <c:if test="${searchVo.bunyangTimes == bunyangTimesItem.code_seq}">selected</c:if>>분양차수 : ${bunyangTimesItem.code_name}</option>
+						</c:forEach>
 					</select>
 				</div>
-				<div class="col-xs-8 col-md-9 pl-0">
+				<div class="col-xs-2 col-md-2 pr-10 pl-0">
+					<select name="progressStatus" class="form-control">
+						<option value="All">전체</option>
+						<option value="B0" <c:if test="${searchVo.progressStatus == 'B0'}">selected</c:if>>계약미승인</option>
+						<option value="<%=CalvaryConstants.PROGRESS_STATUS_B %>" <c:if test="${searchVo.progressStatus == 'B'}">selected</c:if>>계약완료</option>
+						<option value="<%=CalvaryConstants.PROGRESS_STATUS_E %>" <c:if test="${searchVo.progressStatus == 'E'}">selected</c:if>>계약해약</option>
+					</select>
+				</div>
+				<div class="col-xs-8 col-md-8 pl-0">
 					<div class="input-group">
 						<input type="text" name="searchVal" class="form-control" value="${searchVo.searchVal}">
 						<span class="input-group-btn pl-10">
-							<button class="btn btn-primary" type="button" onclick="_search()">조회</button>
-							<button class="btn btn-success" type="button" style="margin-left: 4px;" onclick="_downloadExcel()">Excel</button>
+							<button class="btn btn-primary" type="button" onclick="_search()" style="width: 70px;">조회</button>
+							<button class="btn btn-success" type="button" style="margin-left: 4px; width: 70px;" onclick="_downloadExcel()">Excel</button>
 						</span>
 					</div>
 				</div>
@@ -28,42 +40,38 @@
 	
 		<!-- 테이블 -->
 		<div class="table-responsive">
-			<table id="tblList" class="table table-style table-bordered">
+			<table id="tblList" class="table table-style">
 				<thead>
 					<tr>
-						<th scope="col" rowspan="2">번호</th>
-						<th scope="col" colspan="4">신청자(계약자)</th>
-						<th scope="col" rowspan="2">신청형태</th>
-						<th scope="col" colspan="2">장묘형태</th>
-						<th scope="col" rowspan="2">총 분양대금</th>
-						<th scope="col" rowspan="2">신청일</th>
-						<th scope="col" rowspan="2">계약일</th>
-						<th scope="col" rowspan="2">사용승인일</th>
-					</tr>
-					<tr>
-						<th scope="col">성명</th>
-						<th scope="col">생년월일</th>
-						<th scope="col">직분</th>
-						<th scope="col">교구</th>
+						<th scope="col">번호</th>
+						<th scope="col">신청자</th>
+						<th scope="col">사용자</th>
+						<th scope="col">신청형태</th>
 						<th scope="col">부부형</th>
 						<th scope="col">1인형</th>
+						<th scope="col">총분양대금</th>
+						<th scope="col">상태</th>
+						<th scope="col">납부금액</th>
+						<th scope="col">계약금<br>납부여부</th>
+						<th scope="col">완납여부</th>
+						<th scope="col">계약/해약일</th>
 					</tr>
 				</thead>
 				<tbody>
-					<c:forEach items="${bunyangList}" var="bunyang">
-					<tr bunyangSeq="${bunyang.bunyang_seq}" progressStatus="${bunyang.progress_status}">
-	                    <td>${bunyang.bunyang_seq}</td>
-	                    <td>${bunyang.apply_user_name}<button type="button" class="btn btn-primary btn-xs" style="margin-left: 8px;" onclick="_changeContractor(this, event)">변경</button></td>
-	                    <td>${bunyang.apply_user_birth_date}</td>
-	                    <td>${bunyang.apply_user_church_officer_name}</td>
-	                    <td>${bunyang.apply_user_diocese}</td>
-	                    <td>${bunyang.product_type_name}</td>
-	                    <td>${bunyang.couple_type_count}</td>
-	                    <td>${bunyang.single_type_count}</td>
-	                    <td>${cutil:getThousandSeperatorFormatString(bunyang.total_price)}</td>
-	                    <td>${bunyang.regist_date}</td>
-	                    <td>${bunyang.contract_date}</td>
-	                    <td>${bunyang.use_approval_date}</td>
+					<c:forEach items="${contractList}" var="contract">
+					<tr class="clickable-row" bunyangSeq="${contract.bunyang_seq}">
+	                    <td>${contract.bunyang_no}</td>
+	                    <td>${contract.apply_user_name}</td>
+	                    <td>${contract.use_user_exp}</td>
+	                    <td>${contract.product_type_name}</td>
+	                    <td>${contract.couple_type_count}</td>
+	                    <td>${contract.single_type_count}</td>
+	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_price)}</td>
+	                    <td>${contract.progress_status_exp}</td>
+	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_payment)}</td>
+	                    <td><c:if test="${contract.contract_yn == 'Y'}">O</c:if></td>
+	                    <td><c:if test="${contract.full_payment_yn == 'Y'}">O</c:if></td>
+	                    <td>${contract.action_date}</td>
 					</tr>
 					</c:forEach>
 				</tbody>
@@ -88,6 +96,12 @@
 		_search(num);
 	});
 	
+	// 그리드 로우 선택시
+	$('#tblList').on('click', '.clickable-row', function(event) {
+		var bunyangSeq = $(this).attr("bunyangSeq");
+		_contractorDetail(bunyangSeq);
+	});
+	
 })();
 
 /**
@@ -104,62 +118,25 @@ function _search(pageIndex) {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호", "성명", "생년월일", "직분", "교구", "신청형태", "부부형", "1인형", "총 분양대금", "신청일","계약일","사용승인일"];
-	var excelFields = ["bunyang_seq","apply_user_name","apply_user_birth_date","apply_user_church_officer_name","apply_user_diocese","product_type_name","couple_type_count","single_type_count","total_price","regist_date","contract_date","use_approval_date"];
-	var searchKeys = [""];
-	var searchValues = [""];
-	var queryId = "admin.getBunyangList";
-	var fileName = "분양리스트.xlsx";
-	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName);
+	var excelHeaders = ["번호","신청자","사용자","신청형태","부부형","1인형","총분양대금","상태","납부금액","계약여부","완납여부","계약/해약일"];
+	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","total_price","progress_status_exp","total_payment","contract_yn","full_payment_yn","action_date"];
+	var searchKeys = ["apply_user_name", "progressStatus", "bunyangTimes"];
+	var searchValues = ["${searchVo.searchVal}", "${searchVo.progressStatus}", "${searchVo.bunyangTimes}"];
+	var queryId = "contractor.getContractorList";
+	var title = "갈보리추모동산 계약자관리현황";
+	var fileName = title + ".xlsx";
+	var sheetName = title;
+	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);
 }
 
-/**
- * 사용승인
+/** 
+ * 상세 페이지 이동
  */
-function _changeContractor(btn, event) {
-	event.stopPropagation();
-	var bunyangSeq = $(btn).parent("td").parent("tr").attr("bunyangSeq");
-	var progressStatus = $(btn).parent("td").parent("tr").attr("progressStatus");
-	var userId;
-	var userName;
-	var winoption = {width:1240, height:830};
-	var param = {popupTitle: "계약자 변경"};
-	common.openWindow("${contextPath}/popup/selectuser", "popChangeContractor", winoption, param);
-	// 신청자 입력 팝업 callback 함수
-	window.selectuserCallBack = function(type, item) {
-		var idx = 0;
-		if(type == "select") {
-			if(item && item.length > 0) {
-				userId = item[idx++];
-				userName = item[idx++];
-			}
-		}
-		if(bunyangSeq && progressStatus && userId) {
-			setTimeout(function(){
-				if(confirm('신청번호('+bunyangSeq+')의 계약자를 '+userName+'님으로 변경합니다.\n진행하시겠습니까?')) {
-					var data = {};
-					data["bunyangSeq"] = bunyangSeq;
-					data["progressStatus"] = progressStatus;
-					data["userId"] = userId;
-					common.ajax({
-						url:"${contextPath}/admin/changecontractor", 
-						data:data,
-						success: function(result) {
-							if(result && result.result) {
-								common.showAlert("저장되었습니다.");
-								var frm = document.getElementById("frm");
-								frm.action = "${contextPath}/admin/contractormgmt";
-								frm.submit();
-							}
-						}
-					});
-				}
-			}, 100);
-		}else {
-			common.showAlert('선택된 정보가 올바르지 않습니다.');
-		}
-		
-	};
+function _contractorDetail(bunyangSeq) {
+	$("#bunyangSeq").val(bunyangSeq);
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/admin/contractordetail";
+	frm.submit();
 }
 
 </script>

@@ -47,6 +47,7 @@ public class PopupServiceImpl implements IPopupService {
 	public Map<String, Object> getRefUserByNameAndBirthDate(BunyangUserVo bunyangUserVo) {
 		Map<String, Object> searchParam = new HashMap<String, Object>();
 		searchParam.put("refType", bunyangUserVo.getRefType());
+		searchParam.put("userId", bunyangUserVo.getUserId());
 		searchParam.put("userName", bunyangUserVo.getUserName());
 		searchParam.put("birthDate", bunyangUserVo.getBirthDate());
 		searchParam.put("gender", bunyangUserVo.getGender());

@@ -164,8 +164,8 @@
     <div class="table-responsive" style="border-top: 1px solid #999;">
         <table class="table table-style" style="border-top: 0;">
         	<colgroup>
-        		<col width="18%">
-        		<col width="32%">
+        		<col width="10%">
+        		<col width="40%">
         		<col width="18%">
         		<col width="32%">
         	</colgroup>
@@ -197,103 +197,47 @@
         </table>
     </div>
     
-    <c:if test="${not empty downPaymentInfo}">
-    <!-- 계약금 납부 내역 -->
-	<div style="margin-top: 15px;">
-		<div class="pull-left"><h4>계약금 납부 내역</h4></div>
-	</div>
-    <div class="clearfix"></div>
-    
-    <div class="table-responsive" style="border-top: 1px solid #999;">
-        <table class="table table-style" style="border-top: 0;">
-        	<colgroup>
-        		<col width="18%">
-        		<col width="32%">
-        		<col width="18%">
-        		<col width="32%">
-        	</colgroup>
-            <tbody>
-            	<tr>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static">납부상태</p></th>
-            		<td align="left">
-            			<p class="form-control-static">
-            				<c:choose>
-								<c:when test="${downPaymentInfo.payment_amount > 0}">
-									<span class="label label-info">완납</span>
-								</c:when>
-								<c:otherwise>
-									<span class="label label-warning">미납</span>
-								</c:otherwise>
-							</c:choose>
-            			</p>
-            		</td>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static">납부금액</p></th>
-            		<td align="left"><p class="form-control-static">일금 : ${cutil:convertPriceToHangul(downPaymentInfo.payment_amount)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(downPaymentInfo.payment_amount)})</p></td>
-            	</tr>
-            	<tr>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static">납부일자</p></th>
-            		<td align="left">
-           				<p class="form-control-static">${downPaymentInfo.payment_date}</p>
-            		</td>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static">납부방법</p></th>
-            		<td align="left">
-           				<p class="form-control-static">
-           					<c:choose>
-           						<c:when test="${downPaymentInfo.payment_method == 'TRANSFER'}">무통장입금/계좌이체</c:when>
-           						<c:when test="${downPaymentInfo.payment_method == 'CASH'}">현금납부</c:when>
-           						<c:otherwise>${downPaymentInfo.payment_method}</c:otherwise>
-           					</c:choose>
-           				</p>
-            		</td>
-            	</tr>
-            	<tr>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static">확인일자</p></th>
-            		<td align="left"><p class="form-control-static">${downPaymentInfo.create_date }</p></td>
-            		<th style="background-color: #f5f5f5;"><p class="form-control-static">확인자</p></th>
-            		<td align="left"><p class="form-control-static">${downPaymentInfo.create_user_name}</p></td>
-            	</tr>
-            </tbody>
-        </table>
-    </div>
-    </c:if>
-    
-    <c:if test="${not empty downPaymentInfo}">
+    <c:if test="${not empty paymentList}">
     <!-- 잔금 납부 내역 -->
 	<div style="margin-top: 15px;">
-		<div class="pull-left"><h4>잔금 납부 내역 (총 ₩${cutil:getThousandSeperatorFormatString(totalPaymentInfo.total_amount)})</h4></div>
+		<div class="pull-left"><h4>납부 내역 (총 ₩${cutil:getThousandSeperatorFormatString(totalPaymentInfo.total_amount)})</h4></div>
 	</div>
     <div class="clearfix"></div>
     <div class="table-responsive">
-        <table class="table table-style">
+        <table class="table table-style table-bordered">
+        	<colgroup>
+        		<col width="10%">
+        		<col width="18%">
+        		<col width="18%">
+        		<col width="18%">
+        		<col width="18%">
+        		<col width="18%">
+        	</colgroup>
             <thead>
                 <tr>
                     <th scope="col">회차</th>
                     <th scope="col">납입일</th>
                     <th scope="col">납입금</th>
                     <th scope="col">납입유형</th>
-                    <th scope="col">&nbsp;</th>
+                    <th scope="col">납부방법</th>
+                    <th scope="col">입금자</th>
                 </tr>
             </thead>
             <tbody id="tbodyPayment">
-            	<tr>
-            		<td><p class="form-control-static">1</p></td>
-            		<td><p class="form-control-static">${downPaymentInfo.payment_date}</p></td>
-            		<td><p class="form-control-static">₩${cutil:getThousandSeperatorFormatString(downPaymentInfo.payment_amount)}</p></td>
-            		<td><p class="form-control-static">계약금</p></td>
-            	</tr>
-            	<c:forEach items="${balancePaymentList}" var="balancePayment" varStatus="status">
-            	<tr>
-            		<td><p class="form-control-static">${status.count+1}</p></td>
-            		<td align="center"><p class="form-control-static">${balancePayment.payment_date}</p></td>
-            		<td align="center"><p class="form-control-static">₩${cutil:getThousandSeperatorFormatString(balancePayment.payment_amount)}</p></td>
-            		<td><p class="form-control-static">중도금</p></td>
-            		<td>
-            		<c:choose>
-            			<c:when test="${!empty bunyangInfo.full_payment_date && status.last}"><p class="form-control-static"><span class="label label-info">완납</span></p></c:when>
-            			<c:otherwise>&nbsp;</c:otherwise>
-            		</c:choose>
-            		</td>
-            	</tr>
+            	<c:forEach items="${paymentList}" var="payment" varStatus="status">
+            		<tr>
+            			<td>${status.count}</td>
+	            		<td>${payment.payment_date}</td>
+	            		<td align="right">${cutil:getThousandSeperatorFormatString(payment.payment_amount)}</td>
+	            		<td>${payment.payment_type_name}</td>
+	            		<td>
+	            			<c:choose>
+	            				<c:when test="${payment.payment_method == 'TRANSFER'}">무통장/계좌이체</c:when>
+	            				<c:when test="${payment.payment_method == 'CASH'}">현금</c:when>
+	            			</c:choose>
+	            		</td>
+	            		<td>${payment.payment_user}</td>
+            		</tr>
             	</c:forEach>
             </tbody>
         </table>

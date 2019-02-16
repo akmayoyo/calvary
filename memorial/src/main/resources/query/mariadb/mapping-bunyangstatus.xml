@@ -112,10 +112,10 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
-				,CASE WHEN user_id IS NULL THEN birth_date ELSE (SELECT birth_date FROM TB_COM_USER b WHERE a.user_id = b.user_id) END birth_date
-				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT church_officer FROM TB_COM_USER b WHERE a.user_id = b.user_id) END church_officer
-				,CASE WHEN user_id IS NULL THEN NULL ELSE (SELECT diocese FROM TB_COM_USER b WHERE a.user_id = b.user_id) END diocese
+				,user_name
+				,birth_date
+				,church_officer
+				,diocese
 			FROM TB_BUNYANG_REF_USER a
 			WHERE ref_type = 'APPLY_USER'
 		    ) b ON a.bunyang_seq = b.bunyang_seq

@@ -197,8 +197,8 @@
     <div class="table-responsive" style="border-top: 1px solid #999;">
         <table class="table table-style" style="border-top: 0;">
         	<colgroup>
-        		<col width="18%">
-        		<col width="32%">
+        		<col width="10%">
+        		<col width="40%">
         		<col width="18%">
         		<col width="32%">
         	</colgroup>
@@ -247,7 +247,7 @@
             		<th style="background-color: #f5f5f5;">잔금</th>
             		<td align="left" colspan="3">일금 : ${cutil:convertPriceToHangul(bunyangInfo.total_price - contract_price)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(bunyangInfo.total_price - contract_price)})
             		<c:choose>
-            			<c:when test="${bunyangInfo.balance_payment >= (bunyangInfo.total_price - contract_price)}"><span class="label label-info" style="margin-left: 3px;">완납</span></c:when>
+            			<c:when test="${(bunyangInfo.balance_payment+bunyangInfo.down_payment) >= bunyangInfo.total_price}"><span class="label label-info" style="margin-left: 3px;">완납</span></c:when>
             			<c:otherwise><span class="label label-warning" style="margin-left: 3px;">미납</span></c:otherwise>
             		</c:choose>
 					</td>
@@ -362,13 +362,24 @@ function apprContract(progressStatus) {
 				}
 				if(confirm(confirmMsg)) {
 					donwloadFile(fileSeq);
+					setTimeout(function(){
+						refresh();
+					}, 100);
+				} else {
+					refresh();
 				}
-				var frm = document.getElementById("frm");
-				frm.action = "${contextPath}/admin/contractdetail";
-				frm.submit();
 			}
 		}
 	});
+}
+
+/**
+ * 
+ */
+function refresh() {
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/admin/contractdetail";
+	frm.submit();	
 }
 
 /**

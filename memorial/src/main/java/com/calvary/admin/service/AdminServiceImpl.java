@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
@@ -109,6 +109,33 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
+	 * 분양관련 사용자 정보 조회 
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getBunyangRefUserInfo(String bunyangSeq, String refType, String userId) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("refType", refType);
+		parameter.put("userId", userId);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("admin.getBunyangRefUserInfo", parameter); 
+		return rtnMap;
+	}
+	
+	/** 
+	 * 배우자 정보 조회 
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getCoupleUserInfo(String bunyangSeq, String refType, String userId, int coupleSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("refType", refType);
+		parameter.put("userId", userId);
+		parameter.put("coupleSeq", coupleSeq);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("admin.getCoupleUserInfo", parameter); 
+		return rtnMap;
+	}
+	
+	/** 
 	 * 분양정보의 신청서,승인서등 관련 파일양식 조회
 	 */
 	public List<Object> getBunyangFileList(String bunyangSeq) {
@@ -173,8 +200,20 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 분양 양식파일 고유번호 업데이트
 	 */
-	public int updateBunyangFileSeq(Map<String, Object> param) {
+	public int updateBunyangFileSeq(Map<String, Object> param) throws Exception {
 		int iRslt = commonDao.update("admin.updateBunyangFileSeq", param);
+		return iRslt;
+	}
+	
+	/** 
+	 * 사용(봉안)자 사용승인서 파일seq 업데이트
+	 */
+	public int updateUseUserFileSeq(String fileSeq, String bunyangSeq, String userId) throws Exception {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("fileSeq", fileSeq);
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("userId", userId);
+		int iRslt = commonDao.update("admin.updateUseUserFileSeq", param);
 		return iRslt;
 	}
 	
@@ -384,7 +423,7 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
-	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
+	 * 분양관련 입출금(계약금,잔금,관리비..) 정보 생성
 	 */
 	public int createPaymentHistory(String bunyangSeq, int paymentAmount, String paymentMethod, String paymentDate, String paymentDivision, String paymentType, String paymentUser, String remark) throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
@@ -404,7 +443,7 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
-	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
+	 * 분양관련 입출금(계약금,잔금,관리비..) 정보 생성
 	 */
 	@Transactional(rollbackFor=Exception.class)
 	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks) throws Exception {
@@ -436,13 +475,50 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 사용승인리스트 조회 
 	 */
-	public List<Object> getApprovalList(SearchVo searchVo) {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getApprovalList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
-		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		parameter.put("apply_user_name", searchVo.getSearchVal());
+		parameter.put("progressStatus", searchVo.getProgressStatus());
+		parameter.put("bunyangTimes", searchVo.getBunyangTimes());
 		List<Object> list = commonDao.selectList("approval.getApprovalList", parameter); 
-		return list;
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getApprovalList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
+	}
+	
+	/** 
+	 *  사용(봉안)자 승인
+	 */
+	public int approvalUser(String bunyangSeq, String userId, String approvalNo, String approvalDate) throws Exception{
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("userId", userId);
+		param.put("approvalNo", approvalNo);
+		param.put("approvalDate", approvalDate);
+		iRslt += commonDao.update("approval.approvalUser", param);
+		return iRslt; 
+	}
+	
+	/** 
+	 *  사용(봉안)자 승인서 출력일자 업데이트
+	 */
+	public int updateApprovalAssignDate(String bunyangSeq, String userId) throws Exception{
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("userId", userId);
+		iRslt += commonDao.update("approval.updateApprovalAssignDate", param);
+		return iRslt; 
 	}
 	
 	
@@ -450,14 +526,101 @@ public class AdminServiceImpl implements IAdminService {
 	// 계약자관리
 	//===============================================================================
 	/** 
-	 * 계약자변경 
+	 * 계약자관리 리스트 조회
 	 */
-	public int updateApplyUser(String bunyangSeq, String userId) {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getContractorList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
+		parameter.put("apply_user_name", searchVo.getSearchVal());
+		parameter.put("progressStatus", searchVo.getProgressStatus());
+		parameter.put("bunyangTimes", searchVo.getBunyangTimes());
+		List<Object> list = commonDao.selectList("contractor.getContractorList", parameter); 
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getContractorList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 대리인 정보 삭제
+	 */
+	public int deleteAgentUser(String bunyangSeq) throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
 		int iRslt = 0;
 		param.put("bunyangSeq", bunyangSeq);
-		param.put("userId", userId);
-		iRslt += commonDao.delete("contractor.updateApplyUser", param);
+		iRslt += commonDao.update("contractor.deleteAgentUser", param);
+		return iRslt;
+	}
+	
+	/** 
+	 * 신청자/대리인/사용자 정보 변경 
+	 */
+	public int updateContractUser(BunyangUserVo userVo) throws Exception {
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		param.put("userId", userVo.getUserId());
+		param.put("relationType", userVo.getRelationType());
+		param.put("userName", userVo.getUserName());
+		param.put("birthDate", userVo.getBirthDate());
+		param.put("gender", userVo.getGender());
+		param.put("email", userVo.getEmail());
+		param.put("mobile", userVo.getMobile());
+		param.put("phone", userVo.getPhone());
+		param.put("postNumber", userVo.getPostNumber());
+		param.put("address1", userVo.getAddress1());
+		param.put("address2", userVo.getAddress2());
+		param.put("isChurchPerson", userVo.getIsChurchPerson());
+		param.put("churchOfficer", userVo.getChurchOfficer());
+		param.put("diocese", userVo.getDiocese());
+		param.put("isMove", userVo.getIsMove());
+		param.put("isMaintCharger", userVo.getIsMaintCharger());
+		iRslt += commonDao.update("contractor.updateContractUser", param);
+		return iRslt;
+	}
+	
+	/** 
+	 * 계약정보 및 관련 사용자 정보 업데이트
+	 */
+	@Transactional
+	public int updateContractInfo(BunyangInfoVo bunyangInfoVo) throws Exception {
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		String bunyangSeq = bunyangInfoVo.getBunyangSeq();
+		// 분양정보가 변경된 경우
+		if(!StringUtils.isEmpty(bunyangSeq)) {
+			param.put("bunyangSeq", bunyangSeq);
+			param.put("serviceChargeType", bunyangInfoVo.getServiceChargeType());
+			iRslt += commonDao.update("contractor.updateContractInfo", param);
+		}
+		// 신청자 정보가 변경된 경우
+		if(bunyangInfoVo.getApplyUser() != null) {
+			iRslt += updateContractUser(bunyangInfoVo.getApplyUser());
+		}
+		// 대리인 정보가 변경된 경우
+		if(bunyangInfoVo.getAgentUser() != null) {
+			if(!StringUtils.isEmpty(bunyangInfoVo.getAgentUser().getUserId())) {// 업데이트
+				iRslt += updateContractUser(bunyangInfoVo.getAgentUser());
+			} else {// 생성
+				param = getBunyangUserParam(bunyangInfoVo.getAgentUser(), 1);
+				param.put("bunyangSeq", bunyangSeq);
+				iRslt += commonDao.insert("admin.createBunyangRefUserInfo", param);
+			}
+		} else {// 삭제
+			iRslt += deleteAgentUser(bunyangSeq);
+		}
+		// 사용자 정보가 변경된 경우
+		if(bunyangInfoVo.getUseUsers() != null && bunyangInfoVo.getUseUsers().size() > 0) {
+			for(int i = 0; i < bunyangInfoVo.getUseUsers().size(); i++) {
+				iRslt += updateContractUser(bunyangInfoVo.getUseUsers().get(i));
+			}
+		}
 		return iRslt;
 	}
 	
@@ -487,6 +650,7 @@ public class AdminServiceImpl implements IAdminService {
 			,String depositBank
 			,String depositAccount
 			,String accountHolder
+			,String cancelDate
 			,String cancelReason) throws Exception {
 		Map<String, Object> param = new HashMap<String, Object>();
 		int iRslt = 0;
@@ -504,21 +668,23 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("bunyangSeq", bunyangSeq);
 		param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_E);
 		param.put("userId", SessionUtil.getCurrentUserId());
-		param.put("remarks", "");
+		param.put("updateDate", cancelDate);
+		param.put("remarks", cancelReason);
 		// 상태 업데이트
 		iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
 		// 변경이력
 		iRslt += commonDao.insert("admin.createBunyangHistory", param);
 		
-		// 계약금 납부 정보 업데이트
-		param = new HashMap<String, Object>();
-		param.put("bunyangSeq", bunyangSeq);
-		param.put("paymentType", CalvaryConstants.PAYMENT_TYPE_CANCEL_PAYMENT);
-		param.put("paymentAmount", depositAmount);
-		param.put("paymentMethod", CalvaryConstants.PAYMENT_METHOD_TRANSFER);
-		param.put("paymentDate", depositPlanDate);
-		param.put("createUser", SessionUtil.getCurrentUserId());
-		iRslt += commonDao.insert("cancel.insertCancelPayment", param);
+		// 해약금 출금내역 업데이트
+		int paymentAmount = depositAmount;
+		String paymentMethod = CalvaryConstants.PAYMENT_METHOD_TRANSFER;
+		String paymentDate = depositPlanDate;
+		String paymentDivision = CalvaryConstants.PAYMENT_DIVISION_WITHDRAWAL;
+		String paymentType = CalvaryConstants.PAYMENT_TYPE_CANCEL_PAYMENT;
+		String paymentUser = accountHolder;
+		String remark = cancelReason;
+		
+		iRslt += createPaymentHistory(bunyangSeq, paymentAmount, paymentMethod, paymentDate, paymentDivision, paymentType, paymentUser, remark);
 		return iRslt;
 	}
 	
@@ -614,7 +780,7 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Transactional
-	public int assignEachGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs) {
+	public int assignEachGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs) throws Exception{
 		int iRslt = 0;
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		if(userSeqs != null && coupleSeqs != null && userSeqs.length == coupleSeqs.length) {
@@ -664,7 +830,7 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Transactional
-	public int assignFamilyGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs) {
+	public int assignFamilyGrave(String bunyangSeq, int[] userSeqs, int[] coupleSeqs) throws Exception{
 		
 		int i = 0;
 		int iRslt = 0;

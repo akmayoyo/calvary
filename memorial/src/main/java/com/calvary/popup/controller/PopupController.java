@@ -69,6 +69,7 @@ public class PopupController {
 		mv.addObject("users", selectUserVo.getUsers());
 		mv.addObject("popupTitle", selectUserVo.getPopupTitle());
 		mv.addObject("popupType", selectUserVo.getPopupType());
+		mv.addObject("selectedUserId", selectUserVo.getSelectedUserId());
 		mv.setViewName(ROOT_URL + SELECT_USER_URL);
 		return mv;
 	}
@@ -145,7 +146,7 @@ public class PopupController {
 			@RequestParam(value="productType") String productType,
 			@RequestParam(value="userSeqs[]") int[] userSeqs,
 			@RequestParam(value="coupleSeqs[]") int[] coupleSeqs
-			) {
+			) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		boolean bRslt = false;
 		int iRslt = 0;
@@ -282,10 +283,8 @@ public class PopupController {
 		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
 		mv.addObject("fileList", adminService.getBunyangFileList(bunyangSeq));// 분양 파일 양식 리스트
 		paymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);// 계약금 납부내역
-		if(paymentList != null && paymentList.size() > 0) {
-			mv.addObject("downPaymentInfo", paymentList.get(0));// 계약금 납부내역
-		}
-		mv.addObject("balancePaymentList", adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 잔금납부내역
+		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 분양잔금
+		mv.addObject("paymentList", paymentList);
 		mv.addObject("totalPaymentInfo", adminService.getTotalPayment(bunyangSeq));
 		mv.setViewName(ROOT_URL + BUNYANG_INFO_URL);
 		return mv;

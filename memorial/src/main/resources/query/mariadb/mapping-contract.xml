@@ -69,7 +69,7 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,user_name
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -79,7 +79,7 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,user_name
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -101,7 +101,7 @@
 					(SELECT 
 						 bunyang_seq
 					   	,user_id
-					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+					   	,user_name
 					   	,relation_type 
 					FROM TB_BUNYANG_REF_USER a
 					WHERE a.ref_type = 'USE_USER'
