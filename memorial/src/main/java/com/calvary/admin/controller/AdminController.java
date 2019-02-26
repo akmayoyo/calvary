@@ -861,6 +861,242 @@ public class AdminController {
 	}
 	
 	
+	//===============================================================================
+	// 사용계약 변경 및 해약
+	//===============================================================================
+	/** 사용계약 변경 및 해약  URL */
+	public static final String USE_CHANGE_URL = "/usechange";
+	/** 사용계약 변경 및 해약 상세페이지  URL */
+	public static final String USE_CHANGE_DETAIL_URL = "/useChangeDetail";
+	/** 계약승계  URL */
+	public static final String SUCCEED_CONTRACTOR_URL = "/succeedContractor";
+	/** 사용자 정보 변경  URL */
+	public static final String CHANGE_REF_USER_INFO_URL = "/changeRefUserInfo";
+	/** 관리비 납부자 변경  URL */
+	public static final String CHANGE_SERVICE_CHARGER_URL = "/changeServiceCharger";
+	
+	/** 
+	 * 사용계약 변경 및 해약 페이지
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=USE_CHANGE_URL)
+	public Object useChangeHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		List<Object> bunyangTimesList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_BUNYANG_TIMES);
+		Map<String, Object> rtnMap = adminService.getUseChangeList(searchVo);
+		List<Object> useChangeList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU02_03");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("bunyangTimesList", bunyangTimesList);
+		mv.addObject("useChangeList", useChangeList);
+		mv.setViewName(ROOT_URL + USE_CHANGE_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 사용계약 변경 및 해약 상세페이지
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=USE_CHANGE_DETAIL_URL)
+	public Object useChangeDetailHandler(SearchVo searchVo, String bunyangSeq) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		ModelAndView mv = new ModelAndView();
+		List<Object> paymentList = null;
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU02_03");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("submenuName", "사용계약 상세 정보");
+		mv.addObject("menuList", menuList);
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("searchVo", searchVo);
+		
+		List<Object> applyUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER);
+		List<Object> agentUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER);
+		Map<String, Object> applyUser = null;
+		Map<String, Object> agentUser = null;
+		if(applyUserList != null && applyUserList.size() > 0) {
+			applyUser = (HashMap<String, Object>)applyUserList.get(0);
+		}
+		if(agentUserList != null && agentUserList.size() > 0) {
+			agentUser = (HashMap<String, Object>)agentUserList.get(0);
+		}
+		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
+		mv.addObject("applyUser", applyUser);// 신청자정보
+		mv.addObject("agentUser", agentUser);// 대리신청인정보
+		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
+		mv.addObject("fileList", adminService.getBunyangFileList(bunyangSeq));// 분양 파일 양식 리스트
+		paymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);// 계약금
+		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 분양잔금
+		mv.addObject("paymentList", paymentList);
+		mv.addObject("totalPaymentInfo", adminService.getTotalPayment(bunyangSeq));
+		mv.setViewName(ROOT_URL + USE_CHANGE_DETAIL_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 계약승계
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=SUCCEED_CONTRACTOR_URL)
+	@ResponseBody
+	public Object succeedContractorHandler(BunyangUserVo bunyangUserVo, String changeReason, String remarks) throws Exception{
+		boolean bRslt = false;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		String bunyangSeq = bunyangUserVo.getBunyangSeq();
+		// 계약자 정보를 승계신청자 정보로 변경
+		int iRslt = adminService.updateSucceedContractor(bunyangUserVo, changeReason, remarks);
+		// 엑셀양식 업데이트
+		if(iRslt > 0) {
+			// 분양신청서
+			String file_seq_apply = excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, "", "");
+			// 분양신청서-사용자
+			String file_seq_use_user = excelService.createBunyangExcelForm(ExcelForms.USE_USER_FORM, bunyangSeq, "", "");
+			// 신청승인서
+			String file_seq_approval = excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, "", "");
+			// 분양계약서
+			String file_seq_contract = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "", "");
+			// 완납확인증명서
+			String file_seq_full_payment = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "", "");
+			
+			Map<String, Object> param = new HashMap<String, Object>();
+			param.put("bunyangSeq", bunyangSeq);
+			param.put("file_seq_apply", file_seq_apply);
+			param.put("file_seq_use_user", file_seq_use_user);
+			param.put("file_seq_approval", file_seq_approval);
+			param.put("file_seq_contract", file_seq_contract);
+			param.put("file_seq_full_payment", file_seq_full_payment);
+			adminService.updateBunyangFileSeq(param);
+			
+			List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
+			
+			if(useUserList != null && useUserList.size() > 0) {
+				for(int i = 0; i < useUserList.size(); i++) {
+					Map<String, Object> tmp = (HashMap<String, Object>)useUserList.get(i);
+					String approval_file_seq = (String)tmp.get("approval_file_seq");
+					// 사용승인서가 있을 경우 업데이트
+					if(!StringUtils.isEmpty(approval_file_seq)) {
+						excelService.createBunyangExcelForm(ExcelForms.USE_APPROVAL_FORM, bunyangSeq, approval_file_seq, (String)tmp.get("user_id"));
+					}
+				}
+			}
+			
+			bRslt = true;
+		}
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 사용자 정보 변경
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=CHANGE_REF_USER_INFO_URL)
+	@ResponseBody
+	public Object changeRefUserInfoHandler(BunyangUserVo bunyangUserVo) throws Exception{
+		boolean bRslt = false;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		String bunyangSeq = bunyangUserVo.getBunyangSeq();
+		// 사용자 정보 변경
+		int iRslt = adminService.updateRefUserInfo(bunyangUserVo);
+		// 엑셀양식 업데이트
+		if(iRslt > 0) {
+			
+			Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+			
+			List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
+			
+			// 분양신청서
+			String file_seq_apply = (String)bunyangInfo.get("file_seq_apply");
+			// 분양신청서-사용자
+			String file_seq_use_user = (String)bunyangInfo.get("file_seq_use_user");
+			// 신청승인서
+			String file_seq_approval = (String)bunyangInfo.get("file_seq_approval");
+			// 분양계약서
+			String file_seq_contract = (String)bunyangInfo.get("file_seq_contract");
+			// 완납확인증명서
+			String file_seq_full_payment = (String)bunyangInfo.get("file_seq_full_payment");
+			excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, file_seq_apply, "");
+			excelService.createBunyangExcelForm(ExcelForms.USE_USER_FORM, bunyangSeq, file_seq_use_user, "");
+			excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, file_seq_approval, "");
+			excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, file_seq_contract, "");
+			excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, file_seq_full_payment, "");
+			
+			if(useUserList != null && useUserList.size() > 0) {
+				for(int i = 0; i < useUserList.size(); i++) {
+					Map<String, Object> tmp = (HashMap<String, Object>)useUserList.get(i);
+					String approval_file_seq = (String)tmp.get("approval_file_seq");
+					// 사용승인서가 있을 경우
+					if(!StringUtils.isEmpty(approval_file_seq)) {
+						excelService.createBunyangExcelForm(ExcelForms.USE_APPROVAL_FORM, bunyangSeq, approval_file_seq, (String)tmp.get("user_id"));
+					}
+				}
+			}
+			
+			bRslt = true;
+		}
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 관리비 납부자 변경
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=CHANGE_SERVICE_CHARGER_URL)
+	@ResponseBody
+	public Object changeServiceChargerHandler(String bunyangSeq, String serviceChargeType, String maintCharger) throws Exception{
+		boolean bRslt = false;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		// 사용자 정보 변경
+		int iRslt = adminService.updateServiceCharger(bunyangSeq, serviceChargeType, maintCharger);
+		// 엑셀양식 업데이트
+		if(iRslt > 0) {
+			
+			Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+			
+			List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
+			
+			// 분양신청서
+			String file_seq_apply = (String)bunyangInfo.get("file_seq_apply");
+			// 분양신청서-사용자
+			String file_seq_use_user = (String)bunyangInfo.get("file_seq_use_user");
+			// 신청승인서
+			String file_seq_approval = (String)bunyangInfo.get("file_seq_approval");
+			// 분양계약서
+			String file_seq_contract = (String)bunyangInfo.get("file_seq_contract");
+			// 완납확인증명서
+			String file_seq_full_payment = (String)bunyangInfo.get("file_seq_full_payment");
+			excelService.createBunyangExcelForm(ExcelForms.APPLY_FORM, bunyangSeq, file_seq_apply, "");
+			excelService.createBunyangExcelForm(ExcelForms.USE_USER_FORM, bunyangSeq, file_seq_use_user, "");
+			excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, file_seq_approval, "");
+			excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, file_seq_contract, "");
+			excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, file_seq_full_payment, "");
+			
+			if(useUserList != null && useUserList.size() > 0) {
+				for(int i = 0; i < useUserList.size(); i++) {
+					Map<String, Object> tmp = (HashMap<String, Object>)useUserList.get(i);
+					String approval_file_seq = (String)tmp.get("approval_file_seq");
+					// 사용승인서가 있을 경우
+					if(!StringUtils.isEmpty(approval_file_seq)) {
+						excelService.createBunyangExcelForm(ExcelForms.USE_APPROVAL_FORM, bunyangSeq, approval_file_seq, (String)tmp.get("user_id"));
+					}
+				}
+			}
+			
+			bRslt = true;
+		}
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
 	
 	//===============================================================================
 	// 분양현황

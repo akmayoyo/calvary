@@ -252,6 +252,29 @@ public interface IAdminService {
 	public Map<String, Object> getAvailableGraveInfo(String graveType, int cnt);
 	
 	
+	
+	//===============================================================================
+	// 사용계약 변경 및 해약
+	//===============================================================================
+	/**
+	 * 사용계약 리스트 조회
+	 */
+	public Map<String, Object> getUseChangeList(SearchVo searchVo);
+	
+	/**
+	 * 계약자 정보를 승계신청자 정보로 변경
+	 */
+	public int updateSucceedContractor(BunyangUserVo bunyangUserVo, String changeReason, String remarks) throws Exception;
+	/**
+	 * 사용자 정보 변경
+	 */
+	public int updateRefUserInfo(BunyangUserVo bunyangUserVo) throws Exception;
+	/**
+	 * 관리비 납부자 변경
+	 */
+	public int updateServiceCharger(String bunyangSeq, String serviceChargeType, String maintCharger) throws Exception;
+	
+	
 	//===============================================================================
 	// 분양현황
 	//===============================================================================

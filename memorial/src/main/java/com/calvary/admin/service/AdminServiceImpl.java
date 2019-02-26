@@ -941,6 +941,99 @@ public class AdminServiceImpl implements IAdminService {
 	
 	
 	//===============================================================================
+	// 사용계약 변경 및 해약
+	//===============================================================================
+	/**
+	 * 사용계약 리스트 조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getUseChangeList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
+		parameter.put("apply_user_name", searchVo.getSearchVal());
+		parameter.put("progressStatus", searchVo.getProgressStatus());
+		parameter.put("bunyangTimes", searchVo.getBunyangTimes());
+		List<Object> list = commonDao.selectList("usechange.getUseChangeList", parameter); 
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getUseChangeList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
+	}
+	
+	/**
+	 * 계약자 정보를 승계신청자 정보로 변경
+	 */
+	@Transactional
+	public int updateSucceedContractor(BunyangUserVo bunyangUserVo, String changeReason, String remarks) throws Exception{
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("relationType", bunyangUserVo.getRelationType());
+		param.put("userName", bunyangUserVo.getUserName());
+		param.put("birthDate", bunyangUserVo.getBirthDate());
+		param.put("gender", bunyangUserVo.getGender());
+		param.put("email", bunyangUserVo.getEmail());
+		param.put("mobile", bunyangUserVo.getMobile());
+		param.put("phone", bunyangUserVo.getPhone());
+		param.put("postNumber", bunyangUserVo.getPostNumber());
+		param.put("address1", bunyangUserVo.getAddress1());
+		param.put("address2", bunyangUserVo.getAddress2());
+		param.put("churchOfficer", bunyangUserVo.getChurchOfficer());
+		param.put("diocese", bunyangUserVo.getDiocese());
+		param.put("bunyangSeq", bunyangUserVo.getBunyangSeq());
+		param.put("changeReason", changeReason);
+		param.put("remarks", remarks);
+		// 변경전 이력정보 생성
+		int iRslt = commonDao.insert("usechange.insertSucceedChangeHistory", param);
+		// 계약자 정보를 승계신청자 정보로 업데이트
+		iRslt += commonDao.update("usechange.updateSucceedContractor", param);
+		return iRslt;
+	}
+	
+	/**
+	 * 사용자 정보 변경
+	 */
+	@Transactional
+	public int updateRefUserInfo(BunyangUserVo bunyangUserVo) throws Exception{
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("userId", bunyangUserVo.getUserId());
+		param.put("email", bunyangUserVo.getEmail());
+		param.put("mobile", bunyangUserVo.getMobile());
+		param.put("phone", bunyangUserVo.getPhone());
+		param.put("postNumber", bunyangUserVo.getPostNumber());
+		param.put("address1", bunyangUserVo.getAddress1());
+		param.put("address2", bunyangUserVo.getAddress2());
+		param.put("bunyangSeq", bunyangUserVo.getBunyangSeq());
+		param.put("refType", bunyangUserVo.getRefType());
+		// 변경전 이력정보 생성
+		int iRslt = commonDao.insert("usechange.insertRefUserChangeHistory", param);
+		// 사용자 정보 변경
+		iRslt += commonDao.update("usechange.updateRefUserInfo", param);
+		return iRslt;
+	}
+	
+	/**
+	 * 관리비 납부자 변경
+	 */
+	public int updateServiceCharger(String bunyangSeq, String serviceChargeType, String maintCharger) throws Exception{
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("serviceChargeType", serviceChargeType);
+		param.put("maintCharger", maintCharger);
+		// 변경전 이력정보 생성
+		int iRslt = commonDao.insert("usechange.insertServiceChargerChangeHistory", param);
+		// 관리비 납부자 변경
+		iRslt += commonDao.update("usechange.updateServiceChargeType", param);
+		iRslt += commonDao.update("usechange.updateMaintCharger", param);
+		return iRslt;
+	}
+	
+	
+	//===============================================================================
 	// 분양현황
 	//===============================================================================
 	/** 

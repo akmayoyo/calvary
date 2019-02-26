@@ -680,5 +680,8 @@ input.readonlywhite{
 	background-color: #fff !important;
 }
 .form-inline .form-control { 
-    display: inline-block !important; 
+    /*display: inline-block !important;*/ 
+}
+.hide {
+	display: none !important;
 }

@@ -506,92 +506,90 @@ function editApplyUser() {
 	
 	// 신청자 입력 팝업 callback 함수
 	window.selectuserCallBack = function(item) {
-		var idx = 0, userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', diocese = '';
+		var idx = 0, userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', churchOfficerName = '', diocese = '';
 		if(item && item.length > 0) {
-			setTimeout(function(){
-				var oneSelfUserIdx = -1;
-				$.each(useUsers, function(idx, item) {
-					if(item.relationType == 'ONESELF') {
-						oneSelfUserIdx = idx;
-						return false;
-					}
-				});
-				
-				// 사용(봉안)대상자 중 신청자 본인이 있을 경우
-				if(oneSelfUserIdx >= 0 && !confirm('사용(봉안) 대상자 중 신청자 본인이 있습니다.\n신청자 변경시 해당 정보도 변경됩니다.\n진행하시겠습니까?')) {
-					return;
+			var oneSelfUserIdx = -1;
+			$.each(useUsers, function(idx, item) {
+				if(item.relationType == 'ONESELF') {
+					oneSelfUserIdx = idx;
+					return false;
 				}
-				var tr = $("<tr/>");
-				userName = item[idx++];
-				birthDate = item[idx++];
-				gender = item[idx++];
-				mobile = item[idx++];
-				phone = item[idx++];
-				postNumber = item[idx++];
-				address1 = item[idx++];
-				address2 = item[idx++];
-				fulladdress = item[idx++];
-				churchOfficer = item[idx++];
-				churchOfficerName = item[idx++];
-				diocese = item[idx++];
-				email = item[idx++];
+			});
+			
+			// 사용(봉안)대상자 중 신청자 본인이 있을 경우
+			if(oneSelfUserIdx >= 0 && !confirm('사용(봉안) 대상자 중 신청자 본인이 있습니다.\n신청자 변경시 해당 정보도 변경됩니다.\n진행하시겠습니까?')) {
+				return;
+			}
+			var tr = $("<tr/>");
+			userName = item[idx++];
+			birthDate = item[idx++];
+			gender = item[idx++];
+			mobile = item[idx++];
+			phone = item[idx++];
+			postNumber = item[idx++];
+			address1 = item[idx++];
+			address2 = item[idx++];
+			fulladdress = item[idx++];
+			churchOfficer = item[idx++];
+			churchOfficerName = item[idx++];
+			diocese = item[idx++];
+			email = item[idx++];
+			
+			var applyUser = {};
+			applyUser['userId'] = applyUserId;
+			applyUser['userName'] = userName;
+			applyUser['birthDate'] = birthDate;
+			applyUser['gender'] = gender;
+			applyUser['mobile'] = mobile;
+			applyUser['phone'] = phone;
+			applyUser['postNumber'] = postNumber;
+			applyUser['address1'] = address1;
+			applyUser['address2'] = address2;
+			applyUser['fulladdress'] = fulladdress;
+			applyUser['churchOfficer'] = churchOfficer;
+			applyUser['churchOfficerName'] = churchOfficerName;
+			applyUser['diocese'] = diocese;
+			applyUser['isAgent'] = false;
+			applyUser['email'] = email;
+			applyUser['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>';
+			
+			tr.append('<td>'+userName+"</td>");
+			tr.append('<td>'+birthDate+"</td>");
+			tr.append('<td>'+mobile+"</td>");
+			tr.append('<td>'+email+"</td>");
+			tr.append('<td align="left">'+fulladdress+"</td>");
+			tr.append('<td>'+churchOfficerName+"</td>");
+			tr.append('<td>'+diocese+"</td>");
+			
+			$("#tblApplyUser tbody").html(tr);
+			changed = true;
+			changedBunyangInfo.applyUser = applyUser;
+			// 사용(봉안)대상자 중 신청자 본인이 있을 경우 해당정보도 변경해줌
+			if(oneSelfUserIdx >= 0) {
+				useUsers[oneSelfUserIdx]['userName'] = applyUser['userName'];
+				useUsers[oneSelfUserIdx]['birthDate'] = applyUser['birthDate'];
+				useUsers[oneSelfUserIdx]['gender'] = applyUser['gender'];
+				useUsers[oneSelfUserIdx]['mobile'] = applyUser['mobile'];
+				useUsers[oneSelfUserIdx]['phone'] = applyUser['phone'];
+				useUsers[oneSelfUserIdx]['postNumber'] = applyUser['postNumber'];
+				useUsers[oneSelfUserIdx]['address1'] = applyUser['address1'];
+				useUsers[oneSelfUserIdx]['address2'] = applyUser['address2'];
+				useUsers[oneSelfUserIdx]['fulladdress'] = applyUser['fulladdress'];
+				useUsers[oneSelfUserIdx]['email'] = applyUser['email'];
+				useUsers[oneSelfUserIdx]['relationType'] = 'ONESELF';
+				useUsers[oneSelfUserIdx]['relationTypeName'] = '본인';
+				useUsers[oneSelfUserIdx]['isChurchPerson'] = 'Y';
+				var tr = $("#tblUseUser tbody tr").eq(oneSelfUserIdx);
+				tr.find('td[name="userName"]').text(useUsers[oneSelfUserIdx]['userName']);
+				tr.find('td[name="birthDate"]').text(useUsers[oneSelfUserIdx]['birthDate']);
+				tr.find('td[name="mobile"]').text(useUsers[oneSelfUserIdx]['mobile']);
+				tr.find('td[name="address"]').text(useUsers[oneSelfUserIdx]['fulladdress']);
+				tr.find('td[name="relation"]').text(useUsers[oneSelfUserIdx]['relationTypeName']);
+				tr.find('td[name="ischurch"]').text(useUsers[oneSelfUserIdx]['isChurchPerson']);
+				tr.find('td[name="isMove"]').text(useUsers[oneSelfUserIdx]['isMove']);
 				
-				var applyUser = {};
-				applyUser['userId'] = applyUserId;
-				applyUser['userName'] = userName;
-				applyUser['birthDate'] = birthDate;
-				applyUser['gender'] = gender;
-				applyUser['mobile'] = mobile;
-				applyUser['phone'] = phone;
-				applyUser['postNumber'] = postNumber;
-				applyUser['address1'] = address1;
-				applyUser['address2'] = address2;
-				applyUser['fulladdress'] = fulladdress;
-				applyUser['churchOfficer'] = churchOfficer;
-				applyUser['churchOfficerName'] = churchOfficerName;
-				applyUser['diocese'] = diocese;
-				applyUser['isAgent'] = false;
-				applyUser['email'] = email;
-				applyUser['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>';
-				
-				tr.append('<td>'+userName+"</td>");
-				tr.append('<td>'+birthDate+"</td>");
-				tr.append('<td>'+mobile+"</td>");
-				tr.append('<td>'+email+"</td>");
-				tr.append('<td align="left">'+fulladdress+"</td>");
-				tr.append('<td>'+churchOfficerName+"</td>");
-				tr.append('<td>'+diocese+"</td>");
-				
-				$("#tblApplyUser tbody").html(tr);
-				changed = true;
-				changedBunyangInfo.applyUser = applyUser;
-				// 사용(봉안)대상자 중 신청자 본인이 있을 경우 해당정보도 변경해줌
-				if(oneSelfUserIdx >= 0) {
-					useUsers[oneSelfUserIdx]['userName'] = applyUser['userName'];
-					useUsers[oneSelfUserIdx]['birthDate'] = applyUser['birthDate'];
-					useUsers[oneSelfUserIdx]['gender'] = applyUser['gender'];
-					useUsers[oneSelfUserIdx]['mobile'] = applyUser['mobile'];
-					useUsers[oneSelfUserIdx]['phone'] = applyUser['phone'];
-					useUsers[oneSelfUserIdx]['postNumber'] = applyUser['postNumber'];
-					useUsers[oneSelfUserIdx]['address1'] = applyUser['address1'];
-					useUsers[oneSelfUserIdx]['address2'] = applyUser['address2'];
-					useUsers[oneSelfUserIdx]['fulladdress'] = applyUser['fulladdress'];
-					useUsers[oneSelfUserIdx]['email'] = applyUser['email'];
-					useUsers[oneSelfUserIdx]['relationType'] = 'ONESELF';
-					useUsers[oneSelfUserIdx]['relationTypeName'] = '본인';
-					useUsers[oneSelfUserIdx]['isChurchPerson'] = 'Y';
-					var tr = $("#tblUseUser tbody tr").eq(oneSelfUserIdx);
-					tr.find('td[name="userName"]').text(useUsers[oneSelfUserIdx]['userName']);
-					tr.find('td[name="birthDate"]').text(useUsers[oneSelfUserIdx]['birthDate']);
-					tr.find('td[name="mobile"]').text(useUsers[oneSelfUserIdx]['mobile']);
-					tr.find('td[name="address"]').text(useUsers[oneSelfUserIdx]['fulladdress']);
-					tr.find('td[name="relation"]').text(useUsers[oneSelfUserIdx]['relationTypeName']);
-					tr.find('td[name="ischurch"]').text(useUsers[oneSelfUserIdx]['isChurchPerson']);
-					tr.find('td[name="isMove"]').text(useUsers[oneSelfUserIdx]['isMove']);
-					
-					updateSelectBoxMaintCharger();
-				}
-			}, 100);
+				updateSelectBoxMaintCharger();
+			}
 		}
 	};
 }
@@ -1030,16 +1028,14 @@ function cancelContract(progressStatus) {
 	common.openWindow("${contextPath}/popup/contractcancel", "popContractCancel", winoption, param);
 	window.contractCancelCallBack = function(result) {
 		if(result && result.result) {
+			common.showAlert('해약처리가 승인되었습니다.');
+			// 승인서 파일번호
+			var fileSeq = result.fileSeq;
+			donwloadFile(fileSeq);
 			setTimeout(function(){
-				common.showAlert('해약처리가 승인되었습니다.');
-				// 승인서 파일번호
-				var fileSeq = result.fileSeq;
-				donwloadFile(fileSeq);
-				setTimeout(function(){
-					var frm = document.getElementById("frm");
-					frm.action = "${contextPath}/admin/contractordetail";
-					frm.submit();
-				}, 100);
+				var frm = document.getElementById("frm");
+				frm.action = "${contextPath}/admin/contractordetail";
+				frm.submit();
 			}, 100);
 		}		
 	}

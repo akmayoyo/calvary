@@ -24,6 +24,7 @@ public class BunyangUserVo {
 	private String isMaintCharger;
 	private int coupleSeq = -1;
 	private String editing;
+	private String approvalFileSeq;
 	public String getUserId() {
 		return userId;
 	}
@@ -158,6 +159,12 @@ public class BunyangUserVo {
 	public void setIsMaintCharger(String isMaintCharger) {
 		this.isMaintCharger = isMaintCharger;
 	}
+	public String getApprovalFileSeq() {
+		return approvalFileSeq;
+	}
+	public void setApprovalFileSeq(String approvalFileSeq) {
+		this.approvalFileSeq = approvalFileSeq;
+	}
 	@Override
 	public String toString() {
 		return "BunyangUserVo [bunyangSeq=" + bunyangSeq + ", userId=" + userId + ", userName=" + userName
@@ -166,6 +173,7 @@ public class BunyangUserVo {
 				+ address2 + ", fulladdress=" + fulladdress + ", refType=" + refType + ", relationType=" + relationType
 				+ ", relationTypeName=" + relationTypeName + ", churchOfficer=" + churchOfficer + ", diocese=" + diocese
 				+ ", isChurchPerson=" + isChurchPerson + ", isMove=" + isMove + ", isMaintCharger=" + isMaintCharger
-				+ ", coupleSeq=" + coupleSeq + ", editing=" + editing + "]";
+				+ ", coupleSeq=" + coupleSeq + ", editing=" + editing + ", approvalFileSeq=" + approvalFileSeq + "]";
 	}
+	
 }

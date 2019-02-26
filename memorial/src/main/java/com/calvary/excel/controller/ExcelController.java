@@ -348,8 +348,8 @@ public class ExcelController {
 			applyUserVo.setGender(String.valueOf((int)sheet.getRow(8).getCell(convertColAlphabetToIndex("G")).getNumericCellValue()));// 성별
 			applyUserVo.setChurchOfficer(codeNameToCodeSeq(sheet.getRow(8).getCell(convertColAlphabetToIndex("H")).getStringCellValue(), churchOfficerCodeList));// 직분
 			applyUserVo.setDiocese(String.valueOf((int)sheet.getRow(8).getCell(convertColAlphabetToIndex("K")).getNumericCellValue()));// 교구
-			applyUserVo.setMobile(CommonUtil.getMobileFormatString("0" + String.valueOf((int)sheet.getRow(8).getCell(convertColAlphabetToIndex("L")).getNumericCellValue())));// 휴대전화
-			applyUserVo.setPostNumber(sheet.getRow(10).getCell(convertColAlphabetToIndex("B")).getStringCellValue());// 우편번호
+			applyUserVo.setMobile(getMobile(sheet.getRow(8).getCell(convertColAlphabetToIndex("L"))));// 휴대전화
+			applyUserVo.setPostNumber(getStringByCellType(sheet.getRow(10).getCell(convertColAlphabetToIndex("B"))));// 우편번호
 			applyUserVo.setAddress1(sheet.getRow(10).getCell(convertColAlphabetToIndex("C")).getStringCellValue());// 주소
 			applyUserVo.setPhone(phone);// 전화
 			applyUserVo.setEmail(sheet.getRow(10).getCell(convertColAlphabetToIndex("L")).getStringCellValue());// 이메일
@@ -392,8 +392,8 @@ public class ExcelController {
 				agentUserVo.setBirthDate(getExcelDateValue(sheet.getRow(13).getCell(convertColAlphabetToIndex("E")).getDateCellValue(), dateFmt));// 생년월일
 				agentUserVo.setGender(String.valueOf((int)sheet.getRow(13).getCell(convertColAlphabetToIndex("G")).getNumericCellValue()));// 성별
 				agentUserVo.setRelationType(codeNameToCodeSeq(sheet.getRow(13).getCell(convertColAlphabetToIndex("H")).getStringCellValue(), relationCodeList));// 신청자와의 관계
-				agentUserVo.setMobile(CommonUtil.getMobileFormatString("0" + String.valueOf((int)sheet.getRow(13).getCell(convertColAlphabetToIndex("L")).getNumericCellValue())));// 휴대전화
-				agentUserVo.setPostNumber(sheet.getRow(15).getCell(convertColAlphabetToIndex("B")).getStringCellValue());// 우편번호
+				agentUserVo.setMobile(getMobile(sheet.getRow(13).getCell(convertColAlphabetToIndex("L"))));// 휴대전화
+				agentUserVo.setPostNumber(getStringByCellType(sheet.getRow(15).getCell(convertColAlphabetToIndex("B"))));// 우편번호
 				agentUserVo.setAddress1(sheet.getRow(15).getCell(convertColAlphabetToIndex("C")).getStringCellValue());// 주소
 				agentUserVo.setPhone(phone);// 전화
 				agentUserVo.setEmail(sheet.getRow(15).getCell(convertColAlphabetToIndex("L")).getStringCellValue());// 이메일
@@ -427,7 +427,7 @@ public class ExcelController {
 				useUser.setRelationType(codeNameToCodeSeq(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("D")).getStringCellValue(), relationCodeList));
 				useUser.setBirthDate(getExcelDateValue(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("E")).getDateCellValue(), dateFmt));
 				useUser.setGender(String.valueOf((int)sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("F")).getNumericCellValue()));
-				useUser.setPostNumber(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("G")).getStringCellValue());
+				useUser.setPostNumber(getStringByCellType(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("G"))));
 				useUser.setAddress1(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("H")).getStringCellValue());
 				// 부부형
 				if("O".equals(sheet.getRow(rowIdx).getCell(convertColAlphabetToIndex("I")).getStringCellValue())) {
@@ -838,6 +838,26 @@ public class ExcelController {
 			sRtn = "Y";
 		} else {
 			sRtn = "N";
+		}
+		return sRtn;
+	}
+	
+	private String getMobile(XSSFCell cell) {
+		String sRtn = "";
+		if(cell.getCellType() == CellType.NUMERIC) {
+			sRtn = CommonUtil.getMobileFormatString("0" + String.valueOf((int)cell.getNumericCellValue()));
+		} else if(cell.getCellType() == CellType.STRING) {
+			sRtn = cell.getStringCellValue();
+		}
+		return sRtn;
+	}
+	
+	private String getStringByCellType(XSSFCell cell) {
+		String sRtn = "";
+		if(cell.getCellType() == CellType.NUMERIC) {
+			sRtn = String.valueOf((int)cell.getNumericCellValue());
+		} else if(cell.getCellType() == CellType.STRING) {
+			sRtn = cell.getStringCellValue();
 		}
 		return sRtn;
 	}

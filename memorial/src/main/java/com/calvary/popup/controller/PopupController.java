@@ -33,6 +33,8 @@ public class PopupController {
 	public static final String ROOT_URL = "/popup";
 	
 	public static final String SELECT_USER_URL = "/selectuser";
+	public static final String SUCCEED_CONTRACTOR_URL = "/succeedcontractor";
+	public static final String CHANGE_REF_USER_INFO_URL = "/changeRefUserInfo";
 	public static final String REGIST_USE_USER_URL = "/registuseuser";
 	public static final String CHECK_DUPLICATED_USER_URL = "/checkduplicateduser";
 	public static final String CONTRACT_CANCEL_URL = "/contractcancel";
@@ -71,6 +73,32 @@ public class PopupController {
 		mv.addObject("popupType", selectUserVo.getPopupType());
 		mv.addObject("selectedUserId", selectUserVo.getSelectedUserId());
 		mv.setViewName(ROOT_URL + SELECT_USER_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=SUCCEED_CONTRACTOR_URL)
+	public Object succeedContractorHandler(String bunyangSeq) {
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("yearList", commonService.getYearList());
+		mv.addObject("officerList", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_CHURCH_OFFICER));// 직분코드
+		mv.addObject("relationList", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_USER_RELATION));// 관계코드
+		mv.setViewName(ROOT_URL + SUCCEED_CONTRACTOR_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=CHANGE_REF_USER_INFO_URL)
+	public Object changeRefUserInfoHandler(String bunyangSeq, String refType, String userId, String popupTitle) {
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> refUserInfo = adminService.getBunyangRefUserInfo(bunyangSeq, refType, userId);
+		mv.addObject("refUserInfo", refUserInfo);
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("refType", refType);
+		mv.addObject("popupTitle", popupTitle);
+		mv.addObject("yearList", commonService.getYearList());
+		mv.addObject("officerList", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_CHURCH_OFFICER));// 직분코드
+		mv.addObject("relationList", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_USER_RELATION));// 관계코드
+		mv.setViewName(ROOT_URL + CHANGE_REF_USER_INFO_URL);
 		return mv;
 	}
 	
