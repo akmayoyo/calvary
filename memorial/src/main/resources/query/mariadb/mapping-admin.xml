@@ -128,6 +128,18 @@
         		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
           		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
         	END use_user_exp
+        	,CASE WHEN down_payment >= (total_price/10) THEN 'O' ELSE '' END AS contract_yn
+        	,CASE WHEN down_payment + balance_payment >= total_price THEN 'O' ELSE '' END AS full_payment_yn
+        	,CASE 
+        		WHEN cancel_yn = 'Y' THEN '취소'
+        		WHEN progress_status = 'N' THEN '신청미승인'
+        		WHEN progress_status = 'A' THEN '신청승인'
+        		WHEN progress_status = 'B' THEN '계약완료'
+        		WHEN progress_status = 'C' THEN '완납'
+        		WHEN progress_status = 'D' THEN '사용승인'
+        		WHEN progress_status = 'E' THEN '해약'
+        	END progress_status_exp
+        	,down_payment + balance_payment as total_payment
     	FROM
 		    (SELECT
 		      a.bunyang_seq as id
@@ -225,10 +237,13 @@
 		<if test="bunyang_seq != null and bunyang_seq != ''">
 		AND bunyang_seq like CONCAT('%',#{bunyang_seq},'%')
 		</if>
+		<if test="bunyang_no != null and bunyang_no != ''">
+		AND bunyang_no like CONCAT('%',#{bunyang_no},'%')
+		</if>
 		<if test="searchVal != null and searchVal != ''">
 		AND (apply_user_name like CONCAT('%',#{searchVal},'%') OR bunyang_no like CONCAT('%',#{searchVal},'%'))
 		</if>
-		ORDER BY t.bunyang_seq
+		ORDER BY t.bunyang_no
 		<if test="start != null">
 		LIMIT #{start}, #{count}
 		</if>
@@ -337,8 +352,14 @@
 			DATE_FORMAT(a.approval_date, '%Y-%m-%d') as approval_date,
 			DATE_FORMAT(a.approval_assign_date, '%Y-%m-%d %H:%i:%s') as approval_assign_date,
 			approval_file_seq,
-			is_maint_charger
-		FROM TB_BUNYANG_REF_USER a
+			is_maint_charger,
+			b.section_seq,
+			b.row_seq,
+			b.col_seq,
+			b.product_type,
+			b.assign_status,
+			a.cancel_seq
+		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_BUNYANG_GRAVE_ASSIGN b ON a.bunyang_seq = b.bunyang_seq AND (b.use_user_seq1 = a.user_seq or b.use_user_seq2 = a.user_seq)  
 		WHERE a.bunyang_seq = #{bunyangSeq}
     	AND a.ref_type = #{refType}
     	<if test="userId != null and userId != ''">
@@ -470,5 +491,39 @@
 		SET cancel_yn = 'Y'
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
+	
+	<!-- 관리비 납부 정보가 있는지 체크 -->
+	<select id="getMaintPaymentCount" parameterType="map" resultType="map">
+		SELECT 
+			count(1) as cnt
+		FROM TB_BUNYANG_MAINT_PAYMENT_INFO a
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		AND a.user_seq = #{userSeq}
+		AND a.maint_end_date >= CURDATE()
+	</select>
+	
+	<!-- 관리비 납부정보 생성 -->
+	<insert id="createMaintPaymentInfo" parameterType="map">
+		insert into TB_BUNYANG_MAINT_PAYMENT_INFO( BUNYANG_SEQ,USER_SEQ,PAYMENT_PRICE,MAINT_START_DATE,MAINT_END_DATE,MAINT_YEAR,PAYMENT_YN, PAYMENT_TYPE )
+		values(
+		#{bunyangSeq}, 
+		#{userSeq}, 
+		(select code_value from TB_COM_CODE a WHERE a.CODE_SEQ = 'MAINT_PRICE' ), 
+		(select str_to_date(concat(year(curdate()), date_format(date(max(update_date)), '%m%d')), '%Y%m%d') from TB_BUNYANG_HISTORY a WHERE a.bunyang_seq = #{bunyangSeq} AND a.progress_status = 'D'), 
+		(select DATE_ADD(DATE_ADD(str_to_date(concat(year(curdate()), date_format(date(max(update_date)), '%m%d')), '%Y%m%d'), INTERVAL 1 YEAR), INTERVAL -1 DAY) from TB_BUNYANG_HISTORY a WHERE a.bunyang_seq = #{bunyangSeq} AND a.progress_status = 'D'), 
+		year(curdate()), 
+		'N',
+		'BEFORE_USE'
+		)
+	</insert>
+	
+	<!-- 관리비 납부정보 삭제 -->
+	<delete id="deleteMaintPaymentInfo" parameterType="map">
+		DELETE FROM TB_BUNYANG_MAINT_PAYMENT_INFO 
+		WHERE bunyang_seq = #{bunyangSeq}
+		<if test="userSeq != null and userSeq > 0">
+	  	AND a.user_seq = #{userSeq}
+	  	</if>
+	</delete>
 	
 </mapper>

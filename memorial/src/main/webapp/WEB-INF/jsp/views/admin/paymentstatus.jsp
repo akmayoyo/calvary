@@ -55,7 +55,7 @@
 				<div class="col-xs-4 col-md-3 pr-10">
 					<select name="searchKey" class="form-control">
 						<option value="apply_user_name" <c:if test="${searchVo.searchKey == 'apply_user_name'}">selected</c:if>>신청자</option>
-						<option value="bunyang_seq" <c:if test="${searchVo.searchKey == 'bunyang_seq'}">selected</c:if>>번호</option>
+						<option value="bunyang_no" <c:if test="${searchVo.searchKey == 'bunyang_no'}">selected</c:if>>번호</option>
 					</select>
 				</div>
 				<div class="col-xs-8 col-md-9 pl-0">
@@ -86,12 +86,12 @@
 						<th scope="col">납부금액</th>
 						<th scope="col">완납<br>여부</th>
 						<th scope="col">사용승인<br>일자</th>
-						<th scope="col">비고</th>
+						<th scope="col">상태</th>
 					</tr>
 				</thead>
 				<tbody>
 					<c:forEach items="${bunyangList}" var="bunyangItem">
-						<tr bunyangSeq="${bunyangItem.bunyang_seq}" <c:if test="${bunyangItem.progress_status == 'E' || bunyangItem.progress_status == 'R'}">class="cancel"</c:if>>
+						<tr bunyangSeq="${bunyangItem.bunyang_seq}" <c:if test="${bunyangItem.cancel_yn == 'Y' || bunyangItem.progress_status == 'E' || bunyangItem.progress_status == 'R'}">class="cancel"</c:if>>
 							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.bunyang_no}</a></td>
 							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.apply_user_name}</a></td>
 							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.use_user_exp}</a></td>
@@ -103,12 +103,7 @@
 							<td>₩${cutil:getThousandSeperatorFormatString(bunyangItem.down_payment + bunyangItem.balance_payment)}원</td>
 							<td><c:if test="${not empty bunyangItem.full_payment_date}">O</c:if></td>
 							<td>${bunyangItem.use_approval_date}</td>
-							<td style="text-decoration:none;">
-								<c:choose>
-									<c:when test="${bunyangItem.progress_status == 'E'}">해약</c:when>
-									<c:when test="${bunyangItem.progress_status == 'R'}">반려</c:when>
-								</c:choose>
-							</td>
+							<td style="text-decoration:none;">${bunyangItem.progress_status_exp}</td>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -149,10 +144,11 @@ function _search(pageIndex) {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호", "신청자", "사용자", "신청형태", "부부형", "1인형", "총분양대금", "납부금액(계약금)","납부금액(잔금)","사용승인일자"];
-	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","total_price","down_payment","balance_payment","use_approval_date"];
-	var searchKeys = [""];
-	var searchValues = [""];
+	var excelHeaders = ["번호", "신청자", "사용자", "신청형태", "부부형", "1인형", "총분양대금","납부금액","계약여부","완납여부"];
+	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count"
+		,"single_type_count","total_price","total_payment","contract_yn","full_payment_yn"];
+	var searchKeys = ["${searchVo.searchKey}"];
+	var searchValues = ["${searchVo.searchVal}"];
 	var queryId = "admin.getBunyangList";
 	var title = "갈보리추모동산 대금납부현황";
 	var fileName = title + ".xlsx";

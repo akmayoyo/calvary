@@ -44,8 +44,8 @@
 		    ,COALESCE(d.address1, e.address1) AS address1
 		    ,COALESCE(d.address2, e.address2) AS address2
 		FROM TB_BUNYANG_GRAVE_ASSIGN a 
-		INNER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
-		INNER JOIN TB_BUNYANG_REF_USER c ON a.bunyang_seq = c.bunyang_seq AND c.ref_type = 'APPLY_USER'
+		LEFT OUTER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
+		LEFT OUTER JOIN TB_BUNYANG_REF_USER c ON a.bunyang_seq = c.bunyang_seq AND c.ref_type = 'APPLY_USER'
 		LEFT OUTER JOIN TB_BUNYANG_REF_USER d ON d.ref_type = 'USE_USER' and a.bunyang_seq = d.bunyang_seq and (a.use_user_seq1 = d.user_seq or a.use_user_seq2 = d.user_seq)
         LEFT OUTER JOIN TB_COM_USER e ON d.user_id = e.user_id
 		WHERE a.section_seq = #{sectionSeq}

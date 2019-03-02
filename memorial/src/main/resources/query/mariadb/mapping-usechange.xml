@@ -182,5 +182,26 @@
 		SET is_maint_charger = CASE WHEN user_id = #{maintCharger} THEN 'Y' ELSE 'N' END
 		WHERE bunyang_seq = #{bunyangSeq} AND ref_type = 'USE_USER'
 	</update>
+	
+	<!-- 사용(봉안)자 해약 정보 생성 -->
+	<insert id="insertCancelInfo" parameterType="map">
+	insert into TB_BUNYANG_CANCEL_INFO( CANCEL_SEQ,CANCEL_REASON,CANCEL_BANK,CANCEL_ACCOUNT,CANCEL_ACCOUNT_HOLDER,CANCEL_DEPOSIT_PLAN_DATE,CANCEL_TYPE, SURRENDER_VALUE, PENALTY_VALUE )
+	values(#{cancelSeq} , #{cancelReason}, #{cancelBank}, #{cancelAccount}, #{cancelAccountHolder}, #{cancelDepositPlanDate}, #{cancelType}, #{surrenderValue}, #{penaltyValue})
+	</insert>
+	
+	<!-- 사용자 cancel_seq 업데이트 -->
+	<update id="updateUseUserCancelSeq" parameterType="map">
+		UPDATE TB_BUNYANG_REF_USER
+		SET cancel_seq = #{cancelSeq}
+		WHERE bunyang_seq = #{bunyangSeq} AND ref_type = 'USE_USER'
+		AND user_id = #{userId}
+	</update>
+	
+	<!-- 사용자 해약시 배정된 동산정보가 있을 경우 삭제해줌 -->
+	<update id="cancelGraveAssign" parameterType="map">
+		UPDATE TB_BUNYANG_GRAVE_ASSIGN
+		SET ASSIGN_STATUS = 'AVAILABLE', BUNYANG_SEQ = NULL, USE_USER_SEQ1 = NULL, USE_USER_SEQ2 = NULL
+		WHERE BUNYANG_SEQ = #{bunyangSeq} AND (USE_USER_SEQ1 = #{userSeq} OR USE_USER_SEQ2 = #{userSeq})
+	</update>
 
 </mapper>

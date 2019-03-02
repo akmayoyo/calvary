@@ -1,6 +1,7 @@
 package com.calvary.common.util;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +95,8 @@ public class CommonUtil {
 				iRtn = (int)(long)val;
 			}else if(val instanceof Integer) {
 				iRtn = (int)val;
+			}else if(val instanceof BigInteger) {
+				iRtn = ((BigInteger)val).intValue();
 			}else if(val instanceof String) {
 				iRtn = Integer.parseInt((String)val);
 			}

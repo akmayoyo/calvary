@@ -14,6 +14,8 @@ public class SearchVo {
 	private String toDt;
 	private String progressStatus;
 	private int bunyangTimes;
+	private int maintYear;
+	private String maintStatus;
 	
 	public int getPageIndex() {
 		return pageIndex;
@@ -69,11 +71,24 @@ public class SearchVo {
 	public void setBunyangTimes(int bunyangTimes) {
 		this.bunyangTimes = bunyangTimes;
 	}
+	public int getMaintYear() {
+		return maintYear;
+	}
+	public void setMaintYear(int maintYear) {
+		this.maintYear = maintYear;
+	}
+	public String getMaintStatus() {
+		return maintStatus;
+	}
+	public void setMaintStatus(String maintStatus) {
+		this.maintStatus = maintStatus;
+	}
 	@Override
 	public String toString() {
 		return "SearchVo [pageIndex=" + pageIndex + ", countPerPage=" + countPerPage + ", totalCount=" + totalCount
 				+ ", searchKey=" + searchKey + ", searchVal=" + searchVal + ", fromDt=" + fromDt + ", toDt=" + toDt
-				+ ", progressStatus=" + progressStatus + ", bunyangTimes=" + bunyangTimes + "]";
+				+ ", progressStatus=" + progressStatus + ", bunyangTimes=" + bunyangTimes + ", maintYear=" + maintYear
+				+ ", maintStatus=" + maintStatus + "]";
 	}
 	
 }

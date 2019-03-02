@@ -34,13 +34,22 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 분양리스트 조회 
 	 */
-	public List<Object> getBunyangList(SearchVo searchVo) {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getBunyangList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
 		List<Object> list = commonDao.selectList("admin.getBunyangList", parameter); 
-		return list;
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getBunyangList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
 	}
 	
 	/** 
@@ -519,6 +528,39 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("userId", userId);
 		iRslt += commonDao.update("approval.updateApprovalAssignDate", param);
 		return iRslt; 
+	}
+	
+	/**
+	 * 관리비 납부 정보 생성 
+	 */
+	@SuppressWarnings("unchecked")
+	@Transactional
+	public int createMaintPaymentInfo(String bunyangSeq) throws Exception {
+		int iRslt = 0;
+		// 사용(봉안)자 리스트 조회
+		List<Object> userList = getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
+		if(userList != null && userList.size() > 0) {
+			for(int i = 0; i < userList.size(); i++) {
+				Map<String, Object> userInfo = (Map<String, Object>)userList.get(i);
+				int userSeq = CommonUtil.convertToInt(userInfo.get("user_seq"));
+				String cancelSeq = (String)userInfo.get("cancel_seq");
+				if(!StringUtils.isEmpty(cancelSeq)) {// 해약된건
+					continue;
+				}
+				Map<String, Object> param = new HashMap<String, Object>();
+				param.put("bunyangSeq", bunyangSeq);
+				param.put("userSeq", userSeq);
+				Map<String, Object> tmp = (HashMap<String, Object>)commonDao.selectOne("admin.getMaintPaymentCount", param);
+				int cnt = 0;
+				if(tmp != null) {
+					cnt = CommonUtil.convertToInt(tmp.get("cnt"));
+				}
+				if(cnt == 0) {
+					iRslt += commonDao.insert("admin.createMaintPaymentInfo", param);
+				}
+			}
+		}
+		return iRslt;
 	}
 	
 	
@@ -1032,6 +1074,93 @@ public class AdminServiceImpl implements IAdminService {
 		return iRslt;
 	}
 	
+	/**
+	 * 사용(봉안)자 해약 처리
+	 * @param bunyangSeq
+	 * @param userId1 사용자 아이디
+	 * @param userId2 부부형의 경우만 사용
+	 * @param cancelReason 해약사유
+	 * @param cancelBank 해약금 입금은행
+	 * @param cancelAccount 해약금 입금계좌
+	 * @param cancelAccountHolder 해약금 예금주
+	 * @param cancelDepositPlanDate 입금예정일
+	 * @param surrenderValue 해약반환금
+	 * @param penaltyValue 위약금
+	 * @return
+	 * @throws Exception
+	 */
+	@Transactional
+	public int cancelUseUser(String bunyangSeq
+			,String userId1
+			,String userId2
+			,String cancelReason
+			,String cancelBank
+			,String cancelAccount
+			,String cancelAccountHolder
+			,String cancelDepositPlanDate
+			,int surrenderValue
+			,int penaltyValue) throws Exception {
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		
+		String cancelSeq = String.valueOf(commonService.getSeqNexVal("CANCEL_SEQ"));
+		
+		// 해약정보 생성
+		param = new HashMap<String, Object>();
+		param.put("cancelSeq", cancelSeq);
+		param.put("cancelReason", cancelReason);
+		param.put("cancelBank", cancelBank);
+		param.put("cancelAccount", cancelAccount);
+		param.put("cancelAccountHolder", cancelAccountHolder);
+		param.put("cancelDepositPlanDate", cancelDepositPlanDate);
+		param.put("cancelType", "USE_USER");
+		param.put("surrenderValue", surrenderValue);
+		param.put("penaltyValue", penaltyValue);
+		iRslt += commonDao.insert("usechange.insertCancelInfo", param);
+		
+		// 사용자 cancel_seq 업데이트
+		param = new HashMap<String, Object>();
+		param.put("cancelSeq", cancelSeq);
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("userId", userId1);
+		iRslt += commonDao.update("usechange.updateUseUserCancelSeq", param);
+		
+		Map<String, Object> userInfo = getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId1);
+		
+		// 배정된 동산정보가 있을 경우 삭제해줌
+		param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("userSeq", userInfo.get("user_seq"));
+		iRslt += commonDao.update("usechange.cancelGraveAssign", param);
+		
+		// 부부형의 경우만
+		if(!StringUtils.isEmpty(userId2)) {
+			param = new HashMap<String, Object>();
+			param.put("cancelSeq", cancelSeq);
+			param.put("bunyangSeq", bunyangSeq);
+			param.put("userId", userId2);
+			iRslt += commonDao.update("usechange.updateUseUserCancelSeq", param);
+			
+			userInfo = getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId2);
+			param = new HashMap<String, Object>();
+			param.put("bunyangSeq", bunyangSeq);
+			param.put("userSeq", userInfo.get("user_seq"));
+			iRslt += commonDao.update("usechange.cancelGraveAssign", param);
+		}
+		
+		// 해약금 출금내역 업데이트
+		int paymentAmount = surrenderValue;
+		String paymentMethod = CalvaryConstants.PAYMENT_METHOD_TRANSFER;
+		String paymentDate = cancelDepositPlanDate;
+		String paymentDivision = CalvaryConstants.PAYMENT_DIVISION_WITHDRAWAL;
+		String paymentType = CalvaryConstants.PAYMENT_TYPE_CANCEL_PAYMENT;
+		String paymentUser = cancelAccountHolder;
+		String remark = cancelReason;
+		
+		iRslt += createPaymentHistory(bunyangSeq, paymentAmount, paymentMethod, paymentDate, paymentDivision, paymentType, paymentUser, remark);
+		return iRslt;
+	}
+	
 	
 	//===============================================================================
 	// 분양현황
@@ -1076,20 +1205,83 @@ public class AdminServiceImpl implements IAdminService {
 	 * 관리비납부현황조회
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> getMaintPaymentStatus() {
-		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("bunyangstatus.getMaintPaymentStatus", null);
+	public Map<String, Object> getMaintPaymentStatus(int maintYear) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("maintYear", maintYear);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("bunyangstatus.getMaintPaymentStatus", parameter);
 		return rtnMap;
 	}
 	
 	/** 
 	 * 관리비납부 리스트 조회
 	 */
-	public List<Object> getMaintPaymentList(SearchVo searchVo) {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getMaintPaymentList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
-		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		parameter.put("apply_user_name", searchVo.getSearchVal());
+		parameter.put("maintYear", searchVo.getMaintYear());
+		parameter.put("maintStatus", searchVo.getMaintStatus());
 		List<Object> list = commonDao.selectList("bunyangstatus.getMaintPaymentList", parameter); 
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getMaintPaymentList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 관리비 납부/미납 상세정보 조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getMaintPaymentDetailList(SearchVo searchVo, String bunyangSeq, String paymentYn) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("paymentYn", paymentYn);
+		parameter.put("maintYear", searchVo.getMaintYear());
+		List<Object> list = commonDao.selectList("bunyangstatus.getMaintPaymentDetailList", parameter); 
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getMaintPaymentDetailList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 관리비 납부 연도 조회(2018~최신연도)
+	 */
+	public List<Object> getMaintYearList() {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		List<Object> list = commonDao.selectList("bunyangstatus.getMaintYearList", parameter);
+		return list;
+	}
+	
+	/**
+	 * 입출금 현황 조회
+	 */
+	public List<Object> getBankStatusList() {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		List<Object> list = commonDao.selectList("bunyangstatus.getBankStatusList", parameter);
+		return list;
+	}
+	
+	/**
+	 * 추모동산 사용현황 조회
+	 */
+	public List<Object> getGraveStatusList() {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		List<Object> list = commonDao.selectList("bunyangstatus.getGraveStatusList", parameter);
 		return list;
 	}
 	

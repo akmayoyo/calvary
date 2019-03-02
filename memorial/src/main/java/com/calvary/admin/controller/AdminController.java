@@ -523,6 +523,10 @@ public class AdminController {
 		bunyangInfoVo.setBunyangSeq(bunyangSeq);
 		bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_D);
 		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
+		if(iRslt > 0) {
+			// 사용승인 이후 관리비가 발생하기 때문에 관리비 납부여부 체크를 위한 정보를 생성한다.
+			iRslt += adminService.createMaintPaymentInfo(bunyangSeq);
+		}
 		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);
 		return rtnMap;
@@ -874,6 +878,8 @@ public class AdminController {
 	public static final String CHANGE_REF_USER_INFO_URL = "/changeRefUserInfo";
 	/** 관리비 납부자 변경  URL */
 	public static final String CHANGE_SERVICE_CHARGER_URL = "/changeServiceCharger";
+	/** 사용(봉안)자 해약 처리  URL */
+	public static final String CANCEL_USE_USER_URL = "/cancelUseUser";
 	
 	/** 
 	 * 사용계약 변경 및 해약 페이지
@@ -1097,6 +1103,30 @@ public class AdminController {
 		return rtnMap;
 	}
 	
+	/** 
+	 * 사용(봉안)자 해약 처리
+	 */
+	@RequestMapping(value=CANCEL_USE_USER_URL)
+	@ResponseBody
+	public Object cancelUseUserHandler(String bunyangSeq
+			,String userId1
+			,String userId2
+			,String cancelReason
+			,String cancelBank
+			,String cancelAccount
+			,String cancelAccountHolder
+			,String cancelDepositPlanDate
+			,int surrenderValue
+			,int penaltyValue) throws Exception{
+		boolean bRslt = false;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		// 사용자 정보 변경
+		int iRslt = adminService.cancelUseUser(bunyangSeq, userId1, userId2, cancelReason, cancelBank, cancelAccount, cancelAccountHolder, cancelDepositPlanDate, surrenderValue, penaltyValue);
+		bRslt = iRslt > 0;
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
 	
 	//===============================================================================
 	// 분양현황
@@ -1107,13 +1137,16 @@ public class AdminController {
 	/** 
 	 * 분양현황 페이지
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=BUNYANG_STATUS_URL)
 	public Object bunyangStatusHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU03");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU03_01");
-		List<Object> bunyangList = adminService.getBunyangList(searchVo);
-		searchVo.setTotalCount(commonService.getTotalCount());
+		Map<String, Object> rtnMap = adminService.getBunyangList(searchVo);
+		List<Object> bunyangList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
 		Map<String, Object> statusByGraveType = adminService.getStatusByGraveType();
 		Map<String, Object> statusByProductType = adminService.getStatusByProductType();
 		Map<String, Object> statusByProgress = adminService.getStatusByProgress();
@@ -1140,13 +1173,16 @@ public class AdminController {
 	/** 
 	 * 대금납부현황 페이지
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=PAYMENT_STATUS_URL)
 	public Object paymentStatusHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU03");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU03_02");
-		List<Object> bunyangList = adminService.getBunyangList(searchVo);
-		searchVo.setTotalCount(commonService.getTotalCount());
+		Map<String, Object> rtnMap = adminService.getBunyangList(searchVo);
+		List<Object> bunyangList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
 		Map<String, Object> statusByGraveType = adminService.getStatusByGraveType();
 		Map<String, Object> statusByProductType = adminService.getStatusByProductType();
 		Map<String, Object> paymentStatus = adminService.getPaymentStatus();
@@ -1173,22 +1209,109 @@ public class AdminController {
 	/** 
 	 * 관리비납부현황 페이지
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=MAINT_PAYMENT_STATUS_URL)
 	public Object maintPaymentStatusHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU03");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU03_03");
-		List<Object> maintPaymentList = adminService.getMaintPaymentList(searchVo);
-		searchVo.setTotalCount(commonService.getTotalCount());
-		Map<String, Object> maintPaymentStatus = adminService.getMaintPaymentStatus();
+		List<Object> maintYearList = adminService.getMaintYearList();
+		if(searchVo.getMaintStatus() == null && maintYearList != null && maintYearList.size() > 0) {
+			Map<String, Object> tmp = (HashMap<String, Object>)maintYearList.get(0);
+			searchVo.setMaintYear(CommonUtil.convertToInt(tmp.get("yearval")));
+			searchVo.setMaintStatus("ALL");
+		}
+		Map<String, Object> rtnMap = adminService.getMaintPaymentList(searchVo);
+		List<Object> maintPaymentList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
+		Map<String, Object> maintPaymentStatus = adminService.getMaintPaymentStatus(searchVo.getMaintYear());
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("pMenuInfo", pMenuInfo);
 		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
 		mv.addObject("maintPaymentList", maintPaymentList);
+		mv.addObject("maintYearList", maintYearList);
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("maintPaymentStatus", maintPaymentStatus);
 		mv.setViewName(ROOT_URL + MAINT_PAYMENT_STATUS_URL);
+		return mv;
+	}
+	
+	
+	//===============================================================================
+	// 일출금현황
+	//===============================================================================
+	/** 일출금현황  URL */
+	public static final String BANK_STATUS_URL = "/bankStatus";
+	
+	/** 
+	 * 입출금현황 페이지
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=BANK_STATUS_URL)
+	public Object bankStatusHandler(SearchVo searchVo, String paymentDivision, String paymentType, String parentCodeSeq) {
+		SimpleDateFormat sf = new SimpleDateFormat("yyyyMMdd");
+		// 검색기간은 default 1주일
+		if(StringUtils.isEmpty(searchVo.getFromDt()) && StringUtils.isEmpty(searchVo.getToDt())) {
+			Calendar cl = Calendar.getInstance();
+			cl.add(Calendar.MONTH, -1);
+			searchVo.setFromDt(sf.format(cl.getTime()));
+			searchVo.setToDt(sf.format(new Date()));
+		}
+		String searchPaymentDivision = paymentDivision;
+		if(StringUtils.isEmpty(searchPaymentDivision)) {
+			searchPaymentDivision = parentCodeSeq;
+		}
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		List<Object> depositTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_DEPOSIT_TYPE);
+		List<Object> withdrawalTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_WITHDRAWAL_TYPE);
+		Map<String, Object> rtnMap = adminService.getPaymentList(searchVo, paymentType, searchPaymentDivision);
+		List<Object> depositWithDrawlList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
+		ModelAndView mv = new ModelAndView();
+		List<Object> bankStatusList = adminService.getBankStatusList();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU03");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU03_04");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("paymentDivision", paymentDivision);
+		mv.addObject("paymentType", paymentType);
+		mv.addObject("parentCodeSeq", parentCodeSeq);
+		mv.addObject("depositWithDrawlList", depositWithDrawlList);
+		mv.addObject("bankStatusList", bankStatusList);
+		mv.addObject("depositTypeList", depositTypeList);
+		mv.addObject("withdrawalTypeList", withdrawalTypeList);
+		mv.setViewName(ROOT_URL + BANK_STATUS_URL);
+		return mv;
+	}
+	
+	
+	//===============================================================================
+	// 추모동산 사용(봉안)현황
+	//===============================================================================
+	/** 추모동산 사용(봉안)현황  URL */
+	public static final String GRAVE_STATUS_URL = "/graveStatus";
+	
+	/** 
+	 * 입출금현황 페이지
+	 */
+	@RequestMapping(value=GRAVE_STATUS_URL)
+	public Object graveStatusHandler(SearchVo searchVo, String paymentDivision, String paymentType, String parentCodeSeq) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU03");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU03_05");
+		List<Object> graveStatusList = adminService.getGraveStatusList();
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("graveStatusList", graveStatusList);
+		mv.addObject("searchVo", searchVo);
+		mv.setViewName(ROOT_URL + GRAVE_STATUS_URL);
 		return mv;
 	}
 	

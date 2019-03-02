@@ -19,7 +19,7 @@
 			sum(couple_type_count) as  couple_cnt
 		    ,sum(single_type_count) as single_cnt
 		FROM TB_BUNYANG_INFO a
-		WHERE a.progress_status not in ('E', 'R')
+		WHERE a.progress_status not in ('E', 'R') AND (a.cancel_yn is null or a.cancel_yn = 'N')
 		) t1,
 		(SELECT
 			sum(case when product_type = 'COUPLE' then 1 else 0 end) as total_couple_cnt
@@ -34,7 +34,7 @@
 			sum(case when product_type = 'EACH' then 1 else 0 end) each_cnt
 		    ,sum(case when product_type = 'FAMILY' then 1 else 0 end) family_cnt 
 		FROM TB_BUNYANG_INFO a
-		WHERE a.progress_status not in ('E', 'R')
+		WHERE a.progress_status not in ('E', 'R') AND (a.cancel_yn is null or a.cancel_yn = 'N')
     </select>
     
     <!-- 진행상태 별 신청현황조회 -->
@@ -65,7 +65,7 @@
 		(select 
 			sum((COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count)) as total_price 
 		from TB_BUNYANG_INFO a 
-		where a.PROGRESS_STATUS not in('E', 'R')
+		where a.PROGRESS_STATUS not in('E', 'R') AND (a.cancel_yn is null or a.cancel_yn = 'N')
 		) t1,
 		(SELECT
 			sum(payment_amount) total_payment
@@ -77,62 +77,281 @@
     
     <!-- 관리비납부현황조회 -->
     <select id="getMaintPaymentStatus" parameterType="map" resultType="map">
-    	select 
-			COALESCE(sum(case when PAYMENT_METHOD = 'TRANSFER' then payment_amount else 0 end),0) as transfer_amount
-		    ,COALESCE(sum(case when PAYMENT_METHOD = 'CASH' then payment_amount else 0 end),0) as cash_amount
-		    ,COALESCE(sum(case when PAYMENT_METHOD = 'TRANSFER' then 1 else 0 end),0) as transfer_cnt
-		    ,COALESCE(sum(case when PAYMENT_METHOD = 'CASH' then 1 else 0 end),0) as cash_cnt
-		from TB_BUNYANG_PAYMENT_HISTORY a
-		where a.payment_type = 'MAINT_PAYMENT'
+    	SELECT
+			sum(total_price) total_price
+		    ,sum(total_payment) total_payment
+		    ,sum(case when total_cnt = payment_cnt then 1 else 0 end) as full_payment_cnt
+		    ,sum(case when payment_cnt = 0 then 1 else 0 end) non_payment_cnt
+		    ,sum(case when payment_cnt > 0 AND not_payment_cnt > 0 then 1 else 0 end) partial_payment_cnt
+		FROM
+		(SELECT
+			bunyang_seq
+			,sum(payment_price) total_price
+		    ,sum(case when payment_yn = 'Y' then payment_price else 0 end) total_payment
+		    ,count(1) total_cnt
+		    ,sum(case when payment_yn = 'Y' then 1 else 0 end) payment_cnt
+		    ,sum(case when payment_yn = 'N' then 1 else 0 end) not_payment_cnt
+		from TB_BUNYANG_MAINT_PAYMENT_INFO a
+		where 1=1
+		<if test="maintYear != null and maintYear > 0">
+		and maint_year = #{maintYear} 
+		</if>
+		and exists(select 1 from TB_BUNYANG_REF_USER ru where ru.ref_type = 'USE_USER' and ru.bunyang_seq = a.bunyang_seq and ru.user_seq = a.user_seq and ru.cancel_seq is null)
+		group by bunyang_seq
+		) t
+    </select>
+    
+    <!-- 관리비 납부 연도 조회(2018~최신연도) -->
+    <select id="getMaintYearList" parameterType="map" resultType="map">
+    	<![CDATA[
+	    select 
+			year(curdate()) - seq + 1 as yearval 
+		from seq_1_to_1000
+		where seq <= (year(curdate()) - 2018 + 1)
+		order by yearval desc
+		]]>
     </select>
     
     <!-- 관리비납부현황조회 -->
     <select id="getMaintPaymentList" parameterType="map" resultType="map">
-    	select
-    		SQL_CALC_FOUND_ROWS
+    	SELECT
     		t.*
-    	from
-	    	(select 
-				a.bunyang_seq,
-				b.user_name as apply_user_name,
-				b.birth_date as apply_user_birth_date,
-				b.church_officer as apply_user_church_officer,
-				b.diocese as apply_user_diocese,
-				a.payment_type,
-			    a.payment_amount,
-			    a.payment_method,
-			    case a.payment_method when 'TRANSFER' then '관리비' when 'CASH' then '헌금' else a.payment_method end as payment_method_name,
-			    DATE_FORMAT(a.payment_date, '%Y-%m-%d') AS payment_date,
-			    a.payment_user,
-			    (select user_name from TB_COM_USER cu where cu.user_id = a.payment_user) as payment_user_name,
-			    a.create_user,
-			    (select user_name from TB_COM_USER cu where cu.user_id = a.create_user) as create_user_name,
-			    DATE_FORMAT(a.create_date, '%Y-%m-%d') AS create_date
-			from TB_BUNYANG_PAYMENT_HISTORY a INNER JOIN
-			(SELECT
-				bunyang_seq
-			  	,user_id
-				,user_name
-				,birth_date
-				,church_officer
-				,diocese
-			FROM TB_BUNYANG_REF_USER a
-			WHERE ref_type = 'APPLY_USER'
-		    ) b ON a.bunyang_seq = b.bunyang_seq
-			where a.payment_type = 'MAINT_PAYMENT'
-			<if test="bunyang_seq != null and bunyang_seq != ''">
-			AND a.bunyang_seq like CONCAT('%',#{bunyang_seq},'%')
-			</if>
-			) t
+    		,case 
+    			when payment_cnt = total_cnt then '완납'
+    			when payment_cnt = 0 then '미납'
+    			when payment_cnt > 0 AND not_payment_cnt > 0 then '부분납부'
+    		end maint_status_exp
+    	FROM
+    	(SELECT
+			t2.bunyang_seq
+		    ,t2.bunyang_no
+		    ,t3.user_name as apply_user_name
+		    ,t1.total_price
+		    ,t1.total_payment
+			,t1.total_cnt
+			,t1.payment_cnt
+		    ,t1.not_payment_cnt
+		    ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = t1.bunyang_seq and bh.progress_status = 'D') use_approval_date
+		    ,CASE 
+        		WHEN t4.cnt > 1 THEN CONCAT(t4.user_name,'(',t4.relation_type_name,')',' 외 ',t4.cnt-1,'명')
+          		ELSE  CONCAT(t4.user_name,'(',t4.relation_type_name,')')
+        	END use_user_exp
+		FROM
+		(SELECT
+			a.bunyang_seq
+		    ,sum(payment_price) total_price
+		    ,sum(case when payment_yn = 'Y' then payment_price else 0 end) total_payment
+		    ,count(1) total_cnt
+		    ,sum(case when payment_yn = 'Y' then 1 else 0 end) payment_cnt
+		    ,sum(case when payment_yn = 'N' then 1 else 0 end) not_payment_cnt
+		from TB_BUNYANG_MAINT_PAYMENT_INFO a
 		where 1=1
-		<if test="apply_user_name != null and apply_user_name != ''">
-		and apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		<if test="maintYear != null and maintYear > 0">
+		and maint_year = #{maintYear} 
 		</if>
-		order by payment_date desc
+		and exists(select 1 from TB_BUNYANG_REF_USER ru where ru.ref_type = 'USE_USER' and ru.bunyang_seq = a.bunyang_seq and ru.user_seq = a.user_seq and ru.cancel_seq is null)
+		group by a.bunyang_seq
+		) t1 
+		inner join TB_BUNYANG_INFO t2 on t1.bunyang_seq = t2.bunyang_seq AND t2.progress_status not in ('E', 'R') AND (t2.cancel_yn is null or t2.cancel_yn != 'Y')
+		inner join TB_BUNYANG_REF_USER t3 on t1.bunyang_seq = t3.bunyang_seq AND t3.ref_type = 'APPLY_USER'
+		inner join
+			(SELECT
+				*
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
+				,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = t.relation_type AND cc.parent_code_seq = 'USER_RELATION') relation_type_name
+			FROM
+				(SELECT
+					bunyang_seq
+				  	,user_id
+					,user_name
+					,relation_type
+					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+                    ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
+				FROM      
+					(SELECT 
+						 bunyang_seq
+					   	,user_id
+					   	,user_name
+					   	,relation_type 
+					FROM TB_BUNYANG_REF_USER a
+					WHERE a.ref_type = 'USE_USER'
+					AND a.cancel_seq is null
+					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
+				ORDER BY bunyang_seq, CASE WHEN relation_type = 'ONESELF' THEN 1 ELSE 2 end, user_name
+			  ) t
+			  WHERE rn = 1
+			) t4 ON t1.bunyang_seq = t4.bunyang_seq
+		) t
+		WHERE 1=1
+		<if test="apply_user_name != null and apply_user_name != ''">
+		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		</if>
+		<if test='maintStatus == "1"'>
+		AND payment_cnt = total_cnt
+		</if>
+		<if test='maintStatus == "2"'>
+		AND payment_cnt = 0
+		</if>
+		<if test='maintStatus == "3"'>
+		<![CDATA[
+		AND payment_cnt > 0 AND not_payment_cnt > 0
+		]]>
+		</if>
+		ORDER BY t.bunyang_no
 		<if test="start != null">
 		LIMIT #{start}, #{count}
 		</if>
     </select>
     
+    <!-- 관리비 납부/미납 상세정보 조회 -->
+    <select id="getMaintPaymentDetailList" parameterType="map" resultType="map">
+    	SELECT
+			t1.maint_year
+		    ,t1.payment_price
+		    ,date_format(t1.maint_start_date, '%Y-%m-%d') as maint_start_date
+		    ,date_format(t1.maint_end_date, '%Y-%m-%d') as maint_end_date
+		    ,CONCAT(date_format(t1.maint_start_date, '%Y-%m-%d'),' ~ ',date_format(t1.maint_end_date, '%Y-%m-%d')) as maint_period
+		    ,t1.payment_type
+		    ,CASE 
+		    	WHEN t1.payment_type = 'BEFORE_USE' THEN '정기' 
+		    	WHEN t1.payment_type = 'AFTER_USE' THEN '선납(30년)'
+		    END as payment_type_name
+		    ,t2.user_name
+		    ,t2.birth_date
+		    ,t2.relation_type
+		    ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = t2.relation_type AND cc.parent_code_seq = 'USER_RELATION') relation_type_name
+		    ,t2.mobile
+		    ,t2.post_number
+		    ,t2.address1
+			,t2.address2
+			,t3.user_name as apply_user_name
+			,t4.bunyang_no
+			,CASE 
+				WHEN t4.service_charge_type = 'APPLY_USER' THEN t3.user_name
+				WHEN t4.service_charge_type = 'USE_USER' THEN t2.user_name
+				WHEN t4.service_charge_type = 'REPRESENT' THEN (select user_name from TB_BUNYANG_REF_USER ru WHERE ru.bunyang_seq = t1.bunyang_seq AND ru.ref_type = 'USE_USER' AND ru.is_maint_charger = 'Y')
+			END charger_name
+			,CASE 
+				WHEN t4.service_charge_type = 'APPLY_USER' THEN t3.mobile
+				WHEN t4.service_charge_type = 'USE_USER' THEN t2.mobile
+				WHEN t4.service_charge_type = 'REPRESENT' THEN (select mobile from TB_BUNYANG_REF_USER ru WHERE ru.bunyang_seq = t1.bunyang_seq AND ru.ref_type = 'USE_USER' AND ru.is_maint_charger = 'Y')
+			END charger_phone
+			,CASE 
+				WHEN t4.service_charge_type = 'APPLY_USER' THEN CONCAT('(', t3.post_number, ')', t3.address1, t3.address2)
+				WHEN t4.service_charge_type = 'USE_USER' THEN CONCAT('(', t2.post_number, ')', t2.address1, t2.address2)
+				WHEN t4.service_charge_type = 'REPRESENT' THEN (select CONCAT('(', post_number, ')', address1, address2) from TB_BUNYANG_REF_USER ru WHERE ru.bunyang_seq = t1.bunyang_seq AND ru.ref_type = 'USE_USER' AND ru.is_maint_charger = 'Y')
+			END charger_address
+		FROM TB_BUNYANG_MAINT_PAYMENT_INFO t1 
+		INNER JOIN TB_BUNYANG_REF_USER t2 ON t1.bunyang_seq = t2.bunyang_seq AND t1.user_seq = t2.user_seq AND t2.ref_type = 'USE_USER'
+		INNER JOIN TB_BUNYANG_REF_USER t3 ON t1.bunyang_seq = t3.bunyang_seq AND t3.ref_type = 'APPLY_USER'
+		INNER JOIN TB_BUNYANG_INFO t4 ON t1.bunyang_seq = t4.bunyang_seq
+		WHERE 1=1
+		and exists(select 1 from TB_BUNYANG_REF_USER ru where ru.ref_type = 'USE_USER' and ru.bunyang_seq = t1.bunyang_seq and ru.user_seq = t1.user_seq and ru.cancel_seq is null)
+		and t4.progress_status not in ('E', 'R') AND (t4.cancel_yn is null or t4.cancel_yn != 'Y')
+		<if test="bunyangSeq != null and bunyangSeq != ''">
+		AND t1.bunyang_seq = #{bunyangSeq}
+		</if>
+		<if test="maintYear != null and maintYear > 0">
+		AND t1.maint_year = #{maintYear} 
+		</if>
+		AND t1.payment_yn = #{paymentYn}
+		ORDER BY t4.bunyang_no, t1.maint_year, t1.user_seq
+		<if test="start != null">
+		LIMIT #{start}, #{count}
+		</if>
+    </select>
+    
+    <!-- 입출금 현황 조회 -->
+    <select id="getBankStatusList" parameterType="map" resultType="map">
+    	SELECT
+    		t.*
+    	FROM
+    	(SELECT
+    		year(payment_date) as year
+    		,sum(case when payment_division = 'deposit' then payment_amount else 0 end) as deposit_amount
+    		,sum(case when payment_division = 'withdrawal' then payment_amount else 0 end) as withdrawal_amount
+    	FROM TB_BUNYANG_PAYMENT_HISTORY
+    	GROUP BY YEAR(payment_date)
+    	ORDER BY YEAR(payment_date)
+    	) t
+    	UNION ALL
+        SELECT
+    		'All' as year
+    		,sum(case when payment_division = 'deposit' then payment_amount else 0 end) as deposit_amount
+    		,sum(case when payment_division = 'withdrawal' then payment_amount else 0 end) as withdrawal_amount
+    	FROM TB_BUNYANG_PAYMENT_HISTORY
+    </select>
+    
+    <!-- 추모동산 사용현황 조회 -->
+    <select id="getGraveStatusList" parameterType="map" resultType="map">
+    	select
+         t.*
+        from
+        (select 
+        	grave_type
+        	,section_seq
+            ,sum(case when assign_status = 'AVAILABLE' then 1 else 0 end) * 2 available_cnt
+            ,sum(case when assign_status = 'RESERVED' then 1 else 0 end) * 2 reserved_cnt
+            ,sum(case when assign_status = 'OCCUPIED' then 1 else 0 end) * 2 occupied_cnt
+            ,count(1) * 2 total_cnt
+        from TB_BUNYANG_GRAVE_ASSIGN a
+        where grave_type = 'COUPLE'
+        GROUP BY GRAVE_TYPE, SECTION_SEQ
+        ORDER BY SECTION_SEQ
+        ) t
+        
+        union all
+        
+        select 
+        	'sub_total' as grave_type
+        	,'sub_total' as section_seq
+            ,sum(case when assign_status = 'AVAILABLE' then 1 else 0 end) * 2 available_cnt
+            ,sum(case when assign_status = 'RESERVED' then 1 else 0 end) * 2 reserved_cnt
+            ,sum(case when assign_status = 'OCCUPIED' then 1 else 0 end) * 2 occupied_cnt
+            ,count(1) * 2 total_cnt
+        from TB_BUNYANG_GRAVE_ASSIGN a
+        where grave_type = 'COUPLE'
+        
+        union ALL
+        
+		select
+         t.*
+        from
+        (select 
+        	grave_type
+        	,section_seq
+            ,sum(case when assign_status = 'AVAILABLE' then 1 else 0 end) available_cnt
+            ,sum(case when assign_status = 'RESERVED' then 1 else 0 end) reserved_cnt
+            ,sum(case when assign_status = 'OCCUPIED' then 1 else 0 end) occupied_cnt
+            ,count(1) total_cnt
+        from TB_BUNYANG_GRAVE_ASSIGN a
+        where grave_type = 'SINGLE'
+        GROUP BY GRAVE_TYPE, SECTION_SEQ
+        ORDER BY SECTION_SEQ
+        ) t
+        
+        union all
+        
+        select 
+        	'sub_total' as grave_type
+        	,'sub_total' as section_seq
+            ,sum(case when assign_status = 'AVAILABLE' then 1 else 0 end) available_cnt
+            ,sum(case when assign_status = 'RESERVED' then 1 else 0 end) reserved_cnt
+            ,sum(case when assign_status = 'OCCUPIED' then 1 else 0 end) occupied_cnt
+            ,count(1) total_cnt
+        from TB_BUNYANG_GRAVE_ASSIGN a
+        where grave_type = 'SINGLE'
+        
+        UNION ALL
+        
+        select 
+        	'total' as grave_type
+        	,'total' as section_seq
+            ,sum((case when assign_status = 'AVAILABLE' then 1 else 0 end) * (case when grave_type = 'couple' then 2 else 1 end)) available_cnt
+            ,sum((case when assign_status = 'RESERVED' then 1 else 0 end) * (case when grave_type = 'couple' then 2 else 1 end)) reserved_cnt
+            ,sum((case when assign_status = 'OCCUPIED' then 1 else 0 end) * (case when grave_type = 'couple' then 2 else 1 end)) occupied_cnt
+            ,sum(case when grave_type = 'couple' then 2 else 1 end) total_cnt
+        from TB_BUNYANG_GRAVE_ASSIGN a
+    </select>
 
 </mapper>

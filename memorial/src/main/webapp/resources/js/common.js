@@ -346,7 +346,11 @@
 		            "cancelLabel": "취소"
 			}
 		}, opt);
-		return el.daterangepicker(opt);
+		return el.daterangepicker(opt,
+				function(start, end, label) {
+					$(this)[0].element.change();
+				}
+		);
 	}
 
 	var common = {};

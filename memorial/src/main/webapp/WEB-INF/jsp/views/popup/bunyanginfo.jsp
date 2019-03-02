@@ -111,7 +111,8 @@
         		<col width="8%">
         		<col width="10%">
         		<col width="12%">
-        		<col width="30%">
+        		<col width="22%">
+        		<col width="8%">
         		<col width="8%">
         		<col width="8%">
         		<col width="8%">
@@ -126,6 +127,7 @@
                     <th scope="col">관계</th>
                     <th scope="col">교인여부</th>
                     <th scope="col">이장대상</th>
+                    <th scope="col">상태</th>
                 </tr>
             </thead>
             <tbody>
@@ -149,6 +151,13 @@
             		<td>${use.relation_type_name}</td>
             		<td>${use.is_church_person}</td>
             		<td>${use.is_move}</td>
+            		<td>
+            		<c:choose>
+            			<c:when test="${not empty use.cancel_seq}">해약</c:when>
+            			<c:when test="${not empty use.approval_no}">사용승인</c:when>
+            			<c:otherwise>사용미승인</c:otherwise>
+            		</c:choose>
+            		</td>
             	</tr>
             	</c:forEach>
             </tbody>

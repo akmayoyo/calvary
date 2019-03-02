@@ -128,15 +128,16 @@
     <div class="table-responsive">
         <table id="tblUseUser" class="table table-style table-bordered">
         	<colgroup>
-        		<col width="8%">
-        		<col width="8%">
-        		<col width="10%">
-        		<col width="12%">
-        		<col width="30%">
-        		<col width="8%">
-        		<col width="8%">
-        		<col width="8%">
         		<col width="5%">
+        		<col width="5%">
+        		<col width="8%">
+        		<col width="8%">
+        		<col width="17%">
+        		<col width="5%">
+        		<col width="5%">
+        		<col width="5%">
+        		<col width="7%">
+        		<col width="8%">
         	</colgroup>
             <thead>
                 <tr>
@@ -148,12 +149,13 @@
                     <th scope="col">관계</th>
                     <th scope="col">교인여부</th>
                     <th scope="col">이장대상</th>
-                    <th scope="col"></th>
+                    <th scope="col">상태</th>
+                    <th scope="col">수정/해약</th>
                 </tr>
             </thead>
             <tbody>
             	<c:forEach items="${useUser}" var="use" varStatus="status">
-            	<tr userId="${use.user_id}">
+            	<tr userId="${use.user_id}" coupleSeq="${use.couple_seq}" assignStatus="${use.assign_status}">
             		<c:choose>
             			<c:when test="${!empty use.couple_seq}">
             				<c:set var="nextVal" value="${useUser[status.count]}"/>
@@ -172,7 +174,28 @@
             		<td name="relation">${use.relation_type_name}</td>
             		<td name="ischurch">${use.is_church_person}</td>
             		<td name="isMove">${use.is_move}</td>
-            		<td><button type="button" class="btn btn-primary btn-sm" onclick="editUseUser(this)">수정</button>
+            		<td>
+            			<c:choose>
+            				<c:when test="${not empty use.cancel_seq}">
+            					해약
+            				</c:when>
+            				<c:when test="${not empty use.approval_date}">
+            					<c:choose>
+            						<c:when test="${use.assign_status == 'OCCUPIED'}">사용(봉안)</c:when>
+            						<c:otherwise>사용승인</c:otherwise>
+            					</c:choose>
+            				</c:when>
+            				<c:otherwise>
+            				사용미승인
+            				</c:otherwise>
+            			</c:choose>
+            		</td>
+            		<td>
+            			<c:if test="${use.assign_status != 'OCCUPIED' && empty use.cancel_seq}">
+            			<button type="button" class="btn btn-primary btn-sm" onclick="editUseUser(this)">수정</button>
+            			<button type="button" class="btn btn-danger btn-sm" onclick="cancelContract(this)">해약</button>
+            			</c:if>
+            		</td>
             	</tr>
             	</c:forEach>
             </tbody>
@@ -549,28 +572,40 @@ function changeServiceCharger() {
 			}
 		}
 	});
-	
 }
 
 /**
  * 해약
  */
-function cancelContract(progressStatus) {
+function cancelContract(btn) {
 	var bunyangSeq = '${bunyangSeq}';
-	var winoption = {width:1024, height:690};
+	var winoption = {width:1124, height:590};
 	var param = {bunyangSeq: bunyangSeq};
-	common.openWindow("${contextPath}/popup/contractcancel", "popContractCancel", winoption, param);
-	window.contractCancelCallBack = function(result) {
+	var tr = $(btn).parent('td').parent('tr');
+	var coupleSeq = tr.attr('coupleSeq');
+	if(coupleSeq) {// 부부형의 경우
+		tr = $('#tblUseUser tbody tr[coupleSeq="' + coupleSeq + '"]');
+		if(tr.eq(0).attr('assignStatus') == '<%=CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED%>' || 
+				tr.eq(1).attr('assignStatus') == '<%=CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED%>') {
+			common.showAlert('부부형의 경우 사용(봉안)기수가 하나라도 있을 경우 해약이 불가합니다.');
+			return;
+		}
+		param['userId1'] = tr.eq(0).attr('userId');
+		param['userId2'] = tr.eq(1).attr('userId');
+	} else {
+		if(tr.attr('assignStatus') == '<%=CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED%>') {
+			common.showAlert('미사용(미봉안) 기수에 대해서만 해약이 가능합니다.');
+			return;
+		}
+		param['userId1'] = tr.attr('userId');	
+	}
+	common.openWindow("${contextPath}/popup/useUserCancel", "popUseUserCancel", winoption, param);
+	window.useUserCancelCallBack = function(result) {
 		if(result && result.result) {
 			common.showAlert('해약처리가 승인되었습니다.');
-			// 승인서 파일번호
-			var fileSeq = result.fileSeq;
-			donwloadFile(fileSeq);
-			setTimeout(function(){
-				var frm = document.getElementById("frm");
-				frm.action = "${contextPath}/admin/contractordetail";
-				frm.submit();
-			}, 100);
+			var frm = document.getElementById("frm");
+			frm.action = "${contextPath}/admin/useChangeDetail";
+			frm.submit();
 		}		
 	}
 }

@@ -15,7 +15,7 @@ public interface IAdminService {
 	/** 
 	 * 분양리스트 조회 
 	 */
-	public List<Object> getBunyangList(SearchVo searchVo);
+	public Map<String, Object> getBunyangList(SearchVo searchVo);
 	
 	/** 
 	 * 분양리스트 조회 
@@ -153,6 +153,11 @@ public interface IAdminService {
 	 */
 	public int updateApprovalAssignDate(String bunyangSeq, String userId) throws Exception;
 	
+	/**
+	 * 관리비 납부 정보 생성 
+	 */
+	public int createMaintPaymentInfo(String bunyangSeq) throws Exception;
+	
 	
 	//===============================================================================
 	// 계약자관리
@@ -273,6 +278,31 @@ public interface IAdminService {
 	 * 관리비 납부자 변경
 	 */
 	public int updateServiceCharger(String bunyangSeq, String serviceChargeType, String maintCharger) throws Exception;
+	/**
+	 * 사용(봉안)자 해약 처리
+	 * @param bunyangSeq
+	 * @param userId1 사용자 아이디
+	 * @param userId2 부부형의 경우만 사용
+	 * @param cancelReason 해약사유
+	 * @param cancelBank 해약금 입금은행
+	 * @param cancelAccount 해약금 입금계좌
+	 * @param cancelAccountHolder 해약금 예금주
+	 * @param cancelDepositPlanDate 입금예정일
+	 * @param surrenderValue 해약반환금
+	 * @param penaltyValue 위약금
+	 * @return
+	 * @throws Exception
+	 */
+	public int cancelUseUser(String bunyangSeq
+			,String userId1
+			,String userId2
+			,String cancelReason
+			,String cancelBank
+			,String cancelAccount
+			,String cancelAccountHolder
+			,String cancelDepositPlanDate
+			,int surrenderValue
+			,int penaltyValue) throws Exception;
 	
 	
 	//===============================================================================
@@ -297,12 +327,29 @@ public interface IAdminService {
 	/** 
 	 * 관리비납부현황조회
 	 */
-	public Map<String, Object> getMaintPaymentStatus();
+	public Map<String, Object> getMaintPaymentStatus(int maintYear);
 	/** 
 	 * 관리비납부 리스트 조회
 	 */
-	public List<Object> getMaintPaymentList(SearchVo searchVo);
+	public Map<String, Object> getMaintPaymentList(SearchVo searchVo);
+	/** 
+	 * 관리비 납부/미납 상세정보 조회
+	 */
+	public Map<String, Object> getMaintPaymentDetailList(SearchVo searchVo, String bunyangSeq, String paymentYn);
+	/** 
+	 * 관리비 납부 연도 조회(2018~최신연도)
+	 */
+	public List<Object> getMaintYearList();
 	
+	/**
+	 * 입출금 현황 조회
+	 */
+	public List<Object> getBankStatusList();
+	
+	/**
+	 * 추모동산 사용현황 조회
+	 */
+	public List<Object> getGraveStatusList();
 	
 	//===============================================================================
 	// 메뉴 관리

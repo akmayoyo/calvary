@@ -1,5 +1,6 @@
 package com.calvary.popup.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
+import com.calvary.common.util.CommonUtil;
 import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
 import com.calvary.excel.ExcelForms;
@@ -38,6 +40,7 @@ public class PopupController {
 	public static final String REGIST_USE_USER_URL = "/registuseuser";
 	public static final String CHECK_DUPLICATED_USER_URL = "/checkduplicateduser";
 	public static final String CONTRACT_CANCEL_URL = "/contractcancel";
+	public static final String USE_USER_CANCEL_URL = "/useUserCancel";
 	public static final String USE_APPLY_URL = "/useapply";
 	public static final String SELECT_USE_USER = "/selectuseuser";
 	public static final String ASSIGN_GRAVE = "/assigngrave";
@@ -52,6 +55,10 @@ public class PopupController {
 	public static final String REGIST_BUNYANG_EXCEL_URL = "/registBunyangExcel";
 	/** 입출금 엑셀업로드 등록 팝업 URL */
 	public static final String REGIST_PAYMENT_EXCEL_URL = "/registPaymentExcel";
+	/** 관리비 납부/미납 상세정보 표시 */
+	public static final String MAINT_PAYMENT_DETAIL_INFO_URL = "/maintPaymentDetailInfo";
+	/** 관리비 청구대상 표시 */
+	public static final String MAINT_PAYMENT_CLAIM_URL = "/maintPaymentClaim";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -137,6 +144,25 @@ public class PopupController {
 		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
 		mv.addObject("bunyangInfo", bunyangInfo);
 		mv.setViewName(ROOT_URL + CONTRACT_CANCEL_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 사용(봉안)자 해약
+	 */
+	@RequestMapping(value=USE_USER_CANCEL_URL)
+	public Object useUserCancelHandler(String bunyangSeq, String userId1, String userId2) {
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		Map<String, Object> userInfo1 = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId1);
+		Map<String, Object> userInfo2 = null;
+		if(!StringUtils.isEmpty(userId2)) {
+			userInfo2 = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId2);
+		}
+		mv.addObject("bunyangInfo", bunyangInfo);
+		mv.addObject("userInfo1", userInfo1);
+		mv.addObject("userInfo2", userInfo2);
+		mv.setViewName(ROOT_URL + USE_USER_CANCEL_URL);
 		return mv;
 	}
 	
@@ -355,4 +381,39 @@ public class PopupController {
 		return mv;
 	}
 	
+	/** 
+	 * 관리비 납부/미납 상세정보 표시 팝업
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=MAINT_PAYMENT_DETAIL_INFO_URL)
+	public Object maintPaymentDetailInfoHandler(SearchVo searchVo, String bunyangSeq, String paymentYn) {
+		Map<String, Object> rtnMap = adminService.getMaintPaymentDetailList(searchVo, bunyangSeq, paymentYn);
+		List<Object> maintPaymentDetailList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("maintPaymentDetailList", maintPaymentDetailList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("paymentYn", paymentYn);
+		mv.setViewName(ROOT_URL + MAINT_PAYMENT_DETAIL_INFO_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 관리비 청구대상 표시 팝업
+	 */
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=MAINT_PAYMENT_CLAIM_URL)
+	public Object maintPaymentClaimHandler(SearchVo searchVo) {
+		Map<String, Object> rtnMap = adminService.getMaintPaymentDetailList(searchVo, null, "N");
+		List<Object> maintPaymentDetailList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("maintPaymentDetailList", maintPaymentDetailList);
+		mv.addObject("searchVo", searchVo);
+		mv.setViewName(ROOT_URL + MAINT_PAYMENT_CLAIM_URL);
+		return mv;
+	}
 }
