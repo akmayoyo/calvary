@@ -7,6 +7,8 @@ public interface ICommonService {
 
 	public List<Object> getYearList();
 	
+	public Map<String, Object> getCodeInfo(String codeSeq);
+	
 	public List<Object> getChildCodeList(String parentCodeSeq);
 	
 	public List<Object> getRelationCodeList();

@@ -51,6 +51,8 @@ public class PopupController {
 	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
 	/** comment 입력 팝업 URL */
 	public static final String REGIST_COMMENT_URL = "/registcomment";
+	/** 날짜 입력 팝업 URL */
+	public static final String REGIST_DATE_URL = "/registdate";
 	/** 분양정보 엑셀업로드 등록 팝업 URL */
 	public static final String REGIST_BUNYANG_EXCEL_URL = "/registBunyangExcel";
 	/** 입출금 엑셀업로드 등록 팝업 URL */
@@ -59,6 +61,8 @@ public class PopupController {
 	public static final String MAINT_PAYMENT_DETAIL_INFO_URL = "/maintPaymentDetailInfo";
 	/** 관리비 청구대상 표시 */
 	public static final String MAINT_PAYMENT_CLAIM_URL = "/maintPaymentClaim";
+	/** 코드등록 팝업 */
+	public static final String REGIST_CODE_URL = "/registCode";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -237,6 +241,7 @@ public class PopupController {
 			@RequestParam(value="paymentUsers[]") String[] paymentUsers,
 			@RequestParam(value="paymentMethods[]") String[] paymentMethods,
 			@RequestParam(value="remarks[]") String[] remarks,
+			@RequestParam(value="maintSeqs[]") String[] maintSeqs,
 			@RequestParam(value="contractBunyangSeqs[]", required=false) String[] contractBunyangSeqs,
 			@RequestParam(value="fullPaymentBunyangSeqs[]", required=false) String[] fullPaymentBunyangSeqs
 			) throws Exception {
@@ -252,7 +257,7 @@ public class PopupController {
 //			}
 //		}
 		
-		iRslt = adminService.createPaymentHistory(bunyangSeqs, paymentAmounts, paymentMethods, paymentDates, paymentDivisions, paymentTypes, paymentUsers, remarks);
+		iRslt = adminService.createPaymentHistory(bunyangSeqs, paymentAmounts, paymentMethods, paymentDates, paymentDivisions, paymentTypes, paymentUsers, remarks, maintSeqs);
 		
 		// 계약금 납부가 된 건에 대해 계약상태로 업데이트(현재는 자동 상태 변경은 안하지만 혹시몰라 남겨둠)
 //		if(contractBunyangSeqs != null && contractBunyangSeqs.length > 0) {
@@ -356,6 +361,17 @@ public class PopupController {
 	}
 	
 	/** 
+	 * 날짜 입력 팝업
+	 */
+	@RequestMapping(value=REGIST_DATE_URL)
+	public Object registDateHandler(String popupTitle) {
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("popupTitle", popupTitle);
+		mv.setViewName(ROOT_URL + REGIST_DATE_URL);
+		return mv;
+	}
+	
+	/** 
 	 * 분양정보 엑셀업로드 등록 팝업
 	 */
 	@RequestMapping(value=REGIST_BUNYANG_EXCEL_URL)
@@ -386,7 +402,7 @@ public class PopupController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=MAINT_PAYMENT_DETAIL_INFO_URL)
-	public Object maintPaymentDetailInfoHandler(SearchVo searchVo, String bunyangSeq, String paymentYn) {
+	public Object maintPaymentDetailInfoHandler(SearchVo searchVo, String bunyangSeq, String paymentYn, String popupTitle, String selectable) {
 		Map<String, Object> rtnMap = adminService.getMaintPaymentDetailList(searchVo, bunyangSeq, paymentYn);
 		List<Object> maintPaymentDetailList = (ArrayList<Object>)rtnMap.get("list");
 		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
@@ -396,6 +412,8 @@ public class PopupController {
 		mv.addObject("searchVo", searchVo);
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("paymentYn", paymentYn);
+		mv.addObject("popupTitle", popupTitle);
+		mv.addObject("selectable", selectable);
 		mv.setViewName(ROOT_URL + MAINT_PAYMENT_DETAIL_INFO_URL);
 		return mv;
 	}
@@ -414,6 +432,18 @@ public class PopupController {
 		mv.addObject("maintPaymentDetailList", maintPaymentDetailList);
 		mv.addObject("searchVo", searchVo);
 		mv.setViewName(ROOT_URL + MAINT_PAYMENT_CLAIM_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 코드등록 팝업
+	 */
+	@RequestMapping(value=REGIST_CODE_URL)
+	public Object registCodeHandler(String parentCodeSeq) {
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> parentCodeInfo = commonService.getCodeInfo(parentCodeSeq);
+		mv.addObject("parentCodeInfo", parentCodeInfo);
+		mv.setViewName(ROOT_URL + REGIST_CODE_URL);
 		return mv;
 	}
 }

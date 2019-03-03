@@ -502,16 +502,33 @@
 		AND a.maint_end_date >= CURDATE()
 	</select>
 	
-	<!-- 관리비 납부정보 생성 -->
-	<insert id="createMaintPaymentInfo" parameterType="map">
-		insert into TB_BUNYANG_MAINT_PAYMENT_INFO( BUNYANG_SEQ,USER_SEQ,PAYMENT_PRICE,MAINT_START_DATE,MAINT_END_DATE,MAINT_YEAR,PAYMENT_YN, PAYMENT_TYPE )
+	<!-- 일배치에서 납부기간 갱신된 관리비 납부정보 생성 -->
+	<insert id="createAutoMaintPaymentInfo" parameterType="map">
+		insert into TB_BUNYANG_MAINT_PAYMENT_INFO( MAINT_SEQ, BUNYANG_SEQ,USER_SEQ,PAYMENT_PRICE,MAINT_START_DATE,MAINT_END_DATE,MAINT_YEAR,PAYMENT_YN, PAYMENT_TYPE )
 		values(
+		#{maintSeq},
 		#{bunyangSeq}, 
 		#{userSeq}, 
 		(select code_value from TB_COM_CODE a WHERE a.CODE_SEQ = 'MAINT_PRICE' ), 
 		(select str_to_date(concat(year(curdate()), date_format(date(max(update_date)), '%m%d')), '%Y%m%d') from TB_BUNYANG_HISTORY a WHERE a.bunyang_seq = #{bunyangSeq} AND a.progress_status = 'D'), 
 		(select DATE_ADD(DATE_ADD(str_to_date(concat(year(curdate()), date_format(date(max(update_date)), '%m%d')), '%Y%m%d'), INTERVAL 1 YEAR), INTERVAL -1 DAY) from TB_BUNYANG_HISTORY a WHERE a.bunyang_seq = #{bunyangSeq} AND a.progress_status = 'D'), 
 		year(curdate()), 
+		'N',
+		'BEFORE_USE'
+		)
+	</insert>
+	
+	<!-- 사용승인시 사용승인일 정보로 관리비 납부정보 생성 -->
+	<insert id="createMaintPaymentInfo" parameterType="map">
+		insert into TB_BUNYANG_MAINT_PAYMENT_INFO( MAINT_SEQ, BUNYANG_SEQ,USER_SEQ,PAYMENT_PRICE,MAINT_START_DATE,MAINT_END_DATE,MAINT_YEAR,PAYMENT_YN, PAYMENT_TYPE )
+		values(
+		#{maintSeq},
+		#{bunyangSeq}, 
+		#{userSeq}, 
+		(select code_value from TB_COM_CODE a WHERE a.CODE_SEQ = 'MAINT_PRICE' ),
+		str_to_date(#{approvalDate},'%Y%m%d'), 
+		DATE_ADD(DATE_ADD(str_to_date(#{approvalDate},'%Y%m%d'), INTERVAL 1 YEAR), INTERVAL -1 DAY), 
+		year(str_to_date(#{approvalDate},'%Y%m%d')),
 		'N',
 		'BEFORE_USE'
 		)

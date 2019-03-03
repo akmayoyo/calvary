@@ -185,6 +185,8 @@ function _showPaymentDetail(el,paymentYn) {
 	param['bunyangSeq'] = bunyangSeq;
 	param['maintYear'] = maintYear;
 	param['paymentYn'] = paymentYn;// Y:납부,N:미납
+	param['popupTitle'] = '관리비 납부 상세 정보';
+	param['selectable'] = '0';
 	common.openWindow("${contextPath}/popup/maintPaymentDetailInfo", "popMaintPaymentDetailInfo", winoption, param);
 }
 

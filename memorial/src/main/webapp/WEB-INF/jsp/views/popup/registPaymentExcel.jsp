@@ -199,7 +199,7 @@ function _uploadExcel() {
        			if(rtnList != null && rtnList.length > 0) {
        				displayExcelRow(rtnList);
                	} else {
-               		common.showAlert('업로드 할 데이터가 없습니다.');
+               		common.showAlert('해당기간내 업로드 할 데이터가 없습니다.');
                	}
        		}
 		},error : function(result){
@@ -247,7 +247,7 @@ function displayExcelRow(excelList) {
 	 	// 내용
 	    tr.append('<td><span name="content">' + content + '</span></td>');
 	 	// 계약정보
-	    tr.append('<td><select name="bunyangInfo" class="form-control"></select></td>');
+	    tr.append('<td class="form-inline"><select style="width:255px;" name="bunyangInfo" class="form-control"></select><button name="btnMaintUser" type="button" style="display:none;margin-left: 5px;" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></td>');
 	 	// 비고
 	    tr.append('<td><input name="remark" type="text" class="form-control"></td>');
 	    // 삭제버튼
@@ -287,6 +287,44 @@ function displayExcelRow(excelList) {
     		$(tr).find('select[name="bunyangInfo"]').append(option);
 	    }
 	    
+	 	// 입출유형 변경이벤트
+	    $(tr).find('select[name="paymentType"]').change(function(e) {
+	    	var selectedPaymentDivision = $(tr).find('span[name="paymentDivision"]').attr('code');
+	    	var selectedPaymentType = $(this).find('option:selected').val();
+	    	if(selectedPaymentDivision == '<%=CalvaryConstants.PAYMENT_DIVISION_DEPOSIT%>' 
+	    			&& selectedPaymentType == '<%=CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT%>') {// 관리비 입금의 경우만 사용자 선택 버튼 표시
+	    		$(tr).find('button[name="btnMaintUser"]').show();
+	    	} else {
+	    		$(tr).find('button[name="btnMaintUser"]').hide();
+	    	}
+	    });
+	 	
+	 	// 관리비 대상자 조회 버튼 클릭
+	    $(tr).find('button[name="btnMaintUser"]').click(function(e) {
+	    	var bunyangSeq = $(tr).find('select[name="bunyangInfo"] option:selected').attr('bunyang_seq');
+	    	if(!bunyangSeq) {
+	    		common.showAlert('계약정보를 선택해주세요.');
+	    		$(tr).find('select[name="bunyangInfo"]').focus();
+	    	} else {
+	            var winoption = {width:1180, height:750};
+	        	var param = {};
+	        	param['bunyangSeq'] = bunyangSeq;
+	        	param['maintYear'] = 0;
+	        	param['paymentYn'] = 'N';
+	        	param['popupTitle'] = '관리비 납부대상 선택';
+	        	param['selectable'] = '1';
+	        	common.openWindow("${contextPath}/popup/maintPaymentDetailInfo", "popMaintPaymentDetailInfo", winoption, param);
+	        	window.selectuserCallBack = function(selectedItems) {
+	        		var idx = 0;
+	        		var maintSeq = selectedItems[idx++];
+	        		var userName = selectedItems[idx++];
+	        		var chargerName = selectedItems[idx++];
+	        		var paymentPrice = selectedItems[idx++];
+	        		$(tr).find('select[name="bunyangInfo"] option:selected').attr('maint_seq', maintSeq);
+	        	};
+	    	}
+	    });
+	    
 	    tbody.append(tr);
 	});
 }
@@ -320,6 +358,7 @@ function _savePayment() {
     var paymentUsers = []; // 입출유형
     var paymentMethods = []; // 납입방법
     var remarks = []; // 비고
+    var maintSeqs = []; // 관리비 납부대상자정보
     var rowNumbers = [];// 행번호
     var bValidate = true;
     var summaryByBunyangSeq = {};// 계약번호별 입력된 납입금정보 합산을 위한 storage
@@ -336,6 +375,7 @@ function _savePayment() {
         var balance_payment;// 기납입된 분양잔금
         var apply_user_name;// 신청자명
         var apply_user_mobile;// 신청자 연락처
+        var maint_seq;// 관리비 납부대상자정보 seq
         var selectedBunyangInfo = tr.find('select[name="bunyangInfo"] option:selected');
         if (selectedBunyangInfo && selectedBunyangInfo.attr('bunyang_seq')) {
             bunyang_seq = selectedBunyangInfo.attr('bunyang_seq');
@@ -345,6 +385,7 @@ function _savePayment() {
             balance_payment = selectedBunyangInfo.attr('balance_payment');
             apply_user_name = selectedBunyangInfo.attr('apply_user_name');
             apply_user_mobile = selectedBunyangInfo.attr('apply_user_mobile');
+            maint_seq = selectedBunyangInfo.attr('maint_seq');
             total_price = total_price ? parseInt(total_price) : total_price;
             down_payment = down_payment ? parseInt(down_payment) : down_payment;
             balance_payment = balance_payment ? parseInt(balance_payment) : balance_payment;
@@ -388,6 +429,13 @@ function _savePayment() {
         	bValidate = false;
         	return false;
         }
+     	// 입금/관리비의 경우 관리비대상 사용자 선택여부 체크
+        if(payment_division == 'DEPOSIT' && payment_type == 'MAINT_PAYMENT' && !maint_seq) {
+        	tr.find('button[name="btnMaintUser"]').focus();
+        	common.showAlert((idx+1) + '행 데이터 계약정보란의 검색 버튼을 클릭하여 관리비 대상을 선택해주세요.');
+        	bValidate = false;
+        	return false;
+        }
         
         // 동일 계약건에 대해 복수개 입력가능하기 때문에 입력된 납입금의 validation 체크는 누적 데이터를 생성후 마지막에 수행함
         if(bunyang_seq && !summaryByBunyangSeq.hasOwnProperty(bunyang_seq)) {
@@ -420,6 +468,7 @@ function _savePayment() {
         paymentUsers.push(payment_user);
         paymentMethods.push(payment_method);
         remarks.push(remark);
+        maintSeqs.push(maint_seq);
         rowNumbers.push(rowNo);
     });
     
@@ -460,6 +509,7 @@ function _savePayment() {
     paymentInfo['paymentUsers'] = paymentUsers;
     paymentInfo['paymentMethods'] = paymentMethods;
     paymentInfo['remarks'] = remarks;
+    paymentInfo['maintSeqs'] = maintSeqs; 
     
     common.ajax({
 		url:"${contextPath}/popup/savepayment", 

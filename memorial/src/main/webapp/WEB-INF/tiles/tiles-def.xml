@@ -26,6 +26,10 @@
       <put-attribute name="body" value="/WEB-INF/jsp/views/admin/{1}.jsp" />
     </definition>
     
+    <definition name="/sysadmin/*" extends="admin">
+      <put-attribute name="body" value="/WEB-INF/jsp/views/sysadmin/{1}.jsp" />
+    </definition>
+    
     <!-- Main -->    
     <definition name="main" template="/WEB-INF/jsp/tileslayout/mainLayout.jsp">
         <put-attribute name="header" value="/WEB-INF/jsp/tileslayout/header.jsp" />

@@ -181,9 +181,15 @@
     <!-- 계약금 납부 내역 -->
 	<insert id="insertDownPayment" parameterType="map">
 		INSERT INTO TB_BUNYANG_PAYMENT_HISTORY 
-		(bunyang_seq, payment_division, payment_type, payment_amount, payment_method, payment_date, payment_user, create_user, create_date, remarks) 
-		values (#{bunyangSeq}, #{paymentDivision}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, STR_TO_DATE(REGEXP_REPLACE(#{paymentDate}, '[^0-9]+', ''), '%Y%m%d%H%i%s'), #{paymentUser}, #{createUser}, COALESCE(STR_TO_DATE(REGEXP_REPLACE(#{createDate}, '[^0-9]+', ''), '%Y%m%d%H%i%s'),CURRENT_TIMESTAMP), #{remark})
+		(bunyang_seq, payment_division, payment_type, payment_amount, payment_method, payment_date, payment_user, create_user, create_date, remarks, maint_seq) 
+		values (#{bunyangSeq}, #{paymentDivision}, #{paymentType}, #{paymentAmount}, #{paymentMethod}, STR_TO_DATE(REGEXP_REPLACE(#{paymentDate}, '[^0-9]+', ''), '%Y%m%d%H%i%s'), #{paymentUser}, #{createUser}, COALESCE(STR_TO_DATE(REGEXP_REPLACE(#{createDate}, '[^0-9]+', ''), '%Y%m%d%H%i%s'),CURRENT_TIMESTAMP), #{remark}, #{maintSeq})
 	</insert>
+	
+	<!-- 관리비 납부 대상 정보 납부상태로 업데이트 -->
+	<update id="updateMaintPaymentInfo" parameterType="map">
+		UPDATE TB_BUNYANG_MAINT_PAYMENT_INFO set PAYMENT_YN = 'Y'
+		WHERE maint_seq = #{maintSeq}
+	</update>
 	
     <!-- 계약금 납부 내역 삭제 -->
 	<delete id="deleteDownPayment" parameterType="map">

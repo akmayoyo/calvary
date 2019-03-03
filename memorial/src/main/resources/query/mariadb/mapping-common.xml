@@ -135,6 +135,19 @@
 	  	ORDER BY A.display_order
 	</select>
 	
+	<select id="getCodeInfo" parameterType="map" resultType="map">
+		SELECT A.code_seq,
+			A.code_name,
+			A.code_desc,
+	       	A.code_level,
+	       	A.parent_code_seq,
+	       	A.code_value,
+	       	A.display_order
+	  	FROM TB_COM_CODE A
+	  	WHERE A.code_seq = #{codeSeq}
+	  	LIMIT 0,1
+	</select>
+	
 	<select id="getRelationCodeList" parameterType="String" resultType="map">
 		SELECT A.code_seq,
 			A.code_name,

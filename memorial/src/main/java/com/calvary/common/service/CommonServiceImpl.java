@@ -23,6 +23,17 @@ public class CommonServiceImpl implements ICommonService {
 		return list;
 	}
 	
+	/**
+	 * 코드 정보 조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getCodeInfo(String codeSeq) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("codeSeq", codeSeq);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("common.getCodeInfo", param);
+		return rtnMap;
+	}
+	
 	@Override
 	public List<Object> getChildCodeList(String parentCodeSeq) {
 		List<Object> list = commonDao.selectList("common.getChildCodeList", parentCodeSeq);

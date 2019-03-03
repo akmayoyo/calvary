@@ -30,7 +30,7 @@
 				</thead>
 	            <tbody>
 	            	<c:forEach items="${bankStatusList}" var="rowItem">
-	            	<tr>
+	            	<tr <c:if test="${rowItem.year == 'All'}">style="background-color: #FFFCCC; font-weight: bold;"</c:if>>
 	            		<td>
 	            			<c:choose>
 	            				<c:when test="${rowItem.year == 'All'}">합계</c:when>

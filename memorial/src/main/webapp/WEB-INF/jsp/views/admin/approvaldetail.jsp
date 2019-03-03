@@ -447,21 +447,29 @@ function goToList() {
  */
 function approval() {
 	if(${bunyangInfo.use_user_cnt} > 0 && ${bunyangInfo.use_user_cnt} == ${bunyangInfo.approval_use_user_cnt}) {
-		var data = {};
-		data["bunyangSeq"] = '${bunyangSeq}';
-		// 저장 호출
-		common.ajax({
-			url:"${contextPath}/admin/approvalBunyangInfo", 
-			data:data,
-			success: function(result) {
-				if(result && result.result) {
-					common.showAlert("사용승인되었습니다.");
-					var frm = document.getElementById("frm");
-					frm.action = "${contextPath}/admin/approvaldetail";
-					frm.submit();
+		
+		var winoption = {width:450, height:355};
+		var param = {popupTitle: "사용승인일 입력"};
+		common.openWindow("${contextPath}/popup/registdate", "popRegistDate", winoption, param);
+		// 사용승인일 입력 팝업 callback 함수
+		window.registDateCallBack = function(val) {
+			var data = {};
+			data["bunyangSeq"] = '${bunyangSeq}';
+			data["approvalDate"] = val;
+			// 저장 호출
+			common.ajax({
+				url:"${contextPath}/admin/approvalBunyangInfo", 
+				data:data,
+				success: function(result) {
+					if(result && result.result) {
+						common.showAlert("사용승인되었습니다.");
+						var frm = document.getElementById("frm");
+						frm.action = "${contextPath}/admin/approvaldetail";
+						frm.submit();
+					}
 				}
-			}
-		});	
+			});
+		};
 	} else {
 		common.showAlert('사용(봉안) 대상자의 승인서가 모두 출력되어야 저장이 가능합니다.');
 	}

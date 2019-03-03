@@ -4,6 +4,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 
+<style>
+.select2-selection__rendered, .select2-results__option {
+	font-size: 13px;
+}
+</style>
+
 <form id="frm" method="post">
 </form>
 
@@ -24,13 +30,13 @@
         <table id="tblList" class="table table-style table-bordered">
         	<colgroup>
         		<col width="11%">
-        		<col width="9%">
+        		<col width="8%">
         		<col width="8%">
         		<col width="8%">
         		<col width="11%">
         		<col width="8%">
-        		<col width="18%">
-        		<col width="18%">
+        		<col width="23%">
+        		<col width="15%">
         		<col width="3%">
         	</colgroup>
             <thead>
@@ -87,21 +93,21 @@
 function _addRow() {
     var tr = $('<tr/>');
     // 입출일자
-    tr.append('<td><div class="input-group date" data-provide="datepicker"><input name="paymentDate" type="text" class="form-control text-center"><div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div></div></td>');
+    tr.append('<td><div class="input-group date" data-provide="datepicker"><input name="paymentDate" type="text" class="form-control text-center font-13"><div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div></div></td>');
     // 입출금액
-    tr.append('<td><input name="paymentAmount" type="text" class="form-control text-right"></td>');
+    tr.append('<td><input name="paymentAmount" type="text" class="form-control text-right font-13"></td>');
     // 입출구분
-    tr.append('<td><select name="paymentDivision" type="text" class="form-control text-center"><option value="DEPOSIT" selected>입금</option><option value="WITHDRAWAL">출금</option></td>');
+    tr.append('<td><select name="paymentDivision" type="text" class="form-control text-center font-13"><option value="DEPOSIT" selected>입금</option><option value="WITHDRAWAL">출금</option></td>');
 	// 입출유형
-    tr.append('<td><select name="paymentType" class="form-control"></select></td>');
+    tr.append('<td><select name="paymentType" class="form-control font-13"></select></td>');
  	// 납부방법
-    tr.append('<td><select name="paymentMethod" class="form-control"><option value="<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>">무통장/계좌이체</option><option value="<%=CalvaryConstants.PAYMENT_METHOD_CASH%>">현금납부</option></select></td>');
+    tr.append('<td><select name="paymentMethod" class="form-control font-13"><option value="<%=CalvaryConstants.PAYMENT_METHOD_TRANSFER%>">무통장/계좌이체</option><option value="<%=CalvaryConstants.PAYMENT_METHOD_CASH%>">현금납부</option></select></td>');
     // 입금자
-    tr.append('<td><input name="paymentUser" type="text" class="form-control text-center"></td>');
+    tr.append('<td><input name="paymentUser" type="text" class="form-control text-center font-13"></td>');
     // 계약정보
-    tr.append('<td><select style="width:100%;" name="bunyangSeq" class="form-control"></select></td>');
+    tr.append('<td class="form-inline"><select style="width:250px;" name="bunyangSeq" class="form-control font-13"></select><button name="btnMaintUser" type="button" style="display:none;" class="btn btn-default btn-sm"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></td>');
  	// 비고
-    tr.append('<td><input name="remark" type="text" class="form-control" placeholder="20자 이내" maxlength="20"></td>');
+    tr.append('<td><input name="remark" type="text" class="form-control font-13" placeholder="20자 이내" maxlength="20"></td>');
     // 삭제버튼
     tr.append('<td><button type="button" class="btn btn-default btn-sm" onclick="_deleteRow(this)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button></td>');
 
@@ -206,6 +212,48 @@ function _addRow() {
 		}
 		$(tr).find('select[name="paymentType"]').html(paymentTypeList);
 	});
+    
+ 	// 입출유형 변경이벤트
+    $(tr).find('select[name="paymentType"]').change(function(e) {
+    	var selectedPaymentDivision = $(tr).find('select[name="paymentDivision"]').find('option:selected').val();
+    	var selectedPaymentType = $(this).find('option:selected').val();
+    	if(selectedPaymentDivision == '<%=CalvaryConstants.PAYMENT_DIVISION_DEPOSIT%>' 
+    			&& selectedPaymentType == '<%=CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT%>') {// 관리비 입금의 경우만 사용자 선택 버튼 표시
+    		$(tr).find('button[name="btnMaintUser"]').show();
+    	} else {
+    		$(tr).find('button[name="btnMaintUser"]').hide();
+    	}
+    });
+ 	
+ 	// 관리비 대상자 조회 버튼 클릭
+    $(tr).find('button[name="btnMaintUser"]').click(function(e) {
+    	var data = $(tr).find('select[name="bunyangSeq"]').select2('data');
+    	if(!data || data.length == 0) {
+    		common.showAlert('계약정보를 선택해주세요.');
+    		$(tr).find('select[name="bunyangSeq"]').select2('open');
+    	} else {
+    		var bunyangInfo = data[0];
+            var bunyangSeq = bunyangInfo['bunyang_seq'];
+            var winoption = {width:1180, height:750};
+        	var param = {};
+        	param['bunyangSeq'] = bunyangSeq;
+        	param['maintYear'] = 0;
+        	param['paymentYn'] = 'N';
+        	param['popupTitle'] = '관리비 납부대상 선택';
+        	param['selectable'] = '1';
+        	common.openWindow("${contextPath}/popup/maintPaymentDetailInfo", "popMaintPaymentDetailInfo", winoption, param);
+        	window.selectuserCallBack = function(selectedItems) {
+        		var idx = 0;
+        		var maintSeq = selectedItems[idx++];
+        		var userName = selectedItems[idx++];
+        		var chargerName = selectedItems[idx++];
+        		var paymentPrice = selectedItems[idx++];
+        		$(tr).find('input[name="paymentUser"]').val(chargerName);
+        		$(tr).find('input[name="paymentAmount"]').val($.number(paymentPrice));
+        		data[0].maint_seq = maintSeq;
+        	};
+    	}
+    });
 	
     $(tr).find('select[name="paymentDivision"]').trigger('change');
 }
@@ -270,6 +318,7 @@ function _savePayment() {
     var paymentUsers = []; // 입출유형
     var paymentMethods = []; // 납입방법
     var remarks = []; // 비고
+    var maintSeqs = []; // 관리비 납부대상자정보
     var contractBunyangSeqs = [];// 계약금이 모두 입금되어 계약상태로 변경해야될 분양건
     var fullPaymentBunyangSeqs = [];// 분양잔금이 모두 입금되어 완납상태로 변경해야될 분양건
     var bValidate = true;
@@ -288,6 +337,7 @@ function _savePayment() {
         var balance_price;// 총 분양대금 - 계약금
         var down_payment;// 기납입된 계약금
         var balance_payment;// 기납입된 분양잔금
+        var maint_seq;// 관리비 납부대상자정보 seq
         if (data && data.length > 0) {
         	bunyangInfo = data[0];
             bunyang_seq = bunyangInfo['bunyang_seq'];
@@ -296,6 +346,7 @@ function _savePayment() {
             total_price = bunyangInfo['total_price'];
             down_payment = bunyangInfo['down_payment'];
             balance_payment = bunyangInfo['balance_payment'];
+            maint_seq = bunyangInfo['maint_seq'];
             contract_price = total_price * (<%=CalvaryConstants.DOWN_PAYMENT_PERCENT%>/100);
             balance_price = total_price - contract_price;
         }
@@ -355,6 +406,13 @@ function _savePayment() {
         	bValidate = false;
         	return false;
         }
+        // 입금/관리비의 경우 관리비대상 사용자 선택여부 체크
+        if(payment_division == 'DEPOSIT' && payment_type == 'MAINT_PAYMENT' && !maint_seq) {
+        	tr.find('button[name="btnMaintUser"]').focus();
+        	common.showAlert('관리비 입금의 경우 계약정보란의 검색 버튼을 클릭하여 관리비 대상을 선택해주세요.');
+        	bValidate = false;
+        	return false;
+        }
         // 동일 계약건에 대해 복수개 입력가능하기 때문에 입력된 납입금의 validation 체크는 누적 데이터를 생성후 마지막에 수행함
         if(bunyang_seq && !summaryByBunyangSeq.hasOwnProperty(bunyang_seq)) {
         	summaryByBunyangSeq[bunyang_seq] = {};
@@ -388,6 +446,7 @@ function _savePayment() {
         paymentUsers.push(payment_user);
         paymentMethods.push(payment_method);
         remarks.push(remark);
+        maintSeqs.push(maint_seq ? maint_seq : 'none');
     });
     
     if(!bValidate) {
@@ -439,6 +498,7 @@ function _savePayment() {
     paymentInfo['paymentUsers'] = paymentUsers; 
     paymentInfo['paymentMethods'] = paymentMethods; 
     paymentInfo['remarks'] = remarks; 
+    paymentInfo['maintSeqs'] = maintSeqs; 
     paymentInfo['contractBunyangSeqs'] = contractBunyangSeqs; 
     paymentInfo['fullPaymentBunyangSeqs'] = fullPaymentBunyangSeqs; 
     common.ajax({

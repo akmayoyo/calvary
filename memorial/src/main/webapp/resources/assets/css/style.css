@@ -685,3 +685,6 @@ input.readonlywhite{
 .hide {
 	display: none !important;
 }
+.font-13 {
+	font-size: 13px !important;
+}

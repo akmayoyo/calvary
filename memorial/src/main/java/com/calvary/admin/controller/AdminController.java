@@ -516,16 +516,16 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPROVAL_BUNYANG_INFO_URL)
 	@ResponseBody
-	public Object approvalBunyangInfoHandler(String bunyangSeq) throws Exception {
+	public Object approvalBunyangInfoHandler(String bunyangSeq, String approvalDate) throws Exception {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
 		bunyangInfoVo.setBunyangSeq(bunyangSeq);
 		bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_D);
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), approvalDate);
 		if(iRslt > 0) {
 			// 사용승인 이후 관리비가 발생하기 때문에 관리비 납부여부 체크를 위한 정보를 생성한다.
-			iRslt += adminService.createMaintPaymentInfo(bunyangSeq);
+			iRslt += adminService.createMaintPaymentInfo(bunyangSeq, approvalDate);
 		}
 		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);

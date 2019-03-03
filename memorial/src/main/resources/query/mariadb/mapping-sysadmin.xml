@@ -1,0 +1,48 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="sysadmin">
+
+	<!-- 최상위 코드리스트 조회 -->
+	<select id="getTopLevelCodeList" parameterType="map" resultType="map">
+		select
+			code_seq
+			,code_name
+			,code_desc
+			,code_level
+			,parent_code_seq
+			,display_order
+			,code_value
+		from TB_COM_CODE a
+		where code_level = 1 
+		order by display_order
+	</select>
+	
+	<!-- 코드정보 업데이트 -->
+	<update id="updateCodeInfo" parameterType="map">
+		UPDATE TB_COM_CODE
+			SET code_name = #{codeName}
+			,code_desc = #{codeDesc}
+			,display_order = #{displayOrder}
+			,code_value = case when #{codeValue} = '' then null else cast(#{codeValue} as int) end 
+		WHERE code_level = #{codeLevel} AND (#{parentCodeSeq} is null or parent_code_seq = #{parentCodeSeq}) AND code_seq = #{codeSeq}
+	</update>
+	
+	<!-- 코드정보 생성 -->
+	<insert id="createCodeInfo" parameterType="map">
+		insert into TB_COM_CODE( CODE_SEQ,CODE_NAME,CODE_DESC,CODE_LEVEL,PARENT_CODE_SEQ,DISPLAY_ORDER,CODE_VALUE )
+		values(#{codeSeq} , #{codeName}, #{codeDesc}, #{codeLevel}, #{parentCodeSeq}, #{displayOrder}, case when #{codeValue} = '' then null else cast(#{codeValue} as int) end)
+	</insert>
+	
+	<!-- 코드정보 삭제 -->
+	<delete id="deleteCodeInfo" parameterType="map">
+		DELETE FROM TB_COM_CODE WHERE (#{parentCodeSeq} is null or parent_code_seq = #{parentCodeSeq}) AND code_seq = #{codeSeq}
+	</delete>
+	
+	<!-- 자식코드정보 삭제 -->
+	<delete id="deleteChildCodeInfo" parameterType="map">
+		DELETE FROM TB_COM_CODE WHERE parent_code_seq = #{codeSeq}
+	</delete>
+    
+</mapper>

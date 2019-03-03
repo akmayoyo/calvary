@@ -455,7 +455,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 분양관련 입출금(계약금,잔금,관리비..) 정보 생성
 	 */
 	@Transactional(rollbackFor=Exception.class)
-	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks) throws Exception {
+	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks, String[] maintSeqs) throws Exception {
 		int iRslt = 0;
 		if(bunyangSeqs != null && bunyangSeqs.length > 0) {
 			for(int i = 0; i < bunyangSeqs.length; i++) {
@@ -469,8 +469,15 @@ public class AdminServiceImpl implements IAdminService {
 				param.put("paymentMethod", paymentMethods[i]);
 				param.put("paymentDate", paymentDates[i]);
 				param.put("remark", remarks[i]);
+				param.put("maintSeq", maintSeqs[i]);
 				param.put("createUser", SessionUtil.getCurrentUser().getUserId());
 				iRslt += commonDao.insert("contract.insertDownPayment", param);
+				// 관리비 납부의 경우 관리비 납부 대상 정보도 납부상태로 업데이트 해줌
+				if(CalvaryConstants.PAYMENT_DIVISION_DEPOSIT.equals(paymentDivisions[i])
+						&& CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT.equals(paymentTypes[i])) {
+					iRslt += commonDao.update("contract.updateMaintPaymentInfo", param);
+				}
+				
 				//createPaymentHistory(bunyangSeqs[i], paymentAmounts[i], paymentMethods[i], paymentDates[i], paymentDivisions[i], paymentTypes[i], paymentUsers[i], remarks[i]);
 			}
 		}
@@ -533,9 +540,44 @@ public class AdminServiceImpl implements IAdminService {
 	/**
 	 * 관리비 납부 정보 생성 
 	 */
+//	@SuppressWarnings("unchecked")
+//	@Transactional
+//	public int createMaintPaymentInfo(String bunyangSeq) throws Exception {
+//		int iRslt = 0;
+//		// 사용(봉안)자 리스트 조회
+//		List<Object> userList = getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
+//		if(userList != null && userList.size() > 0) {
+//			for(int i = 0; i < userList.size(); i++) {
+//				Map<String, Object> userInfo = (Map<String, Object>)userList.get(i);
+//				int userSeq = CommonUtil.convertToInt(userInfo.get("user_seq"));
+//				String cancelSeq = (String)userInfo.get("cancel_seq");
+//				if(!StringUtils.isEmpty(cancelSeq)) {// 해약된건
+//					continue;
+//				}
+//				Map<String, Object> param = new HashMap<String, Object>();
+//				param.put("bunyangSeq", bunyangSeq);
+//				param.put("userSeq", userSeq);
+//				Map<String, Object> tmp = (HashMap<String, Object>)commonDao.selectOne("admin.getMaintPaymentCount", param);
+//				int cnt = 0;
+//				if(tmp != null) {
+//					cnt = CommonUtil.convertToInt(tmp.get("cnt"));
+//				}
+//				if(cnt == 0) {
+//					String maintSeq = String.valueOf(commonService.getSeqNexVal("MAINT_SEQ"));
+//					param.put("maintSeq", maintSeq);
+//					iRslt += commonDao.insert("admin.createMaintPaymentInfo", param);
+//				}
+//			}
+//		}
+//		return iRslt;
+//	}
+	
+	/**
+	 * 관리비 납부 정보 생성 
+	 */
 	@SuppressWarnings("unchecked")
 	@Transactional
-	public int createMaintPaymentInfo(String bunyangSeq) throws Exception {
+	public int createMaintPaymentInfo(String bunyangSeq, String approvalDate) throws Exception {
 		int iRslt = 0;
 		// 사용(봉안)자 리스트 조회
 		List<Object> userList = getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
@@ -547,17 +589,13 @@ public class AdminServiceImpl implements IAdminService {
 				if(!StringUtils.isEmpty(cancelSeq)) {// 해약된건
 					continue;
 				}
+				String maintSeq = String.valueOf(commonService.getSeqNexVal("MAINT_SEQ"));
 				Map<String, Object> param = new HashMap<String, Object>();
 				param.put("bunyangSeq", bunyangSeq);
+				param.put("approvalDate", approvalDate);
 				param.put("userSeq", userSeq);
-				Map<String, Object> tmp = (HashMap<String, Object>)commonDao.selectOne("admin.getMaintPaymentCount", param);
-				int cnt = 0;
-				if(tmp != null) {
-					cnt = CommonUtil.convertToInt(tmp.get("cnt"));
-				}
-				if(cnt == 0) {
-					iRslt += commonDao.insert("admin.createMaintPaymentInfo", param);
-				}
+				param.put("maintSeq", maintSeq);
+				iRslt += commonDao.insert("admin.createMaintPaymentInfo", param);
 			}
 		}
 		return iRslt;

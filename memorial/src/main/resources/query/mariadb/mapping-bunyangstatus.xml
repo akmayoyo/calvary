@@ -207,6 +207,7 @@
     <select id="getMaintPaymentDetailList" parameterType="map" resultType="map">
     	SELECT
 			t1.maint_year
+			,t1.maint_seq
 		    ,t1.payment_price
 		    ,date_format(t1.maint_start_date, '%Y-%m-%d') as maint_start_date
 		    ,date_format(t1.maint_end_date, '%Y-%m-%d') as maint_end_date

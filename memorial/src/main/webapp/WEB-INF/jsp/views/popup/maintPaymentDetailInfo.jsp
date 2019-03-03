@@ -10,7 +10,7 @@
 </form>
 
 <div class="poptitle">
-	<strong>관리비 납부 상세 정보</strong>
+	<strong>${popupTitle}</strong>
 	<button type="button" class="close btnClose" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 	</button>
@@ -30,7 +30,7 @@
     </div>
     <div class="clearfix"></div>
     <div class="table-responsive">
-        <table class="table table-style table-bordered">
+        <table id="tbl" class="table table-style table-bordered">
         	<colgroup>
         		<col width="8%">
         		<col width="8%">
@@ -62,7 +62,12 @@
             </thead>
             <tbody>
             	<c:forEach items="${maintPaymentDetailList}" var="rowItem">
-            	<tr>
+            	<tr 
+            		maintSeq="${rowItem.maint_seq}"
+            	 	userName="${rowItem.user_name}"
+            	 	chargerName="${rowItem.charger_name}"
+            	 	paymentPrice="${rowItem.payment_price}"
+            	<c:if test="${selectable == '1'}">class="clickable-row"</c:if>>
             		<td>${rowItem.bunyang_no}</td>
             		<td>${rowItem.apply_user_name}</td>
             		<td>${rowItem.user_name}(${rowItem.relation_type_name})</td>
@@ -96,6 +101,24 @@
 	   maxVisible: 5
 	}).on('page', function(event, num){
 		_search(num);
+	});
+	
+	// 그리드 로우 선택시
+	$('#tbl').on('click', '.clickable-row', function(event) {
+		var maintSeq = $(this).attr("maintSeq");
+		var userName = $(this).attr("userName");
+		var chargerName = $(this).attr("chargerName");
+		var paymentPrice = $(this).attr("paymentPrice");
+		var selectedItems = [];
+		var idx = 0;
+		selectedItems[idx++] = maintSeq;
+		selectedItems[idx++] = userName;
+		selectedItems[idx++] = chargerName;
+		selectedItems[idx++] = paymentPrice;
+		if(window.opener && window.opener.selectuserCallBack != 'undefined') {
+			window.opener.selectuserCallBack(selectedItems);
+		}
+		common.closeWindow();
 	});
 	
 	// 닫기 클릭

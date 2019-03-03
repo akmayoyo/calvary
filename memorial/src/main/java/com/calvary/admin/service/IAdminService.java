@@ -132,7 +132,7 @@ public interface IAdminService {
 	/** 
 	 * 분양관련 납입금(계약금,잔금,관리비..) 정보 생성
 	 */
-	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks) throws Exception;
+	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks, String[] maintSeqs) throws Exception;
 	
 	
 	//===============================================================================
@@ -156,7 +156,7 @@ public interface IAdminService {
 	/**
 	 * 관리비 납부 정보 생성 
 	 */
-	public int createMaintPaymentInfo(String bunyangSeq) throws Exception;
+	public int createMaintPaymentInfo(String bunyangSeq, String approvalDate) throws Exception;
 	
 	
 	//===============================================================================

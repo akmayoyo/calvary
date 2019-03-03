@@ -60,7 +60,7 @@
             </thead>
             <tbody>
             	<c:forEach items="${maintPaymentDetailList}" var="rowItem">
-            	<tr>
+            	<tr maintSeq="${rowItem.maint_seq}">
             		<td>${rowItem.bunyang_no}</td>
             		<td>${rowItem.apply_user_name}</td>
             		<td>${rowItem.user_name}(${rowItem.relation_type_name})</td>
