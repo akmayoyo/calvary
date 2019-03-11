@@ -1,14 +1,15 @@
-package com.calvary.common.vo;
+package com.calvary.sysadmin.vo;
 
 public class MenuVo {
-
 	private String menuSeq;
 	private String menuName;
+	private String menuUrl;
 	private int menuLevel;
-	private String menuType;
 	private int displayOrder;
 	private String parentMenuSeq;
-	private String userYn;
+	private String useYn;
+	private String hasAuth;
+	private String flag;// C:생성, U:업데이트
 	public String getMenuSeq() {
 		return menuSeq;
 	}
@@ -21,17 +22,17 @@ public class MenuVo {
 	public void setMenuName(String menuName) {
 		this.menuName = menuName;
 	}
+	public String getMenuUrl() {
+		return menuUrl;
+	}
+	public void setMenuUrl(String menuUrl) {
+		this.menuUrl = menuUrl;
+	}
 	public int getMenuLevel() {
 		return menuLevel;
 	}
 	public void setMenuLevel(int menuLevel) {
 		this.menuLevel = menuLevel;
-	}
-	public String getMenuType() {
-		return menuType;
-	}
-	public void setMenuType(String menuType) {
-		this.menuType = menuType;
 	}
 	public int getDisplayOrder() {
 		return displayOrder;
@@ -45,17 +46,29 @@ public class MenuVo {
 	public void setParentMenuSeq(String parentMenuSeq) {
 		this.parentMenuSeq = parentMenuSeq;
 	}
-	public String getUserYn() {
-		return userYn;
+	public String getUseYn() {
+		return useYn;
 	}
-	public void setUserYn(String userYn) {
-		this.userYn = userYn;
+	public void setUseYn(String useYn) {
+		this.useYn = useYn;
+	}
+	public String getHasAuth() {
+		return hasAuth;
+	}
+	public void setHasAuth(String hasAuth) {
+		this.hasAuth = hasAuth;
+	}
+	public String getFlag() {
+		return flag;
+	}
+	public void setFlag(String flag) {
+		this.flag = flag;
 	}
 	@Override
 	public String toString() {
-		return "MenuVo [menuSeq=" + menuSeq + ", menuName=" + menuName + ", menuLevel=" + menuLevel + ", menuType="
-				+ menuType + ", displayOrder=" + displayOrder + ", parentMenuSeq=" + parentMenuSeq + ", userYn="
-				+ userYn + "]";
+		return "MenuVo [menuSeq=" + menuSeq + ", menuName=" + menuName + ", menuUrl=" + menuUrl + ", menuLevel="
+				+ menuLevel + ", displayOrder=" + displayOrder + ", parentMenuSeq=" + parentMenuSeq + ", useYn="
+				+ useYn + ", hasAuth=" + hasAuth + ", flag=" + flag + "]";
 	}
 	
 }

@@ -1,0 +1,90 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mobile">
+
+	<resultMap id="userVo" type="com.calvary.admin.vo.BunyangUserVo">
+         <result property="bunyangSeq" column="bunyang_seq"/>
+         <result property="refType" column="ref_type"/>
+         <result property="relationType" column="relation_type"/>
+         <result property="userId" column="user_id"/>
+         <result property="userName" column="user_name"/>
+         <result property="birthDate" column="birth_date"/>
+         <result property="gender" column="gender"/>
+         <result property="email" column="email"/>
+         <result property="mobile" column="mobile"/>
+         <result property="phone" column="phone"/>
+         <result property="postNumber" column="post_number"/>
+         <result property="address1" column="address1"/>
+         <result property="address2" column="address2"/>
+         <result property="isChurchPerson" column="is_church_person"/>
+         <result property="churchOfficer" column="church_officer"/>
+         <result property="coupleSeq" column="couple_seq"/>
+         <result property="diocese" column="diocese"/>
+    </resultMap>
+
+    <!-- 분양 사용자 조회 -->
+    <select id="getBunyangUserVo" parameterType="map" resultMap="userVo">
+    	select 
+    	   a.bunyang_seq,
+	       a.ref_type,
+	       a.relation_type,
+	       a.user_id,
+	       a.user_name,
+	       a.birth_date,
+	       a.gender,
+	       a.email,
+	       a.mobile,
+	       a.phone,
+	       a.post_number,
+	       a.address1,
+	       a.address2,
+	       a.is_church_person,
+	       a.couple_seq,
+	       a.church_officer,
+	       a.diocese
+  		from TB_BUNYANG_REF_USER a
+		WHERE a.user_name = #{userName}
+		AND REGEXP_REPLACE(a.birth_date, '[^0-9]+', '') = #{birthDate}
+		AND REGEXP_REPLACE(a.mobile, '[^0-9]+', '') = #{mobile}
+		AND cancel_seq is null
+		AND NOT EXISTS(select 1 from TB_BUNYANG_INFO bi WHERE bi.bunyang_seq = a.bunyang_seq AND (bi.progress_status in('R','E') or bi.cancel_yn = 'Y'))
+		ORDER BY case when ref_type = 'APPLY_USER' THEN 1 when ref_type = 'USE_USER' THEN 2 ELSE 3 END
+		LIMIT 0, 1
+    </select>
+    
+    <!-- 분양 사용자 조회 -->
+    <select id="getKeepLoginInfo" parameterType="map" resultMap="userVo">
+    	select 
+    	   a.bunyang_seq,
+	       a.ref_type,
+	       a.relation_type,
+	       a.user_id,
+	       a.user_name,
+	       a.birth_date,
+	       a.gender,
+	       a.email,
+	       a.mobile,
+	       a.phone,
+	       a.post_number,
+	       a.address1,
+	       a.address2,
+	       a.is_church_person,
+	       a.couple_seq,
+	       a.church_officer,
+	       a.diocese
+  		from TB_BUNYANG_REF_USER a INNER JOIN TB_BUNYANG_REF_USER_LOGIN b ON a.user_id = b.user_id
+		WHERE b.session_id = #{sessionId}
+		LIMIT 0, 1
+    </select>
+    
+    <!-- 필요한 묘 개수 조회 -->
+    <select id="getRequiredGraveCount" parameterType="map" resultType="map">
+	    select
+			cast((select count(1) from TB_BUNYANG_REF_USER ru WHERE ru.ref_type = 'USE_USER' and ru.bunyang_seq = a.bunyang_seq) * (case when couple_type_count > 0 then 0.5 else 1 end) as int) as required_cnt   
+		from TB_BUNYANG_INFO a 
+		where BUNYANG_SEQ = #{bunyangSeq}
+	</select>
+    
+</mapper>
