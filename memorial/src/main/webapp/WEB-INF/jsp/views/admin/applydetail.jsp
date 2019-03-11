@@ -230,7 +230,7 @@
 	</ul>
 
     <div class="mt-30 text-center">
-        <button id="btnEdit" type="button" class="btn btn-primary btn-lg">수정</button>
+<!--         <button id="btnEdit" type="button" class="btn btn-primary btn-lg">수정</button> -->
         <c:if test="${bunyangInfo.progress_status == 'N'}">
         <button type="button" class="btn btn-info btn-lg" onclick="approval()">승인</button>
         <button type="button" class="btn btn-warning btn-lg" onclick="reject()">반려</button>

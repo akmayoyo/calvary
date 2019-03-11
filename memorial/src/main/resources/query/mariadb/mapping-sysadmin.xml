@@ -25,7 +25,7 @@
 			SET code_name = #{codeName}
 			,code_desc = #{codeDesc}
 			,display_order = #{displayOrder}
-			,code_value = case when #{codeValue} = '' then null else cast(#{codeValue} as int) end 
+			,code_value = #{codeValue} 
 		WHERE code_level = #{codeLevel} AND (#{parentCodeSeq} is null or parent_code_seq = #{parentCodeSeq}) AND code_seq = #{codeSeq}
 	</update>
 	
@@ -43,6 +43,272 @@
 	<!-- 자식코드정보 삭제 -->
 	<delete id="deleteChildCodeInfo" parameterType="map">
 		DELETE FROM TB_COM_CODE WHERE parent_code_seq = #{codeSeq}
+	</delete>
+	
+	<!-- 메뉴사용이력 조회 -->
+	<select id="getMenuLogList" parameterType="map" resultType="map">
+		select
+			t1.menu_id
+			,t2.menu_name
+			,t2.parent_menu_seq
+			,(select menu_name from TB_COM_MENU cm WHERE cm.menu_seq = t2.parent_menu_seq) as parent_menu_name
+			,t1.login_user
+			,(select user_name from TB_COM_USER cu WHERE cu.user_id = t1.login_user) as login_user_name
+			,t1.login_ip
+			,t1.device_type
+			,DATE_FORMAT(t1.access_time, '%Y-%m-%d %H:%i:%s') as access_time
+		from TB_SYS_MENU_ACCESS_LOG t1 INNER JOIN TB_COM_MENU t2 ON t1.menu_id = t2.menu_seq
+		where 1=1
+		<if test="deviceType != null and deviceType != ''">
+		AND t1.device_type = #{deviceType}
+		</if>
+		<if test="fromDt != null and fromDt != ''">
+		<![CDATA[
+		AND access_time >= STR_TO_DATE(#{fromDt}, '%Y%m%d')
+		]]>
+		</if>
+		<if test="toDt != null and toDt != ''">
+		<![CDATA[
+		AND access_time < DATE_ADD(STR_TO_DATE(#{toDt}, '%Y%m%d'), INTERVAL 1 DAY)
+		]]>
+		</if>
+		ORDER BY t1.access_time DESC
+		<if test="start != null">
+		LIMIT #{start}, #{count}
+		</if>
+	</select>
+	
+	<!-- Admin 사용자 리스트 조회 -->
+	<select id="getAdminUserList" parameterType="map" resultType="map">
+		select 
+			a.user_id,
+	       	a.user_name,
+	       	a.birth_date,
+	       	a.gender,
+	       	a.email,
+	       	a.mobile,
+	       	a.phone,
+	       	a.post_number,
+	       	a.address1,
+	       	a.address2,
+	       	CONCAT('(', a.post_number, ') ', a.address1, COALESCE(a.address2,'')) as fulladdress,
+	       	a.church_officer,
+	       	(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') church_officer_name,
+	       	a.diocese,
+	       	a.user_status,
+	       	CASE WHEN a.user_status = 'ACTIVE' THEN '승인' ELSE '미승인' END as user_status_exp,
+	       	DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+	  	from TB_COM_USER a
+		where 1=1
+		<if test="userName != null and userName != ''">
+		AND a.user_name like CONCAT('%',#{userName},'%')
+		</if>
+		<if test="userStatus != null and userStatus != ''">
+		AND a.user_status = #{userStatus}
+		</if>
+		ORDER BY a.user_name
+		<if test="start != null">
+		LIMIT #{start}, #{count}
+		</if>
+	</select>
+	
+	<!-- Admin 사용자 정보 조회 -->
+	<select id="getAdminUserInfo" parameterType="map" resultType="map">
+		select 
+			a.user_id,
+	       	a.user_name,
+	       	a.birth_date,
+	       	a.gender,
+	       	a.email,
+	       	a.mobile,
+	       	a.phone,
+	       	a.post_number,
+	       	a.address1,
+	       	a.address2,
+	       	a.church_officer,
+	       	(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') church_officer_name,
+	       	a.diocese,
+	       	a.user_status,
+	       	CASE WHEN a.user_status = 'ACTIVE' THEN '승인' ELSE '미승인' END as user_status_exp,
+	       	DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+	  	from TB_COM_USER a
+		where a.user_id = #{userId}
+		LIMIT 0, 1
+	</select>
+	
+	<update id="approvalAdminUser" parameterType="map">
+		UPDATE TB_COM_USER
+			SET user_status = 'ACTIVE' 
+		WHERE user_id = #{userId}
+	</update>
+	
+	<delete id="deleteAdminUser" parameterType="map">
+		DELETE FROM TB_COM_USER WHERE user_id = #{userId}
+	</delete>
+	
+	<update id="updateAdminUserInfo" parameterType="map">
+		UPDATE TB_COM_USER
+			SET USER_NAME = #{userName}
+			,BIRTH_DATE = #{birthDate}
+			,GENDER = #{gender}
+			,EMAIL = #{email}
+			,MOBILE = #{mobile}
+			,PHONE = #{phone}
+			,POST_NUMBER = #{postNumber}
+			,ADDRESS1 = #{address1}
+			,ADDRESS2 = #{address2}
+			,CHURCH_OFFICER = #{churchOfficer}
+			,DIOCESE = #{diocese}
+		WHERE user_id = #{userId}
+	</update>
+	
+	<select id="getTopLevelMenuList" parameterType="map" resultType="map">
+		select 
+			a.menu_seq,
+       		a.menu_name,
+       		a.menu_url,
+       		a.menu_level,
+       		a.menu_type,
+       		a.display_order,
+       		a.parent_menu_seq,
+       		a.use_yn,
+       		a.has_auth
+  		from TB_COM_MENU a
+  		WHERE a.menu_level = 1
+  		ORDER BY a.display_order
+	</select>
+	
+	<select id="getChildMenuList" parameterType="map" resultType="map">
+		select 
+			a.menu_seq,
+       		a.menu_name,
+       		a.menu_url,
+       		a.menu_level,
+       		a.menu_type,
+       		a.display_order,
+       		a.parent_menu_seq,
+       		a.use_yn,
+       		a.has_auth
+  		from TB_COM_MENU a
+  		WHERE a.parent_menu_seq = #{parentMenuSeq}
+  		ORDER BY a.display_order
+	</select>
+	
+	<select id="getNextMenuSeq" parameterType="map" resultType="map">
+		select
+			COALESCE(
+        	(case 
+            	when menu_level = 1 then concat('MENU', lpad(cast(max(replace(menu_seq,'MENU', '')) as int) + 1, 2, '0'))
+            	when menu_level = 2 then concat(parent_menu_seq, '_', lpad(cast(max(replace(menu_seq, concat(parent_menu_seq,'_'), '')) as int) + 1, 2, '0'))
+            end)
+            ,case 
+            	when #{menuLevel} = 1 then 'MENU01' 
+            	when #{menuLevel} = 2 then concat(#{parentMenuSeq},'_01')
+            end
+            ) as menu_seq 
+        from TB_COM_MENU a
+        where menu_level = #{menuLevel} and (#{parentMenuSeq} is null or parent_menu_seq = #{parentMenuSeq})
+	</select>
+	
+	<insert id="createMenuInfo" parameterType="map">
+		insert into TB_COM_MENU( MENU_SEQ,MENU_NAME,MENU_URL,MENU_LEVEL,MENU_TYPE,DISPLAY_ORDER,PARENT_MENU_SEQ,USE_YN,HAS_AUTH )
+		values(
+		#{menuSeq},
+		#{menuName},
+		#{menuUrl},
+		#{menuLevel},
+		null,
+		#{displayOrder},
+		#{parentMenuSeq},
+		#{useYn},
+		#{hasAuth}
+		)
+	</insert>
+	
+	<update id="updateMenuInfo" parameterType="map">
+		update TB_COM_MENU
+		set 
+		MENU_NAME = #{menuName},
+		MENU_URL = #{menuUrl}, 
+		MENU_LEVEL = #{menuLevel}, 
+		DISPLAY_ORDER = #{displayOrder}, 
+		USE_YN = #{useYn}, 
+		HAS_AUTH = #{hasAuth} 
+		WHERE menu_level = #{menuLevel} AND (#{parentMenuSeq} is null or parent_menu_seq = #{parentMenuSeq}) AND menu_seq = #{menuSeq}
+	</update>
+	
+	<delete id="deleteMenuInfo" parameterType="map">
+		DELETE FROM TB_COM_MENU WHERE (#{parentMenuSeq} is null or parent_menu_seq = #{parentMenuSeq}) AND menu_seq = #{menuSeq}
+	</delete>
+	
+	<delete id="deleteChildMenuInfo" parameterType="map">
+		DELETE FROM TB_COM_MENU WHERE parent_menu_seq = #{menuSeq}
+	</delete>
+	
+	<select id="getRoleList" parameterType="map" resultType="map">
+		select
+			role_id
+			,role_name
+			,role_desc
+		from TB_COM_ROLE a
+	</select>
+	
+	<select id="getUserRoleList" parameterType="map" resultType="map">
+		select
+			a.role_id
+			,b.user_id
+			,b.user_name
+			,b.birth_date
+			,b.mobile
+			,b.church_officer
+			,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = b.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') church_officer_name
+			,b.diocese
+			,b.post_number
+			,b.address1
+			,b.address2
+			,b.email
+		from TB_COM_USER_ROLE_MAPPING a RIGHT OUTER JOIN TB_COM_USER b ON a.user_id = b.user_id AND a.role_id = 'SYSADMIN'
+		order by b.user_name
+	</select>
+	
+	<insert id="createRole" parameterType="map">
+		insert into TB_COM_ROLE( ROLE_ID,ROLE_NAME,ROLE_DESC )
+		values(#{roleId} , #{roleName},  #{roleDesc})
+	</insert>
+	
+	<update id="updateRole" parameterType="map">
+		UPDATE TB_COM_ROLE
+		set ROLE_NAME = #{roleName}
+		,ROLE_DESC = #{roleDesc}
+		WHERE ROLE_ID = #{roleId}
+	</update>
+	
+	<delete id="deleteRole" parameterType="map">
+		DELETE FROM TB_COM_ROLE WHERE role_id = #{roleId}
+	</delete>
+	
+	<insert id="createUserRoleMapping" parameterType="map">
+		insert into TB_COM_USER_ROLE_MAPPING( USER_ID,ROLE_ID )
+		values(#{userId} , #{roleId})
+	</insert>
+	
+	<insert id="createMenuRoleMapping" parameterType="map">
+		insert into TB_COM_MENU_ROLE_MAPPING( MENU_ID,ROLE_ID )
+		values(#{menuId} , #{roleId})
+	</insert>
+	
+	<delete id="deleteUserRoleMapping" parameterType="map">
+		DELETE FROM TB_COM_USER_ROLE_MAPPING WHERE role_id = #{roleId}
+		<if test="userId != null and userId != ''">
+		AND user_id = #{userId}
+		</if>
+	</delete>
+	
+	<delete id="deleteMenuRoleMapping" parameterType="map">
+		DELETE FROM TB_COM_MENU_ROLE_MAPPING WHERE role_id = #{roleId}
+		<if test="menuId != null and menuId != ''">
+		AND menu_id = #{menuId}
+		</if> 
 	</delete>
     
 </mapper>

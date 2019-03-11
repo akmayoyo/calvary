@@ -667,5 +667,40 @@
 		</if>
 		AND t1.payment_yn = #{paymentYn}
     </select>
+    
+    <!-- 메뉴사용이력 조회 -->
+	<select id="getMenuLogList" parameterType="map" resultType="map">
+		select
+			COUNT(1) as total_count 
+		from TB_SYS_MENU_ACCESS_LOG t1 INNER JOIN TB_COM_MENU t2 ON t1.menu_id = t2.menu_seq
+		where 1=1
+		<if test="deviceType != null and deviceType != ''">
+		AND t1.device_type = #{deviceType}
+		</if>
+		<if test="fromDt != null and fromDt != ''">
+		<![CDATA[
+		AND access_time >= STR_TO_DATE(#{fromDt}, '%Y%m%d')
+		]]>
+		</if>
+		<if test="toDt != null and toDt != ''">
+		<![CDATA[
+		AND access_time < DATE_ADD(STR_TO_DATE(#{toDt}, '%Y%m%d'), INTERVAL 1 DAY)
+		]]>
+		</if>
+	</select>
+	
+	<!-- Admin 사용자 조회 -->
+	<select id="getAdminUserList" parameterType="map" resultType="map">
+		select 
+			COUNT(1) as total_count
+	  	from TB_COM_USER a
+		where 1=1
+		<if test="userName != null and userName != ''">
+		AND a.user_name like CONCAT('%',#{userName},'%')
+		</if>
+		<if test="userStatus != null and userStatus != ''">
+		AND a.user_status = #{userStatus}
+		</if>
+	</select>
 	
 </mapper>

@@ -15,17 +15,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.calvary.admin.service.IAdminService;
-import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.CommonUtil;
-import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
-import com.calvary.excel.ExcelForms;
 import com.calvary.excel.service.IExcelService;
 import com.calvary.popup.service.IPopupService;
 import com.calvary.popup.vo.SelectUserVo;
+import com.calvary.sysadmin.service.ISysAdminService;
 
 @Controller
 @RequestMapping(value=PopupController.ROOT_URL)
@@ -63,6 +61,10 @@ public class PopupController {
 	public static final String MAINT_PAYMENT_CLAIM_URL = "/maintPaymentClaim";
 	/** 코드등록 팝업 */
 	public static final String REGIST_CODE_URL = "/registCode";
+	/** 메뉴권한 등록 팝업 */
+	public static final String SELECT_MENU_ROLE_URL = "/selectMenuRole";
+	/** 사용자권한 등록 팝업 */
+	public static final String SELECT_USER_ROLE_URL = "/selectUserRole";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -71,7 +73,7 @@ public class PopupController {
 	@Autowired
 	private IAdminService adminService;
 	@Autowired
-	private IExcelService excelService;
+	private ISysAdminService sysAdminService;
 	
 	@RequestMapping(value=SELECT_USER_URL)
 	public Object selectUserHandler(SelectUserVo selectUserVo) {
@@ -444,6 +446,26 @@ public class PopupController {
 		Map<String, Object> parentCodeInfo = commonService.getCodeInfo(parentCodeSeq);
 		mv.addObject("parentCodeInfo", parentCodeInfo);
 		mv.setViewName(ROOT_URL + REGIST_CODE_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=SELECT_MENU_ROLE_URL)
+	public Object selectMenuRoleHandler(String roleId) {
+		ModelAndView mv = new ModelAndView();
+		List<Object> roleMenuList = adminService.getRoleMenuList(roleId);
+		mv.addObject("roleMenuList", roleMenuList);
+		mv.addObject("roleId", roleId);
+		mv.setViewName(ROOT_URL + SELECT_MENU_ROLE_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=SELECT_USER_ROLE_URL)
+	public Object selectUserRoleHandler(String roleId) {
+		ModelAndView mv = new ModelAndView();
+		List<Object> userRoleList = sysAdminService.getUserRoleList(roleId);
+		mv.addObject("userRoleList", userRoleList);
+		mv.addObject("roleId", roleId);
+		mv.setViewName(ROOT_URL + SELECT_USER_ROLE_URL);
 		return mv;
 	}
 }

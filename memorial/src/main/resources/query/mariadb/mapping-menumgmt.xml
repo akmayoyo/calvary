@@ -19,12 +19,20 @@
 		WHERE a.use_yn = 'Y' AND a.has_auth = 'Y'
 		AND a.menu_seq in
 			(SELECT 
-	        	DISTINCT b.menu_seq	 
-	        FROM TB_COM_USER_ROLE a INNER JOIN TB_COM_USER_ROLE_MENU b ON a.USER_ROLE = b.USER_ROLE
-	        WHERE a.user_id = #{userId}
+	        	DISTINCT b.menu_id
+	        FROM TB_COM_USER_ROLE_MAPPING a INNER JOIN TB_COM_MENU_ROLE_MAPPING b ON a.ROLE_ID = b.ROLE_ID
+	        WHERE 1=1 AND a.user_id = #{userId}
 	        )
 		) t
 		ORDER BY t.menu_level, t.display_order
+	</select>
+	
+	<select id="getRoleMenuList" parameterType="String" resultType="map">
+		SELECT
+			a.menu_seq, a.menu_name, a.menu_url, a.menu_level, a.menu_type, a.display_order, a.parent_menu_seq, a.use_yn, b.role_id
+		FROM TB_COM_MENU a LEFT OUTER JOIN TB_COM_MENU_ROLE_MAPPING b ON a.menu_seq = b.menu_id AND b.role_id = #{roleId}
+		WHERE a.use_yn = 'Y'
+		ORDER BY a.menu_level, a.display_order
 	</select>
 
 </mapper>

@@ -24,9 +24,11 @@
     <select id="getGraveAssignInfo" parameterType="map" resultType="map">
     	SELECT
 	  		b.bunyang_seq
+	  		,b.bunyang_no
 			,a.section_seq
 		    ,a.row_seq
 		    ,a.col_seq
+		    ,a.seq_no
 		    ,a.grave_type
             ,a.assign_status
             ,COALESCE(c.user_name, (SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = c.user_id)) AS apply_user_name
@@ -189,6 +191,48 @@
 		LIMIT 1
     </select>
     
+    <!-- 사용가능한 동산 정보 조회 -->
+    <select id="getAvailableSectionGraveInfo" parameterType="map" resultType="map">
+    	SELECT
+			section_seq, row_seq, col_seq
+		FROM
+		(SELECT
+			section_seq, row_seq, count(1) cnt, min(col_seq) col_seq
+		FROM TB_BUNYANG_GRAVE_ASSIGN a
+		WHERE a.section_seq = #{sectionSeq} an grave_type = #{graveType} AND assign_status = 'AVAILABLE'
+		GROUP BY section_seq, row_seq
+		) t
+		WHERE cnt >= #{cnt}
+    </select>
+    
+    <!-- 사용가능한 동산 정보 조회(모든구역별로) -->
+    <select id="getAvailableGraveInfoAll" parameterType="map" resultType="map">
+    	SELECT
+			t.section_seq
+		    ,t.row_seq
+		    ,t.col_seq
+		    ,(select seq_no from TB_BUNYANG_GRAVE_ASSIGN ga where ga.section_seq = t.section_seq and ga.row_seq = t.row_seq and ga.col_seq = t.col_seq) seq_no
+		FROM
+		(SELECT
+			a.*
+		    ,CASE WHEN @vsection_seq = a.section_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+		    ,(@vsection_seq := a.section_seq) vsection_seq
+		FROM
+		(SELECT
+			section_seq, row_seq, col_seq
+		FROM
+		(SELECT
+			section_seq, row_seq, count(1) cnt, min(col_seq) col_seq
+		FROM TB_BUNYANG_GRAVE_ASSIGN a
+		WHERE grave_type = #{graveType} AND assign_status = 'AVAILABLE'
+		GROUP BY section_seq, row_seq
+		) t
+		WHERE cnt >= #{cnt} 
+		) a, (SELECT @vsection_seq:='', @rownum:=0 FROM DUAL) b
+		) t
+		WHERE rn = 1
+    </select>
+    
     <!-- 예약된 가족형 자리중에서 사용가능한 동산 정보 조회 -->
     <select id="getAvailableFamilyGraveInfo" parameterType="map" resultType="map">
     	SELECT
@@ -207,7 +251,7 @@
     	SELECT 
 			a.use_user_seq1
 		FROM TB_BUNYANG_GRAVE_ASSIGN a INNER JOIN TB_BUNYANG_REF_USER b 
-		ON a.bunyang_seq = b.bunyang_seq AND a.use_user_seq1 = b.user_seq AND b.couple_seq = #{coupleSeq} AND b.ref_type = 'USE_USER'
+		ON a.bunyang_seq = b.bunyang_seq AND a.couple_seq = b.couple_seq AND a.use_user_seq1 = b.user_seq AND b.couple_seq = #{coupleSeq} AND b.ref_type = 'USE_USER'
 		WHERE a.bunyang_seq = #{bunyangSeq} 
 		LIMIT 1
     </select>
@@ -228,13 +272,45 @@
 		ORDER BY section_seq, row_seq, col_seq
     </select>
     
+    <!-- 가족형의 다른가족 또는 부부형 배우자가 사용시 내 자리는 이미 정해져있기때문에 그자리가 있는지 조회함 -->
+    <select id="getReservedGraveInfo" parameterType="map" resultType="map">
+    	SELECT 
+			section_seq
+			,row_seq
+			,col_seq
+			,bunyang_seq
+			,use_user_seq1
+			,use_user_seq2
+			,assign_status
+			,grave_type
+			,seq_no
+		FROM TB_BUNYANG_GRAVE_ASSIGN a
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		AND (
+		case 
+			when a.grave_type = 'SINGLE' and a.assign_status = 'RESERVED' then 1
+			when a.grave_type = 'COUPLE' then
+				case 
+					when a.assign_status = 'RESERVED' then 1
+					when a.assign_status = 'HALF_OCCUPIED' and a.couple_seq = #{coupleSeq} then 1 
+					else 0 
+				end
+			else 0
+		end
+		) = 1
+		AND a.assign_status IN ('RESERVED', 'HALF_OCCUPIED')
+		ORDER BY section_seq, row_seq, col_seq
+		LIMIT 1
+    </select>
+    
     <!-- 동산 배정 -->
     <update id="updateGrave" parameterType="map">
     	UPDATE TB_BUNYANG_GRAVE_ASSIGN a
 			SET bunyang_seq = #{bunyangSeq},
 			use_user_seq1 = #{useUserSeq1},
 			use_user_seq2 = #{useUserSeq2},
-			assign_status = #{assignStatus}
+			assign_status = #{assignStatus},
+			couple_seq = #{coupleSeq}
 		WHERE a.section_seq = #{sectionSeq} 
 		AND a.row_seq = #{rowSeq}
 		AND a.col_seq = #{colSeq}

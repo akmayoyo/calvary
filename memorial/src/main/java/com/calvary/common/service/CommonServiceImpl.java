@@ -84,5 +84,19 @@ public class CommonServiceImpl implements ICommonService {
 		}
 		return iRtn;
 	}
+	
+	/**
+	 * 
+	 * 메뉴 접속 이력 생성
+	 */
+	public int createMenuAccessLog(String loginUser, String loginIP, String deviceType, String menuId) throws Exception {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("loginUser", loginUser);
+		parameter.put("loginIP", loginIP);
+		parameter.put("deviceType", deviceType);
+		parameter.put("menuId", menuId);
+		int iRslt = commonDao.insert("common.createMenuAccessLog", parameter);
+		return iRslt;
+	}
 
 }

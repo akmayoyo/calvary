@@ -30,7 +30,7 @@
 									<ul>
 									<!-- 2 Level -->
 									<c:forEach items="${menu.children}" var="menu">
-										<li><a href="${menu.menu_url}">${menu.menu_name}</a></li>
+										<li><a href="${menu.menu_url}?_menuId=${menu.menu_seq}">${menu.menu_name}</a></li>
 									</c:forEach>
 									</ul>
 								</li>

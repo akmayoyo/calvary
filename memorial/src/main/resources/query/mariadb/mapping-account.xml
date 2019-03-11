@@ -29,5 +29,18 @@
 		WHERE a.user_id = #{userId} AND a.password = #{password}
 		ORDER BY a.user_id
     </select>
+    
+    <delete id="deleteKeepLoginInfo" parameterType="map">
+    	DELETE FROM TB_BUNYANG_REF_USER_LOGIN WHERE session_id = #{sessionId}
+    </delete>
+    
+    <delete id="insertKeepLoginInfo" parameterType="map">
+    	INSERT INTO TB_BUNYANG_REF_USER_LOGIN(USER_ID, SESSION_ID, EXPIRE_DATE)
+    	VALUES(
+    	#{userId},
+    	#{sessionId},
+    	DATE_ADD(CURRENT_TIMESTAMP, INTERVAL #{keepDays} DAY)
+    	)
+    </delete>
 
 </mapper>

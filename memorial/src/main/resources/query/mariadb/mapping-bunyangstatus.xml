@@ -47,11 +47,13 @@
 			count(distinct bunyang_seq) cnt, progress_status 
 		from TB_BUNYANG_HISTORY b 
 		where progress_status = 'B'
+		AND EXISTS(select 1 from TB_BUNYANG_INFO bi WHERE bi.bunyang_seq = b.bunyang_seq AND bi.progress_status not in ('E', 'R') AND (bi.cancel_yn is null or bi.cancel_yn = 'N'))
 		union ALL
 		select 
 			count(distinct bunyang_seq) cnt, progress_status
-		from TB_BUNYANG_HISTORY b 
+		from TB_BUNYANG_HISTORY b
 		where progress_status = 'C'
+		AND EXISTS(select 1 from TB_BUNYANG_INFO bi WHERE bi.bunyang_seq = b.bunyang_seq AND bi.progress_status not in ('E', 'R') AND (bi.cancel_yn is null or bi.cancel_yn = 'N')) 
 		) t
     </select>
     

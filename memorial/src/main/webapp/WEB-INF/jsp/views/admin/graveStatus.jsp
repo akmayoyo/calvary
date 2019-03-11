@@ -285,11 +285,9 @@ function makeGraveGrid(grid, gridData) {
 		.attr("height", function(d) { return d.height; })
 		.style("fill", function(d) {
 			if(d.assign_status == 'OCCUPIED') {
-				if(d.grave_type == 'SINGLE' || (d.use_user_seq1 && d.use_user_seq2)) {// 1인형 또는 2기 모두 사용중인 부부형
-					return "#FF7F27";
-				}else {
-					return "#FFCCA9";
-				}
+				return "#FF7F27";
+			} else if(d.assign_status == 'HALF_OCCUPIED') {
+				return "#FFCCA9";
 			} else if(d.assign_status == 'RESERVED') {
 				return "#007BFF";
 			} else {

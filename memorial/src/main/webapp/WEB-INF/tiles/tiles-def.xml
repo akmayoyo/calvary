@@ -48,4 +48,12 @@
       <put-attribute name="body" value="/WEB-INF/jsp/views/popup/{1}.jsp" />
     </definition>
     
+    <!-- mobile -->    
+    <definition name="mobile" template="/WEB-INF/jsp/tileslayout/mobileLayout.jsp">
+    </definition>
+    
+    <definition name="/mobile/*" extends="mobile">
+      <put-attribute name="body" value="/WEB-INF/jsp/views/mobile/{1}.jsp" />
+    </definition>
+    
 </tiles-definitions>

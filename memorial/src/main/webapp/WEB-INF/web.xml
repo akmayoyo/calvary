@@ -73,6 +73,16 @@
 		<url-pattern>/sysadmin/*</url-pattern>
 	</filter-mapping>
 	
+	<!-- Mobile Filter -->
+	<filter>
+		<filter-name>mobileFilter</filter-name>
+        	<filter-class>com.calvary.common.filter.MobileFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>mobileFilter</filter-name>
+		<url-pattern>/mobile/*</url-pattern>
+	</filter-mapping>
+	
 	<!-- Member Filter -->
 	<filter>
 		<filter-name>memberFilter</filter-name>

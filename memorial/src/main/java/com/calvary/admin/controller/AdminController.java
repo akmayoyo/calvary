@@ -1361,7 +1361,7 @@ public class AdminController {
 	@RequestMapping(value=MENU_MGMT_URL)
 	public Object menuMgmtHandler() {
 		// TODO 로그인아이디 넘겨야됨
-		List<Object> menuList = adminService.getMenuList("");
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("menuList", menuList);
 		mv.setViewName(ROOT_URL + MENU_MGMT_URL);

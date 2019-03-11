@@ -1381,4 +1381,28 @@ public class AdminServiceImpl implements IAdminService {
 		return children;
 	}
 	
+	/** 
+	 * 메뉴리스트조회 
+	 * @param roleId 사용자그룹
+	 */
+	@SuppressWarnings("unchecked")
+	public List<Object> getRoleMenuList(String roleId) {
+		List<Object> menuListAll = commonDao.selectList("menumgmt.getRoleMenuList", roleId);
+		List<Object> rtnList = new ArrayList<Object>();
+		// 메뉴를 Hierarchy 구조로 가공
+		if(menuListAll != null && menuListAll.size() > 0) {
+			for(int i = 0, iLen = menuListAll.size(); i < iLen; i++) {
+				Map<String, Object> tmp = (Map<String, Object>)menuListAll.get(i);
+				int menuLevel =  (int)tmp.get("menu_level");
+				if(menuLevel == 1) {
+					String menuSeq = (String)tmp.get("menu_seq");
+					List<Map<String, Object>> children = getChildMenuList(menuSeq, menuLevel + 1, menuListAll);
+					tmp.put("children", children);
+					rtnList.add(tmp);
+				}
+			}
+		}
+		return rtnList;
+	}
+	
 }

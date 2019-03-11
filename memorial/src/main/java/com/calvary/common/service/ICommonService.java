@@ -22,4 +22,10 @@ public interface ICommonService {
 	 * 각 쿼리에 SQL_CALC_FOUND_ROWS 를 정의한후 해당 함수 호출해야 정상 동작함
 	 */
 	public int getTotalCount();
+	
+	/**
+	 * 
+	 * 메뉴 접속 이력 생성
+	 */
+	public int createMenuAccessLog(String loginUser, String loginIP, String deviceType, String menuId) throws Exception;
 }

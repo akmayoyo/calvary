@@ -223,5 +223,24 @@
 			YEAR(CURDATE())- seq as year_val
 		FROM seq_0_to_110
 	</select>
+	
+	<!-- 메뉴접속 이력 생성 -->
+	<insert id="createMenuAccessLog" parameterType="map">
+		INSERT INTO TB_SYS_MENU_ACCESS_LOG ( 
+			MENU_ID
+			,LOGIN_USER
+			,LOGIN_IP
+			,ACCESS_TIME
+			,DEVICE_TYPE 
+		)
+		SELECT 
+			menu_seq
+			,#{loginUser}
+			,#{loginIP}
+			,CURRENT_TIMESTAMP  
+			,#{deviceType}
+		FROM TB_COM_MENU a 
+		WHERE a.menu_seq = #{menuId}
+	</insert>
 
 </mapper>

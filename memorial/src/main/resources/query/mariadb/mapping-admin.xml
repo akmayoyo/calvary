@@ -358,8 +358,17 @@
 			b.col_seq,
 			b.product_type,
 			b.assign_status,
+			case 
+				when b.assign_status = 'HALF_OCCUPIED' then 
+					case when a.user_seq = b.use_user_seq1 then 'OCCUPIED' 
+					else 'RESERVED' 
+					end 
+				else b.assign_status 
+			end couple_assign_status,
+			b.use_user_seq1,
+			b.use_user_seq2,
 			a.cancel_seq
-		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_BUNYANG_GRAVE_ASSIGN b ON a.bunyang_seq = b.bunyang_seq AND (b.use_user_seq1 = a.user_seq or b.use_user_seq2 = a.user_seq)  
+		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_BUNYANG_GRAVE_ASSIGN b ON a.bunyang_seq = b.bunyang_seq AND (b.use_user_seq1 = a.user_seq or b.couple_seq = a.couple_seq)  
 		WHERE a.bunyang_seq = #{bunyangSeq}
     	AND a.ref_type = #{refType}
     	<if test="userId != null and userId != ''">

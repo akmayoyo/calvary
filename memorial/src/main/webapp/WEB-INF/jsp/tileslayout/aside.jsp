@@ -32,10 +32,10 @@
 							<li>
 							<c:choose>
 								<c:when test="${menu.menu_seq eq menuInfo.menu_seq}">
-									<a class="active" href="${menu.menu_url}">${menu.menu_name}</a>
+									<a class="active" href="${menu.menu_url}?_menuId=${menu.menu_seq}">${menu.menu_name}</a>
 								</c:when>
 								<c:otherwise>
-									<a href="${menu.menu_url}">${menu.menu_name}</a>
+									<a href="${menu.menu_url}?_menuId=${menu.menu_seq}">${menu.menu_name}</a>
 								</c:otherwise>
 							</c:choose>
 							</li>

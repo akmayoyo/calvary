@@ -360,4 +360,10 @@ public interface IAdminService {
 	 * @param userId 접속유저 아이디
 	 */
 	public List<Object> getMenuList(String userId);
+	
+	/** 
+	 * 메뉴리스트조회 
+	 * @param roleId 사용자그룹
+	 */
+	public List<Object> getRoleMenuList(String roleId);
 }

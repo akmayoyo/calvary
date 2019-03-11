@@ -10,6 +10,9 @@
 	padding: 4px 7px;
 	font-size: 12px;
 }
+tr.selected {
+	background-color: #E0EFFC;
+}
 </style>
 <form id="frm" method="post">
 	<input type="hidden" id="parentCodeSeq" name="parentCodeSeq" value="${parentCodeSeq}">
@@ -23,16 +26,16 @@
 		    	<h4 style="margin-top: 3;">코드 리스트</h4>
 	    	</div>
 	    	<div class="pull-right">
-	    		<button type="button" class="btn btn-default disabled" onclick="_deleteInfo(this)"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span></button>
-	    		<button type="button" class="btn btn-default disabled" onclick="_deleteInfo(this)"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span></button>
-		    	<button class="btn btn-primary" style="margin-left: 5px;" type="button" onclick="_addCode()">추가</button>
+	    		<button type="button" class="btn btn-default" onclick="_changeDisplayOrder('top','up')"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span></button>
+	    		<button type="button" class="btn btn-default" onclick="_changeDisplayOrder('top','down')"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span></button>
+		    	<button class="btn btn-primary" type="button" onclick="_addCode()">추가</button>
 		    	<button class="btn btn-primary" type="button" onclick="_saveCode()">저장</button>
 	    	</div>
     	</div>
     	<div class="clearfix"></div>
 		<!-- 테이블 -->
 		<div class="table-responsive">
-			<table id="tblTopLevelCode" class="table table-style table-bordered">
+			<table id="tblTopCode" class="table table-style table-bordered table-hover">
 				<colcolgroup>
 					<col width="16%">
 					<col width="16%">
@@ -53,12 +56,14 @@
 				</thead>
 				<tbody>
 					<c:forEach items="${topLevelCodeList}" var="rowItem">
-					<tr codeSeq="${rowItem.code_seq}" codeName="${rowItem.code_name}">
+					<tr codeSeq="${rowItem.code_seq}" codeName="${rowItem.code_name}" <c:if test="${parentCodeSeq == rowItem.code_seq}">class="selected"</c:if>>
 	                    <td align="left" name="codeSeq"><a href="javascript:void(0);" class="tbllink" style="color: #337ab7;" onclick="searchChildCodeList(this)">${rowItem.code_seq}</a></td>
 	                    <td><input name="codeName" type="text" class="form-control" value="${rowItem.code_name}"></td>
 	                    <td><input name="codeDesc" type="text" class="form-control" value="${rowItem.code_desc}"></td>
 	                    <td><input name="codeValue" type="text" class="form-control" value="${rowItem.code_value}"></td>
-	                    <td name="displayOrder">${rowItem.display_order}</td>
+	                    <td name="displayOrder">
+	                    	${rowItem.display_order}
+	                    </td>
 	                    <td>
 	                    	<button type="button" data-toggle="tooltip" title="삭제" class="btn btn-default btn-sm" onclick="_deleteCode(this)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
 	                    </td>
@@ -74,6 +79,8 @@
 		    	<h4 style="margin-top: 3;">상세 코드 리스트 - ${parentCodeName}</h4>
 	    	</div>
 	    	<div class="pull-right">
+	    		<button type="button" class="btn btn-default" onclick="_changeDisplayOrder('child','up')"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span></button>
+	    		<button type="button" class="btn btn-default" onclick="_changeDisplayOrder('child','down')"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span></button>
 		    	<button class="btn btn-primary" type="button" onclick="_addCode('${parentCodeSeq}')">추가</button>
 		    	<button class="btn btn-primary" type="button" onclick="_saveCode('${parentCodeSeq}')">저장</button>
 	    	</div>
@@ -81,7 +88,7 @@
     	<div class="clearfix"></div>
 		<!-- 테이블 -->
 		<div class="table-responsive">
-			<table id="tblChildCode" class="table table-style table-bordered">
+			<table id="tblChildCode" class="table table-style table-bordered table-hover">
 				<colcolgroup>
 					<col width="16%">
 					<col width="16%">
@@ -125,9 +132,14 @@
 (function(){
 	
 	// 그리드 로우 선택시
-	$('#tblTopLevelCode').on('click', '.clickable-row', function(event) {
+	$('#tblTopCode').on('click', '.clickable-row', function(event) {
 		var parentCodeSeq = $(this).attr("codeSeq");
 		var parentCodeName = $(this).attr("codeName");
+	});
+	
+	$('.table-hover tbody tr').click(function(e) {
+		$(this).parent().find('tr.selected').removeClass();
+		$(this).addClass('selected');
 	});
 	
 })();
@@ -154,7 +166,7 @@ function _addCode(parentCodeSeq) {
 	if(parentCodeSeq) {
 		tbody = $('#tblChildCode tbody');
 	} else {
-		tbody = $('#tblTopLevelCode tbody');
+		tbody = $('#tblTopCode tbody');
 	}
 	var tr = $('<tr/>');
 	var displayOrder = $(tbody).find('tr').length + 1;
@@ -222,7 +234,7 @@ function _saveCode(parentCodeSeq) {
 	if(parentCodeSeq) {
 		tbody = $('#tblChildCode tbody');
 	} else {
-		tbody = $('#tblTopLevelCode tbody');
+		tbody = $('#tblTopCode tbody');
 	}
 	
 	var isValid = true;
@@ -273,12 +285,12 @@ function _saveCode(parentCodeSeq) {
 			isValid = false;
 			return false;
 		}
-		if(codeValue && codeValue != common.toNumeric(codeValue)) {
-			common.showAlert('코드값은 숫자만 입력가능합니다.');
-			$(this).find('input[name="codeValue"]').focus();
-			isValid = false;
-			return false;
-		}
+// 		if(codeValue && codeValue != common.toNumeric(codeValue)) {
+// 			common.showAlert('코드값은 숫자만 입력가능합니다.');
+// 			$(this).find('input[name="codeValue"]').focus();
+// 			isValid = false;
+// 			return false;
+// 		}
 		codeItem['flag'] = flag;
 		codeItem['codeSeq'] = codeSeq;
 		codeItem['codeName'] = codeName;
@@ -326,22 +338,20 @@ function _saveCode(parentCodeSeq) {
 }
 
 /**
- * Excel 다운로드
+ * 행순서 변경
  */
-function _downloadExcel() {
-	var excelHeaders = ["승인번호","신청자","사용자","신청형태","부부형","1인형","신청일자","신청상태","비고"];
-	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","regist_date","progress_status_exp","remarks_exp"];
-	var searchKeys = ["bunyangTimes", "progressStatus", "apply_user_name"];
-	var bunyangTimes = $('select[name="bunyangTimes"] option:selected').val();
-	var progressStatus = $('select[name="progressStatus"] option:selected').val();
-	var apply_user_name = $('input[name="searchVal"]').val();
-	var searchValues = [bunyangTimes, progressStatus, apply_user_name];
-	var queryId = "admin.getApplyList";
-	var title = "갈보리추모동산 신청현황";
-	var fileName = title + ".xlsx";
-	var sheetName = title;
-	title += " (" + $('select[name="bunyangTimes"] option:selected').text() + ")";
-	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);
+function _changeDisplayOrder(target, direction) {
+	var tbl = target == 'top' ? $('#tblTopCode') : $('#tblChildCode');
+	var tr = tbl.find('tr.selected');
+	if(direction == 'up') {
+		$(tr).prev().before($(tr));
+	} else if(direction == 'down') {
+		$(tr).next().after($(tr));
+	}
+	// 표시순서 번호 업데이트
+	tbl.find('tr').each(function(idx) {
+		$(this).find('td[name="displayOrder"]').text(idx);
+	});
 }
 
 </script>

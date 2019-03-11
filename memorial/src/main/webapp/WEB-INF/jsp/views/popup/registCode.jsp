@@ -21,7 +21,6 @@
 
 <div class="content" style="padding: 10px 10px;">
 
-	<!-- 부부형 사용자 1. -->
 	<div>
 		<h4>코드 정보</h4>
 	</div>
