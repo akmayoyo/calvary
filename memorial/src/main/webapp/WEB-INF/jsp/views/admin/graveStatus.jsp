@@ -40,9 +40,9 @@
             		<c:if test="${rowItem.grave_type != 'sub_total' && rowItem.grave_type != 'total'}">
             		<td >${rowItem.section_seq}</td>
             		</c:if>
-            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.available_cnt)}</td>
-            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.reserved_cnt)}</td>
             		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.occupied_cnt)}</td>
+            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.reserved_cnt)}</td>
+            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.available_cnt)}</td>
             		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.total_cnt)}</td>
             	</tr>
             	</c:forEach>
@@ -359,6 +359,9 @@ function _getGraveAssignInfo(d) {
 					tr.append('<td>'+ address +'</td>');
 					$('#tblAssignInfo tbody').append(tr);
 				});
+				$('html:not(:animated), body:not(:animated)').animate({
+		            scrollTop: $("#tblAssignInfo").offset().top
+		        }, 1000);
 			}
 		}
 	});

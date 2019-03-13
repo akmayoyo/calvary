@@ -199,10 +199,12 @@
 		(SELECT
 			section_seq, row_seq, count(1) cnt, min(col_seq) col_seq
 		FROM TB_BUNYANG_GRAVE_ASSIGN a
-		WHERE a.section_seq = #{sectionSeq} an grave_type = #{graveType} AND assign_status = 'AVAILABLE'
+		WHERE a.section_seq = #{sectionSeq} and grave_type = #{graveType} AND assign_status = 'AVAILABLE'
 		GROUP BY section_seq, row_seq
 		) t
 		WHERE cnt >= #{cnt}
+		ORDER BY section_seq, row_seq, col_seq
+		LIMIT 1
     </select>
     
     <!-- 사용가능한 동산 정보 조회(모든구역별로) -->
@@ -319,7 +321,7 @@
     <!-- 동산 배정(부부형 두번째 자리 업데이트) -->
     <update id="updateCoupleGrave" parameterType="map">
     	UPDATE TB_BUNYANG_GRAVE_ASSIGN a
-			SET use_user_seq2 = #{useUserSeq2}
+			SET use_user_seq2 = #{useUserSeq2}, assign_status = #{assignStatus}
 		WHERE a.bunyang_seq = #{bunyangSeq} AND a.use_user_seq1 = #{useUserSeq1}
     </update>
     

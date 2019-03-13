@@ -84,7 +84,7 @@ public class MobileFilter implements Filter {
 				if(!StringUtils.isEmpty(query)) {
 					requestUrl += "?" + query;
 				}
-				hRequest.getSession().setAttribute("requestUrl", requestUrl);
+				hRequest.getSession().setAttribute("requestMobileUrl", requestUrl);
 				((HttpServletResponse)response).sendRedirect(contextPath + loginUrl);
 			}
 		}

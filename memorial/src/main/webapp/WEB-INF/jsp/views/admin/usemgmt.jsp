@@ -240,11 +240,9 @@ function makeGraveGrid(grid, gridData) {
 		.attr("height", function(d) { return d.height; })
 		.style("fill", function(d) {
 			if(d.assign_status == 'OCCUPIED') {
-				if(d.grave_type == 'SINGLE' || (d.use_user_seq1 && d.use_user_seq2)) {// 1인형 또는 2기 모두 사용중인 부부형
-					return "#FF7F27";
-				}else {
-					return "#FFCCA9";
-				}
+				return "#FF7F27";
+			} else if(d.assign_status == 'HALF_OCCUPIED') {
+				return "#FFCCA9";
 			} else if(d.assign_status == 'RESERVED') {
 				return "#007BFF";
 			} else {
@@ -274,7 +272,7 @@ function makeGraveGrid(grid, gridData) {
  * 
  */
 function _clickable(d) {
-	var bRtn = false;
+	var bRtn = true;
 	if(d.assign_status == 'OCCUPIED') {
 		bRtn = true;
 	}
@@ -318,19 +316,25 @@ function _getGraveAssignInfo(d) {
 					var section = item.section_seq + '구역';
 					section += '  ' + item.row_seq + ' - ' + item.col_seq;
 					var graveType = item.grave_type == 'COUPLE' ? '부부형' : '1인형';
-					var address = '(' + item.post_number + ') ' + item.address1 + (item.address2 ? item.address2 : '');
+					var address = item.post_number ? '(' + item.post_number + ') ' + item.address1 + (item.address2 ? item.address2 : '') : '';
+					var bunyang_no = item.bunyang_no ? item.bunyang_no : '';
+					var apply_user_name = item.apply_user_name ? item.apply_user_name : '';
 					if(idx == 0) {
 						tr.append('<td rowspan="' + len + '">'+ section +'</td>');
-						tr.append('<td rowspan="' + len + '">'+ item.bunyang_seq +'</td>');
-						tr.append('<td rowspan="' + len + '">'+ item.apply_user_name +'</td>');
+						tr.append('<td rowspan="' + len + '">'+ bunyang_no +'</td>');
+						tr.append('<td rowspan="' + len + '">'+ apply_user_name +'</td>');
 						tr.append('<td rowspan="' + len + '">'+ graveType +'</td>');	
 					}
-					tr.append('<td>'+ item.user_name +'</td>');
-					tr.append('<td>'+ item.relation_type_name +'</td>');
-					tr.append('<td>'+ item.birth_date +'</td>');
+					tr.append('<td>'+ (item.user_name ? item.user_name : '') +'</td>');
+					tr.append('<td>'+ (item.relation_type_name ? item.relation_type_name : '') +'</td>');
+					tr.append('<td>'+ (item.birth_date ? item.birth_date : '') +'</td>');
 					tr.append('<td>'+ address +'</td>');
 					$('#tblAssignInfo tbody').append(tr);
 				});
+				//document.getElementById('tblAssignInfo').scrollIntoView(true);
+				$('html:not(:animated), body:not(:animated)').animate({
+		            scrollTop: $("#tblAssignInfo").offset().top
+		        }, 1000);
 			}
 		}
 	});

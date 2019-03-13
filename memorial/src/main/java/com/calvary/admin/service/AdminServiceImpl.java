@@ -868,7 +868,7 @@ public class AdminServiceImpl implements IAdminService {
 				int userSeq = userSeqs[i];
 				int coupleSeq = coupleSeqs[i];
 				int usingUserSeq = -1;
-				if(coupleSeq >= 0) {// 부부형
+				if(coupleSeq > 0) {// 부부형
 					parameter.put("bunyangSeq", bunyangSeq);
 					parameter.put("coupleSeq", coupleSeq);
 					Map<String, Object> usingUser = (HashMap<String, Object>)commonDao.selectOne("use.getUsingCoupleUserSeq", parameter);
@@ -876,15 +876,16 @@ public class AdminServiceImpl implements IAdminService {
 						usingUserSeq = CommonUtil.convertToInt(usingUser.get("use_user_seq1"));
 					}
 				}
-				if(usingUserSeq >= 0) {// 부부형 2기중 1기 사용중인 경우
+				if(usingUserSeq > 0) {// 부부형 2기중 1기 사용중인 경우
 					parameter = new HashMap<String, Object>();
 					parameter.put("bunyangSeq", bunyangSeq);
 					parameter.put("coupleSeq", coupleSeq);
 					parameter.put("useUserSeq1", usingUserSeq);
 					parameter.put("useUserSeq2", userSeq);
+					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED);
 					iRslt += commonDao.update("use.updateCoupleGrave", parameter);
 				} else {
-					String graveType = coupleSeq >= 0 ? CalvaryConstants.GRAVE_TYPE_COUPLE : CalvaryConstants.GRAVE_TYPE_SINGLE;
+					String graveType = coupleSeq > 0 ? CalvaryConstants.GRAVE_TYPE_COUPLE : CalvaryConstants.GRAVE_TYPE_SINGLE;
 					Map<String, Object> availableGraveInfo = getAvailableGraveInfo(graveType, 1);
 					String sectionSeq = (String)availableGraveInfo.get("section_seq");
 					int rowSeq = CommonUtil.convertToInt(availableGraveInfo.get("row_seq"));
@@ -896,7 +897,8 @@ public class AdminServiceImpl implements IAdminService {
 					parameter.put("sectionSeq", sectionSeq);
 					parameter.put("rowSeq", rowSeq);
 					parameter.put("colSeq", colSeq);
-					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED);
+					parameter.put("coupleSeq", coupleSeq > 0 ? coupleSeq : null);
+					parameter.put("assignStatus", coupleSeq > 0 ? CalvaryConstants.GRAVE_ASSIGN_STATUS_HALF_OCCUPIED : CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED);
 					parameter.put("graveType", graveType);
 					iRslt += commonDao.update("use.updateGrave", parameter);
 				}
@@ -919,7 +921,7 @@ public class AdminServiceImpl implements IAdminService {
 		// 가족형의 경우 부부형 또는 1인형 둘중 하나만 가능하기 때문에 0번째 데이터만 확인
 		String graveType = null;
 		if(coupleSeqs != null && coupleSeqs.length > 0) {
-			if(coupleSeqs[0] >= 0) {
+			if(coupleSeqs[0] > 0) {
 				graveType = CalvaryConstants.GRAVE_TYPE_COUPLE;
 			} else {
 				graveType = CalvaryConstants.GRAVE_TYPE_SINGLE;
@@ -937,7 +939,7 @@ public class AdminServiceImpl implements IAdminService {
 		if(graveList == null || graveList.size() == 0) {
 			List<Object> useUserList = getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
 			int requireCnt = useUserList.size();
-			if(graveType == CalvaryConstants.GRAVE_TYPE_COUPLE) {
+			if(CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) {
 				requireCnt = requireCnt/2;
 			}
 			// 가족수만큼 연속배정이 가능한 자리를 조회
@@ -969,7 +971,7 @@ public class AdminServiceImpl implements IAdminService {
 				int userSeq = userSeqs[i];
 				int coupleSeq = coupleSeqs[i];
 				int usingUserSeq = -1;
-				if(coupleSeq >= 0) {// 부부형
+				if(coupleSeq > 0) {// 부부형
 					parameter.put("bunyangSeq", bunyangSeq);
 					parameter.put("coupleSeq", coupleSeq);
 					Map<String, Object> usingUser = (HashMap<String, Object>)commonDao.selectOne("use.getUsingCoupleUserSeq", parameter);
@@ -977,12 +979,13 @@ public class AdminServiceImpl implements IAdminService {
 						usingUserSeq = CommonUtil.convertToInt(usingUser.get("use_user_seq1"));
 					}
 				}
-				if(usingUserSeq >= 0) {// 부부형 2기중 1기 사용중인 경우
+				if(usingUserSeq > 0) {// 부부형 2기중 1기 사용중인 경우
 					parameter = new HashMap<String, Object>();
 					parameter.put("bunyangSeq", bunyangSeq);
 					parameter.put("coupleSeq", coupleSeq);
 					parameter.put("useUserSeq1", usingUserSeq);
 					parameter.put("useUserSeq2", userSeq);
+					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED);
 					iRslt += commonDao.update("use.updateCoupleGrave", parameter);
 				} else {
 					parameter = new HashMap<String, Object>();
@@ -999,7 +1002,8 @@ public class AdminServiceImpl implements IAdminService {
 					parameter.put("sectionSeq", sectionSeq);
 					parameter.put("rowSeq", rowSeq);
 					parameter.put("colSeq", colSeq);
-					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED);
+					parameter.put("coupleSeq", coupleSeq);
+					parameter.put("assignStatus", CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType) ? CalvaryConstants.GRAVE_ASSIGN_STATUS_HALF_OCCUPIED : CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED);
 					iRslt += commonDao.update("use.updateGrave", parameter);
 				}
 			}

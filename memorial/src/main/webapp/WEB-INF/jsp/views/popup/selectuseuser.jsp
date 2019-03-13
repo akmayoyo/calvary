@@ -104,7 +104,7 @@ function _assignGrave() {
 			var userSeq = tr.attr("userSeq");
 			var coupleSeq = tr.attr("coupleSeq");
 			userSeqs.push(userSeq);
-			coupleSeqs.push(coupleSeq);
+			coupleSeqs.push(coupleSeq ? coupleSeq : 0);
 		}
 	});
 	if(userSeqs.length > 0) {

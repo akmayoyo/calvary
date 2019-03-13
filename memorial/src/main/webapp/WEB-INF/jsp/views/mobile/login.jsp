@@ -6,8 +6,8 @@
 </style>
 
 <c:choose>
-	<c:when test="${not empty requestUrl}">
-		<c:set var="requestUrl" value="${requestUrl}"></c:set>
+	<c:when test="${not empty requestMobileUrl}">
+		<c:set var="requestUrl" value="${requestMobileUrl}"></c:set>
 	</c:when>
 	<c:otherwise>
 		<c:set var="requestUrl" value="/mobile/main"></c:set>
@@ -19,7 +19,7 @@
 
 <header class="m_header">
 	<!-- 사이트 로고 -->
-	<a class="logo" href="#">
+	<a class="logo" href="${contextPath}/mobile/main">
 		<img src="${contextPath}/resources/assets/images/logo_w.png" alt="">
 	</a>
 </header>
@@ -40,11 +40,11 @@
                     </div>
                     <div class="form-group">
                         <label for="tiMobile" class="sr-only">휴대폰</label>
-                        <input id="tiMobile" type="text" class="form-control input-lg" placeholder="휴대폰 (-제외)" autocomplete="off" data-mask="000-0000-0000">
+                        <input id="tiMobile" type="tel" class="form-control input-lg" placeholder="휴대폰 (-제외)" autocomplete="off" data-mask="000-0000-0000">
                     </div>
                     <div class="form-group">
                         <label for="tiBirthDate" class="sr-only">생년월일</label>
-                        <input id="tiBirthDate" type="text" class="form-control input-lg" placeholder="생년월일 (ex. 19620110)" autocomplete="off" data-mask="0000-00-00">
+                        <input id="tiBirthDate" type="tel" class="form-control input-lg" placeholder="생년월일 (ex. 19620110)" autocomplete="off" data-mask="0000-00-00">
                     </div>
 <!--                     <div class="form-group"> -->
 <!--                         <label for="tiUserId">휴대폰 번호</label> -->

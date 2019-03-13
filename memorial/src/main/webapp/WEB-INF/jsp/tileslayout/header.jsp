@@ -49,7 +49,7 @@
 			</ul>
 			<ul class="link-bar pull-right">
 				<c:choose>
-					<c:when test="${not empty sessionVo}">
+					<c:when test="${not empty sessionVo and not empty sessionVo.userVo}">
 					<li class="item"><a href="javascript:void(0)" onclick="_logout()">로그아웃</a></li>
 					</c:when>
 					<c:otherwise>
