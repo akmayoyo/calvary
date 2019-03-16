@@ -2,12 +2,10 @@ package com.calvary.common.vo;
 
 import java.io.Serializable;
 
-public class UserVo implements Serializable{
+public class UserVo {
 
-	/** */
-	private static final long serialVersionUID = 6304055526501379404L;
-	
 	private String userId;
+	private String password;
 	private String userName;
 	private String birthDate;
 	private String gender;
@@ -26,6 +24,12 @@ public class UserVo implements Serializable{
 	}
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	public String getUserName() {
 		return userName;
@@ -105,14 +109,12 @@ public class UserVo implements Serializable{
 	public void setRegistDate(String registDate) {
 		this.registDate = registDate;
 	}
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
 	@Override
 	public String toString() {
-		return "UserVo [userId=" + userId + ", userName=" + userName + ", birthDate=" + birthDate + ", gender=" + gender
-				+ ", email=" + email + ", mobile=" + mobile + ", phone=" + phone + ", postNumber=" + postNumber
-				+ ", address1=" + address1 + ", address2=" + address2 + ", churchOfficer=" + churchOfficer
-				+ ", diocese=" + diocese + ", userStatus=" + userStatus + ", registDate=" + registDate + "]";
+		return "UserVo [userId=" + userId + ", password=" + password + ", userName=" + userName + ", birthDate="
+				+ birthDate + ", gender=" + gender + ", email=" + email + ", mobile=" + mobile + ", phone=" + phone
+				+ ", postNumber=" + postNumber + ", address1=" + address1 + ", address2=" + address2
+				+ ", churchOfficer=" + churchOfficer + ", diocese=" + diocese + ", userStatus=" + userStatus
+				+ ", registDate=" + registDate + "]";
 	}
 }

@@ -56,6 +56,6 @@
 	</div>
 	
 	<div class="copy">
-		<p>2018 갈보리 교회 All rights reserved.</p>
+		<p>© 갈보리 교회 All rights reserved.</p>
 	</div>
 </footer>

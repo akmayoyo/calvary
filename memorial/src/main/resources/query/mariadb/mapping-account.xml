@@ -6,6 +6,7 @@
 
 	<resultMap id="userVo" type="com.calvary.common.vo.UserVo">
          <result property="userId" column="user_id"/>
+         <result property="password" column="password"/>
          <result property="userName" column="user_name"/>
          <result property="birthDate" column="birth_date"/>
          <result property="gender" column="gender"/>
@@ -30,6 +31,44 @@
 		ORDER BY a.user_id
     </select>
     
+    <!-- 사용자 조회 -->
+    <select id="getUserById" parameterType="map" resultMap="userVo">
+    	SELECT 
+			a.user_id, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+		FROM TB_COM_USER a
+		WHERE a.user_id = #{userId}
+		ORDER BY a.user_id
+    </select>
+    
+    <!-- 성명,핸드폰으로 사용자 조회 -->
+    <select id="getUserByNameAndMobile" parameterType="map" resultMap="userVo">
+    	SELECT 
+			a.user_id, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+		FROM TB_COM_USER a
+		WHERE a.user_name = #{userName} AND a.mobile = #{mobile}
+		<if test="userId != null and userId != ''">
+	  	AND a.user_id = #{userId}
+	  	</if>
+		ORDER BY a.user_id
+		LIMIT 0,1
+    </select>
+    
+    <!-- 성명,핸드폰으로 사용자 조회 -->
+    <select id="getUserByAuthNo" parameterType="map" resultMap="userVo">
+    	SELECT 
+			a.user_id, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+		FROM TB_COM_USER a INNER JOIN TB_COM_USER_AUTH_INFO b ON a.user_id = b.user_id
+		WHERE a.user_name = #{userName} AND a.mobile = #{mobile} AND b.auth_no = #{authNo}
+    </select>
+    
+    <!-- 성명,핸드폰으로 사용자 조회 -->
+    <select id="getUserByAuthNo2" parameterType="map" resultMap="userVo">
+    	SELECT 
+			a.user_id, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
+		FROM TB_COM_USER a INNER JOIN TB_COM_USER_AUTH_INFO b ON a.user_id = b.user_id
+		WHERE a.user_id = #{userId} AND a.user_name = #{userName} AND a.mobile = #{mobile} AND b.auth_no = #{authNo}
+    </select>
+    
     <delete id="deleteKeepLoginInfo" parameterType="map">
     	DELETE FROM TB_BUNYANG_REF_USER_LOGIN WHERE session_id = #{sessionId}
     </delete>
@@ -42,5 +81,43 @@
     	DATE_ADD(CURRENT_TIMESTAMP, INTERVAL #{keepDays} DAY)
     	)
     </delete>
+    
+    <delete id="deleteUserAuthInfo" parameterType="map">
+    	DELETE FROM TB_COM_USER_AUTH_INFO WHERE user_id = #{userId}
+    </delete>
+    
+    <insert id="insertUserAuthInfo" parameterType="map">
+    	INSERT INTO TB_COM_USER_AUTH_INFO(USER_ID, AUTH_NO, EXPIRE_DATE)
+    	VALUES(
+    	#{userId},
+    	#{authNo},
+    	DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 5 MINUTE)
+    	)
+    </insert>
+    
+    <update id="updatePassword" parameterType="map">
+    	UPDATE TB_COM_USER set password = #{password} WHERE user_id = #{userId}
+    </update>
+    
+    <insert id="createUserInfo" parameterType="map">
+	    insert into TB_COM_USER( USER_ID,PASSWORD,USER_NAME,BIRTH_DATE,GENDER,EMAIL,MOBILE,PHONE,POST_NUMBER,ADDRESS1,ADDRESS2,CHURCH_OFFICER,DIOCESE,USER_STATUS,REGIST_DATE )
+		values(
+		#{userId},
+		#{password},
+		#{userName},
+		#{birthDate},
+		#{gender},
+		#{email},
+		#{mobile},
+		#{phone},
+		#{postNumber},
+		#{address1},
+		#{address2},
+		#{churchOfficer},
+		#{diocese},
+		'ACTIVE',
+		CURRENT_TIMESTAMP
+		)
+    </insert>
 
 </mapper>

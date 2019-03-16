@@ -142,9 +142,6 @@
 
         <div class="mt-30 text-center">
             <button type="button" class="btn btn-primary btn-lg" onclick="saveUserInfo()">저장</button>
-            <c:if test="${userInfo.user_status == 'INACTIVE'}">
-            <button type="button" class="btn btn-info btn-lg" onclick="approvalUserInfo()">승인</button>
-            </c:if>
             <button type="button" class="btn btn-danger btn-lg" onclick="deleteUserInfo()">삭제</button>
             <button type="button" class="btn btn-default btn-lg" onclick="goToList()">목록</button>
         </div>

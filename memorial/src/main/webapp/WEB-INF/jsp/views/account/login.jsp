@@ -41,17 +41,17 @@
 
 							<div class="form-group">
 								<label class="sr-only" for="inputId">아이디</label>
-								<input id="tiUserId" type="text" class="form-control input-lg" id="inputid" placeholder="아이디" required="" autofocus="" value="calvaryadmin">
+								<input id="tiUserId" type="text" class="form-control input-lg" id="inputid" placeholder="아이디" required="">
 							</div>
 
 							<div class="form-group">
 								<label class="sr-only" for="inputPw">비밀번호</label>
-								<input id="tiPassword" type="password" class="form-control input-lg" id="inputPw" placeholder="비밀번호" required="" autocomplete="off" value="calvaryadmin">
+								<input id="tiPassword" type="password" class="form-control input-lg" id="inputPw" placeholder="비밀번호" required="" autocomplete="off">
 							</div>
 
 							<div class="checkbox mb-3">
 								<label>
-									<input type="checkbox" checked="checked"> 아이디 저장
+									<input id="chkId" type="checkbox"> 아이디 저장
 								</label>
 							</div>
 
@@ -59,7 +59,7 @@
 						</form>
 
 						<ul class="link-bar row">
-							<li class="item col-xs-6"><a href="javascript:void(0)">아이디/비밀번호 찾기</a></li>
+							<li class="item col-xs-6"><a href="javascript:void(0)" onclick="showFindIdPwdPopup('id')">아이디 찾기</a>&nbsp;/&nbsp;<a href="javascript:void(0)" onclick="showFindIdPwdPopup('pwd')">비밀번호 찾기</a></li>
 							<li class="item col-xs-6"><a href="${contextPath}/account/join">회원가입</a></li>
 						</ul>
 					</div>
@@ -72,6 +72,21 @@
 <script type="text/javascript">
 // init 함수
 (function(){
+	var ck00001 = $.cookie("CK00001");
+	if(ck00001) {
+		$('#tiUserId').val(ck00001);
+		$('#chkId').prop("checked", true);
+		$('#tiPassword').focus();
+	}else{
+		$('#tiUserId').focus();
+	}
+	
+	$('#tiUserId, #tiPassword').keyup(function(e) {
+		if (e.keyCode == 13) {
+			$('#btnLogin').trigger('click');
+		}
+	});
+	
 	$('#btnLogin').click(function(e){
 		
 		var userId = $('#tiUserId').val();
@@ -86,6 +101,13 @@
 			common.showAlert('비밀번호를 입력해주세요.');
 			$('#tiPassword').focus();
 			return;
+		}
+		
+		var checkedId = $('#chkId').is(":checked");
+		if(checkedId) {
+			$.cookie("CK00001", userId);
+		} else {
+			$.removeCookie("CK00001");
 		}
 		
 		common.ajax({
@@ -103,4 +125,14 @@
 	});
 	
 })();
+
+/**
+ * 아이디/비밀번호 찾기 팝업 표시
+ */
+function showFindIdPwdPopup(type) {
+	var winoption = {width:520, height:430};
+	var param = {};
+	common.openWindow("${contextPath}/popup/findIdPwd?findType="+type, "popFindIdPwd", winoption, param);
+	
+}
 </script>

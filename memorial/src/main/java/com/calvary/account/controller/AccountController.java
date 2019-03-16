@@ -2,6 +2,7 @@ package com.calvary.account.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
@@ -19,6 +21,8 @@ import org.springframework.web.util.WebUtils;
 
 import com.calvary.account.service.IAccountService;
 import com.calvary.admin.vo.BunyangUserVo;
+import com.calvary.common.constant.CalvaryConstants;
+import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SessionVo;
 import com.calvary.common.vo.UserVo;
@@ -36,6 +40,8 @@ public class AccountController {
 	public static final String LOGOUT_URL = "/logout";
 	/** */
 	public static final String JOIN_URL = "/join";
+	
+	public static final String SAVE_JOIN_INFO_URL = "/saveJoinInfo";
 	/** */
 	public static final String CHECK_LOGIN_URL = "/checklogin";
 	/** */
@@ -44,6 +50,18 @@ public class AccountController {
 	public static final String MOBILE_LOGOUT_URL = "/mobile/logout";
 	/** */
 	public static final String CHECK_MOBILE_LOGIN_URL = "/checkMobilelogin";
+	/** */
+	public static final String SEND_AUTH_NO_URL = "/sendAuthNo";
+	
+	public static final String CHECK_AUTH_AND_FIND_ID_URL = "/checkAuthAndFindId";
+	
+	public static final String CHECK_AUTH_AND_FIND_PWD_URL = "/checkAuthAndFindPwd";
+	
+	public static final String CHECK_USER_ID_URL = "/checkUserId";
+	
+	public static final String RESET_PWD_URL = "/resetPwd";
+	
+	public static final String CHECK_DUPLICATE_USER_ID_URL = "/checkDuplicateUserId";
 	
 	public static final String COOKIE_KEEP_LOGIN = "keepLoginCookie";
 	
@@ -55,6 +73,8 @@ public class AccountController {
 	private IAccountService accountService;
 	@Autowired
 	private IMobileService mobileService;
+	@Autowired
+	private ICommonService commonService;
 	
 	/** */
 	@RequestMapping(LOGIN_URL)
@@ -78,7 +98,19 @@ public class AccountController {
 	public Object joinHandler() {
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName(ROOT_URL + JOIN_URL);
+		mv.addObject("yearList", commonService.getYearList());
+		mv.addObject("officerList", commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_CHURCH_OFFICER));// 직분코드
 		return mv;
+	}
+	
+	@RequestMapping(SAVE_JOIN_INFO_URL)
+	@ResponseBody
+	public Object saveJoinInfoHandler(@RequestBody UserVo userVo) throws Exception {
+		int iRslt = accountService.createUserInfo(userVo);
+		boolean bRtn = iRslt > 0;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("result", bRtn);
+		return rtnMap;
 	}
 	
 	@RequestMapping(CHECK_LOGIN_URL)
@@ -157,6 +189,87 @@ public class AccountController {
 		return rtnMap;
 	}
 	
+	@RequestMapping(SEND_AUTH_NO_URL)
+	@ResponseBody
+	public Object sendAuthNoHandler(String userId, String userName, String mobile) throws Exception {
+		int iRslt = 0;
+		UserVo userVo = accountService.getUserByNameAndMobile(userId, userName, mobile);
+		if(userVo != null) {
+			String authUserId = userVo.getUserId();
+			String authNo = genAuthNo();
+			iRslt = accountService.createUserAuthInfo(authUserId, authNo);
+		}
+		return iRslt;
+	}
+	
+	@RequestMapping(CHECK_AUTH_AND_FIND_ID_URL)
+	@ResponseBody
+	public Object checkAuthAndFindIdHandler(String userName, String mobile, String authNo) {
+		String userId = null;
+		UserVo userVo = accountService.getUserByAuthNo(userName, mobile, authNo);
+		if(userVo != null) {
+			userId = userVo.getUserId();
+		}
+		return userId;
+	}
+	
+	@RequestMapping(CHECK_AUTH_AND_FIND_PWD_URL)
+	@ResponseBody
+	public Object checkAuthAndFindPwdHandler(String userId, String userName, String mobile, String authNo) {
+		UserVo userVo = accountService.getUserByAuthNo(userId, userName, mobile, authNo);
+		String rtn = null;
+		if(userVo != null) {
+			rtn = userVo.getUserId();
+		}
+		return rtn;
+	}
+	
+	@RequestMapping(CHECK_USER_ID_URL)
+	@ResponseBody
+	public Object checkUserIdHandler(String userId) {
+		String result = null;
+		UserVo userVo = accountService.getUserVo(userId);
+		if(userVo != null) {
+			result = userVo.getUserId();
+		}
+		return result;
+	}
+	
+	@RequestMapping(RESET_PWD_URL)
+	@ResponseBody
+	public Object resetPwdHandler(String userId, String password) throws Exception {
+		int iRslt = accountService.updatePassword(userId, password);
+		return iRslt;
+	}
+	
+	@RequestMapping(CHECK_DUPLICATE_USER_ID_URL)
+	@ResponseBody
+	public Object checkDuplicateUserIdHandler(String userId) throws Exception {
+		String existUserId = null;
+		UserVo userVo = accountService.getUserVo(userId);
+		if(userVo != null) {
+			existUserId = userVo.getUserId();
+		}
+		return existUserId;
+	}
+	
+	/**
+	 * 6자리 인증번호 생성
+	 */
+	private String genAuthNo() {
+		Random rand = new Random();
+        String numStr = "";
+        int len = 6;
+        for(int i=0;i<len;i++) {
+        	String ran = Integer.toString(rand.nextInt(10));
+        	if(!numStr.contains(ran)) {
+                numStr += ran;
+            }else {
+                i-=1;
+            }
+        }
+        return numStr;
+	}
 	
 	
 }

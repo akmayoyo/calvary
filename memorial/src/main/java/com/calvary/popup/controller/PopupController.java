@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -65,6 +67,8 @@ public class PopupController {
 	public static final String SELECT_MENU_ROLE_URL = "/selectMenuRole";
 	/** 사용자권한 등록 팝업 */
 	public static final String SELECT_USER_ROLE_URL = "/selectUserRole";
+	/** 아이디/비밀번호 찾기 팝업 */
+	public static final String FIND_ID_PWD_URL = "/findIdPwd";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -466,6 +470,15 @@ public class PopupController {
 		mv.addObject("userRoleList", userRoleList);
 		mv.addObject("roleId", roleId);
 		mv.setViewName(ROOT_URL + SELECT_USER_ROLE_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=FIND_ID_PWD_URL)
+	public Object findIdPwdHandler(HttpServletRequest request) {
+		String findType = request.getParameter("findType");
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("findType", findType);
+		mv.setViewName(ROOT_URL + FIND_ID_PWD_URL);
 		return mv;
 	}
 }
