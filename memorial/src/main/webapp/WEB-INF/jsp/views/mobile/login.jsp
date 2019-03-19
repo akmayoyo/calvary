@@ -32,19 +32,19 @@
         <div class="wrap">
             <div class="row">
 
-                <div style="padding: 10% 7%;">
+                <div style="padding: 0 7%;">
 
                     <div class="form-group">
-                        <label for="tiUserName" class="sr-only">성명</label>
-                        <input id="tiUserName" type="text" class="form-control input-lg" placeholder="성명" autocomplete="off" autofocus="autofocus">
+                        <label for="tiUserName" style="font-size: 14px;">성명</label>
+                        <input id="tiUserName" type="text" class="form-control input-lg" autocomplete="off" autofocus="autofocus">
                     </div>
                     <div class="form-group">
-                        <label for="tiMobile" class="sr-only">휴대폰</label>
-                        <input id="tiMobile" type="tel" class="form-control input-lg" placeholder="휴대폰 (-제외)" autocomplete="off" data-mask="000-0000-0000">
+                        <label for="tiMobile" style="font-size: 14px;">휴대폰</label>
+                        <input id="tiMobile" type="tel" class="form-control input-lg" placeholder="'-'제외하고 숫자만 입력" autocomplete="off" data-mask="000-0000-0000">
                     </div>
                     <div class="form-group">
-                        <label for="tiBirthDate" class="sr-only">생년월일</label>
-                        <input id="tiBirthDate" type="tel" class="form-control input-lg" placeholder="생년월일 (ex. 19620110)" autocomplete="off" data-mask="0000-00-00">
+                        <label for="tiBirthDate" style="font-size: 14px;">생년월일</label>
+                        <input id="tiBirthDate" type="tel" class="form-control input-lg" placeholder="생년월일 8자리 (ex. 19620110)" autocomplete="off" data-mask="0000-00-00">
                     </div>
 <!--                     <div class="form-group"> -->
 <!--                         <label for="tiUserId">휴대폰 번호</label> -->
@@ -111,13 +111,13 @@
 <%--             <img src="${contextPath}/resources/assets/images/icon_insta.jpg"> --%>
 <!--         </a> -->
 <!--     </div> -->
-    <div style="margin-top: 10px;">
+    <div style="margin-top: 5px;">
         <a href="tel:031-789-8800">대표번호 031-789-8800</a>
     </div>
     <div>
         <a href="mailto:calvary@icalvarychurch.org">이메일 calvary@icalvarychurch.org</a>
     </div>
-    <div style="margin-top: 10px;">
+    <div style="margin-top: 7px;">
         <p>경기 성남시 분당구 이매로 132</p>
         <p>© 갈보리 교회 All rights reserved.</p>
     </div>

@@ -20,7 +20,7 @@ public interface IAdminService {
 	/** 
 	 * 분양리스트 조회 
 	 */
-	public List<Object> getBunyangSelectList(String searchVal, int pageIndex);
+	public Map<String, Object> getBunyangSelectList(String searchVal, int pageIndex);
 	
 	
 	//===============================================================================
@@ -29,7 +29,7 @@ public interface IAdminService {
 	/** 
 	 * 분양신청리스트 조회 
 	 */
-	public List<Object> getApplyList(SearchVo searchVo);
+	public Map<String, Object> getApplyList(SearchVo searchVo);
 	
 	/** 
 	 * 분양 정보 조회 
@@ -189,7 +189,7 @@ public interface IAdminService {
 	/** 
 	 * 해약관리 대상 조회
 	 */
-	public List<Object> getCancelList(SearchVo searchVo);
+	public Map<String, Object> getCancelList(SearchVo searchVo);
 	
 	/** 
 	 * 해약 승인 내역 업데이트

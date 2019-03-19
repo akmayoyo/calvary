@@ -89,6 +89,10 @@ function _confirm() {
             		common.showAlert('해당 승인번호로 이미 등록된 분양정보가 있습니다.');
             	} else if(resultCode == '-100') {
             		common.showAlert('엑셀 업로드중 에러가 발생하였습니다.\n엑셀 양식을 확인해주세요.');
+            	} else if(resultCode && resultCode.indexOf('READ_ERROR') == 0) {
+            		var msg = decodeURIComponent(resultCode.replace('READ_ERROR', '').replace(/\+/g, ''));
+            		msg = msg.replace(/<br>/g, '\n').replace(/<nbsp>/g, ' ');
+            		common.showAlert('아래 시트의 셀참조시 에러가 발생하였습니다.\n' + msg);
             	} else {
             		common.showAlert('정상적으로 업로드 되었습니다.');
             		var winoption = {width:1120, height:750};

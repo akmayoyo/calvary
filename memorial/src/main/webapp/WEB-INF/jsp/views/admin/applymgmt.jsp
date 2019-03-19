@@ -12,6 +12,7 @@
 			<div class="row">
 				<div class="col-xs-2 col-md-2 pr-10">
 					<select name="bunyangTimes" class="form-control">
+						<option value="0">분양차수 : 전체</option>
 						<c:forEach items="${bunyangTimesList}" var="bunyangTimesItem">
 						<option value="${bunyangTimesItem.code_seq}" <c:if test="${searchVo.bunyangTimes == bunyangTimesItem.code_seq}">selected</c:if>>분양차수 : ${bunyangTimesItem.code_name}</option>
 						</c:forEach>

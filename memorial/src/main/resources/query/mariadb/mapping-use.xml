@@ -17,7 +17,7 @@
 		    ,assign_status
 		    ,(SELECT MAX(col_seq) FROM TB_BUNYANG_GRAVE_ASSIGN t WHERE a.section_seq = t.SECTION_SEQ) max_col_cnt
 		FROM TB_BUNYANG_GRAVE_ASSIGN a
-		ORDER BY section_seq, row_seq, col_seq
+		ORDER BY section_seq, row_seq desc, col_seq
     </select>
     
     <!-- 특정 구역에 배정된 정보 조회 -->

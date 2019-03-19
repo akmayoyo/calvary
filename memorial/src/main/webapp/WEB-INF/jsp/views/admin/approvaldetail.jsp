@@ -342,9 +342,9 @@
 
     <div class="mt-30 text-center">
         <c:if test="${bunyangInfo.progress_status != 'D'}">
-        <button id="btnContract" type="button" class="btn btn-info btn-lg" onclick="approval()">저장</button>
+        <button id="btnContract" type="button" class="btn btn-info btn-lg" onclick="approval()">사용승인</button>
         </c:if>
-        <button id="btnList" type="button" class="btn btn-default btn-lg" onclick="goToList()">목록</button>
+        <button id="btnList" type="button" class="btn btn-default btn-lg" style="width: 127px;" onclick="goToList()">목록</button>
     </div>
     
 </div>

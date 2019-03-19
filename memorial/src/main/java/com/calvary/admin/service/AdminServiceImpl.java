@@ -55,14 +55,23 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 분양리스트 조회 
 	 */
-	public List<Object> getBunyangSelectList(String searchVal, int pageIndex) {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getBunyangSelectList(String searchVal, int pageIndex) {
 		int countPerPage = 10;
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (pageIndex-1) * countPerPage);
 		parameter.put("count", countPerPage);
 		parameter.put("searchVal", searchVal);
-		List<Object> list = commonDao.selectList("admin.getBunyangList", parameter); 
-		return list;
+		List<Object> list = commonDao.selectList("admin.getBunyangList", parameter);
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getBunyangList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
 	}
 	
 	
@@ -73,15 +82,24 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 분양신청리스트 조회 
 	 */
-	public List<Object> getApplyList(SearchVo searchVo) {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getApplyList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put("apply_user_name", searchVo.getSearchVal());
 		parameter.put("progressStatus", searchVo.getProgressStatus());
 		parameter.put("bunyangTimes", searchVo.getBunyangTimes());
-		List<Object> list = commonDao.selectList("admin.getApplyList", parameter); 
-		return list;
+		List<Object> list = commonDao.selectList("admin.getApplyList", parameter);
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getApplyList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
 	}
 	
 	/** 
@@ -711,13 +729,22 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 해약관리 대상 조회
 	 */
-	public List<Object> getCancelList(SearchVo searchVo) {
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getCancelList(SearchVo searchVo) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
-		List<Object> list = commonDao.selectList("cancel.getCancelList", parameter); 
-		return list;
+		List<Object> list = commonDao.selectList("cancel.getCancelList", parameter);
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getCancelList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
 	}
 	
 	/** 

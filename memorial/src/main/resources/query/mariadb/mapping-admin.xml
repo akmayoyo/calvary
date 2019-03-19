@@ -112,8 +112,10 @@
 		<if test="progressStatus == 'CA'">
 		AND cancel_yn = 'Y'
 		</if>
+		<if test="bunyangTimes != null and bunyangTimes > 0">
 		AND bunyang_times = #{bunyangTimes}
-		ORDER BY t.bunyang_seq
+		</if>
+		ORDER BY t.bunyang_no
 		<if test="start != null">
 		LIMIT #{start}, #{count}
 		</if>

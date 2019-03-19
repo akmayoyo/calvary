@@ -68,11 +68,13 @@ public class AdminController {
 	public Object applyMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		List<Object> bunyangTimesList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_BUNYANG_TIMES);
-		if(searchVo.getBunyangTimes() <= 0 && bunyangTimesList != null && bunyangTimesList.size() > 0) {
-			searchVo.setBunyangTimes(CommonUtil.convertToInt(((Map<String, Object>)bunyangTimesList.get(0)).get("code_seq")));
-		}
-		List<Object> applyList = adminService.getApplyList(searchVo);
-		searchVo.setTotalCount(commonService.getTotalCount());
+//		if(searchVo.getBunyangTimes() <= 0 && bunyangTimesList != null && bunyangTimesList.size() > 0) {
+//			searchVo.setBunyangTimes(CommonUtil.convertToInt(((Map<String, Object>)bunyangTimesList.get(0)).get("code_seq")));
+//		}
+		Map<String, Object> rtnMap = adminService.getApplyList(searchVo);
+		List<Object> applyList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
@@ -668,11 +670,14 @@ public class AdminController {
 	/** 
 	 * 해약관리 메인 페이지 
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=CANCEL_MGMT_URL)
 	public Object cancelMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
-		List<Object> cancelList = adminService.getCancelList(searchVo);
-		searchVo.setTotalCount(commonService.getTotalCount());
+		Map<String, Object> rtnMap = adminService.getCancelList(searchVo);
+		List<Object> cancelList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_05");
@@ -1326,12 +1331,14 @@ public class AdminController {
 	/** 
 	 * 분양리스트 조회용 select2 ajax 처리
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=GET_BUNYANG_SELECT_LIST_URL)
 	@ResponseBody
 	public Map<String, Object> getBunyangSelectListHandler(String searchVal, int pageIndex) {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
-		List<Object> bunyangList = adminService.getBunyangSelectList(searchVal, pageIndex);
-		int total_count = commonService.getTotalCount();
+		Map<String, Object> tmp = adminService.getBunyangSelectList(searchVal, pageIndex);
+		List<Object> bunyangList = (ArrayList<Object>)tmp.get("list");
+		int total_count = CommonUtil.convertToInt(tmp.get("total_count"));
 		rtnMap.put("result", bunyangList);
 		rtnMap.put("total_count", total_count);
 		return rtnMap;

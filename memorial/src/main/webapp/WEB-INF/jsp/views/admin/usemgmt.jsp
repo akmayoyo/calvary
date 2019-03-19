@@ -13,7 +13,7 @@
 			<h3 style="display: inline-block;">추모동산 사용(봉안)현황</h3>
 		</div>
 		<div style="text-align: center; margin-top: 5px;">
-			<div style="width: 10px; height: 10px; background-color: #FF7F27; display: inline-block;">
+			<div style="width: 10px; height: 10px; background-color: #FF0000; display: inline-block;">
 			</div>
 			<span>사용중</span>
 			<div style="width: 10px; height: 10px; background-color: #FFCCA9; display: inline-block; margin-left: 10px;">
@@ -30,7 +30,7 @@
 			<div id="grid1" style="display: inline-block;">
 				<p style="margin: 0;">가구역</p>
 			</div>
-			<div id="grid2" style="display: inline-block; margin-left: 5px;">
+			<div id="grid2" style="display: inline-block; margin-left: 28px;">
 				<p style="margin: 0;">나구역</p>
 			</div>
 		</div>
@@ -38,7 +38,7 @@
 			<div id="grid3" style="display: inline-block;">
 				<p style="margin: 0;">다구역</p>
 			</div>
-			<div id="grid4" style="display: inline-block; margin-left: 5px;">
+			<div id="grid4" style="display: inline-block; margin-left: 28px;">
 				<p style="margin: 0;">라구역</p>
 			</div>
 		</div>
@@ -112,18 +112,17 @@
 				 }
 			 }
 			 if(sectionData1 != null && sectionData1.length > 0) {
-				 gridData1 = getGridData(sectionData1);
-				 gridData1.totalwidth = 155;
+				 gridData1 = getGridData(sectionData1, false, 2, 15);
+				 gridData1.totalwidth = 210;
 				 makeGraveGrid('#grid1', gridData1);
 			 }
 			 if(sectionData2 != null && sectionData2.length > 0) {
-				 gridData2 = getGridData(sectionData2);
+				 gridData2 = getGridData(sectionData2, false, 0, 15);
 				 gridData2.totalwidth = 267;
-				 gridData2.totalheight = 211;
 				 makeGraveGrid('#grid2', gridData2);
 			 }
 			 if(sectionData3 != null && sectionData3.length > 0) {
-				 gridData3 = getGridData(sectionData3);
+				 gridData3 = getGridData(sectionData3, false, 0, 15);
 				 makeGraveGrid('#grid3', gridData3);
 			 }
 			 if(sectionData4 != null && sectionData4.length > 0) {
@@ -157,10 +156,11 @@ function getSectionArrayData(data) {
 /**
  * d3 Grid 배치를 위한 데이터 반환
  */
-function getGridData(data) {
+function getGridData(data, reverse, offset, w, h) {
 	var rows = [], cols = [], rowCols = [], rowIdx = -1, colIdx = -1,
 	row_seq, col_seq, max_col_cnt
 	;
+	if(!offset) offset = 0;
 	$.each(data, function(idx, item){
 		row_seq = item['row_seq'];
 		col_seq = item['col_seq'];
@@ -168,19 +168,23 @@ function getGridData(data) {
 		if(rows.indexOf(row_seq) < 0) {
 			rows.push(row_seq);
 			cols = [];
-			for(i = 0; i < max_col_cnt; i++) {
+			for(i = 0; i < max_col_cnt+offset; i++) {
 				cols.push({});
 			}
 			rowCols.push(cols);
 			rowIdx++
 		}
-		rowCols[rowIdx][col_seq -1] = item;
+		if(reverse) {
+			rowCols[rowIdx][max_col_cnt - col_seq] = item;
+		} else {
+			rowCols[rowIdx][col_seq -1 + offset] = item;	
+		}
 	});
 	
 	var xpos = 1;
     var ypos = 1;
-    var width = 10;
-    var height = 10;
+    var width = w ? w : 10;
+    var height = h ? h : 10;
     var rtnData = {};
     var totalwidth = 0;
     var totalheight = 0;
@@ -240,7 +244,7 @@ function makeGraveGrid(grid, gridData) {
 		.attr("height", function(d) { return d.height; })
 		.style("fill", function(d) {
 			if(d.assign_status == 'OCCUPIED') {
-				return "#FF7F27";
+				return "#FF0000";
 			} else if(d.assign_status == 'HALF_OCCUPIED') {
 				return "#FFCCA9";
 			} else if(d.assign_status == 'RESERVED') {
@@ -314,7 +318,7 @@ function _getGraveAssignInfo(d) {
 				$.each(result, function(idx, item){
 					var tr = $('<tr/>');
 					var section = item.section_seq + '구역';
-					section += '  ' + item.row_seq + ' - ' + item.col_seq;
+					section += '  ' + item.row_seq + '행-' + seqToAlpha(item.col_seq) + '열(고유번호:' + item.seq_no + ')';
 					var graveType = item.grave_type == 'COUPLE' ? '부부형' : '1인형';
 					var address = item.post_number ? '(' + item.post_number + ') ' + item.address1 + (item.address2 ? item.address2 : '') : '';
 					var bunyang_no = item.bunyang_no ? item.bunyang_no : '';
@@ -331,13 +335,21 @@ function _getGraveAssignInfo(d) {
 					tr.append('<td>'+ address +'</td>');
 					$('#tblAssignInfo tbody').append(tr);
 				});
-				//document.getElementById('tblAssignInfo').scrollIntoView(true);
 				$('html:not(:animated), body:not(:animated)').animate({
 		            scrollTop: $("#tblAssignInfo").offset().top
 		        }, 1000);
 			}
 		}
 	});
+}
+
+/**
+ * 
+ */
+function seqToAlpha(seq) {
+	var seqOfA = "A".charCodeAt(0) + (seq-1);
+	var alpha = String.fromCharCode(seqOfA);
+	return alpha;
 }
 
 </script>
