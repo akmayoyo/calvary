@@ -1,6 +1,20 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <form id="frm" method="post">
+	<input type="hidden" name="bunyangSeq">
+	<input type="hidden" name="userId">
+	<input type="hidden" name="sectionSeq">
+	<input type="hidden" name="seqNo">
 </form>
+<c:choose>
+<c:when test="${isOccupied }">
+<script type="text/javascript">
+	alert('이미 사용(봉안)중인 사용자입니다.');
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/mobile/main";
+	frm.submit();
+</script>
+</c:when>
+<c:otherwise>
 <header class="m_header">
 	<!-- 사이트 로고 -->
 	<a class="logo" href="${contextPath}/mobile/main">
@@ -83,8 +97,7 @@
 							<tr>
 								<th scope="sel">상세위치</th>
 								<td class="text-left">
-									<a id="aDetailGraveInfo" href="javascript:void(0);" class="tbllink" style="color: #337ab7; padding: 5px 0;" onclick="_showGraveMap()">
-									<c:if test="${!empty assignedGraveInfo}">${assignedGraveInfo.row_seq} - ${assignedGraveInfo.col_seq}</c:if>
+									<a id="aDetailGraveInfo" href="javascript:void(0);" style="padding: 5px 0;" onclick="_showGraveMap()">
 									</a>
 								</td>
 							</tr>
@@ -110,11 +123,23 @@
 <input id="assignedSectionSeq" type="hidden" value="${assignedGraveInfo.section_seq}">
 <input id="assignedRowSeq" type="hidden" value="${assignedGraveInfo.row_seq}">
 <input id="assignedColSeq" type="hidden" value="${assignedGraveInfo.col_seq}">
+<input id="assignedSeqNo" type="hidden" value="${assignedGraveInfo.seq_no}">
 </c:if>
 
 <script type="text/javascript">
 
-$('#selGraveSection').trigger('change');
+(function() {
+	if($('#assignedSectionSeq').val()) {
+		var sectionSeq = $('#assignedSectionSeq').val();
+		var rowSeq = $('#assignedRowSeq').val();
+		var colSeq = $('#assignedColSeq').val();
+		var seqNo = $('#assignedSeqNo').val();
+		showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo);
+	} else {
+		$('#selGraveSection').trigger('change');	
+	}
+})();
+
 
 /**
  * 
@@ -128,28 +153,42 @@ function _showGraveMap() {
  */
 function _changeGraveSection() {
 	var selectedOption = $('#selGraveSection').find('option:selected');
+	var sectionSeq = selectedOption.val();
 	var rowSeq = selectedOption.attr('rowSeq');
 	var colSeq = selectedOption.attr('colSeq');
-	var detailGraveInfo = rowSeq + ' - ' + colSeq;
-	$('#aDetailGraveInfo').text(detailGraveInfo);
+	var seqNo = selectedOption.attr('seqNo');
+	showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo);
+}
+
+/**
+ * 
+ */
+function showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo) {
+	if(sectionSeq) {
+		var detailGraveInfo = sectionSeq + '구역';
+		detailGraveInfo += '  ' + (rowSeq ? rowSeq : '') + '행 - ' + seqToAlpha(colSeq) + '열 (고유번호 : ' + (seqNo ? seqNo : '') + ')';
+		$('#aDetailGraveInfo').text(detailGraveInfo);	
+	}
 }
 
 /**
  * 
  */
 function _request() {
-	var sectionSeq = '', rowSeq = 0, colSeq = 0, isReserved = 0;
+	var sectionSeq = '', rowSeq = 0, colSeq = 0, isReserved = 0, seqNo = '';
 	var assignedSectionSeq = $('#assignedSectionSeq').val();
 	if(assignedSectionSeq) {
 		isReserved = 1;
 		sectionSeq = assignedSectionSeq;
 		rowSeq = $('#assignedRowSeq').val();
 		colSeq = $('#assignedColSeq').val();
+		seqNo = $('#assignedSeqNo').val();
 	}else {
 		var selectedOption = $('#selGraveSection').find('option:selected');
 		sectionSeq = selectedOption.val();
 		rowSeq = selectedOption.attr('rowSeq');
 		colSeq = selectedOption.attr('colSeq');
+		seqNo = selectedOption.attr('seqNo');
 	}
 	
 	var data = {};
@@ -167,9 +206,13 @@ function _request() {
 		data:data,
 		success: function(result) {
 			if(result && result.result) {
-				common.showAlert('신청되었습니다.');
+				common.showAlert('신청되었습니다.\n부고 알림 메세지 전송 페이지로 이동합니다.');
+				$('input[name="bunyangSeq"]').val('${bunyangInfo.bunyang_seq}');
+				$('input[name="userId"]').val('${useUserInfo.user_id}');
+				$('input[name="sectionSeq"]').val(sectionSeq);
+				$('input[name="seqNo"]').val(seqNo);
 				var frm = document.getElementById("frm");
-				frm.action = "${contextPath}/mobile/main";
+				frm.action = "${contextPath}/mobile/registFuneralInfo";
 				frm.submit();
 			} else {
 				common.showAlert('저장에 실패하였습니다.');
@@ -187,4 +230,18 @@ function _cancel() {
 	frm.submit();
 }
 
+/**
+ * 
+ */
+function seqToAlpha(seq) {
+	var seqOfA = "A".charCodeAt(0) + (seq-1);
+	var alpha = String.fromCharCode(seqOfA);
+	return alpha;
+}
+
 </script>
+</c:otherwise>
+</c:choose>
+
+
+

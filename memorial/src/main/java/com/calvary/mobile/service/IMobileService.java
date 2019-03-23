@@ -11,6 +11,10 @@ public interface IMobileService {
 	
 	public Map<String, Object> getReservedGraveInfo(String bunyangSeq, int userSeq, int coupleSeq);
 	
+	public Map<String, Object> getContractMinister(String bunyangSeq);
+	
+	public Map<String, Object> getContract(String codeSeq);
+	
 	public int getRequiredGraveCount(String bunyangSeq);
 	
 	public List<Object> getAvailableGraveInfoAll(String graveType, int cnt);

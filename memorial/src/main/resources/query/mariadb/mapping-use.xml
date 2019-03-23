@@ -45,6 +45,10 @@
 		    ,COALESCE(d.post_number, e.post_number) AS post_number
 		    ,COALESCE(d.address1, e.address1) AS address1
 		    ,COALESCE(d.address2, e.address2) AS address2
+		    ,CASE 
+		    	WHEN a.use_user_seq1 = d.user_seq then DATE_FORMAT(a.assign_date1, '%Y-%m-%d')
+		    	WHEN a.use_user_seq2 = d.user_seq then DATE_FORMAT(a.assign_date2, '%Y-%m-%d')
+		    END assign_date
 		FROM TB_BUNYANG_GRAVE_ASSIGN a 
 		LEFT OUTER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
 		LEFT OUTER JOIN TB_BUNYANG_REF_USER c ON a.bunyang_seq = c.bunyang_seq AND c.ref_type = 'APPLY_USER'
@@ -54,6 +58,19 @@
 		AND a.row_seq = #{rowSeq}
 		AND a.col_seq = #{colSeq}
 		ORDER BY section_seq, row_seq, col_seq
+    </select>
+    
+    <!-- 특정 구역에 배정된 정보 조회 -->
+    <select id="getGraveAssignInfoBySeqNo" parameterType="map" resultType="map">
+    	SELECT
+	  		a.section_seq
+		    ,a.row_seq
+		    ,a.col_seq
+		    ,a.seq_no
+		    ,a.grave_type
+            ,a.assign_status
+		FROM TB_BUNYANG_GRAVE_ASSIGN a 
+		WHERE a.section_seq = #{sectionSeq} and a.seq_no = #{seqNo}
     </select>
     
     <!-- 동산 사용신청 리스트 조회 -->
@@ -312,7 +329,9 @@
 			use_user_seq1 = #{useUserSeq1},
 			use_user_seq2 = #{useUserSeq2},
 			assign_status = #{assignStatus},
-			couple_seq = #{coupleSeq}
+			couple_seq = #{coupleSeq},
+			assign_date1 = case when #{useUserSeq1} is not null then CURRENT_TIMESTAMP else null end,
+			assign_date2 = case when #{useUserSeq2} is not null then CURRENT_TIMESTAMP else null end
 		WHERE a.section_seq = #{sectionSeq} 
 		AND a.row_seq = #{rowSeq}
 		AND a.col_seq = #{colSeq}
@@ -321,7 +340,7 @@
     <!-- 동산 배정(부부형 두번째 자리 업데이트) -->
     <update id="updateCoupleGrave" parameterType="map">
     	UPDATE TB_BUNYANG_GRAVE_ASSIGN a
-			SET use_user_seq2 = #{useUserSeq2}, assign_status = #{assignStatus}
+			SET use_user_seq2 = #{useUserSeq2}, assign_status = #{assignStatus}, assign_date2 = CURRENT_TIMESTAMP
 		WHERE a.bunyang_seq = #{bunyangSeq} AND a.use_user_seq1 = #{useUserSeq1}
     </update>
     

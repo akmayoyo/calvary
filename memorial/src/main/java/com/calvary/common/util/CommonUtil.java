@@ -97,6 +97,8 @@ public class CommonUtil {
 				iRtn = (int)val;
 			}else if(val instanceof BigInteger) {
 				iRtn = ((BigInteger)val).intValue();
+			}else if(val instanceof Double) {
+				iRtn = ((Double)val).intValue();
 			}else if(val instanceof String) {
 				iRtn = Integer.parseInt((String)val);
 			}

@@ -195,6 +195,17 @@
 	<delete id="deleteDownPayment" parameterType="map">
 		DELETE FROM TB_BUNYANG_PAYMENT_HISTORY WHERE bunyang_seq = #{bunyangSeq} and payment_type = #{paymentType}
 	</delete>
-    
+	
+	<select id="getRequiredContractPrice" parameterType="map" resultType="map">
+		select
+			total_price/10 - down_payment as required_contract_price
+		from
+		(select 
+			(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
+		    ,(select COALESCE(SUM(payment_amount), 0) total_amount from TB_BUNYANG_PAYMENT_HISTORY ph where ph.BUNYANG_SEQ = a.BUNYANG_SEQ and ph.payment_type = 'DOWN_PAYMENT') down_payment
+		from TB_BUNYANG_INFO a
+		where a.BUNYANG_SEQ = #{bunyangSeq}
+		) a
+	</select>
 
 </mapper>

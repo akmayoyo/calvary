@@ -14,6 +14,8 @@
 			,parent_code_seq
 			,display_order
 			,code_value
+			,code_value1
+			,code_value2
 		from TB_COM_CODE a
 		where code_level = 1 
 		order by display_order
@@ -26,13 +28,15 @@
 			,code_desc = #{codeDesc}
 			,display_order = #{displayOrder}
 			,code_value = #{codeValue} 
+			,code_value1 = #{codeValue1} 
+			,code_value2 = #{codeValue2} 
 		WHERE code_level = #{codeLevel} AND (#{parentCodeSeq} is null or parent_code_seq = #{parentCodeSeq}) AND code_seq = #{codeSeq}
 	</update>
 	
 	<!-- 코드정보 생성 -->
 	<insert id="createCodeInfo" parameterType="map">
-		insert into TB_COM_CODE( CODE_SEQ,CODE_NAME,CODE_DESC,CODE_LEVEL,PARENT_CODE_SEQ,DISPLAY_ORDER,CODE_VALUE )
-		values(#{codeSeq} , #{codeName}, #{codeDesc}, #{codeLevel}, #{parentCodeSeq}, #{displayOrder}, case when #{codeValue} = '' then null else cast(#{codeValue} as int) end)
+		insert into TB_COM_CODE( CODE_SEQ,CODE_NAME,CODE_DESC,CODE_LEVEL,PARENT_CODE_SEQ,DISPLAY_ORDER,CODE_VALUE,CODE_VALUE1,CODE_VALUE2 )
+		values(#{codeSeq} , #{codeName}, #{codeDesc}, #{codeLevel}, #{parentCodeSeq}, #{displayOrder}, #{codeValue}, #{codeValue1}, #{codeValue2})
 	</insert>
 	
 	<!-- 코드정보 삭제 -->

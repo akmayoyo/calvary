@@ -344,33 +344,40 @@ function goToList() {
  * 계약 승인
  */
 function apprContract(progressStatus) {
-	var data = {};
-	data["bunyangSeq"] = "${bunyangSeq}";
-	data["progressStatus"] = progressStatus;
-	common.ajax({
-		url:"${contextPath}/admin/apprcontract", 
-		data:data,
-		success: function(result) {
-			if(result && result.result) {
-				// 계약서 파일번호
-				var fileSeq = result.fileSeq;
-				var confirmMsg = '';
-				if(progressStatus == 'B') {
-					confirmMsg = '계약 처리 되었습니다.\n계약서를 다운로드하시겠습니까?';
-				} else if(progressStatus == 'C') {
-					confirmMsg = '완납 처리 되었습니다.\n완납확인증명서를 다운로드하시겠습니까?';
-				}
-				if(confirm(confirmMsg)) {
-					donwloadFile(fileSeq);
-					setTimeout(function(){
+	var winoption = {width:450, height:355};
+	var param = {popupTitle: progressStatus == 'B' ? "계약일 입력" : "완납일 입력"};
+	common.openWindow("${contextPath}/popup/registdate", "popRegistDate", winoption, param);
+	// 사용승인일 입력 팝업 callback 함수
+	window.registDateCallBack = function(val) {
+		var data = {};
+		data["bunyangSeq"] = "${bunyangSeq}";
+		data["progressStatus"] = progressStatus;
+		data["updateDate"] = val;
+		common.ajax({
+			url:"${contextPath}/admin/apprcontract", 
+			data:data,
+			success: function(result) {
+				if(result && result.result) {
+					// 계약서 파일번호
+					var fileSeq = result.fileSeq;
+					var confirmMsg = '';
+					if(progressStatus == 'B') {
+						confirmMsg = '계약 처리 되었습니다.\n계약서를 다운로드하시겠습니까?';
+					} else if(progressStatus == 'C') {
+						confirmMsg = '완납 처리 되었습니다.\n완납확인증명서를 다운로드하시겠습니까?';
+					}
+					if(confirm(confirmMsg)) {
+						donwloadFile(fileSeq);
+						setTimeout(function(){
+							refresh();
+						}, 100);
+					} else {
 						refresh();
-					}, 100);
-				} else {
-					refresh();
+					}
 				}
 			}
-		}
-	});
+		});
+	};
 }
 
 /**

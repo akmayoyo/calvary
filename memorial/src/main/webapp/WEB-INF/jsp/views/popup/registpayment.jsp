@@ -27,17 +27,17 @@
     </div>
 
     <div class="table-responsive" style="margin-top: 10px;">
-        <table id="tblList" class="table table-style table-bordered">
+        <table id="tblList" class="table table-style table-bordered table-condensed">
         	<colgroup>
-        		<col width="11%">
+        		<col width="12%">
         		<col width="8%">
-        		<col width="8%">
-        		<col width="8%">
-        		<col width="11%">
-        		<col width="8%">
-        		<col width="23%">
-        		<col width="15%">
-        		<col width="3%">
+        		<col width="7%">
+        		<col width="9%">
+        		<col width="12%">
+        		<col width="7%">
+        		<col width="22%">
+        		<col width="13%">
+        		<col width="2%">
         	</colgroup>
             <thead>
                 <tr>

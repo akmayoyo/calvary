@@ -228,5 +228,13 @@
 		AND a.ref_type = 'USE_USER'
 		AND a.user_id = #{userId}
 	</update>
+	
+	<select id="checkDuplicatedApprovalNo" parameterType="map" resultType="map">
+		select count(1) as cnt from TB_BUNYANG_REF_USER a WHERE a.ref_type = 'USE_USER' and approval_no = #{approvalNo}
+	</select>
+	
+	<select id="getBunyangStartDate" parameterType="map" resultType="map">
+		select CODE_VALUE1 as start_date from TB_COM_CODE a WHERE a.parent_code_seq = 'BUNYANG_TIMES' and code_seq = #{bunyangTimes}
+	</select>
 
 </mapper>

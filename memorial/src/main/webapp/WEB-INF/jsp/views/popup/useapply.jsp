@@ -55,7 +55,7 @@
 					<c:forEach items="${useApplyList}" var="useApply">
 					<c:set var="contract_price" value="${cutil:getDownPayment(useApply.total_price)}"/><!-- 계약금 -->
 					<tr class="clickable-row" bunyangSeq="${useApply.bunyang_seq}">
-	                    <td><p class="form-control-static">${useApply.bunyang_seq}</p></td>
+	                    <td><p class="form-control-static">${useApply.bunyang_no}</p></td>
 	                    <td><p class="form-control-static">${useApply.apply_user_name}</p></td>
 	                    <td><p class="form-control-static">${useApply.use_user_exp}</p></td>
 	                    <td><p class="form-control-static">${useApply.product_type_name}</p></td>

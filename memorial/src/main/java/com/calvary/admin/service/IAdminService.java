@@ -149,9 +149,19 @@ public interface IAdminService {
 	public int approvalUser(String bunyangSeq, String userId, String approvalNo, String approvalDate) throws Exception;
 	
 	/** 
+	 *  승인번호 중복 체크
+	 */
+	public int checkDuplicatedApprovalNo(String approvalNo);
+	
+	/** 
 	 *  사용(봉안)자 승인서 출력일자 업데이트
 	 */
 	public int updateApprovalAssignDate(String bunyangSeq, String userId) throws Exception;
+	
+	/** 
+	 * 특정 분양차수의 분양시작일을 조회
+	 */
+	public String getBunyangStartDate(int bunyangTimes);
 	
 	/**
 	 * 관리비 납부 정보 생성 
@@ -230,6 +240,11 @@ public interface IAdminService {
 	 * 특정 구역에 배정된 정보 조회
 	 */
 	public List<Object> getGraveAssignInfo(String sectionSeq, int rowSeq, int colSeq);
+	
+	/** 
+	 * 특정 구역에 배정된 정보 조회
+	 */
+	public Map<String, Object> getGraveAssignInfoBySeqNo(String sectionSeq, String seqNo);
 	
 	/** 
 	 * 동산 사용신청 리스트 조회

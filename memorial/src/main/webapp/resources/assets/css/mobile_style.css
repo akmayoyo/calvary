@@ -178,3 +178,17 @@ html {
     font-size: 14px;
     color: #777777;
 }
+
+.dateselect{
+	width: calc(33% - 6px); 
+	display: inline-block; 
+	padding: 0 0 0 8px !important; 
+	font-size: 13px !important;
+	background-image: none !important;
+	max-width: 80px;
+}
+.tel_input{
+	width: calc(33% - 6px); 
+	display: inline-block;
+	max-width: 80px;
+}

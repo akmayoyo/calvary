@@ -394,11 +394,16 @@ function _saveUserApproval(btn) {
 		url:"${contextPath}/admin/saveUserApproval", 
 		data:data,
 		success: function(result) {
-			if(result && result.result) {
-				common.showAlert("저장되었습니다.");
-				var frm = document.getElementById("frm");
-				frm.action = "${contextPath}/admin/approvaldetail";
-				frm.submit();
+			if(result) {
+				if(result.result) {
+					common.showAlert("저장되었습니다.");
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/admin/approvaldetail";
+					frm.submit();
+				} else if(result.existno) {
+					common.showAlert("해당 승인번호로 이미 등록된 사용자가 있습니다.\n다른 승인번호를 입력해주세요.");
+					tr.find('input[name="user_approval_no"]').focus();
+				}
 			}
 		}
 	});

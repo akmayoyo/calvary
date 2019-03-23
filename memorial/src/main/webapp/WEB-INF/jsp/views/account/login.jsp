@@ -41,12 +41,12 @@
 
 							<div class="form-group">
 								<label class="sr-only" for="inputId">아이디</label>
-								<input id="tiUserId" type="text" class="form-control input-lg" id="inputid" placeholder="아이디" required="">
+								<input id="tiUserId" type="text" class="form-control input-lg font-15" id="inputid" placeholder="아이디" required="">
 							</div>
 
 							<div class="form-group">
 								<label class="sr-only" for="inputPw">비밀번호</label>
-								<input id="tiPassword" type="password" class="form-control input-lg" id="inputPw" placeholder="비밀번호" required="" autocomplete="off">
+								<input id="tiPassword" type="password" class="form-control input-lg font-15" id="inputPw" placeholder="비밀번호" required="" autocomplete="off">
 							</div>
 
 							<div class="checkbox mb-3">
@@ -105,7 +105,7 @@
 		
 		var checkedId = $('#chkId').is(":checked");
 		if(checkedId) {
-			$.cookie("CK00001", userId);
+			$.cookie("CK00001", userId, {expires:1000});
 		} else {
 			$.removeCookie("CK00001");
 		}

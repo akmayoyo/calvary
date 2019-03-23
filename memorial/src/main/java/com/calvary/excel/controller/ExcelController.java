@@ -67,6 +67,8 @@ public class ExcelController {
 	/** */
 	public static final String ROOT_DIR = "/excel";
 	
+	public static final String SAME = "상동";
+	
 	/** */
 	private static final Logger logger = LoggerFactory.getLogger("ERROR_LOGGER");
 	
@@ -328,7 +330,11 @@ public class ExcelController {
 			String userName = null;
 			String maintChargerName = null;
 			String phone = null;
+			String phone1 = null;
+			String phone2 = null;
 			String requestDate = null;
+			String postNumber = null;
+			String address = null;
 			
 			bunyangInfoVo = new BunyangInfoVo();
 			
@@ -425,11 +431,23 @@ public class ExcelController {
 				if(!StringUtils.isEmpty(maintChargerName) && maintChargerName.equals(userName)) {
 					useUser.setIsMaintCharger("Y");
 				}
+				postNumber = getPostNumber(getStringByCellType(sheet, rowIdx, "G"));
+				address = getStringByCellType(sheet, rowIdx, "H");
+				
+				// 상동일 경우 가장 근접한 행의 우편번호를 가져옴
+				if(SAME.equals(postNumber)) {
+					postNumber = getSamePostNumber(sheet, startRow, rowIdx-1, "G");
+				}
+				// 상동일 경우 가장 근접한 행의 주소를 가져옴
+				if(SAME.equals(address)) {
+					address = getSameAddress(sheet, startRow, rowIdx-1, "H");
+				}
+				
 				useUser.setRelationType(codeNameToCodeSeq(getStringByCellType(sheet, rowIdx, "D"), relationCodeList));
 				useUser.setBirthDate(getExcelDateValue(sheet, rowIdx, "E", dateFmt));
 				useUser.setGender(getStringByCellType(sheet, rowIdx, "F"));
-				useUser.setPostNumber(getPostNumber(getStringByCellType(sheet, rowIdx, "G")));
-				useUser.setAddress1(getStringByCellType(sheet, rowIdx, "H"));
+				useUser.setPostNumber(postNumber);
+				useUser.setAddress1(address);
 				// 부부형
 				if("O".equals(getStringByCellType(sheet, rowIdx, "I"))) {
 					// 부부둘중 첫번째 행에서 시퀀스 증가시켜줘서 부부형 두명이 하나의 seq로 묶일수있도록함
@@ -443,10 +461,17 @@ public class ExcelController {
 				}
 				useUser.setIsChurchPerson(excelValToYN(getStringByCellType(sheet, rowIdx, "M")));
 				useUser.setMobile(getStringByCellType(sheet, rowIdx, "N"));
-				phone = getStringByCellType(sheet, rowIdx, "O");
-				if(!StringUtils.isEmpty(phone) && !"0".equals(phone)) {
-					phone += "-" + getStringByCellType(sheet, rowIdx, "P");
+				phone1 = getStringByCellType(sheet, rowIdx, "O");
+				phone2 = getStringByCellType(sheet, rowIdx, "P");
+				if(SAME.equals(phone1) || SAME.equals(phone2)) {
+					phone = getSamePhone(sheet, startRow, rowIdx -1);
 					useUser.setPhone(phone);
+				} else {
+					phone = getStringByCellType(sheet, rowIdx, "O");
+					if(!StringUtils.isEmpty(phone) && !"0".equals(phone)) {
+						phone += "-" + getStringByCellType(sheet, rowIdx, "P");
+						useUser.setPhone(phone);
+					}
 				}
 				useUser.setEmail(getStringByCellType(sheet, rowIdx, "Q"));
 				if("0".equals(useUser.getEmail())) {
@@ -861,15 +886,17 @@ public class ExcelController {
 		String sRtn = "";
 		try {
 			XSSFCell cell = sheet.getRow(row).getCell(convertColAlphabetToIndex(col));
-			if(cell.getCellType() == CellType.NUMERIC) {
-				sRtn = String.valueOf((int)cell.getNumericCellValue());
-			} else if(cell.getCellType() == CellType.STRING) {
-				sRtn = cell.getStringCellValue();
-			} else if(cell.getCellType() == CellType.FORMULA) {
-				try {
-					sRtn = cell.getStringCellValue();
-				} catch(Exception e) {
+			if(cell != null) {
+				if(cell.getCellType() == CellType.NUMERIC) {
 					sRtn = String.valueOf((int)cell.getNumericCellValue());
+				} else if(cell.getCellType() == CellType.STRING) {
+					sRtn = cell.getStringCellValue();
+				} else if(cell.getCellType() == CellType.FORMULA) {
+					try {
+						sRtn = cell.getStringCellValue();
+					} catch(Exception e) {
+						sRtn = String.valueOf((int)cell.getNumericCellValue());
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -905,6 +932,42 @@ public class ExcelController {
 		String sRtn = val;
 		if(!StringUtils.isEmpty(sRtn) && sRtn.length() == 4) {
 			sRtn = "0" + sRtn;
+		}
+		return sRtn;
+	}
+	
+	private String getSamePostNumber(XSSFSheet sheet, int startRow, int endRow, String col) throws Exception {
+		String sRtn = "";
+		for(int i = endRow; i >= startRow; i--) {
+			String postNumber = getPostNumber(getStringByCellType(sheet, i, col));
+			if(!SAME.equals(postNumber)) {
+				sRtn = postNumber;
+				break;
+			}
+		}
+		return sRtn;
+	}
+	
+	private String getSameAddress(XSSFSheet sheet, int startRow, int endRow, String col) throws Exception {
+		String sRtn = "";
+		for(int i = endRow; i >= startRow; i--) {
+			String address = getStringByCellType(sheet, i, col);
+			if(!SAME.equals(address)) {
+				sRtn = address;
+				break;
+			}
+		}
+		return sRtn;
+	}
+	
+	private String getSamePhone(XSSFSheet sheet, int startRow, int endRow) throws Exception {
+		String sRtn = "";
+		for(int i = endRow; i >= startRow; i--) {
+			String phone1 = getStringByCellType(sheet, i, "O");
+			String phone2 = getStringByCellType(sheet, i, "P");
+			if(!SAME.equals(phone1) && !SAME.equals(phone2)) {
+				sRtn += phone1 + "-" + phone2;
+			}
 		}
 		return sRtn;
 	}

@@ -37,19 +37,21 @@ tr.selected {
 		<div class="table-responsive">
 			<table id="tblTopCode" class="table table-style table-bordered table-hover">
 				<colcolgroup>
-					<col width="16%">
-					<col width="16%">
-					<col width="16%">
-					<col width="16%">
-					<col width="16%">
-					<col width="16%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
 				</colcolgroup>
 				<thead>
 					<tr>
 						<th scope="col" class="required">CODE</th>
 						<th scope="col" class="required">코드명</th>
 						<th scope="col" class="required">코드설명</th>
-						<th scope="col">코드값</th>
+						<th scope="col">코드값1</th>
+						<th scope="col">코드값2</th>
 						<th scope="col">표시순서</th>
 						<th scope="col"></th>
 					</tr>
@@ -61,6 +63,7 @@ tr.selected {
 	                    <td><input name="codeName" type="text" class="form-control" value="${rowItem.code_name}"></td>
 	                    <td><input name="codeDesc" type="text" class="form-control" value="${rowItem.code_desc}"></td>
 	                    <td><input name="codeValue" type="text" class="form-control" value="${rowItem.code_value}"></td>
+	                    <td><input name="codeValue1" type="text" class="form-control" value="${rowItem.code_value1}"></td>
 	                    <td name="displayOrder">
 	                    	${rowItem.display_order}
 	                    </td>
@@ -90,19 +93,21 @@ tr.selected {
 		<div class="table-responsive">
 			<table id="tblChildCode" class="table table-style table-bordered table-hover">
 				<colcolgroup>
-					<col width="16%">
-					<col width="16%">
-					<col width="16%">
-					<col width="16%">
-					<col width="16%">
-					<col width="16%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
+					<col width="14%">
 				</colcolgroup>
 				<thead>
 					<tr>
 						<th scope="col" class="required">CODE</th>
 						<th scope="col" class="required">코드명</th>
 						<th scope="col" class="required">코드설명</th>
-						<th scope="col">코드값</th>
+						<th scope="col">코드값1</th>
+						<th scope="col">코드값2</th>
 						<th scope="col">표시순서</th>
 						<th scope="col"></th>
 					</tr>
@@ -114,6 +119,7 @@ tr.selected {
 	                    <td><input name="codeName" type="text" class="form-control" value="${rowItem.code_name}"></td>
 	                    <td><input name="codeDesc" type="text" class="form-control" value="${rowItem.code_desc}"></td>
 	                    <td><input name="codeValue" type="text" class="form-control" value="${rowItem.code_value}"></td>
+	                    <td><input name="codeValue1" type="text" class="form-control" value="${rowItem.code_value1}"></td>
 	                    <td name="displayOrder">${rowItem.display_order}</td>
 	                    <td>
 	                    	<button type="button" data-toggle="tooltip" title="삭제" class="btn btn-default btn-sm" onclick="_deleteCode(this)"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
@@ -176,8 +182,10 @@ function _addCode(parentCodeSeq) {
     tr.append('<td><input name="codeName" type="text" class="form-control"></td>');
  	// 코드설명
     tr.append('<td><input name="codeDesc" type="text" class="form-control"></td>');
- 	// 코드값
+ 	// 코드값1
     tr.append('<td><input name="codeValue" type="text" class="form-control"></td>');
+ 	// 코드값2
+    tr.append('<td><input name="codeValue1" type="text" class="form-control"></td>');
     // 표시순서
     tr.append('<td name="displayOrder">' + displayOrder + '</td>');
     // 삭제버튼
@@ -270,6 +278,7 @@ function _saveCode(parentCodeSeq) {
 		var codeName = $(this).find('input[name="codeName"]').val();
 		var codeDesc = $(this).find('input[name="codeDesc"]').val();
 		var codeValue = $(this).find('input[name="codeValue"]').val();
+		var codeValue1 = $(this).find('input[name="codeValue1"]').val();
 		var codeLevel = parentCodeSeq ? 2 : 1;
 		var displayOrder = $(this).find('td[name="displayOrder"]').text();
 		
@@ -296,6 +305,7 @@ function _saveCode(parentCodeSeq) {
 		codeItem['codeName'] = codeName;
 		codeItem['codeDesc'] = codeDesc;
 		codeItem['codeValue'] = codeValue;
+		codeItem['codeValue1'] = codeValue1;
 		codeItem['codeLevel'] = codeLevel;
 		codeItem['displayOrder'] = displayOrder;
 		codeItem['parentCodeSeq'] = parentCodeSeq ? parentCodeSeq : '';

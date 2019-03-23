@@ -9,7 +9,7 @@
 	
 		<div class="pull-left"><h3 style="margin-top: 0;">관리비납부현황</h3></div>
     	<div class="clearfix"></div>
-		<div class="table-responsive" style="border-top: 1px solid #999;">
+		<div style="border-top: 1px solid #999;">
 	        <table class="table table-style table-bordered" style="border-top: 0;">
 	        	<colgroup>
 	        		<col width="14%">

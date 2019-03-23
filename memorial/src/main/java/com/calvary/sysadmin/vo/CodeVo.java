@@ -9,6 +9,7 @@ public class CodeVo {
 	private String parentCodeSeq;
 	private int displayOrder;
 	private String codeValue;
+	private String codeValue1;
 	private String flag;// C:생성, U:업데이트
 	public String getCodeSeq() {
 		return codeSeq;
@@ -52,7 +53,12 @@ public class CodeVo {
 	public void setCodeValue(String codeValue) {
 		this.codeValue = codeValue;
 	}
-	
+	public String getCodeValue1() {
+		return codeValue1;
+	}
+	public void setCodeValue1(String codeValue1) {
+		this.codeValue1 = codeValue1;
+	}
 	public String getFlag() {
 		return flag;
 	}
@@ -63,7 +69,7 @@ public class CodeVo {
 	public String toString() {
 		return "CodeVo [codeSeq=" + codeSeq + ", codeName=" + codeName + ", codeDesc=" + codeDesc + ", codeLevel="
 				+ codeLevel + ", parentCodeSeq=" + parentCodeSeq + ", displayOrder=" + displayOrder + ", codeValue="
-				+ codeValue + ", flag=" + flag + "]";
+				+ codeValue + ", codeValue1=" + codeValue1 + ", flag=" + flag + "]";
 	}
 	
 }

@@ -129,6 +129,8 @@
 	       	A.code_level,
 	       	A.parent_code_seq,
 	       	A.code_value,
+	       	A.code_value1,
+	       	A.code_value2,
 	       	A.display_order
 	  	FROM TB_COM_CODE A
 	  	WHERE A.parent_code_seq = #{parentCodeSeq}
@@ -142,6 +144,8 @@
 	       	A.code_level,
 	       	A.parent_code_seq,
 	       	A.code_value,
+	       	A.code_value1,
+	       	A.code_value2,
 	       	A.display_order
 	  	FROM TB_COM_CODE A
 	  	WHERE A.code_seq = #{codeSeq}

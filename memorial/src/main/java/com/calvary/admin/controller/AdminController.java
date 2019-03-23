@@ -294,7 +294,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=APPR_CONTRACT_URL)
 	@ResponseBody
-	public Object apprContractHandler(String bunyangSeq, String progressStatus) throws Exception {
+	public Object apprContractHandler(String bunyangSeq, String progressStatus, String updateDate) throws Exception {
 		boolean bRslt = false;
 		String fileSeq = null;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
@@ -302,7 +302,7 @@ public class AdminController {
 		BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
 		bunyangInfoVo.setBunyangSeq(bunyangSeq);
 		bunyangInfoVo.setProgressStatus(progressStatus);
-		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), null);
+		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), updateDate);
 		if(iRslt > 0) {
 			if(CalvaryConstants.PROGRESS_STATUS_B.equals(progressStatus)) {
 				fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "", "");
@@ -466,8 +466,13 @@ public class AdminController {
 //				bRslt = iRslt > 0;
 //			}
 //		}
-		int iRslt = adminService.approvalUser(bunyangSeq, userId, approvalNo, approvalDate);
-		bRslt = iRslt > 0;
+		int existCount = adminService.checkDuplicatedApprovalNo(approvalNo);
+		if(existCount > 0) {
+			rtnMap.put("existno", true);
+		} else {
+			int iRslt = adminService.approvalUser(bunyangSeq, userId, approvalNo, approvalDate);
+			bRslt = iRslt > 0;
+		}
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
@@ -526,8 +531,11 @@ public class AdminController {
 		bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_D);
 		int iRslt = adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), approvalDate);
 		if(iRslt > 0) {
+			Map<String, Object> tmp = adminService.getBunyangInfo(bunyangSeq);
+			// 해당 분양차수의 분양 시작일로 관리비 납부 정보를 생성
+			String startDate = adminService.getBunyangStartDate(CommonUtil.convertToInt(tmp.get("bunyang_times")));
 			// 사용승인 이후 관리비가 발생하기 때문에 관리비 납부여부 체크를 위한 정보를 생성한다.
-			iRslt += adminService.createMaintPaymentInfo(bunyangSeq, approvalDate);
+			iRslt += adminService.createMaintPaymentInfo(bunyangSeq, StringUtils.isEmpty(startDate) ? approvalDate : startDate);
 		}
 		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);

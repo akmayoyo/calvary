@@ -38,7 +38,7 @@
 	
 		<!-- 테이블 -->
 		<div class="table-responsive">
-			<table id="tblList" class="table table-style">
+			<table id="tblList" class="table table-style table-bordered">
 				<thead>
 					<tr>
 						<th scope="col">번호</th>

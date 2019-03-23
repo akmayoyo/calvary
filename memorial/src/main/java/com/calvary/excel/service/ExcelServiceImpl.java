@@ -732,7 +732,6 @@ public class ExcelServiceImpl implements IExcelService {
 					int totalAmount = CommonUtil.convertToInt(tmp.get("total_amount"));
 					String paymentMethod = (String)tmp.get("payment_method");
 					String createUser = (String)tmp.get("create_user_name");
-					String createDate = (String)tmp.get("create_date");
 					
 					// 납부일자
 					sheetnums.add(0);
@@ -777,11 +776,11 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(26);
 					cellnums.add(convertColAlphabetToIndex("D"));
-					cellvalues.add(createDate);
+					cellvalues.add((String)bunyangInfo.get("contract_date"));
 					sheetnums.add(0);
 					rownums.add(46);
 					cellnums.add(convertColAlphabetToIndex("H"));
-					cellvalues.add(createDate);
+					cellvalues.add((String)bunyangInfo.get("contract_date"));
 					
 					// 계약금미납,완납,과납
 					sheetnums.add(0);
@@ -966,11 +965,11 @@ public class ExcelServiceImpl implements IExcelService {
 			sheetnums.add(0);
 			rownums.add(25);
 			cellnums.add(convertColAlphabetToIndex("D"));
-			cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+			cellvalues.add((String)bunyangInfo.get("full_payment_date"));
 			sheetnums.add(0);
 			rownums.add(29);
 			cellnums.add(convertColAlphabetToIndex("G"));
-			cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+			cellvalues.add((String)bunyangInfo.get("full_payment_date"));
 		}else if(ExcelForms.USE_APPROVAL_FORM.equals(excelForm)) {// 사용승인서
 			fileFormType = CalvaryConstants.FILE_FORM_TYPE_USE_APPROVAL;
 			destFilePath += "/useApproval";
@@ -983,11 +982,17 @@ public class ExcelServiceImpl implements IExcelService {
 			List<Object> approvalUser = commonDao.selectList("admin.getBunyangRefUserInfo",  param);
 			Map<String, Object> approvalUserMap = null;
 			Map<String, Object> coupleUserMap = null;
+			String approvalNo = "";
 			int coupleSeq = 0;
 			if(approvalUser != null && approvalUser.size() > 0) {
 				approvalUserMap = (HashMap<String, Object>)approvalUser.get(0);
 				file_append_value = (String)approvalUserMap.get("user_name");
 				coupleSeq = CommonUtil.convertToInt(approvalUserMap.get("couple_seq"));
+				approvalNo = (String)approvalUserMap.get("approval_no");
+				if(!StringUtils.isEmpty(approvalNo)) {
+					// 계약번호를 제외한 숫자
+					approvalNo = approvalNo.replace(bunyangNo, "");
+				}
 				// 부부형의 경우 배우자정보 조회
 				if(coupleSeq > 0 ) {
 					param = new HashMap<String, Object>();
@@ -1091,6 +1096,10 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(5);
 			cellnums.add(convertColAlphabetToIndex("O"));
 			cellvalues.add(bunyangNo);
+			sheetnums.add(0);
+			rownums.add(5);
+			cellnums.add(convertColAlphabetToIndex("Q"));
+			cellvalues.add(approvalNo);
 			// 계약번호
 			sheetnums.add(0);
 			rownums.add(16);

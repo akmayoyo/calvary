@@ -472,18 +472,66 @@ public class AdminServiceImpl implements IAdminService {
 	/** 
 	 * 분양관련 입출금(계약금,잔금,관리비..) 정보 생성
 	 */
+	@SuppressWarnings("unchecked")
 	@Transactional(rollbackFor=Exception.class)
 	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks, String[] maintSeqs) throws Exception {
 		int iRslt = 0;
 		if(bunyangSeqs != null && bunyangSeqs.length > 0) {
 			for(int i = 0; i < bunyangSeqs.length; i++) {
 				Map<String, Object> param = new HashMap<String, Object>();
-				// 계약금 납부 정보 업데이트
+				String paymentDivision = paymentDivisions[i];
+				String paymentType = paymentTypes[i];
+				int paymentAmount = paymentAmounts[i];
+				// 분양잔금 입금시 계약금 완납이 안된 경우 입금해야할 계약금만큼 제하고 분양잔금 입금처리함
+				if(CalvaryConstants.PAYMENT_DIVISION_DEPOSIT.equals(paymentDivision)
+						&& CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT.equals(paymentType)) {
+					boolean bExistContract = false;
+					// 일단 리스트중에 같은 분양건의 계약금 입금 내역이 있는지 조회
+					for(int j = 0; j < bunyangSeqs.length; j++) {
+						if(bunyangSeqs[j] != null && bunyangSeqs[j].equals(bunyangSeqs[i]) && CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT.equals(paymentTypes[j])) {
+							bExistContract = true;
+							break;
+						}
+					}
+					if(!bExistContract) {
+						param = new HashMap<String, Object>();
+						param.put("bunyangSeq", bunyangSeqs[i]);
+						Map<String, Object> tmp = (HashMap<String, Object>)commonDao.selectOne("contract.getRequiredContractPrice", param);
+						if(tmp != null) {
+							int requiredContractPrice = CommonUtil.convertToInt(tmp.get("required_contract_price"));
+							// 입금해야할 계약금이 있을경우
+							if(requiredContractPrice > 0) {
+								if(requiredContractPrice >= paymentAmount) {
+									requiredContractPrice = paymentAmount;
+								}
+								param = new HashMap<String, Object>();
+								param.put("bunyangSeq", bunyangSeqs[i]);
+								param.put("paymentDivision", CalvaryConstants.PAYMENT_DIVISION_DEPOSIT);
+								param.put("paymentType", CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);
+								param.put("paymentUser", paymentUsers[i]);
+								param.put("paymentAmount", requiredContractPrice);
+								param.put("paymentMethod", paymentMethods[i]);
+								param.put("paymentDate", paymentDates[i]);
+								param.put("remark", remarks[i]);
+								param.put("maintSeq", maintSeqs[i]);
+								param.put("createUser", SessionUtil.getCurrentUser().getUserId());
+								iRslt += commonDao.insert("contract.insertDownPayment", param);
+								paymentAmount = paymentAmount - requiredContractPrice;
+							}
+						}
+					}
+				}
+				
+				if(paymentAmount <= 0) {
+					continue;
+				}
+				
+				param = new HashMap<String, Object>();
 				param.put("bunyangSeq", bunyangSeqs[i]);
-				param.put("paymentDivision", paymentDivisions[i]);
-				param.put("paymentType", paymentTypes[i]);
+				param.put("paymentDivision", paymentDivision);
+				param.put("paymentType", paymentType);
 				param.put("paymentUser", paymentUsers[i]);
-				param.put("paymentAmount", paymentAmounts[i]);
+				param.put("paymentAmount", paymentAmount);
 				param.put("paymentMethod", paymentMethods[i]);
 				param.put("paymentDate", paymentDates[i]);
 				param.put("remark", remarks[i]);
@@ -491,8 +539,8 @@ public class AdminServiceImpl implements IAdminService {
 				param.put("createUser", SessionUtil.getCurrentUser().getUserId());
 				iRslt += commonDao.insert("contract.insertDownPayment", param);
 				// 관리비 납부의 경우 관리비 납부 대상 정보도 납부상태로 업데이트 해줌
-				if(CalvaryConstants.PAYMENT_DIVISION_DEPOSIT.equals(paymentDivisions[i])
-						&& CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT.equals(paymentTypes[i])) {
+				if(CalvaryConstants.PAYMENT_DIVISION_DEPOSIT.equals(paymentDivision)
+						&& CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT.equals(paymentType)) {
 					iRslt += commonDao.update("contract.updateMaintPaymentInfo", param);
 				}
 				
@@ -544,6 +592,21 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
+	 *  승인번호 중복 체크
+	 */
+	@SuppressWarnings("unchecked")
+	public int checkDuplicatedApprovalNo(String approvalNo) {
+		int count = 0;
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("approvalNo", approvalNo);
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("approval.checkDuplicatedApprovalNo", param);
+		if(countMap != null) {
+			count = CommonUtil.convertToInt(countMap.get("cnt"));
+		}
+		return count; 
+	}
+	
+	/** 
 	 *  사용(봉안)자 승인서 출력일자 업데이트
 	 */
 	public int updateApprovalAssignDate(String bunyangSeq, String userId) throws Exception{
@@ -553,6 +616,18 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("userId", userId);
 		iRslt += commonDao.update("approval.updateApprovalAssignDate", param);
 		return iRslt; 
+	}
+	
+	/** 
+	 * 특정 분양차수의 분양시작일을 조회
+	 */
+	@SuppressWarnings("unchecked")
+	public String getBunyangStartDate(int bunyangTimes) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangTimes", bunyangTimes);
+		Map<String, Object> tmpMap = (HashMap<String, Object>)commonDao.selectOne("approval.getBunyangStartDate", param);
+		String startDate = (String)tmpMap.get("start_date");
+		return startDate;
 	}
 	
 	/**
@@ -858,6 +933,18 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("colSeq", colSeq);
 		List<Object> list = commonDao.selectList("use.getGraveAssignInfo", parameter); 
 		return list;
+	}
+	
+	/** 
+	 * 특정 구역에 배정된 정보 조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getGraveAssignInfoBySeqNo(String sectionSeq, String seqNo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("sectionSeq", sectionSeq);
+		parameter.put("seqNo", seqNo);
+		Map<String, Object> rtn = (HashMap<String, Object>)commonDao.selectOne("use.getGraveAssignInfoBySeqNo", parameter); 
+		return rtn;
 	}
 	
 	/** 

@@ -171,4 +171,20 @@ public class MobileServiceImpl implements IMobileService {
 		
 		return iRslt;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getContractMinister(String bunyangSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("mobile.getContractMinister", parameter);
+		return rtnMap;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getContract(String codeSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("codeSeq", codeSeq);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("mobile.getContract", parameter);
+		return rtnMap;
+	}
 }

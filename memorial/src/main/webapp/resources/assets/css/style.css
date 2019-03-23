@@ -47,7 +47,7 @@ body {
 	color: #3a3a3a;
 	font-family: 'NotoKrR', sans-serif;
 	font-weight: 300;
-	font-size: 14px;
+	font-size: 13px;
 }
 
 /* ++++++++++++++ [ padding/margin ] ++++++++++++++ */
@@ -111,7 +111,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h1 {
-	font-size: 50px !important;
+	font-size: 45px !important;
 }
 
 h6 {
@@ -155,7 +155,7 @@ h6 {
 .link-bar .item {
 	position: relative;
 	display: inline-block;
-	font-size: 14px;
+	font-size: 13px;
 	text-align: center;
 }
 .link-bar .item a {
@@ -448,7 +448,7 @@ header .link-bar a {
 .breadcrumb {
 	padding: 10px 15px;
 	margin-bottom: 0;
-	font-size: 14px;
+	font-size: 13px;
 }
 .breadcrumb-item+.breadcrumb-item::before {
     content: "\003E";
@@ -685,6 +685,60 @@ input.readonlywhite{
 .hide {
 	display: none !important;
 }
+.form-control {
+	font-size: 13px !important;
+}
 .font-13 {
 	font-size: 13px !important;
+}
+.font-14 {
+	font-size: 14px !important;
+}
+.font-15 {
+	font-size: 15px !important;
+}
+
+@media screen and (max-width: 1920px) {
+  .table-responsive {
+    width: 100%;
+    margin-bottom: 15px;
+    overflow-y: hidden;
+    border: 1px solid #ddd;
+  }
+  .table-responsive > .table {
+    margin-bottom: 0;
+  }
+  .table-responsive > .table > thead > tr > th,
+  .table-responsive > .table > tbody > tr > th,
+  .table-responsive > .table > tfoot > tr > th,
+  .table-responsive > .table > thead > tr > td,
+  .table-responsive > .table > tbody > tr > td,
+  .table-responsive > .table > tfoot > tr > td {
+    white-space: nowrap;
+  }
+  .table-responsive > .table-bordered {
+    border: 0;
+  }
+  .table-responsive > .table-bordered > thead > tr > th:first-child,
+  .table-responsive > .table-bordered > tbody > tr > th:first-child,
+  .table-responsive > .table-bordered > tfoot > tr > th:first-child,
+  .table-responsive > .table-bordered > thead > tr > td:first-child,
+  .table-responsive > .table-bordered > tbody > tr > td:first-child,
+  .table-responsive > .table-bordered > tfoot > tr > td:first-child {
+    border-left: 0;
+  }
+  .table-responsive > .table-bordered > thead > tr > th:last-child,
+  .table-responsive > .table-bordered > tbody > tr > th:last-child,
+  .table-responsive > .table-bordered > tfoot > tr > th:last-child,
+  .table-responsive > .table-bordered > thead > tr > td:last-child,
+  .table-responsive > .table-bordered > tbody > tr > td:last-child,
+  .table-responsive > .table-bordered > tfoot > tr > td:last-child {
+    border-right: 0;
+  }
+  .table-responsive > .table-bordered > tbody > tr:last-child > th,
+  .table-responsive > .table-bordered > tfoot > tr:last-child > th,
+  .table-responsive > .table-bordered > tbody > tr:last-child > td,
+  .table-responsive > .table-bordered > tfoot > tr:last-child > td {
+    border-bottom: 0;
+  }
 }

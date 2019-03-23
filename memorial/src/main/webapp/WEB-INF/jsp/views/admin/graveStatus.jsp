@@ -97,14 +97,14 @@
 	    <div class="table-responsive">
 	        <table id="tblAssignInfo" class="table table-style table-bordered">
 	        	<colgroup>
-	        		<col width="10%">
-	        		<col width="10%">
-	        		<col width="10%">
-	        		<col width="10%">
-	        		<col width="10%">
-	        		<col width="10%">
-	        		<col width="10%">
-	        		<col width="30%">
+	        		<col width="16%">
+	        		<col width="12%">
+	        		<col width="12%">
+	        		<col width="12%">
+	        		<col width="12%">
+	        		<col width="12%">
+	        		<col width="12%">
+	        		<col width="12%">
 	        	</colgroup>
 	            <thead>
 	                <tr>
@@ -116,9 +116,9 @@
 	                </tr>
 	                <tr>
 	                	<th scope="col">성명</th>
-	                    <th scope="col">관계</th>
 	                    <th scope="col">생년월일</th>
-	                    <th scope="col">주소</th>
+	                    <th scope="col">관계</th>
+	                    <th scope="col">봉안일시</th>
 	                </tr>
 	            </thead>
 	            <tbody>
@@ -346,11 +346,12 @@ function _getGraveAssignInfo(d) {
 				$.each(result, function(idx, item){
 					var tr = $('<tr/>');
 					var section = item.section_seq + '구역';
-					section += '  ' + item.row_seq + '행-' + seqToAlpha(item.col_seq) + '열(고유번호:' + item.seq_no + ')';
+					section += '  ' + item.row_seq + '행-' + seqToAlpha(item.col_seq) + '열<br>(고유번호:' + item.seq_no + ')';
 					var graveType = item.grave_type == 'COUPLE' ? '부부형' : '1인형';
 					var address = item.post_number ? '(' + item.post_number + ') ' + item.address1 + (item.address2 ? item.address2 : '') : '';
 					var bunyang_no = item.bunyang_no ? item.bunyang_no : '';
 					var apply_user_name = item.apply_user_name ? item.apply_user_name : '';
+					var assign_date = item.assign_date ? item.assign_date : '';
 					if(idx == 0) {
 						tr.append('<td rowspan="' + len + '">'+ section +'</td>');
 						tr.append('<td rowspan="' + len + '">'+ bunyang_no +'</td>');
@@ -358,9 +359,9 @@ function _getGraveAssignInfo(d) {
 						tr.append('<td rowspan="' + len + '">'+ graveType +'</td>');	
 					}
 					tr.append('<td>'+ (item.user_name ? item.user_name : '') +'</td>');
-					tr.append('<td>'+ (item.relation_type_name ? item.relation_type_name : '') +'</td>');
 					tr.append('<td>'+ (item.birth_date ? item.birth_date : '') +'</td>');
-					tr.append('<td>'+ address +'</td>');
+					tr.append('<td>'+ (item.relation_type_name ? item.relation_type_name : '') +'</td>');
+					tr.append('<td>'+ assign_date +'</td>');
 					$('#tblAssignInfo tbody').append(tr);
 				});
 				$('html:not(:animated), body:not(:animated)').animate({

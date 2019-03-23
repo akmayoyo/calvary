@@ -56,6 +56,7 @@ public class SysAdminServiceImpl implements ISysAdminService {
 				parameter.put("codeLevel", codeVo.getCodeLevel());
 				parameter.put("displayOrder", codeVo.getDisplayOrder());
 				parameter.put("codeValue", codeVo.getCodeValue());
+				parameter.put("codeValue1", codeVo.getCodeValue1());
 				parameter.put("parentCodeSeq", parentCodeSeq);
 				if("U".equals(codeVo.getFlag())) {
 					iRslt += commonDao.update("sysadmin.updateCodeInfo", parameter);

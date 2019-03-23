@@ -360,6 +360,7 @@
 			b.col_seq,
 			b.product_type,
 			b.assign_status,
+			b.seq_no,
 			case 
 				when b.assign_status = 'HALF_OCCUPIED' then 
 					case when a.user_seq = b.use_user_seq1 then 'OCCUPIED' 

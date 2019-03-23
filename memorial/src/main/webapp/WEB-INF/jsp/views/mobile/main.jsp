@@ -85,7 +85,7 @@
 				<a data-toggle="collapse" data-parent="#m_menu" aria-expanded="false" href="#menu2">사용(봉안) 대상자</a>
 			</div>
 			<div id="menu2" class="collapse">
-				<div class="padding-15">
+				<div class="padding-15 table-responsive">
 					<table id="tblUseUser" class="table m_table">
 						<thead>
 							<tr>
@@ -94,6 +94,7 @@
 								<th scope="col">승인상태</th>
 								<th scope="col">봉안여부</th>
 								<th scope="col">사용신청</th>
+								<th scope="col">사용구역</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -115,7 +116,17 @@
 									</c:choose>
 								</td>
 								<td>
-									<button class="btn btn-primary btn-sm" onclick="_requestGrave(this, '${rowItem.user_id}')" <c:if test="${not empty rowItem.cancel_seq}">disabled</c:if>>신청</button>
+									<c:choose>
+										<c:when test="${rowItem.couple_assign_status == 'OCCUPIED'}">사용(봉안)중</c:when>
+										<c:otherwise>
+										<button class="btn btn-primary btn-sm" onclick="_requestGrave(this, '${rowItem.user_id}')" <c:if test="${not empty rowItem.cancel_seq}">disabled</c:if>>신청</button>
+										</c:otherwise>
+									</c:choose>
+								</td>
+								<td>
+									<c:choose>
+										<c:when test="${rowItem.couple_assign_status == 'OCCUPIED'}"><span name="section_info" section_seq="${rowItem.section_seq}" row_seq="${rowItem.row_seq}" col_seq="${rowItem.col_seq}" seq_no="${rowItem.seq_no}"></span></c:when>
+									</c:choose>
 								</td>
 							</tr>
 							</c:forEach>
@@ -157,6 +168,16 @@
 
 <script type="text/javascript">
 
+(function(){
+	// 사용구역표시
+	$('span[name="section_info"]').each(function(idx) {
+		var section = $(this).attr('section_seq') + '구역';
+		section += '  ' + $(this).attr('row_seq') + '행-' + seqToAlpha($(this).attr('col_seq')) + '열 (고유번호:' + $(this).attr('seq_no') + ')';
+		$(this).text(section);
+	});
+	
+})();
+
 /**
  * 추모동산 사용신청
  */
@@ -189,6 +210,15 @@ function _logout() {
 			}
 		}
 	});
+}
+
+/**
+ * 
+ */
+function seqToAlpha(seq) {
+	var seqOfA = "A".charCodeAt(0) + (seq-1);
+	var alpha = String.fromCharCode(seqOfA);
+	return alpha;
 }
 
 </script>
