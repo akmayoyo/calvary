@@ -280,6 +280,8 @@
           	,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
           	,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
             ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
+            ,(SELECT DATE_FORMAT(max(payment_date), '%Y%m%d') FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment_date
+            ,(SELECT DATE_FORMAT(max(payment_date), '%Y%m%d') FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment_date
 	       	,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
 	       	,cancel_reason
 	       	,cancel_bank
@@ -351,6 +353,7 @@
 			a.couple_seq,
 			a.is_move,
 			a.approval_no,
+			a.yongin_no,
 			DATE_FORMAT(a.approval_date, '%Y-%m-%d') as approval_date,
 			DATE_FORMAT(a.approval_assign_date, '%Y-%m-%d %H:%i:%s') as approval_assign_date,
 			approval_file_seq,
@@ -405,6 +408,8 @@
 			a.couple_seq,
 			a.is_move,
 			a.approval_no,
+			a.yongin_no,
+			a.approval_file_seq,
 			DATE_FORMAT(a.approval_date, '%Y-%m-%d') as approval_date,
 			DATE_FORMAT(a.approval_assign_date, '%Y-%m-%d %H:%i:%s') as approval_assign_date
 		FROM TB_BUNYANG_REF_USER a
@@ -522,11 +527,11 @@
 		#{bunyangSeq}, 
 		#{userSeq}, 
 		(select code_value from TB_COM_CODE a WHERE a.CODE_SEQ = 'MAINT_PRICE' ), 
-		(select str_to_date(concat(year(curdate()), date_format(date(max(update_date)), '%m%d')), '%Y%m%d') from TB_BUNYANG_HISTORY a WHERE a.bunyang_seq = #{bunyangSeq} AND a.progress_status = 'D'), 
-		(select DATE_ADD(DATE_ADD(str_to_date(concat(year(curdate()), date_format(date(max(update_date)), '%m%d')), '%Y%m%d'), INTERVAL 1 YEAR), INTERVAL -1 DAY) from TB_BUNYANG_HISTORY a WHERE a.bunyang_seq = #{bunyangSeq} AND a.progress_status = 'D'), 
-		year(curdate()), 
+		str_to_date(#{maintStartDate},'%Y%m%d'),
+		DATE_ADD(DATE_ADD(str_to_date(#{maintStartDate},'%Y%m%d'), INTERVAL (case when #{paymentType} = 'AFTER_USE' THEN 30 ELSE 1 END)  YEAR), INTERVAL -1 DAY),  
+		year(str_to_date(#{maintStartDate},'%Y%m%d')), 
 		'N',
-		'BEFORE_USE'
+		#{paymentType}
 		)
 	</insert>
 	
@@ -554,5 +559,49 @@
 	  	AND a.user_seq = #{userSeq}
 	  	</if>
 	</delete>
+	
+	<!-- 관리비 납부기간을 갱신해야할 대상 조회 -->
+	<select id="getRemakePaymentInfo" parameterType="map" resultType="map">
+		<![CDATA[
+		SELECT
+			t1.bunyang_seq
+			,t1.user_seq
+			,date_format(t1.maint_end_date, '%Y%m%d') as maint_end_date
+		    ,t1.payment_type
+		    ,t2.user_name
+		    ,t3.bunyang_no
+		from
+		(select 
+			bunyang_seq
+		    ,user_seq
+		    ,payment_type
+		    ,max(maint_end_date) as maint_end_date
+		from TB_BUNYANG_MAINT_PAYMENT_INFO a
+		group by bunyang_seq, user_seq, payment_type
+		having max(maint_end_date) <= CURRENT_TIMESTAMP
+		) t1 inner join TB_BUNYANG_REF_USER t2 on t1.bunyang_seq = t2.bunyang_seq AND t1.user_seq = t2.user_seq AND t2.ref_type = 'USE_USER'
+		inner join TB_BUNYANG_INFO t3 on t1.bunyang_seq = t3.bunyang_seq
+		]]>
+	</select>
+	
+	<!-- 해약금 출금정보 조회 -->
+	<select id="getCancelPaymentInfo" parameterType="map" resultType="map">
+		select
+			bunyang_seq
+			,payment_type
+			,payment_amount
+			,payment_method
+			,date_format(payment_date, '%Y%m%d') as payment_date
+			,payment_user
+			,create_user
+			,create_date
+			,payment_division
+			,remarks
+			,maint_seq
+		from TB_BUNYANG_PAYMENT_HISTORY a 
+		where a.bunyang_seq = #{bunyangSeq}
+		ORDER BY create_date DESC
+		LIMIT 0,1
+	</select>
 	
 </mapper>

@@ -240,9 +240,9 @@
 				WHEN t4.service_charge_type = 'REPRESENT' THEN (select mobile from TB_BUNYANG_REF_USER ru WHERE ru.bunyang_seq = t1.bunyang_seq AND ru.ref_type = 'USE_USER' AND ru.is_maint_charger = 'Y')
 			END charger_phone
 			,CASE 
-				WHEN t4.service_charge_type = 'APPLY_USER' THEN CONCAT('(', t3.post_number, ')', t3.address1, t3.address2)
-				WHEN t4.service_charge_type = 'USE_USER' THEN CONCAT('(', t2.post_number, ')', t2.address1, t2.address2)
-				WHEN t4.service_charge_type = 'REPRESENT' THEN (select CONCAT('(', post_number, ')', address1, address2) from TB_BUNYANG_REF_USER ru WHERE ru.bunyang_seq = t1.bunyang_seq AND ru.ref_type = 'USE_USER' AND ru.is_maint_charger = 'Y')
+				WHEN t4.service_charge_type = 'APPLY_USER' THEN CONCAT('(', t3.post_number, ')', t3.address1, COALESCE(t3.address2, ''))
+				WHEN t4.service_charge_type = 'USE_USER' THEN CONCAT('(', t2.post_number, ')', t2.address1, COALESCE(t2.address2, ''))
+				WHEN t4.service_charge_type = 'REPRESENT' THEN (select CONCAT('(', post_number, ')', address1, COALESCE(address2, '')) from TB_BUNYANG_REF_USER ru WHERE ru.bunyang_seq = t1.bunyang_seq AND ru.ref_type = 'USE_USER' AND ru.is_maint_charger = 'Y')
 			END charger_address
 		FROM TB_BUNYANG_MAINT_PAYMENT_INFO t1 
 		INNER JOIN TB_BUNYANG_REF_USER t2 ON t1.bunyang_seq = t2.bunyang_seq AND t1.user_seq = t2.user_seq AND t2.ref_type = 'USE_USER'

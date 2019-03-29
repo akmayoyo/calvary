@@ -79,6 +79,34 @@
 				</div>
 			</div>
 		</div>
+		
+		<div class="panel">
+			<div class="depth1">
+				<a data-toggle="collapse" data-parent="#m_menu" aria-expanded="false" href="#menu3">납입정보</a>
+			</div>
+			<div id="menu3" class="collapse">
+				<div class="padding-15">
+					<table class="table m_table table-bordered">
+						<thead>
+							<tr>
+								<th scope="col">납입유형</th>
+								<th scope="col">납입금액</th>
+								<th scope="col">납입일자</th>
+							</tr>
+						</thead>
+						<tbody>
+							<c:forEach items="${paymentList}" var="rowItem">
+							<tr>
+								<td>${rowItem.payment_type_name}</td>
+								<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.payment_amount)}</td>
+								<td>${rowItem.payment_date}</td>
+							</tr>
+							</c:forEach>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
 
 		<div class="panel">
 			<div class="depth1">
@@ -128,34 +156,6 @@
 										<c:when test="${rowItem.couple_assign_status == 'OCCUPIED'}"><span name="section_info" section_seq="${rowItem.section_seq}" row_seq="${rowItem.row_seq}" col_seq="${rowItem.col_seq}" seq_no="${rowItem.seq_no}"></span></c:when>
 									</c:choose>
 								</td>
-							</tr>
-							</c:forEach>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-
-		<div class="panel">
-			<div class="depth1">
-				<a data-toggle="collapse" data-parent="#m_menu" aria-expanded="false" href="#menu3">납입정보</a>
-			</div>
-			<div id="menu3" class="collapse">
-				<div class="padding-15">
-					<table class="table m_table table-bordered">
-						<thead>
-							<tr>
-								<th scope="col">납입유형</th>
-								<th scope="col">납입금액</th>
-								<th scope="col">납입일자</th>
-							</tr>
-						</thead>
-						<tbody>
-							<c:forEach items="${paymentList}" var="rowItem">
-							<tr>
-								<td>${rowItem.payment_type_name}</td>
-								<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.payment_amount)}</td>
-								<td>${rowItem.payment_date}</td>
 							</tr>
 							</c:forEach>
 						</tbody>

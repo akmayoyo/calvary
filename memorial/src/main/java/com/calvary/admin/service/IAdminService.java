@@ -146,12 +146,12 @@ public interface IAdminService {
 	/** 
 	 *  사용(봉안)자 승인
 	 */
-	public int approvalUser(String bunyangSeq, String userId, String approvalNo, String approvalDate) throws Exception;
+	public int approvalUser(String bunyangSeq, String userId, String approvalNo, String yonginNo, String approvalDate) throws Exception;
 	
 	/** 
-	 *  승인번호 중복 체크
+	 *  용인공원 확약번호 중복 체크
 	 */
-	public int checkDuplicatedApprovalNo(String approvalNo);
+	public int checkDuplicatedYonginNo(String yonginNo);
 	
 	/** 
 	 *  사용(봉안)자 승인서 출력일자 업데이트
@@ -212,6 +212,19 @@ public interface IAdminService {
 			,String accountHolder
 			,String cancelDate
 			,String cancelReason) throws Exception;
+	
+	/** 
+	 * 해약 승인 내역 업데이트
+	 */
+	public int updateCancelManual(String bunyangSeq
+			,String depositPlanDate
+			,String depositBank
+			,String depositAccount
+			,String accountHolder
+			,String cancelDate
+			,String cancelReason) throws Exception;
+	
+	public Map<String, Object> getCancelPaymentInfo(String bunyangSeq);
 	
 	
 	//===============================================================================

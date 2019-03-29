@@ -58,6 +58,7 @@
 	    	<button class="btn btn-primary" type="button" onclick="_search()" style="width: 70px;">조회</button>
 			<button class="btn btn-primary" type="button" style="width: 70px;" onclick="_registPayment()">등록</button>
 			<button class="btn btn-primary" type="button" onclick="_registPaymentExcel()">엑셀등록</button>
+			<button class="btn btn-primary" type="button" onclick="_registManualExcel()">입출대장</button>
 			<button class="btn btn-success" type="button" style="width: 70px;" onclick="_downloadExcel()">Excel</button>
 	    </div>
 	    
@@ -256,6 +257,20 @@ function _registPayment() {
 function _registPaymentExcel() {
 	var winoption = {width:1390, height:750};
 	common.openWindow("${contextPath}/popup/registPaymentExcel", "popRegistPaymentExcel", winoption, {});
+	// callback 함수
+	window.saveCallBack = function(result) {
+		if(result && result.result) {
+			_search();
+    	}
+	};
+}
+
+/**
+ * 분양대금 입출금 대장 엑셀업로드 팝업 표시
+ */
+function _registManualExcel() {
+	var winoption = {width:1024, height:768};
+	common.openWindow("${contextPath}/popup/registManualExcel", "popRegistManualExcel", winoption, {});
 	// callback 함수
 	window.saveCallBack = function(result) {
 		if(result && result.result) {

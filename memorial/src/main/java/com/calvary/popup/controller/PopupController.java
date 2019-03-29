@@ -11,20 +11,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.calvary.admin.service.IAdminService;
+import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.CommonUtil;
+import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
+import com.calvary.excel.ExcelForms;
 import com.calvary.excel.service.IExcelService;
 import com.calvary.popup.service.IPopupService;
 import com.calvary.popup.vo.SelectUserVo;
+import com.calvary.popup.vo.UpdateBunyangVo;
 import com.calvary.sysadmin.service.ISysAdminService;
 
 @Controller
@@ -46,6 +51,8 @@ public class PopupController {
 	public static final String ASSIGN_GRAVE = "/assigngrave";
 	public static final String REGIST_PAYMENT = "/registpayment";
 	public static final String SAVE_PAYMENT = "/savepayment";
+	public static final String SAVE_MANUAL_PAYMENT = "/saveManualPayment";
+	public static final String UPDATE_BUNYANG_PROGRESS = "/updateBunyangProgress";
 	public static final String SAVE_PAYMENT_ONE = "/savepaymentone";
 	/** 분양상세정보 페이지  URL */
 	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
@@ -57,6 +64,8 @@ public class PopupController {
 	public static final String REGIST_BUNYANG_EXCEL_URL = "/registBunyangExcel";
 	/** 입출금 엑셀업로드 등록 팝업 URL */
 	public static final String REGIST_PAYMENT_EXCEL_URL = "/registPaymentExcel";
+	/** 분양대금 입출금 대장 엑셀업로드 등록 팝업 URL */
+	public static final String REGIST_MANUAL_EXCEL_URL = "/registManualExcel";
 	/** 관리비 납부/미납 상세정보 표시 */
 	public static final String MAINT_PAYMENT_DETAIL_INFO_URL = "/maintPaymentDetailInfo";
 	/** 관리비 청구대상 표시 */
@@ -78,6 +87,8 @@ public class PopupController {
 	private IAdminService adminService;
 	@Autowired
 	private ISysAdminService sysAdminService;
+	@Autowired
+	private IExcelService excelService;
 	
 	@RequestMapping(value=SELECT_USER_URL)
 	public Object selectUserHandler(SelectUserVo selectUserVo) {
@@ -305,6 +316,163 @@ public class PopupController {
 		return rtnMap;
 	}
 	
+	@RequestMapping(value=SAVE_MANUAL_PAYMENT)
+	@ResponseBody
+	public Object saveManualPaymentHandler(
+			@RequestParam(value="bunyangNo") String bunyangNo,
+			@RequestParam(value="paymentDate") String paymentDate,
+			@RequestParam(value="paymentAmount") int paymentAmount,
+			@RequestParam(value="paymentDivision") String paymentDivision,
+			@RequestParam(value="paymentType") String paymentType,
+			@RequestParam(value="paymentUser") String paymentUser,
+			@RequestParam(value="remarks") String remarks
+			) throws Exception {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean bRslt = false;
+		String errorMsg = "";
+		try {
+			int iRslt = 0;
+			Map<String, Object> bunyangInfo = null;
+			String progressStatus = "";
+			String cancelYn = "";
+			if(!StringUtils.isEmpty(bunyangNo)) {
+				bunyangInfo = adminService.getBunyangInfoByNo(bunyangNo);
+			}
+			String bunyangSeq = "";
+			if(bunyangInfo != null) {
+				bunyangSeq = (String)bunyangInfo.get("bunyang_seq");
+				progressStatus = (String)bunyangInfo.get("progress_status");
+				cancelYn = (String)bunyangInfo.get("cancel_yn");
+			}
+			
+			if(!StringUtils.isEmpty(bunyangNo) && StringUtils.isEmpty(bunyangSeq)) {
+				errorMsg = "등록되지 않은 분양건";
+			} else if("Y".equals(cancelYn)) {
+				errorMsg = "취소된 분양건";
+			} else if(CalvaryConstants.PROGRESS_STATUS_E.equals(progressStatus)) {
+				errorMsg = "해약된 분양건";
+			} else if(CalvaryConstants.PROGRESS_STATUS_R.equals(progressStatus)) {
+				errorMsg = "반려된 분양건";
+			} else if(CalvaryConstants.PROGRESS_STATUS_C.equals(progressStatus) || CalvaryConstants.PROGRESS_STATUS_D.equals(progressStatus)) {
+				errorMsg = "이미 완납된 분양건";
+			} else {
+				iRslt = adminService.createPaymentHistory(bunyangSeq, paymentAmount, CalvaryConstants.PAYMENT_METHOD_TRANSFER, paymentDate, paymentDivision, paymentType, paymentUser, remarks);
+				if(iRslt  > 0) {
+					bRslt = true;
+				} else {
+					errorMsg = "업데이트실패";
+				}
+			}
+		} catch(Exception e) {
+			bRslt = false;
+			errorMsg = "Exception 발생";
+			LoggerFactory.getLogger("ERROR_LOGGER").error("Save Manual Payment Error Occured!!", e);
+		}
+		rtnMap.put("result", bRslt);
+		rtnMap.put("errorMsg", errorMsg);
+		return rtnMap;
+	}
+	
+	@RequestMapping(value=UPDATE_BUNYANG_PROGRESS)
+	@ResponseBody
+	public Object updateBunyangProgress(@RequestBody UpdateBunyangVo vo
+			) throws Exception {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean bRslt = false;
+		try {
+			int iRslt = 0;
+			int i = 0;
+			// 계약금 및 중도금 납부된건 계약상태 또는 완납상태로 업데이트
+			if(vo.getSavedBunyangNo() != null && vo.getSavedBunyangNo().length > 0) {
+				for(i = 0; i < vo.getSavedBunyangNo().length; i++) {
+					Map<String, Object> bunyangInfo = null;
+					String bunyangNo = vo.getSavedBunyangNo()[i];
+					if(!StringUtils.isEmpty(bunyangNo)) {
+						bunyangInfo = adminService.getBunyangInfoByNo(bunyangNo);
+						if(bunyangInfo != null) {
+							String bunyangSeq = (String)bunyangInfo.get("bunyang_seq");
+							String contractDate = (String)bunyangInfo.get("contract_date"); 
+							String fullPaymentDate = (String)bunyangInfo.get("full_payment_date");
+							String downPaymentDate = (String)bunyangInfo.get("down_payment_date");
+							String balancePaymentDate = (String)bunyangInfo.get("balance_payment_date");
+							int totalPrice = CommonUtil.convertToInt(bunyangInfo.get("total_price"));
+							int downPayment = CommonUtil.convertToInt(bunyangInfo.get("down_payment"));
+							int balancePayment = CommonUtil.convertToInt(bunyangInfo.get("balance_payment"));
+							BunyangInfoVo bunyangInfoVo = null;
+							// 미계약상태이고 계약금 납부된경우 계약상태로 업데이트
+							if(StringUtils.isEmpty(contractDate) && (downPayment + balancePayment) >= (totalPrice/10)) {
+								bunyangInfoVo = new BunyangInfoVo();
+								bunyangInfoVo.setBunyangSeq(bunyangSeq);
+								bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_B);
+								iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), downPaymentDate);
+								String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "", "");
+								if(!StringUtils.isEmpty(fileSeq)) {
+									Map<String, Object> param = new HashMap<String, Object>();
+									param.put("bunyangSeq", bunyangSeq);
+									param.put("file_seq_contract", fileSeq);
+									iRslt += adminService.updateBunyangFileSeq(param);
+								}
+							}
+							// 미완납상태이고 완납된경우 완납상태로 업데이트
+							if(StringUtils.isEmpty(fullPaymentDate) && (downPayment + balancePayment)>= totalPrice) {
+								bunyangInfoVo = new BunyangInfoVo();
+								bunyangInfoVo.setBunyangSeq(bunyangSeq);
+								bunyangInfoVo.setProgressStatus(CalvaryConstants.PROGRESS_STATUS_C);
+								iRslt += adminService.updateBunyangProgressStatus(bunyangInfoVo, SessionUtil.getCurrentUserId(), balancePaymentDate);
+								String fileSeq = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "", "");
+								if(!StringUtils.isEmpty(fileSeq)) {
+									Map<String, Object> param = new HashMap<String, Object>();
+									param.put("bunyangSeq", bunyangSeq);
+									param.put("file_seq_full_payment", fileSeq);
+									iRslt += adminService.updateBunyangFileSeq(param);
+								}
+							}
+						}
+					}
+				}
+			}
+			// 해약금 출금된건 해약상태로 업데이트
+			if(vo.getCanceledBunyangNo() != null && vo.getCanceledBunyangNo().length > 0) {
+				for(i = 0; i < vo.getCanceledBunyangNo().length; i++) {
+					Map<String, Object> bunyangInfo = null;
+					String bunyangNo = vo.getCanceledBunyangNo()[i];
+					if(!StringUtils.isEmpty(bunyangNo)) {
+						bunyangInfo = adminService.getBunyangInfoByNo(bunyangNo);
+						if(bunyangInfo != null) {
+							String bunyangSeq = (String)bunyangInfo.get("bunyang_seq");
+							Map<String, Object> cancelInfo = adminService.getCancelPaymentInfo(bunyangSeq);
+							String depositPlanDate = "";
+							String depositBank = "";
+							String depositAccount = "";
+							String accountHolder = "";
+							String cancelDate = "";
+							String cancelReason = "";
+							if(cancelInfo != null) {
+								depositPlanDate = (String)cancelInfo.get("payment_date");
+								accountHolder = (String)cancelInfo.get("payment_user");
+								cancelDate = (String)cancelInfo.get("payment_date");
+								cancelReason = (String)cancelInfo.get("remarks");
+							}
+							adminService.updateCancelManual(bunyangSeq, depositPlanDate, depositBank, depositAccount, accountHolder, cancelDate, cancelReason);
+							String fileSeq = excelService.createBunyangExcelForm(ExcelForms.CANCEL_APPROVAL_FORM, bunyangSeq, "", "");
+							if(!StringUtils.isEmpty(fileSeq)) {
+								Map<String, Object> param = new HashMap<String, Object>();
+								param.put("bunyangSeq", bunyangSeq);
+								param.put("file_seq_cancel", fileSeq);
+								adminService.updateBunyangFileSeq(param);
+							}
+						}
+					}
+				}
+			}
+			bRslt = iRslt > 0;
+		} catch(Exception e) {
+			LoggerFactory.getLogger("ERROR_LOGGER").error("updateBunyangProgress Error Occured!!", e);
+		}
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
 	@RequestMapping(value=SAVE_PAYMENT_ONE)
 	@ResponseBody
 	public Object savePaymentOneHandler(
@@ -400,6 +568,16 @@ public class PopupController {
 		mv.addObject("depositTypeList", depositTypeList);
 		mv.addObject("withdrawalTypeList", withdrawalTypeList);
 		mv.setViewName(ROOT_URL + REGIST_PAYMENT_EXCEL_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 분양대금 입출금 대장 엑셀업로드 등록 팝업
+	 */
+	@RequestMapping(value=REGIST_MANUAL_EXCEL_URL)
+	public Object registManualExcelHandler() {
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName(ROOT_URL + REGIST_MANUAL_EXCEL_URL);
 		return mv;
 	}
 	

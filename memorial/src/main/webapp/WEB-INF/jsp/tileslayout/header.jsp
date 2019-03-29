@@ -47,9 +47,10 @@
 					</div>
 				</div>
 			</ul>
-			<ul class="link-bar pull-right">
+			<ul class="link-bar pull-right" style="width: auto;">
 				<c:choose>
 					<c:when test="${not empty sessionVo and not empty sessionVo.userVo}">
+					<li class="item"><a href="http://b2b.yonginparklife.com/b2b/index.asp#" target="_blank">용인공원 바로가기</a></li>
 					<li class="item"><a href="javascript:void(0)" onclick="_logout()">로그아웃</a></li>
 					</c:when>
 					<c:otherwise>

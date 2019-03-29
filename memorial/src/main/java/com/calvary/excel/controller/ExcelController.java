@@ -805,6 +805,82 @@ public class ExcelController {
 		return rtnMap;
 	}
 	
+	/** 
+	 * 분양대금 입출금대장 Excel 파일을 읽어 리스트반환
+	 */
+	@RequestMapping(value="/importPaymentManualExcel", method=RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> importPaymentManualExcel(MultipartHttpServletRequest request) throws Exception{
+		MultipartFile file = request.getFile("file");
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean isError = false;
+		List<Object> rtnList = new ArrayList<Object>();
+		InputStream is = null;
+		XSSFWorkbook wb = null;
+		XSSFSheet sheet = null;
+		try {
+			is = file.getInputStream();
+			wb = new XSSFWorkbook(is);
+			int rows = 0;
+			int startRow = 15;
+			int rowIdx = 0;
+			sheet = wb.getSheetAt(4);
+			rows = sheet.getPhysicalNumberOfRows();
+			for(rowIdx = startRow; rowIdx < rows; rowIdx++) {
+				String paymentDate = getExcelDateValue(sheet, rowIdx, "B", "yyyy-MM-dd HH:mm");
+				if(StringUtils.isEmpty(paymentDate) || paymentDate.length() < 16) {
+					break;
+				}
+				String paymentAmount = getStringByCellType(sheet, rowIdx, "C");
+				String paymentDivision = getStringByCellType(sheet, rowIdx, "D");
+				String bunyangNo = getStringByCellType(sheet, rowIdx, "F");
+				String paymentUser = getStringByCellType(sheet, rowIdx, "G");
+				String paymentType = getStringByCellType(sheet, rowIdx, "M");
+				String remarks = getStringByCellType(sheet, rowIdx, "N");
+				Map<String, Object> tmp = new HashMap<String, Object>();
+				boolean errorFlag = false;
+				String errorMsg = "";
+				String bunyangSeq = "";
+				int totalPrice = 0;
+				if(!StringUtils.isEmpty(bunyangNo)) {
+					Map<String, Object> bunyangInfo = adminService.getBunyangInfoByNo(bunyangNo);
+					if(bunyangInfo == null) {
+						errorFlag = true;
+						errorMsg = "등록되지 않은 분양건";
+					} else {
+						bunyangSeq = (String)bunyangInfo.get("bunyang_seq");
+						totalPrice = CommonUtil.convertToInt(bunyangInfo.get("total_price"));
+					}
+				}
+				tmp.put("paymentDate", paymentDate);
+				tmp.put("paymentAmount", paymentAmount);
+				tmp.put("paymentDivision", paymentDivision);
+				tmp.put("bunyangNo", bunyangNo);
+				tmp.put("paymentUser", paymentUser);
+				tmp.put("paymentType", paymentType);
+				tmp.put("remarks", remarks);
+				tmp.put("errorFlag", errorFlag);
+				tmp.put("errorMsg", errorMsg);
+				tmp.put("bunyangSeq", bunyangSeq);
+				tmp.put("totalPrice", totalPrice);
+				rtnList.add(tmp);
+			}
+		} catch (Exception e) {
+			isError = true;
+			logger.error("payment manual excel upload failed!!", e);
+		} finally {
+			if(is != null) {
+				is.close();
+			}
+			if(wb != null) {
+				wb.close();
+			}
+		}
+		rtnMap.put("isError", isError);
+		rtnMap.put("rtnList", rtnList);
+		return rtnMap;
+	}
+	
 	
 	/** 
 	 * 엑셀업데이트

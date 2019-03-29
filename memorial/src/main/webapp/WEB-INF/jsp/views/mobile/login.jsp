@@ -39,10 +39,6 @@
                         <input id="tiUserName" type="text" class="form-control input-lg" autocomplete="off" autofocus="autofocus">
                     </div>
                     <div class="form-group">
-                        <label for="tiMobile" style="font-size: 14px;">휴대폰</label>
-                        <input id="tiMobile" type="tel" class="form-control input-lg" placeholder="'-'제외하고 숫자만 입력" autocomplete="off" data-mask="000-0000-0000">
-                    </div>
-                    <div class="form-group">
                         <label for="tiBirthDate" style="font-size: 14px;">생년월일</label>
                         <input id="tiBirthDate" type="tel" class="form-control input-lg" placeholder="생년월일 8자리 (ex. 19620110)" autocomplete="off" data-mask="0000-00-00">
                     </div>
@@ -130,17 +126,11 @@
 	$('#btnLogin').click(function(e){
 		
 		var userName = $('#tiUserName').val();
-		var mobile = $('#tiMobile').val();
 		var birthDate = $('#tiBirthDate').val();
 		
 		if(!userName) {
 			common.showAlert('성명을 입력해주세요.');
 			$('#tiUserName').focus();
-			return;
-		}
-		if(!mobile) {
-			common.showAlert('휴대폰번호를 입력해주세요.');
-			$('#tiMobile').focus();
 			return;
 		}
 		if(!birthDate) {
@@ -149,12 +139,11 @@
 			return;
 		}
 		
-		mobile = common.toNumeric(mobile);
 		birthDate = common.toNumeric(birthDate);
 		
 		common.ajax({
     		url:"${contextPath}/account/checkMobilelogin", 
-    		data:{userName:userName, mobile:mobile, birthDate:birthDate, keepLogin:$('#chkKeepLogin').is(":checked") ? '1' : '0'},
+    		data:{userName:userName, birthDate:birthDate, keepLogin:$('#chkKeepLogin').is(":checked") ? '1' : '0'},
     		success: function(result) {
     			if(result && result.result) {
     				var frm = document.getElementById("frm");

@@ -129,6 +129,7 @@
         		<col width="5%">
         		<col width="5%">
         		<col width="5%">
+        		<col width="5%">
         		<col width="9%">
         		<col width="9%">
         		<col width="5%">
@@ -145,6 +146,7 @@
                     <th scope="col">교인<br>여부</th>
                     <th scope="col">이장<br>대상</th>
                     <th scope="col">승인<br>번호</th>
+                    <th scope="col">용인공원<br>확약번호</th>
                     <th scope="col">승인<br>일자</th>
                     <th scope="col">승인<br>처리</th>
                     <th scope="col">승인서<br>출력일자</th>
@@ -174,20 +176,30 @@
             		<td>
             			<c:choose>
             				<c:when test="${not empty use.approval_no}">
-            					${use.approval_no}
+            					<span name="sApprovalNo">${use.approval_no}</span>
             				</c:when>
             				<c:when test="${empty use.approval_no}">
-            					<input name="user_approval_no" type="text" class="form-control">
+            					<span name="sApprovalNo">${bunyangInfo.bunyang_no}-${status.count}</span>
             				</c:when>
             			</c:choose>
             		</td>
             		<td>
             			<c:choose>
-            				<c:when test="${not empty use.approval_no}">
+            				<c:when test="${not empty use.yongin_no}">
+            					${use.yongin_no}
+            				</c:when>
+            				<c:when test="${empty use.yongin_no}">
+            					<input name="yongin_no" type="text" class="form-control" style="min-width: 65px;">
+            				</c:when>
+            			</c:choose>
+            		</td>
+            		<td>
+            			<c:choose>
+            				<c:when test="${not empty use.approval_date}">
             					${use.approval_date}
             				</c:when>
-            				<c:when test="${empty use.approval_no}">
-            					<input name="user_approval_date" type="text" class="form-control">
+            				<c:when test="${empty use.approval_date}">
+            					<input name="user_approval_date" type="text" class="form-control" style="min-width: 95px;">
             				</c:when>
             			</c:choose>
             		</td>
@@ -195,10 +207,10 @@
             			<c:choose>
             				<c:when test="${empty use.approval_assign_date}">
             					<c:choose>
-		            				<c:when test="${not empty use.approval_no}">
+		            				<c:when test="${not empty use.approval_date}">
 		            					<button type="button" class="btn btn-primary btn-sm" onclick="_exportUserApproval(this)">출력</button>
 		            				</c:when>
-		            				<c:when test="${empty use.approval_no}">
+		            				<c:when test="${empty use.approval_date}">
 		            					<button type="button" class="btn btn-primary btn-sm" onclick="_saveUserApproval(this)">저장</button>
 		            				</c:when>
 		            			</c:choose>
@@ -366,7 +378,8 @@
 function _saveUserApproval(btn) {
 	var tr = $(btn).parent('td').parent('tr');
 	var userId = tr.attr('userId');
-	var approvalNo = tr.find('input[name="user_approval_no"]').val();
+	var approvalNo = tr.find('span[name="sApprovalNo"]').text();
+	var yonginNo = tr.find('input[name="yongin_no"]').val();
 	var dateData = tr.find('input[name="user_approval_date"]').data('daterangepicker');
 	var approvalDate;
 	if(dateData) {
@@ -374,9 +387,9 @@ function _saveUserApproval(btn) {
 			approvalDate = dateData.startDate.format('YYYYMMDD');
 		}
 	}
-	if(!approvalNo) {
-		tr.find('input[name="user_approval_no"]').focus();
-		common.showAlert('승인번호를 입력하세요.');
+	if(!yonginNo) {
+		tr.find('input[name="yongin_no"]').focus();
+		common.showAlert('용인공원 확약번호를 입력하세요.');
 		return;
 	}
 	if(!approvalDate) {
@@ -388,6 +401,7 @@ function _saveUserApproval(btn) {
 	data["bunyangSeq"] = '${bunyangSeq}';
 	data["userId"] = userId;
 	data["approvalNo"] = approvalNo;
+	data["yonginNo"] = yonginNo;
 	data["approvalDate"] = approvalDate;
 	// 저장 호출
 	common.ajax({
@@ -401,8 +415,8 @@ function _saveUserApproval(btn) {
 					frm.action = "${contextPath}/admin/approvaldetail";
 					frm.submit();
 				} else if(result.existno) {
-					common.showAlert("해당 승인번호로 이미 등록된 사용자가 있습니다.\n다른 승인번호를 입력해주세요.");
-					tr.find('input[name="user_approval_no"]').focus();
+					common.showAlert("입력하신 용인공원 확약번호로 이미 등록된 사용자가 있습니다.\n다른 번호를 입력해주세요.");
+					tr.find('input[name="yongin_no"]').focus();
 				}
 			}
 		}

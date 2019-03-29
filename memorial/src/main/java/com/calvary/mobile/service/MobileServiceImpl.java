@@ -22,10 +22,9 @@ public class MobileServiceImpl implements IMobileService {
 	@Autowired
 	private IAdminService adminService;
 	
-	public BunyangUserVo getBunyangUserVo(String userName, String mobile, String birthDate) {
+	public BunyangUserVo getBunyangUserVo(String userName, String birthDate) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("userName", userName);
-		parameter.put("mobile", mobile);
 		parameter.put("birthDate", birthDate);
 		BunyangUserVo userVo = (BunyangUserVo)commonDao.selectOne("mobile.getBunyangUserVo", parameter);
 		return userVo;

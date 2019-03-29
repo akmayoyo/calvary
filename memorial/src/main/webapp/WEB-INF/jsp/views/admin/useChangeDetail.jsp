@@ -137,6 +137,8 @@
         		<col width="5%">
         		<col width="5%">
         		<col width="7%">
+        		<col width="5%">
+        		<col width="5%">
         		<col width="8%">
         	</colgroup>
             <thead>
@@ -150,6 +152,8 @@
                     <th scope="col">교인여부</th>
                     <th scope="col">이장대상</th>
                     <th scope="col">상태</th>
+                    <th scope="col">승인<br>번호</th>
+                    <th scope="col">용인공원<br>확약번호</th>
                     <th scope="col">수정/해약</th>
                 </tr>
             </thead>
@@ -190,6 +194,17 @@
             				</c:otherwise>
             			</c:choose>
             		</td>
+            		<td>
+            			<c:choose>
+            				<c:when test="${not empty use.approval_no}">
+            					<span>${use.approval_no}</span>
+            				</c:when>
+            				<c:when test="${empty use.approval_no}">
+            					<span>${bunyangInfo.bunyang_no}-${status.count}</span>
+            				</c:when>
+            			</c:choose>
+            		</td>
+            		<td>${use.yongin_no}</td>
             		<td>
             			<c:if test="${use.assign_status != 'OCCUPIED' && empty use.cancel_seq}">
             			<button type="button" class="btn btn-primary btn-sm" onclick="editUseUser(this)">수정</button>

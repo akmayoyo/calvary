@@ -7,7 +7,7 @@ import com.calvary.admin.vo.BunyangUserVo;
 
 public interface IMobileService {
 
-	public BunyangUserVo getBunyangUserVo(String userName, String mobile, String birthDate);
+	public BunyangUserVo getBunyangUserVo(String userName, String birthDate);
 	
 	public Map<String, Object> getReservedGraveInfo(String bunyangSeq, int userSeq, int coupleSeq);
 	

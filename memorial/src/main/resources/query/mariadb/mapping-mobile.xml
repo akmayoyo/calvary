@@ -47,7 +47,6 @@
   		from TB_BUNYANG_REF_USER a
 		WHERE a.user_name = #{userName}
 		AND REGEXP_REPLACE(a.birth_date, '[^0-9]+', '') = #{birthDate}
-		AND REGEXP_REPLACE(a.mobile, '[^0-9]+', '') = #{mobile}
 		AND cancel_seq is null
 		AND NOT EXISTS(select 1 from TB_BUNYANG_INFO bi WHERE bi.bunyang_seq = a.bunyang_seq AND (bi.progress_status in('R','E') or bi.cancel_yn = 'Y'))
 		ORDER BY case when ref_type = 'APPLY_USER' THEN 1 when ref_type = 'USE_USER' THEN 2 ELSE 3 END

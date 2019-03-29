@@ -449,7 +449,7 @@ public class AdminController {
 	 */
 	@RequestMapping(value=SAVE_USER_APPROVAL_URL)
 	@ResponseBody
-	public Object saveUserApprovalHandler(String bunyangSeq, String userId, String approvalNo, String approvalDate) throws Exception {
+	public Object saveUserApprovalHandler(String bunyangSeq, String userId, String approvalNo, String yonginNo, String approvalDate) throws Exception {
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 //		BunyangInfoVo bunyangInfoVo = new BunyangInfoVo();
@@ -466,11 +466,11 @@ public class AdminController {
 //				bRslt = iRslt > 0;
 //			}
 //		}
-		int existCount = adminService.checkDuplicatedApprovalNo(approvalNo);
+		int existCount = adminService.checkDuplicatedYonginNo(yonginNo);
 		if(existCount > 0) {
 			rtnMap.put("existno", true);
 		} else {
-			int iRslt = adminService.approvalUser(bunyangSeq, userId, approvalNo, approvalDate);
+			int iRslt = adminService.approvalUser(bunyangSeq, userId, approvalNo, yonginNo, approvalDate);
 			bRslt = iRslt > 0;
 		}
 		rtnMap.put("result", bRslt);

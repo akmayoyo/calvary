@@ -214,7 +214,8 @@
 	<update id="approvalUser" parameterType="map">
 		UPDATE TB_BUNYANG_REF_USER a
 		SET approval_no = #{approvalNo},
-		approval_date = #{approvalDate}
+		approval_date = #{approvalDate},
+		yongin_no = #{yonginNo}
 		WHERE a.bunyang_seq = #{bunyangSeq}
 		AND a.ref_type = 'USE_USER'
 		AND a.user_id = #{userId}
@@ -229,8 +230,8 @@
 		AND a.user_id = #{userId}
 	</update>
 	
-	<select id="checkDuplicatedApprovalNo" parameterType="map" resultType="map">
-		select count(1) as cnt from TB_BUNYANG_REF_USER a WHERE a.ref_type = 'USE_USER' and approval_no = #{approvalNo}
+	<select id="checkDuplicatedYonginNo" parameterType="map" resultType="map">
+		select count(1) as cnt from TB_BUNYANG_REF_USER a WHERE a.ref_type = 'USE_USER' and yongin_no = #{yonginNo}
 	</select>
 	
 	<select id="getBunyangStartDate" parameterType="map" resultType="map">

@@ -570,7 +570,7 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(startRowNum);
 					cellnums.add(convertColAlphabetToIndex("T"));
-					cellvalues.add((String)userMap.get("approval_no"));
+					cellvalues.add(userMap.get("yongin_no"));
 				}
 			}
 		}else if(ExcelForms.CONTRACT_FORM.equals(excelForm)) {// 분양계약서
@@ -991,7 +991,7 @@ public class ExcelServiceImpl implements IExcelService {
 				approvalNo = (String)approvalUserMap.get("approval_no");
 				if(!StringUtils.isEmpty(approvalNo)) {
 					// 계약번호를 제외한 숫자
-					approvalNo = approvalNo.replace(bunyangNo, "");
+					approvalNo = approvalNo.replace(bunyangNo+"-", "");
 				}
 				// 부부형의 경우 배우자정보 조회
 				if(coupleSeq > 0 ) {
@@ -1069,7 +1069,7 @@ public class ExcelServiceImpl implements IExcelService {
 				sheetnums.add(0);
 				rownums.add(13);
 				cellnums.add(convertColAlphabetToIndex("G"));
-				cellvalues.add((String)approvalUserMap.get("approval_no"));
+				cellvalues.add(approvalUserMap.get("yongin_no"));
 				
 				// 배우자정보
 				if(coupleUserMap != null) {
@@ -1087,7 +1087,7 @@ public class ExcelServiceImpl implements IExcelService {
 					sheetnums.add(0);
 					rownums.add(14);
 					cellnums.add(convertColAlphabetToIndex("M"));
-					cellvalues.add((String)coupleUserMap.get("approval_no"));
+					cellvalues.add(coupleUserMap.get("yongin_no"));
 				}
 			}
 			
@@ -1105,6 +1105,11 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(16);
 			cellnums.add(convertColAlphabetToIndex("O"));
 			cellvalues.add(bunyangNo);
+			// 사용자수
+			sheetnums.add(0);
+			rownums.add(16);
+			cellnums.add(convertColAlphabetToIndex("Q"));
+			cellvalues.add(bunyangInfo.get("use_user_cnt"));
 			// 신청자성명
 			sheetnums.add(0);
 			rownums.add(18);
