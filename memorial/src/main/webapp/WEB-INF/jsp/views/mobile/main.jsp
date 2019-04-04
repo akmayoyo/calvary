@@ -6,12 +6,13 @@
 <header class="m_header">
 	<!-- 사이트 로고 -->
 	<a class="logo" href="${contextPath}/mobile/main">
-		<img src="${contextPath}/resources/assets/images/logo_w.png" alt="">
+		<img src="${contextPath}/resources/assets/images/logo_w.png" alt="" style="width: 145px;">
 	</a>
 
 	<!-- 로그아웃 -->
 	<div class="pull-right bx_logout">
-		<a href="javascript:void(0)" onclick="_logout()">로그아웃</a></li>
+		<a href="http://b2b.yonginparklife.com/mobile.b2b/m.index.asp#" target="_blank" style="display: inline-block;">용인공원</a>
+		<a href="javascript:void(0)" onclick="_logout()" style="display: inline-block;">로그아웃</a>
 	</div>
 </header>
 

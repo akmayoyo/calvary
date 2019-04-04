@@ -1,6 +1,11 @@
 <%@page import="com.calvary.common.constant.CalvaryConstants"%>
 <%@page import="com.calvary.admin.controller.AdminController"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<style>
+.grid-text {
+    pointer-events: none;
+}
+</style>
 <!-- 그리드 샘플 -->
 <div class="col-md-9">
 	
@@ -157,17 +162,17 @@
 				 }
 			 }
 			 if(sectionData1 != null && sectionData1.length > 0) {
-				 gridData1 = getGridData(sectionData1, false, 2, 15);
-				 gridData1.totalwidth = 210;
+				 gridData1 = getGridData(sectionData1, false, 2, 20);
+				 gridData1.totalwidth = 290;
 				 makeGraveGrid('#grid1', gridData1);
 			 }
 			 if(sectionData2 != null && sectionData2.length > 0) {
-				 gridData2 = getGridData(sectionData2, false, 0, 15);
-				 gridData2.totalwidth = 267;
+				 gridData2 = getGridData(sectionData2, false, 0, 20);
+				 gridData2.totalwidth = 387;
 				 makeGraveGrid('#grid2', gridData2);
 			 }
 			 if(sectionData3 != null && sectionData3.length > 0) {
-				 gridData3 = getGridData(sectionData3, false, 0, 15);
+				 gridData3 = getGridData(sectionData3, false, 0, 20);
 				 makeGraveGrid('#grid3', gridData3);
 			 }
 			 if(sectionData4 != null && sectionData4.length > 0) {
@@ -203,13 +208,14 @@ function getSectionArrayData(data) {
  */
 function getGridData(data, reverse, offset, w, h) {
 	var rows = [], cols = [], rowCols = [], rowIdx = -1, colIdx = -1,
-	row_seq, col_seq, max_col_cnt
+	row_seq, col_seq, max_col_cnt, min_col_seq
 	;
 	if(!offset) offset = 0;
 	$.each(data, function(idx, item){
 		row_seq = item['row_seq'];
 		col_seq = item['col_seq'];
-		max_col_cnt = item['max_col_cnt'];
+		min_col_seq = item['min_col_seq'];
+		max_col_cnt = item['max_col_cnt'] + 1;// 행번호표시를 위한 rect 1개 plus
 		if(rows.indexOf(row_seq) < 0) {
 			rows.push(row_seq);
 			cols = [];
@@ -219,17 +225,20 @@ function getGridData(data, reverse, offset, w, h) {
 			rowCols.push(cols);
 			rowIdx++
 		}
+		// 행번호 표시용 정보 추가
+		rowCols[rowIdx][min_col_seq -1 + offset] = {row_seq:row_seq, is_rownum:true, col_seq:min_col_seq};
 		if(reverse) {
 			rowCols[rowIdx][max_col_cnt - col_seq] = item;
 		} else {
-			rowCols[rowIdx][col_seq -1 + offset] = item;	
+			rowCols[rowIdx][col_seq + offset] = item;
 		}
 	});
 	
 	var xpos = 1;
     var ypos = 1;
-    var width = w ? w : 10;
-    var height = h ? h : 10;
+    var width = w ? w : 15;
+    var height = h ? h : 15;
+    var rowNumWidth = 20;
     var rtnData = {};
     var totalwidth = 0;
     var totalheight = 0;
@@ -244,11 +253,15 @@ function getGridData(data, reverse, offset, w, h) {
         		gridData[rowIdx].push($.extend(true, {
                     x: xpos,
                     y: ypos,
-                    width: width,
+                    width: colInfo['is_rownum'] ? rowNumWidth : width,
                     height: height
                 }, colInfo))	
         	}
-            xpos += width + margin;
+        	if(colInfo['is_rownum']) {
+        		xpos += rowNumWidth + margin;	
+        	} else {
+        		xpos += width + margin;
+        	}
         }
         totalwidth = xpos;
         xpos = 1;
@@ -288,26 +301,26 @@ function makeGraveGrid(grid, gridData) {
 		.attr("width", function(d) { return d.width; })
 		.attr("height", function(d) { return d.height; })
 		.style("fill", function(d) {
-			if(d.assign_status == 'OCCUPIED') {
-				return "#FF0000";
-			} else if(d.assign_status == 'HALF_OCCUPIED') {
-				return "#FFCCA9";
-			} else if(d.assign_status == 'RESERVED') {
-				return "#007BFF";
-			} else {
-				return "#fff";
-			}
+			return getRectFillColor(d);
 		})
 		.style("stroke", "#999")
-		.style("stroke-width", 1)
+		.style("stroke-width", function(d) {
+			if(d.is_rownum) {
+	    		return 0;
+			} else {
+				return 1;	
+			}
+		})
 		.on('mouseover', function(d) {
-	       if(_clickable(d)) {
-	    	   d3.select(this).style("cursor", "pointer"); 
+			if(_clickable(d)) {
+	    	   d3.select(this).style("cursor", "pointer");
+	    	   d3.select(this).style("fill", "#007BFF"); 
 	       }
 	    })
 	    .on('mouseout', function(d) {
 	       if(_clickable(d)) {
 	    	   d3.select(this).style("cursor", "default"); 
+	    	   d3.select(this).style("fill", getRectFillColor(d)); 
 	       }
 	    })
 		.on('click', function(d) {
@@ -315,6 +328,71 @@ function makeGraveGrid(grid, gridData) {
 				_getGraveAssignInfo(d);
 			}
 	    });
+	
+	var txt = row.selectAll("text")
+	.data(function(d) { return d; })
+	.enter().append("text")
+	.attr("x", function(d) { return d.x + d.width/2; })
+	.attr("y", function(d) { return d.y + d.height/2 + 3; })
+    .attr("font-size", function(d) {
+    	if(d.is_rownum) {
+    		return "10px";
+		} else {
+			return "9px";
+		}
+	})
+    .attr("fill", function(d) {
+    	if(d.is_rownum) {
+    		return "#fff";
+		} else {
+			return "#999";	
+		}
+    })
+	.text(function(d) {
+		if(d.is_rownum) {
+			return d.row_seq;
+		} else {
+			return seqToAlpha(d.col_seq);	
+		}
+	})
+	.style("text-anchor", function(d) {
+		if(d.is_rownum) {
+			return "middle";
+		} else {
+			return "middle";
+		}
+	})
+	.style("cursor", "pointer")
+	.attr("class", "grid-text")
+	.on('mouseover', function(d) {
+		if(_clickable(d)) {
+	    	d3.select(this).style("fill", "#fff"); 
+		}
+	})
+	.on('mouseout', function(d) {
+		if(_clickable(d)) {
+	    	d3.select(this).style("cursor", "default"); 
+	    	d3.select(this).style("fill", "#999"); 
+		}
+	});
+	
+}
+
+/**
+ * 
+ */
+function getRectFillColor(d) {
+	if(d.assign_status == 'OCCUPIED') {
+		return "#FF0000";
+	} else if(d.assign_status == 'HALF_OCCUPIED') {
+		return "#FFCCA9";
+	} else if(d.assign_status == 'RESERVED') {
+		return "#007BFF";
+	} else if(!d.is_rownum){
+		return "#fff";
+	} else {
+		return "#92D050";
+	}
 }
 
 /**
@@ -322,8 +400,8 @@ function makeGraveGrid(grid, gridData) {
  */
 function _clickable(d) {
 	var bRtn = true;
-	if(d.assign_status == 'OCCUPIED') {
-		bRtn = true;
+	if(d.is_rownum) {
+		bRtn = false;
 	}
 	return bRtn;
 }

@@ -1461,6 +1461,27 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
+	 * 관리비 납부대상 리스트 조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getUnpaidMaintPaymentList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
+		parameter.put("maintYear", searchVo.getMaintYear());
+		List<Object> list = commonDao.selectList("bunyangstatus.getUnpaidMaintPaymentList", parameter); 
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getUnpaidMaintPaymentList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
+	}
+	
+	/** 
 	 * 관리비 납부 연도 조회(2018~최신연도)
 	 */
 	public List<Object> getMaintYearList() {

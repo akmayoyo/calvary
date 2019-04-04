@@ -34,11 +34,11 @@
 			  ,c.user_id agent_user_id
 			  ,c.user_name agent_user_name
 			  ,c.relation_type agent_user_relation
-			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = c.relation_type AND cc.parent_code_seq = 'USER_RELATION') agent_user_relation_name
+			  ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = c.relation_type) agent_user_relation_name
 			  ,d.user_id use_user_id
 			  ,d.user_name use_user_name
 			  ,d.relation_type use_user_relation
-			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
+			  ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = d.relation_type) use_user_relation_name
 			  ,d.cnt use_user_cnt
 			  ,a.regist_user_id
 			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name

@@ -16,6 +16,7 @@
 		    ,use_user_seq2
 		    ,assign_status
 		    ,(SELECT MAX(col_seq) FROM TB_BUNYANG_GRAVE_ASSIGN t WHERE a.section_seq = t.SECTION_SEQ) max_col_cnt
+		    ,(SELECT MIN(col_seq) FROM TB_BUNYANG_GRAVE_ASSIGN t WHERE a.section_seq = t.SECTION_SEQ AND a.row_seq = t.row_seq) min_col_seq
 		FROM TB_BUNYANG_GRAVE_ASSIGN a
 		ORDER BY section_seq, row_seq desc, col_seq
     </select>
@@ -35,7 +36,7 @@
 		    ,d.user_seq
             ,d.user_id
             ,d.relation_type
-            ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') relation_type_name
+            ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = d.relation_type) relation_type_name
             ,COALESCE(d.user_name, e.user_name) AS user_name
 		    ,COALESCE(d.birth_date, e.birth_date) AS birth_date
 		    ,COALESCE(d.gender, e.gender) AS gender
@@ -99,11 +100,11 @@
 			  ,c.user_id agent_user_id
 			  ,c.user_name agent_user_name
 			  ,c.relation_type agent_user_relation
-			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = c.relation_type AND cc.parent_code_seq = 'USER_RELATION') agent_user_relation_name
+			  ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = c.relation_type) agent_user_relation_name
 			  ,d.user_id use_user_id
 			  ,d.user_name use_user_name
 			  ,d.relation_type use_user_relation
-			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
+			  ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = d.relation_type) use_user_relation_name
 			  ,d.cnt use_user_cnt
 			  ,a.regist_user_id
 			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
@@ -182,7 +183,7 @@
 		   	,COALESCE(a.address1, b.address1) AS address1
 		   	,COALESCE(a.address2, b.address2) AS address2
 		   	,relation_type
-		   	,(SELECT code_name FROM TB_COM_CODE t WHERE t.parent_code_seq = 'USER_RELATION' and t.code_seq = a.relation_type) as relation_type_name
+		   	,(SELECT code_name FROM TB_COM_RELATION_CODE t WHERE t.code_seq = a.relation_type) as relation_type_name
 		   	,(SELECT COUNT(1) FROM TB_BUNYANG_GRAVE_ASSIGN t WHERE t.bunyang_seq = a.bunyang_seq AND (t.use_user_seq1 = a.user_seq or t.use_user_seq2 = a.user_seq)) assign_yn
 		   	,a.user_seq
 		   	,a.couple_seq

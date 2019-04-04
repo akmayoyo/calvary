@@ -46,7 +46,7 @@
 
 							<div class="form-group">
 								<label class="sr-only" for="inputPw">비밀번호</label>
-								<input id="tiPassword" type="password" class="form-control input-lg font-15" id="inputPw" placeholder="비밀번호" required="" autocomplete="off">
+								<input id="tiPassword" type="password" class="form-control input-lg font-15" id="inputPw" placeholder="비밀번호" required="" autocomplete="off" >
 							</div>
 
 							<div class="checkbox mb-3">

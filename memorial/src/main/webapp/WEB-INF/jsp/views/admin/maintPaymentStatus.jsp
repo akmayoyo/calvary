@@ -96,17 +96,17 @@
 						<td>${maintPaymentItem.use_approval_date}</td>
 						<td align="right">${cutil:getThousandSeperatorFormatString(maintPaymentItem.total_price)}</td>
 						<td align="right">${cutil:getThousandSeperatorFormatString(maintPaymentItem.total_payment)}</td>
-						<td align="right">
-						<c:choose>
-							<c:when test="${maintPaymentItem.payment_cnt > 0}"><a href="javascript:void(0);" class="tbllink" style="color: #337ab7;" onclick="_showPaymentDetail(this,'Y')">${maintPaymentItem.payment_cnt}</a></c:when>
-							<c:otherwise>${maintPaymentItem.payment_cnt}</c:otherwise>
-						</c:choose>
+						<td align="right">${maintPaymentItem.payment_cnt}
+<%-- 						<c:choose> --%>
+<%-- 							<c:when test="${maintPaymentItem.payment_cnt > 0}"><a href="javascript:void(0);" class="tbllink" style="color: #337ab7;" onclick="_showPaymentDetail(this,'Y')">${maintPaymentItem.payment_cnt}</a></c:when> --%>
+<%-- 							<c:otherwise>${maintPaymentItem.payment_cnt}</c:otherwise> --%>
+<%-- 						</c:choose> --%>
 						</td>
-						<td align="right">
-						<c:choose>
-							<c:when test="${maintPaymentItem.not_payment_cnt > 0}"><a href="javascript:void(0);" class="tbllink" style="color: #337ab7;" onclick="_showPaymentDetail(this,'N')">${maintPaymentItem.not_payment_cnt}</a></c:when>
-							<c:otherwise>${maintPaymentItem.not_payment_cnt}</c:otherwise>
-						</c:choose>
+						<td align="right">${maintPaymentItem.not_payment_cnt}
+<%-- 						<c:choose> --%>
+<%-- 							<c:when test="${maintPaymentItem.not_payment_cnt > 0}"><a href="javascript:void(0);" class="tbllink" style="color: #337ab7;" onclick="_showPaymentDetail(this,'N')">${maintPaymentItem.not_payment_cnt}</a></c:when> --%>
+<%-- 							<c:otherwise>${maintPaymentItem.not_payment_cnt}</c:otherwise> --%>
+<%-- 						</c:choose> --%>
 						</td>
 						<td>${maintPaymentItem.maint_status_exp}</td>
 					</tr>

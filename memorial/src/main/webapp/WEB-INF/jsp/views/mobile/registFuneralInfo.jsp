@@ -22,12 +22,13 @@ int currDay = currDt.get(Calendar.DATE);
 <header class="m_header">
 	<!-- 사이트 로고 -->
 	<a class="logo" href="${contextPath}/mobile/main">
-		<img src="${contextPath}/resources/assets/images/logo_w.png" alt="">
+		<img src="${contextPath}/resources/assets/images/logo_w.png" alt="" style="width: 145px;">
 	</a>
 
 	<!-- 로그아웃 -->
 	<div class="pull-right bx_logout">
-		<a href="javascript:void(0)" onclick="_logout()">로그아웃</a></li>
+		<a href="http://b2b.yonginparklife.com/mobile.b2b/m.index.asp#" target="_blank" style="display: inline-block;">용인공원</a>
+		<a href="javascript:void(0)" onclick="_logout()" style="display: inline-block;">로그아웃</a></li>
 	</div>
 </header>
 
@@ -157,10 +158,10 @@ int currDay = currDt.get(Calendar.DATE);
 			</div>
 			<div class="padding-15" style="font-size: 12px;">
 				<p style="font-weight: bold;">
-					[부고] 갈보리교회 추모동산
+					[부고] 갈보리교회 <span id="sUserName2"></span>님 소천
 				</p>
 				<p>
-					<span id="sUserName"></span>님께서 하나님의 부름 받아 <span id="sDeathDate"></span> 하늘나라로 가셨기에 다음과 같이 알립니다.
+					<span id="sUserName"></span>성도께서 하나님의 부름심을 받아 <span id="sDeathDate"></span> 하늘나라로 가셨기에 다음과 같이 알립니다.
 				</p>
 				<p>
 				1. 장례식장 : <span id="sFuneralHall"></span><br>
@@ -421,6 +422,7 @@ function _confirm() {
 	}
 	
 	$('#sUserName').text(userName);
+	$('#sUserName2').text(userName);
 	$('#sDeathDate').text(deathDate);
 	$('#sBorneOutDate').text(borneOutDate);
 	$('#sFuneralHall').text(funeralHall);

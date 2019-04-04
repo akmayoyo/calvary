@@ -37,7 +37,7 @@ html {
     display: block;
     float: left;
     height: 60px;
-    padding: 10px 0 10px 15px;
+    padding: 10px 0 10px 10px;
 }
 .m_header .logo img {
     max-height: 40px;
@@ -48,10 +48,10 @@ html {
 }
 
 .m_header .bx_logout a {
-	display: block;
+	display: inline-block;
     height: 60px;
     line-height: 60px;
-    padding: 0 10px;
+    padding: 0 5px;
 }
 
 /* ++++++++++++++ [ contents ] ++++++++++++++ */

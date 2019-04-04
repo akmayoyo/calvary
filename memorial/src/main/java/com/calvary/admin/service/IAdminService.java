@@ -365,6 +365,10 @@ public interface IAdminService {
 	 */
 	public Map<String, Object> getMaintPaymentDetailList(SearchVo searchVo, String bunyangSeq, String paymentYn);
 	/** 
+	 * 관리비 납부대상 리스트 조회
+	 */
+	public Map<String, Object> getUnpaidMaintPaymentList(SearchVo searchVo);
+	/** 
 	 * 관리비 납부 연도 조회(2018~최신연도)
 	 */
 	public List<Object> getMaintYearList();

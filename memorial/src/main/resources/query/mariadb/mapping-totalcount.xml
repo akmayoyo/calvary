@@ -864,6 +864,67 @@
 		AND t1.payment_yn = #{paymentYn}
     </select>
     
+    <!-- 관리비 납부대상 리스트 조회 -->
+    <select id="getUnpaidMaintPaymentList" parameterType="map" resultType="map">
+    	SELECT
+    		count(1) as total_count
+    	FROM
+	    	(SELECT
+	        	bunyang_seq
+	        	,bunyang_no
+	        	,(select user_name from TB_BUNYANG_REF_USER ru WHERE ru.bunyang_seq = t.bunyang_seq AND ru.ref_type = 'APPLY_USER') as apply_user_name
+	        	,service_charge_type
+	        	,(select code_name from TB_COM_CODE cc WHERE cc.parent_code_seq = 'SERVICE_CHARGE_TYPE' AND cc.code_seq = t.service_charge_type) as service_charge_type_name
+	        	,user_id as charger_id
+	        	,user_name as charger_name
+	        	,mobile as charger_phone
+	        	,address as charger_address
+	            ,sum(payment_price) as total_unpaid_price
+	            ,count(1) as total_unpaid_cnt
+	 		FROM
+	        (SELECT
+	        	t1.bunyang_seq
+				,t1.bunyang_no
+	            ,t1.service_charge_type
+	            ,t2.payment_price
+	            ,t3.user_id
+	            ,t3.user_name
+				,t3.mobile
+	            ,concat('(', t3.post_number, ')', t3.address1, coalesce(t3.address2, '')) address
+			FROM TB_BUNYANG_INFO t1 INNER JOIN TB_BUNYANG_MAINT_PAYMENT_INFO t2 ON t1.bunyang_seq = t2.bunyang_seq
+	        INNER JOIN TB_BUNYANG_REF_USER t3 ON t1.bunyang_seq = t3.bunyang_seq
+	        WHERE t2.payment_yn = 'N' AND t1.service_charge_type = 'APPLY_USER' AND t3.ref_type = 'APPLY_USER'
+	        UNION ALL
+			SELECT
+	        	t1.bunyang_seq
+				,t1.bunyang_no
+	            ,t1.service_charge_type
+	            ,t2.payment_price
+	            ,t3.user_id
+	            ,t3.user_name
+				,t3.mobile
+	            ,concat('(', t3.post_number, ')', t3.address1, coalesce(t3.address2, '')) address
+			FROM TB_BUNYANG_INFO t1 INNER JOIN TB_BUNYANG_MAINT_PAYMENT_INFO t2 ON t1.bunyang_seq = t2.bunyang_seq
+	        INNER JOIN TB_BUNYANG_REF_USER t3 ON t1.bunyang_seq = t3.bunyang_seq AND t2.user_seq = t3.user_seq
+	        WHERE t2.payment_yn = 'N' AND t1.service_charge_type = 'USE_USER' AND t3.ref_type = 'USE_USER'
+	        UNION ALL
+			SELECT
+	        	t1.bunyang_seq
+				,t1.bunyang_no
+	            ,t1.service_charge_type
+	            ,t2.payment_price
+	            ,t3.user_id
+	            ,t3.user_name
+				,t3.mobile
+	            ,concat('(', t3.post_number, ')', t3.address1, coalesce(t3.address2, '')) address
+			FROM TB_BUNYANG_INFO t1 INNER JOIN TB_BUNYANG_MAINT_PAYMENT_INFO t2 ON t1.bunyang_seq = t2.bunyang_seq
+	        INNER JOIN TB_BUNYANG_REF_USER t3 ON t1.bunyang_seq = t3.bunyang_seq
+	        WHERE t2.payment_yn = 'N' AND t1.service_charge_type = 'REPRESENT' AND t3.ref_type = 'USE_USER' AND t3.is_maint_charger = 'Y'
+	        ) t
+	        GROUP BY bunyang_seq, bunyang_no, service_charge_type, user_id, user_name, mobile, address
+        ) t
+    </select>
+    
     <!-- 메뉴사용이력 조회 -->
 	<select id="getMenuLogList" parameterType="map" resultType="map">
 		select

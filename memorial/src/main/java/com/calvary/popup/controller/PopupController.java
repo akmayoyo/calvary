@@ -608,7 +608,7 @@ public class PopupController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=MAINT_PAYMENT_CLAIM_URL)
 	public Object maintPaymentClaimHandler(SearchVo searchVo) {
-		Map<String, Object> rtnMap = adminService.getMaintPaymentDetailList(searchVo, null, "N");
+		Map<String, Object> rtnMap = adminService.getUnpaidMaintPaymentList(searchVo);
 		List<Object> maintPaymentDetailList = (ArrayList<Object>)rtnMap.get("list");
 		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
 		searchVo.setTotalCount(total_count);
