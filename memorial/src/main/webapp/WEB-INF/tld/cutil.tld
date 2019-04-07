@@ -54,4 +54,13 @@
          </function-signature>
     </function>
     
+     <function>
+         <description>개행문자제거</description>
+         <name>replaceNewLine</name>
+         <function-class>com.calvary.common.util.CommonUtil</function-class>
+         <function-signature>
+              java.lang.String replaceNewLine(java.lang.String)
+         </function-signature>
+    </function>
+    
 </taglib>

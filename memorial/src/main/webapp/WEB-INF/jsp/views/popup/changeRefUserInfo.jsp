@@ -156,7 +156,7 @@
     var postNumber = '${refUserInfo.post_number}';
     var address1 = '${refUserInfo.address1}';
     var address2 = '${refUserInfo.address2}';
-    var email = '${refUserInfo.email}';
+    var email = '${cutil:replaceNewLine(refUserInfo.email)}';
     var emailAddr = '';
     var emailDomain = '';
     var arrTmp;
@@ -245,12 +245,12 @@ function _confirm() {
 		common.showAlert('주소를 입력해주세요.');
 		return;
 	}
-	if(!address2) {
-		common.showAlert('상세주소를 입력해주세요.');
-		$('#tblUserInfo input[name="address2"]').focus();
-		return;
-	}
-	fulladdress = '(' + postNumber + ') ' + address1 + ' ' + address2;
+// 	if(!address2) {
+// 		common.showAlert('상세주소를 입력해주세요.');
+// 		$('#tblUserInfo input[name="address2"]').focus();
+// 		return;
+// 	}
+	fulladdress = '(' + postNumber + ') ' + address1 + ' ' + (address2 ? address2 : '');
 	
     email = $('#tiEmailAddr').val();
     if(email) {

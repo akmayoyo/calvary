@@ -116,5 +116,13 @@ public class CommonUtil {
 		return sRtn;
 	}
 	
+	public static String replaceNewLine(String val) {
+		String sRtn = "";
+		if(!StringUtils.isEmpty(val)) {
+			sRtn = val.replaceAll("(\r\n|\r|\n|\n\r)", "");
+		}
+		return sRtn;
+	}
+	
 	
 }

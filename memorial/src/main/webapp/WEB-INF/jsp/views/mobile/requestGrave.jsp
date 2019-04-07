@@ -70,6 +70,7 @@
             						</c:choose>
 								</td>
 							</tr>
+							<c:if test="${empty assignedGraveInfo}">
 							<tr>
 								<th scope="sel">구역</th>
 								<td class="text-left">
@@ -85,11 +86,14 @@
 									</c:choose>
 								</td>
 							</tr>
+							</c:if>
 							<tr>
 								<th scope="sel">사용(봉안)위치</th>
 								<td class="text-left">
-									<a id="aDetailGraveInfo" href="javascript:void(0);" style="padding: 5px 0;" onclick="_showGraveMap()"></a>
+									<a id="aDetailGraveInfo" href="javascript:void(0);" style="padding: 5px 0;"></a>
+									<c:if test="${empty assignedGraveInfo}">
 									<span style="color: #007BFF;">※사용(봉안)위치는 선택하신 구역내 순차적으로 배정됩니다.</span>
+									</c:if>
 								</td>
 							</tr>
 						</tbody>
@@ -97,7 +101,7 @@
     				
     				<div style="background-color: #E0EFFC; padding: 10px 10px; margin-top: 15px;">
     					<div style="text-align: center;">
-							<h4 style="display: inline-block;">[가구역] 사용(봉안)위치 정보</h3>
+							<h4 id="mapTitle" style="display: inline-block;">[ 구역] 사용(봉안)위치 정보</h3>
 						</div>
 						<div style="text-align: center; margin-top: 5px;">
 							<div style="width: 10px; height: 10px; background-color: #BFBFBF; display: inline-block;">
@@ -105,11 +109,11 @@
 							<span>사용중</span>
 							<div style="width: 10px; height: 10px; background-color: #007BFF; display: inline-block; margin-left: 15px;">
 							</div>
-							<span>배정구역</span>
+							<span id="assignLegend">배정구역</span>
 						</div>
 						
-						<div id="grid1" style="text-align: center; margin-top: 20px;">
-			<svg height="286"><g class="row"><rect class="square" x="169" y="1" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="193" y="1" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="1" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="1" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="1" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="179" y="11.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">15</text><text x="203" y="11.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="11.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="11.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="11.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="145" y="20" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="169" y="20" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="20" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="20" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="20" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="20" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="155" y="30.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">14</text><text x="179" y="30.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="30.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="30.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="30.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="30.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="145" y="39" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="169" y="39" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="39" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="39" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="39" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="39" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="155" y="49.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">13</text><text x="179" y="49.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="49.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="49.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="49.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="49.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="121" y="58" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="145" y="58" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="58" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="58" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="58" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="58" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="58" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="131" y="68.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">12</text><text x="155" y="68.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="68.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="68.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="68.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="68.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="68.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="121" y="77" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="145" y="77" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="77" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="77" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="77" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="77" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="77" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="131" y="87.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">11</text><text x="155" y="87.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="87.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="87.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="87.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="87.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="87.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="121" y="96" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="145" y="96" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="96" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="96" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="96" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="96" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="96" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="131" y="106.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">10</text><text x="155" y="106.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="106.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="106.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="106.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="106.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="106.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="121" y="115" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="145" y="115" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="115" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="115" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="115" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="115" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="115" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="131" y="125.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">9</text><text x="155" y="125.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="125.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="125.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="125.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="125.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="125.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="97" y="134" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="121" y="134" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="145" y="134" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="134" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="134" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="134" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="134" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="134" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="107" y="144.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">8</text><text x="131" y="144.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">C</text><text x="155" y="144.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="144.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="144.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="144.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="144.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="144.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="97" y="153" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="121" y="153" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="145" y="153" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="153" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="153" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="153" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="153" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="153" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="107" y="163.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">7</text><text x="131" y="163.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">C</text><text x="155" y="163.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="163.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="163.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="163.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="163.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="163.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="73" y="172" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="97" y="172" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="121" y="172" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1; cursor: default;"></rect><rect class="square" x="145" y="172" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="172" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1; cursor: default;"></rect><rect class="square" x="193" y="172" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1; cursor: default;"></rect><rect class="square" x="217" y="172" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="172" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="172" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="83" y="182.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">6</text><text x="107" y="182.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">B</text><text x="131" y="182.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">C</text><text x="155" y="182.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="182.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="182.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="182.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="182.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="182.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="73" y="191" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="97" y="191" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="121" y="191" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="145" y="191" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="191" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="191" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="191" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1; cursor: default;"></rect><rect class="square" x="241" y="191" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="191" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="83" y="201.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">5</text><text x="107" y="201.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">B</text><text x="131" y="201.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">C</text><text x="155" y="201.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="201.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="201.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="201.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="201.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="201.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="73" y="210" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="97" y="210" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="121" y="210" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="145" y="210" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="210" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="210" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="210" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="210" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="210" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="83" y="220.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">4</text><text x="107" y="220.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">B</text><text x="131" y="220.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">C</text><text x="155" y="220.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="220.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="220.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="220.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="220.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="220.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="49" y="229" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="73" y="229" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="97" y="229" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="121" y="229" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="145" y="229" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="229" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="229" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="229" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="229" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="229" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="59" y="239.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">3</text><text x="83" y="239.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">A</text><text x="107" y="239.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">B</text><text x="131" y="239.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">C</text><text x="155" y="239.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="239.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="239.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="239.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="239.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="239.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="49" y="248" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="73" y="248" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="97" y="248" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="121" y="248" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="145" y="248" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="248" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="248" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="248" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="248" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="248" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="59" y="258.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">2</text><text x="83" y="258.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">A</text><text x="107" y="258.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">B</text><text x="131" y="258.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">C</text><text x="155" y="258.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="258.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="258.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="258.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="258.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="258.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g><g class="row"><rect class="square" x="49" y="267" width="20" height="15" style="fill: rgb(146, 208, 80); stroke: rgb(153, 153, 153); stroke-width: 0;"></rect><rect class="square" x="73" y="267" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="97" y="267" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="121" y="267" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="145" y="267" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="169" y="267" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="193" y="267" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="217" y="267" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="241" y="267" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><rect class="square" x="265" y="267" width="20" height="15" style="fill: rgb(255, 255, 255); stroke: rgb(153, 153, 153); stroke-width: 1;"></rect><text x="59" y="277.5" font-size="10px" fill="#fff" class="grid-text" style="text-anchor: middle; cursor: pointer;">1</text><text x="83" y="277.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">A</text><text x="107" y="277.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">B</text><text x="131" y="277.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">C</text><text x="155" y="277.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">D</text><text x="179" y="277.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">E</text><text x="203" y="277.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">F</text><text x="227" y="277.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">G</text><text x="251" y="277.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">H</text><text x="275" y="277.5" font-size="9px" fill="#999" class="grid-text" style="text-anchor: middle; cursor: pointer;">I</text></g></svg></div>
+						<div id="grid" style="text-align: center; margin-top: 20px;">
+						</div>			
 						
 						
     				</div>
@@ -138,6 +142,7 @@
 <input id="assignedSeqNo" type="hidden" value="${assignedGraveInfo.seq_no}">
 </c:if>
 
+<script type="text/javascript" src="${contextPath}/resources/js/d3.min.js"></script>
 <script type="text/javascript">
 
 (function() {
@@ -146,19 +151,12 @@
 		var rowSeq = $('#assignedRowSeq').val();
 		var colSeq = $('#assignedColSeq').val();
 		var seqNo = $('#assignedSeqNo').val();
+		showGraveMap();
 		showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo);
 	} else {
 		$('#selGraveSection').trigger('change');	
 	}
 })();
-
-
-/**
- * 
- */
-function _showGraveMap() {
-	
-}
 
 /**
  * 
@@ -169,7 +167,248 @@ function _changeGraveSection() {
 	var rowSeq = selectedOption.attr('rowSeq');
 	var colSeq = selectedOption.attr('colSeq');
 	var seqNo = selectedOption.attr('seqNo');
+	showGraveMap();
 	showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo);
+}
+
+/**
+ * 
+ */
+function showGraveMap() {
+	var assignedInfo = getAssignedGraveInfo();
+	var sectionSeq = assignedInfo['sectionSeq'];
+	var rowSeq = assignedInfo['rowSeq'];
+	var colSeq = assignedInfo['colSeq'];
+	var seqNo = assignedInfo['seqNo'];
+	
+	$('#mapTitle').text('[' + sectionSeq + '구역] 사용(봉안)위치 정보');
+	$('#assignLegend').text('배정구역 (' + rowSeq + '행 - ' + seqToAlpha(colSeq) + '열)');
+	
+	common.ajax({
+		url:"${contextPath}/admin/getGraveUseList", 
+		data:{},
+		success: function(result) {
+			var sectionData = getSectionData(result, sectionSeq);
+			var gridData;
+			 if(sectionData != null && sectionData.length > 0) {
+				 gridData = getGridData(sectionData, false, 0, 15);
+				 makeGraveGrid('#grid', gridData);
+			 }
+		}
+	});
+}
+
+/**
+ * section 에 해당하는 데이터를 반환
+ */
+function getSectionData(data, section_seq) {
+	var rtn = [];
+	if(data != null) {
+		$.each(data, function(idx){
+			var section = data[idx]['section_seq'];
+			if(section == section_seq) {
+				rtn.push(data[idx]);
+			}
+		});
+	}
+	return rtn;
+}
+
+/**
+ * d3 Grid 배치를 위한 데이터 반환
+ */
+function getGridData(data, reverse, offset, w, h) {
+	var rows = [], cols = [], rowCols = [], rowIdx = -1, colIdx = -1,
+	row_seq, col_seq, max_col_cnt, min_col_seq
+	;
+	if(!offset) offset = 0;
+	$.each(data, function(idx, item){
+		row_seq = item['row_seq'];
+		col_seq = item['col_seq'];
+		min_col_seq = item['min_col_seq'];
+		max_col_cnt = item['max_col_cnt'] + 1;// 행번호표시를 위한 rect 1개 plus
+		if(rows.indexOf(row_seq) < 0) {
+			rows.push(row_seq);
+			cols = [];
+			for(i = 0; i < max_col_cnt+offset; i++) {
+				cols.push({});
+			}
+			rowCols.push(cols);
+			rowIdx++
+		}
+		// 행번호 표시용 정보 추가
+		rowCols[rowIdx][min_col_seq -1 + offset] = {row_seq:row_seq, is_rownum:true, col_seq:min_col_seq};
+		if(reverse) {
+			rowCols[rowIdx][max_col_cnt - col_seq] = item;
+		} else {
+			rowCols[rowIdx][col_seq + offset] = item;
+		}
+	});
+	
+	var xpos = 1;
+    var ypos = 1;
+    var width = w ? w : 15;
+    var height = h ? h : 15;
+    var rowNumWidth = 15;
+    var rtnData = {};
+    var totalwidth = 0;
+    var totalheight = 0;
+    var gridData = [];
+    var margin = 4;
+    for (rowIdx = 0; rowIdx < rowCols.length; rowIdx++) {
+        var rowInfo = rowCols[rowIdx];
+        gridData.push([]);
+        for (colIdx = 0; colIdx < rowInfo.length; colIdx++) {
+        	var colInfo = rowInfo[colIdx];
+        	if(colInfo['col_seq']) {
+        		gridData[rowIdx].push($.extend(true, {
+                    x: xpos,
+                    y: ypos,
+                    width: colInfo['is_rownum'] ? rowNumWidth : width,
+                    height: height
+                }, colInfo))	
+        	}
+        	if(colInfo['is_rownum']) {
+        		xpos += rowNumWidth + margin;	
+        	} else {
+        		xpos += width + margin;
+        	}
+        }
+        totalwidth = xpos;
+        xpos = 1;
+        ypos += height + margin; 
+    }
+    totalheight = ypos;
+	
+    rtnData['totalwidth'] = totalwidth;
+    rtnData['totalheight'] = totalheight;
+    rtnData['gridData'] = gridData;
+    
+    return rtnData; 
+}
+
+/**
+ * 추모동산 배정현황 그리드 생성
+ */
+function makeGraveGrid(grid, gridData) {
+	d3.select("svg").remove();
+	var totalwidth = gridData.totalwidth;
+	var totalheight = gridData.totalheight;
+	var grid = d3.select(grid)
+		.append("svg")
+		.attr("width",totalwidth)
+		.attr("height",totalheight);
+		
+	var row = grid.selectAll(".row")
+		.data(gridData.gridData)
+		.enter().append("g")
+		.attr("class", "row");
+		
+	var column = row.selectAll(".square")
+		.data(function(d) { return d; })
+		.enter().append("rect")
+		.attr("class","square")
+		.attr("x", function(d) { return d.x; })
+		.attr("y", function(d) { return d.y; })
+		.attr("width", function(d) { return d.width; })
+		.attr("height", function(d) { return d.height; })
+		.style("fill", function(d) {
+			return getRectFillColor(d);
+		})
+		.style("stroke", "#999")
+		.style("stroke-width", function(d) {
+			if(d.is_rownum) {
+	    		return 0;
+			} else {
+				return 1;	
+			}
+		});
+	
+	var txt = row.selectAll("text")
+	.data(function(d) { return d; })
+	.enter().append("text")
+	.attr("x", function(d) { return d.x + d.width/2; })
+	.attr("y", function(d) { return d.y + d.height/2 + 3; })
+    .attr("font-size", function(d) {
+    	if(d.is_rownum) {
+    		return "10px";
+		} else {
+			return "9px";
+		}
+	})
+    .attr("fill", function(d) {
+    	var assignedInfo = getAssignedGraveInfo();
+    	var sectionSeq = assignedInfo['sectionSeq'];
+    	var rowSeq = assignedInfo['rowSeq'];
+    	var colSeq = assignedInfo['colSeq'];
+    	if(d.is_rownum) {
+    		return "#fff";
+		} else if(d.section_seq == sectionSeq && d.row_seq == rowSeq && d.col_seq == colSeq) {
+			return "#fff";
+		} else {
+			return "#999";	
+		}
+    })
+	.text(function(d) {
+		if(d.is_rownum) {
+			return d.row_seq;
+		} else {
+			return seqToAlpha(d.col_seq);	
+		}
+	})
+	.style("text-anchor", function(d) {
+		if(d.is_rownum) {
+			return "middle";
+		} else {
+			return "middle";
+		}
+	});
+	
+}
+
+/**
+ * 
+ */
+function getRectFillColor(d) {
+	var assignedInfo = getAssignedGraveInfo();
+	var sectionSeq = assignedInfo['sectionSeq'];
+	var rowSeq = assignedInfo['rowSeq'];
+	var colSeq = assignedInfo['colSeq'];
+	if(d.section_seq == sectionSeq && d.row_seq == rowSeq && d.col_seq == colSeq) {// 배정구역
+		return "#007BFF";
+	} else if(d.is_rownum){// 행번호
+		return "#92D050";
+	} else if(d.assign_status != 'AVAILABLE') {// 사용중
+		return "#BFBFBF";
+	} else {
+		return "#fff";
+	}
+}
+
+/**
+ * 배정된 추모동산 구역 정보를 반환
+ */
+function getAssignedGraveInfo() {
+	var sectionSeq, rowSeq, colSeq, seqNo;
+	// 부부형, 가족형 사용자로 이미 배정된 자리가 있는경우
+	if($('#assignedSectionSeq').val()) {
+		sectionSeq = $('#assignedSectionSeq').val();
+		rowSeq = $('#assignedRowSeq').val();
+		colSeq = $('#assignedColSeq').val();
+		seqNo = $('#assignedSeqNo').val();
+	} else {// 구역을 선택한경우
+		var selectedOption = $('#selGraveSection').find('option:selected');
+		sectionSeq = selectedOption.val();
+		rowSeq = selectedOption.attr('rowSeq');
+		colSeq = selectedOption.attr('colSeq');
+		seqNo = selectedOption.attr('seqNo');
+	}
+	var assignedInfo = {};
+	assignedInfo['sectionSeq'] = sectionSeq;
+	assignedInfo['rowSeq'] = rowSeq;
+	assignedInfo['colSeq'] = colSeq;
+	assignedInfo['seqNo'] = seqNo;
+	return assignedInfo;
 }
 
 /**

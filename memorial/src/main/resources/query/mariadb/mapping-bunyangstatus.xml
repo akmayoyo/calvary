@@ -429,5 +429,18 @@
             ,sum(case when grave_type = 'couple' then 2 else 1 end) total_cnt
         from TB_BUNYANG_GRAVE_ASSIGN a
     </select>
+    
+    <select id="getGraveUserInfo" parameterType="map" resultType="map">
+    	SELECT
+			t1.section_seq
+		    ,t1.row_seq
+		    ,t1.col_seq
+		    ,t1.seq_no
+		from TB_BUNYANG_GRAVE_ASSIGN t1
+		inner join TB_BUNYANG_REF_USER t2 on t1.bunyang_seq = t2.bunyang_seq AND (t1.use_user_seq1 = t2.user_seq or t1.use_user_seq2 = t2.user_seq) AND t2.ref_type = 'USE_USER'
+		where t2.user_name = #{userName}
+		order by t1.section_seq, t1.row_seq, t1.col_seq
+		LIMIT 0,1
+    </select>
 
 </mapper>

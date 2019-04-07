@@ -171,12 +171,11 @@ public class MobileServiceImpl implements IMobileService {
 		return iRslt;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> getContractMinister(String bunyangSeq) {
+	public List<Object> getContractMinister(String bunyangSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("bunyangSeq", bunyangSeq);
-		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("mobile.getContractMinister", parameter);
-		return rtnMap;
+		List<Object> rtnList = commonDao.selectList("mobile.getContractMinister", parameter);
+		return rtnList;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -185,5 +184,12 @@ public class MobileServiceImpl implements IMobileService {
 		parameter.put("codeSeq", codeSeq);
 		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("mobile.getContract", parameter);
 		return rtnMap;
+	}
+	
+	public List<Object> getContractList(String codeSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("codeSeq", codeSeq);
+		List<Object> rtnList = commonDao.selectList("mobile.getContractList", parameter);
+		return rtnList;
 	}
 }

@@ -383,6 +383,11 @@ public interface IAdminService {
 	 */
 	public List<Object> getGraveStatusList();
 	
+	/**
+	 * 사용(봉안)자 이름에 해당하는 정보 검색
+	 */
+	public Map<String, Object> getGraveUserInfo(String userName);
+	
 	//===============================================================================
 	// 메뉴 관리
 	//===============================================================================

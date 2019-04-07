@@ -147,7 +147,7 @@ int currDay = currDt.get(Calendar.DATE);
 </div>
 
 <!-- 알림 메세지 확인 및 수신인 입력-->
-<div id="registContact" class="m_contents" style="display: none;">
+<div id="registContact" class="m_contents">
 	
 	<!-- 아코디언 메뉴 -->
 	<div id="m_menu" class="m_menu">
@@ -189,7 +189,11 @@ int currDay = currDt.get(Calendar.DATE);
 						<tr>
 							<th scope="sel">1. 교구목사</th>
 							<td class="text-left">
-								<span name="receiver">${contractMinister.mobile}</span>
+								<select id="receiverMinister" class="form-control">
+								<c:forEach items="${contractMinister}" var="rowItem">
+									<option value="${rowItem.mobile}" <c:if test="${rowItem.diocese == rowItem.user_diocese}">selected</c:if>>${rowItem.mobile} (${rowItem.diocese_name})</option>
+								</c:forEach>
+								</select>
 							</td>
 						</tr>
 						<tr>
@@ -205,7 +209,17 @@ int currDay = currDt.get(Calendar.DATE);
 							</td>
 						</tr>
 						<tr>
-							<th scope="sel">4. 상조회사</th>
+							<th scope="sel">4. 용인공원라이프</th>
+							<td class="text-left">
+								<select id="receiverYongin" class="form-control">
+								<c:forEach items="${contract3}" var="rowItem">
+									<option value="${rowItem.mobile}">${rowItem.mobile}</option>
+								</c:forEach>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<th scope="sel">5. 상조회사</th>
 							<td class="text-left">
 								<div style="margin-bottom: 5px;">
 									<input id="companyPhone1" type="tel" class="form-control input-sm tel_input"><span> - </span>
@@ -216,7 +230,7 @@ int currDay = currDt.get(Calendar.DATE);
 							</td>
 						</tr>
 						<tr>
-							<th scope="sel">5. 추가연락처</th>
+							<th scope="sel">6. 추가연락처</th>
 							<td class="text-left">
 								<div>
 									<input name="extraPhone1" type="tel" class="form-control input-sm tel_input"><span> - </span>
@@ -457,12 +471,25 @@ function scrollToTop() {
  */
 function _sendSms() {
 	var receivers = [];
+	var mobile;
 	// 기지정된 담당자 연락처
 	$('span[name="receiver"]').each(function(idx) {
-		if($(this).text()) {
-			receivers.push($(this).text());
+		mobile = $(this).text();
+		if(mobile && receivers.indexOf(mobile) < 0) {
+			receivers.push(mobile);
 		}
 	});
+	
+	// 교구목사
+	mobile = $('#receiverMinister option:selected').val();
+	if(mobile && receivers.indexOf(mobile) < 0) {
+		receivers.push(mobile);
+	}
+	// 용인공원라이프
+	mobile = $('#receiverYongin option:selected').val();
+	if(mobile && receivers.indexOf(mobile) < 0) {
+		receivers.push(mobile);
+	}
 	
 	// 상조회사
 	var companyPhone1 = $('#companyPhone1').val();
@@ -484,7 +511,9 @@ function _sendSms() {
 			}
 			return;
 		}
-		receivers.push(companyPhone);
+		if(companyPhone && receivers.indexOf(companyPhone) < 0) {
+			receivers.push(companyPhone);
+		}
 	}
 	var bValid = true;
 	// 추가연락처
@@ -512,7 +541,9 @@ function _sendSms() {
 				bValid = false;
 				return false;
 			}
-			receivers.push(phone);
+			if(phone && receivers.indexOf(phone) < 0) {
+				receivers.push(phone);
+			}
 		}
 	});
 	

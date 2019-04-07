@@ -1308,6 +1308,8 @@ public class AdminController {
 	//===============================================================================
 	/** 추모동산 사용(봉안)현황  URL */
 	public static final String GRAVE_STATUS_URL = "/graveStatus";
+	/** 사용(봉안)자 이름에 해당하는 정보 검색  URL */
+	public static final String SEARCH_GRAVE_USER_URL = "/searchGraveUser";
 	
 	/** 
 	 * 입출금현황 페이지
@@ -1326,6 +1328,18 @@ public class AdminController {
 		mv.addObject("searchVo", searchVo);
 		mv.setViewName(ROOT_URL + GRAVE_STATUS_URL);
 		return mv;
+	}
+	
+	/** 
+	 * 사용(봉안)자 이름에 해당하는 정보 검색
+	 */
+	@RequestMapping(value=SEARCH_GRAVE_USER_URL)
+	@ResponseBody
+	public Object searchGraveUserHandler(String userName) throws Exception {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		Map<String, Object> resultMap = adminService.getGraveUserInfo(userName);
+		rtnMap.put("result", resultMap);
+		return rtnMap;
 	}
 	
 	

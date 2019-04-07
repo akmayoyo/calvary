@@ -34,7 +34,7 @@
             <tbody>
             	<c:forEach items="${graveStatusList}" var="rowItem">
             	<tr <c:if test="${rowItem.grave_type == 'sub_total' || rowItem.grave_type == 'total'}">style="background-color: #FFFCCC; font-weight: bold;"</c:if>>
-            		<td <c:if test="${rowItem.grave_type == 'sub_total' || rowItem.grave_type == 'total'}">colspan="2"</c:if>>
+            		<td class="tdgraveType" graveType="${rowItem.grave_type}" <c:if test="${rowItem.grave_type == 'sub_total' || rowItem.grave_type == 'total'}">colspan="2"</c:if>>
             			<c:choose>
             				<c:when test="${rowItem.grave_type == 'COUPLE'}">부부형</c:when>
             				<c:when test="${rowItem.grave_type == 'SINGLE'}">1인형</c:when>
@@ -60,36 +60,48 @@
 			<h3 style="display: inline-block;">추모동산 배치판</h3>
 		</div>
 		<div style="text-align: center; margin-top: 5px;">
-			<div style="width: 10px; height: 10px; background-color: #FF0000; display: inline-block;">
+			<div style="width: 10px; height: 10px; background-color: #C785C8; display: inline-block;">
 			</div>
 			<span>사용중</span>
-			<div style="width: 10px; height: 10px; background-color: #FFCCA9; display: inline-block; margin-left: 10px;">
-			</div>
-			<span>1/2 사용중(부부형)</span>
-			<div style="width: 10px; height: 10px; background-color: #007BFF; display: inline-block; margin-left: 10px;">
+			<div style="width: 10px; height: 10px; background-color: #47CCCA; display: inline-block; margin-left: 10px;">
 			</div>
 			<span>사용예정</span>
 			<div style="width: 10px; height: 10px; background-color: #fff; display: inline-block; margin-left: 10px; border: 1px solid #ccc;">
 			</div>
 			<span>사용가능</span>
+			<div style="width: 10px; height: 10px; background-color: #007BFF; display: inline-block; margin-left: 10px;">
+			</div>
+			<span>선택</span>
 		</div>
 		
-		<div style="text-align: center; margin-top: 5px;"><span style="color: #007BFF; margin-left: 10px;">※ 사용(봉안) 구역을 클릭하면 하단에 상세 정보가 표시됩니다.</span></div>
+		<div style="text-align: center; margin-top: 5px;"><span style="color: #007BFF; margin-left: 10px;">※ 사용(봉안) 구역을 선택하면 하단에 상세 정보가 표시됩니다.</span></div>
+		
+		<!--  사용자 검색 -->
+		<div class="row" style="margin-top: 10px;">
+			<div class="col-xs-3" style="margin: 0 auto; float: none;">
+				<div class="input-group add-on">
+      				<input class="form-control" placeholder="사용(봉안)자 검색" id="tiSearchUser" type="text">
+      				<div class="input-group-btn">
+        				<button class="btn btn-default" type="button" onclick="searchUser()"><i class="glyphicon glyphicon-search"></i></button>
+      				</div>
+    			</div>
+			</div>
+		</div>
 		
 		<div style="text-align: center; margin-top: 10px;">
 			<div id="grid1" style="display: inline-block;">
-				<p style="margin: 0;">가구역</p>
+				<p style="margin-bottom: 5px; font-size: 15px;">가구역</p>
 			</div>
 			<div id="grid2" style="display: inline-block; margin-left: 28px;">
-				<p style="margin: 0;">나구역</p>
+				<p style="margin-bottom: 5px; font-size: 15px;">나구역</p>
 			</div>
 		</div>
 		<div style="text-align: center; margin-top: 5px;">
 			<div id="grid3" style="display: inline-block;">
-				<p style="margin: 0;">다구역</p>
+				<p style="margin-bottom: 5px; font-size: 15px;">다구역</p>
 			</div>
 			<div id="grid4" style="display: inline-block; margin-left: 28px;">
-				<p style="margin: 0;">라구역</p>
+				<p style="margin-bottom: 5px; font-size: 15px;">라구역</p>
 			</div>
 		</div>
 	</div>
@@ -139,6 +151,24 @@
 <script type="text/javascript" src="${contextPath}/resources/js/d3.min.js"></script>
 <script type="text/javascript">
 (function(){
+	
+	// 행병합
+	rowSpan();
+	
+	// add for programmatically d3 click event
+	$.fn.d3Click = function () {
+		this.each(function (i, e) {
+			var evt = new MouseEvent("click");
+			e.dispatchEvent(evt);
+		});
+	};
+	// 사용(봉안)자 검색
+	$('#tiSearchUser').keyup(function(e) {
+		if (e.keyCode == 13) {
+			searchUser();
+		}
+	});
+	
 	common.ajax({
 		url:"${contextPath}/admin/getGraveUseList", 
 		data:{},
@@ -277,6 +307,11 @@ function getGridData(data, reverse, offset, w, h) {
 }
 
 /**
+ * 이전에 클릭한 square 클릭상태 해제를 위해 저장해둠
+ */
+var clickedInfo = {};
+
+/**
  * 추모동산 배정현황 그리드 생성
  */
 function makeGraveGrid(grid, gridData) {
@@ -296,6 +331,7 @@ function makeGraveGrid(grid, gridData) {
 		.data(function(d) { return d; })
 		.enter().append("rect")
 		.attr("class","square")
+		.attr("id",function(d) {return 'square' + d.section_seq + '_' + d.row_seq + '_' + d.col_seq})
 		.attr("x", function(d) { return d.x; })
 		.attr("y", function(d) { return d.y; })
 		.attr("width", function(d) { return d.width; })
@@ -312,19 +348,33 @@ function makeGraveGrid(grid, gridData) {
 			}
 		})
 		.on('mouseover', function(d) {
-			if(_clickable(d)) {
-	    	   d3.select(this).style("cursor", "pointer");
-	    	   d3.select(this).style("fill", "#007BFF"); 
+			if(_clickable(d) && !$(this).attr('selected')) {
+// 	    	   d3.select(this).style("cursor", "pointer");
+// 	    	   d3.select(this).style("fill", "#007BFF"); 
+// 	    	   var txtId = $(this).attr('id').replace('square', 'txt');
+// 	    	   $('#'+txtId).attr("fill", "#fff");
+				setSelectedStyle(this, true, d);
 	       }
 	    })
 	    .on('mouseout', function(d) {
-	       if(_clickable(d)) {
-	    	   d3.select(this).style("cursor", "default"); 
-	    	   d3.select(this).style("fill", getRectFillColor(d)); 
+	    	if(_clickable(d) && !$(this).attr('selected')) {
+// 	    	   d3.select(this).style("cursor", "default"); 
+// 	    	   d3.select(this).style("fill", getRectFillColor(d)); 
+// 	    	   var txtId = $(this).attr('id').replace('square', 'txt');
+// 	    	   $('#'+txtId).attr("fill", "#999");
+	    		setSelectedStyle(this, false, d);
 	       }
 	    })
 		.on('click', function(d) {
 			if(_clickable(d)) {
+				if(clickedInfo && clickedInfo.square) {
+					$(clickedInfo.square).attr('selected', false);
+					setSelectedStyle(clickedInfo.square, false, clickedInfo.data);
+				}
+				clickedInfo.square = this;
+				clickedInfo.data = d;
+				$(this).attr('selected', true);
+				setSelectedStyle(this, true, d);
 				_getGraveAssignInfo(d);
 			}
 	    });
@@ -332,6 +382,7 @@ function makeGraveGrid(grid, gridData) {
 	var txt = row.selectAll("text")
 	.data(function(d) { return d; })
 	.enter().append("text")
+	.attr("class","squaretxt")
 	.attr("x", function(d) { return d.x + d.width/2; })
 	.attr("y", function(d) { return d.y + d.height/2 + 3; })
     .attr("font-size", function(d) {
@@ -342,12 +393,9 @@ function makeGraveGrid(grid, gridData) {
 		}
 	})
     .attr("fill", function(d) {
-    	if(d.is_rownum) {
-    		return "#fff";
-		} else {
-			return "#999";	
-		}
+    	return getTextFillColor(d);
     })
+    .attr("id",function(d) {return 'txt' + d.section_seq + '_' + d.row_seq + '_' + d.col_seq})
 	.text(function(d) {
 		if(d.is_rownum) {
 			return d.row_seq;
@@ -364,17 +412,7 @@ function makeGraveGrid(grid, gridData) {
 	})
 	.style("cursor", "pointer")
 	.attr("class", "grid-text")
-	.on('mouseover', function(d) {
-		if(_clickable(d)) {
-	    	d3.select(this).style("fill", "#fff"); 
-		}
-	})
-	.on('mouseout', function(d) {
-		if(_clickable(d)) {
-	    	d3.select(this).style("cursor", "default"); 
-	    	d3.select(this).style("fill", "#999"); 
-		}
-	});
+	;
 	
 }
 
@@ -383,15 +421,46 @@ function makeGraveGrid(grid, gridData) {
  */
 function getRectFillColor(d) {
 	if(d.assign_status == 'OCCUPIED') {
-		return "#FF0000";
+		return "#C785C8";
 	} else if(d.assign_status == 'HALF_OCCUPIED') {
-		return "#FFCCA9";
+		return "#C785C8";
 	} else if(d.assign_status == 'RESERVED') {
-		return "#007BFF";
+		return "#47CCCA";
 	} else if(!d.is_rownum){
 		return "#fff";
 	} else {
 		return "#92D050";
+	}
+}
+
+/**
+ * 
+ */
+function getTextFillColor(d) {
+	if(d.is_rownum) {
+		return "#fff";
+	} else {
+		if(d.assign_status == 'AVAILABLE') {
+			return "#999";
+		} else {
+			return "#fff";
+		}
+	}
+}
+
+/**
+ * 
+ */
+function setSelectedStyle(el, selected, d) {
+	var txt = $('#' + $(el).attr('id').replace('square', 'txt'));
+	if(selected) {
+		d3.select(el).style("cursor", "pointer"); 
+		d3.select(el).style("fill", "#007BFF"); 
+		txt.attr("fill", "#fff");	
+	} else {
+		d3.select(el).style("cursor", "default"); 
+		d3.select(el).style("fill", getRectFillColor(d)); 
+		txt.attr("fill", getTextFillColor(d));	
 	}
 }
 
@@ -453,10 +522,59 @@ function _getGraveAssignInfo(d) {
 /**
  * 
  */
+function searchUser() {
+	var userName = $('#tiSearchUser').val();
+	if(!userName) {
+		common.showAlert('검색할 사용자명을 입력하세요.');
+		$('#tiSearchUser').focus();
+		return;
+	}
+	
+	common.ajax({
+		url:"${contextPath}/admin/searchGraveUser", 
+		data:{userName:userName},
+		success: function(result) {
+			if(result && result.result) {
+				var searchedInfo = result.result;
+				var section_seq = searchedInfo.section_seq;
+				var row_seq = searchedInfo.row_seq;
+				var col_seq = searchedInfo.col_seq;
+				var squareId = 'square' + section_seq + '_' + row_seq + '_' + col_seq;
+				$('#' + squareId).d3Click();
+			} else {
+				common.showAlert('해당 이름으로 등록된 사용(봉안)자가 없습니다.');
+			}
+		}
+	});
+}
+
+/**
+ * 
+ */
 function seqToAlpha(seq) {
 	var seqOfA = "A".charCodeAt(0) + (seq-1);
 	var alpha = String.fromCharCode(seqOfA);
 	return alpha;
+}
+
+/**
+ * 
+ */
+function rowSpan(){
+    $(".tdgraveType").each(function() {
+    	var val = $(this).attr('graveType');
+    	if(val == 'COUPLE' || val == 'SINGLE') {
+    		var rows = $(".tdgraveType" + ":contains('" + $(this).text() + "')");
+            if (rows.length > 1) {
+            	var row = rows.eq(0); 
+            	row.attr("rowspan", rows.length);
+            	for(var i = 1; i < rows.length; i++) {
+            		row = rows.eq(i);
+            		row.remove();
+            	}
+            }
+    	}
+    });
 }
 
 </script>

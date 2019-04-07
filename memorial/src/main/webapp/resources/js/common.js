@@ -352,6 +352,14 @@
 				}
 		);
 	}
+	
+	var trimAll = function(val) {
+		var sRtn = '';
+		if(val) {
+			sRtn = val.replace(/\s/g, '');
+		}
+		return sRtn;
+	}
 
 	var common = {};
 	common.ajax = ajax;
@@ -370,6 +378,7 @@
 	common.isValidMobile = isValidMobile;
 	common.isValidPhone = isValidPhone;
 	common.isVisible = isVisible;
+	common.trimAll = trimAll;
 
 	window.common = common;
 })();

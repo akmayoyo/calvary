@@ -89,10 +89,15 @@
     <!-- 교구목사 연락처 -->
     <select id="getContractMinister" parameterType="map" resultType="map">
 	    select
-	    	code_value as mobile
+	    	code_name as diocese_name,
+	    	code_desc as minister_name,
+	    	code_value1 as diocese,
+	    	code_value as mobile,
+	    	(select diocese from TB_BUNYANG_REF_USER ru WHERE ru.bunyang_seq = #{bunyangSeq} and ru.ref_type = 'APPLY_USER') user_diocese
 	    from TB_COM_CODE a
 	    WHERE a.parent_code_seq = 'CONTRACT_DIOCESE' 
-	    and a.code_seq = (select concat('MINISTER_', diocese) from TB_BUNYANG_REF_USER ru WHERE ru.bunyang_seq = #{bunyangSeq} and ru.ref_type = 'APPLY_USER')
+	    and a.code_seq like 'MINISTER%'
+	    order by a.display_order
 	</select>
 	
     <!-- 담당 연락처 -->
@@ -102,6 +107,15 @@
 	    from TB_COM_CODE a
 	    WHERE a.parent_code_seq = 'CONTRACT' 
 	    and a.code_seq = #{codeSeq}
+	</select>
+	
+    <!-- 담당 연락처 -->
+    <select id="getContractList" parameterType="map" resultType="map">
+	    select
+	    	code_value as mobile
+	    from TB_COM_CODE a
+	    WHERE a.parent_code_seq = 'CONTRACT' 
+	    and a.code_seq like concat(#{codeSeq},'%')
 	</select>
     
 </mapper>

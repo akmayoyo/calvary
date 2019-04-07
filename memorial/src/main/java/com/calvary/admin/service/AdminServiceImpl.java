@@ -1508,6 +1508,17 @@ public class AdminServiceImpl implements IAdminService {
 		return list;
 	}
 	
+	/**
+	 * 사용(봉안)자 이름에 해당하는 정보 검색
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getGraveUserInfo(String userName) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("userName", userName);
+		Map<String, Object> rtnMap = (Map<String, Object>)commonDao.selectOne("bunyangstatus.getGraveUserInfo", parameter); 
+		return rtnMap;
+	}
+	
 	
 	//===============================================================================
 	// 메뉴 관리
