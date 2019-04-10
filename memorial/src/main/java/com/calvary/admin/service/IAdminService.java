@@ -245,6 +245,11 @@ public interface IAdminService {
 	// 사용(봉안) 관리
 	//===============================================================================
 	/** 
+	 * 사용신청 리스트 조회
+	 */
+	public Map<String, Object> getGraveRequestList(SearchVo searchVo);
+	
+	/** 
 	 * 추모동산 사용현황 리스트 조회
 	 */
 	public List<Object> getGraveUseList();

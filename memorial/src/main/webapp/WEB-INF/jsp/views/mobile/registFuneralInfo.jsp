@@ -560,5 +560,19 @@ function _sendSms() {
 	}
 }
 
+/**
+ * 로그아웃처리
+ */
+function _logout() {
+	common.ajax({
+		url:"${contextPath}/account/mobile/logout", 
+		data:{},
+		success: function(result) {
+			if(result) {
+				location.replace('${contextPath}/account/mobile/login');
+			}
+		}
+	});
+}
 
 </script>

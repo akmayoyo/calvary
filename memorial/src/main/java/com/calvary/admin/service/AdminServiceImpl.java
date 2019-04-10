@@ -961,6 +961,27 @@ public class AdminServiceImpl implements IAdminService {
 	// 사용(봉안) 관리
 	//===============================================================================
 	/** 
+	 * 사용신청 리스트 조회
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getGraveRequestList(SearchVo searchVo) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
+		parameter.put("count", searchVo.getCountPerPage());
+		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		List<Object> list = commonDao.selectList("use.getGraveRequestList", parameter);
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getGraveRequestList", parameter);
+		int total_count = 0;
+		if(countMap != null) {
+			total_count = CommonUtil.convertToInt(countMap.get("total_count"));
+		}
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		rtnMap.put("list", list);
+		rtnMap.put("total_count", total_count);
+		return rtnMap;
+	}
+	
+	/** 
 	 * 추모동산 사용현황 리스트 조회
 	 */
 	public List<Object> getGraveUseList() {

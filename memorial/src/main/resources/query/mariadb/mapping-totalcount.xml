@@ -960,4 +960,13 @@
 		</if>
 	</select>
 	
+	<select id="getGraveRequestList" parameterType="map" resultType="map">
+    	 SELECT
+        	count(1) as total_count
+        FROM TB_BUNYANG_GRAVE_REQUEST_INFO a INNER JOIN TB_BUNYANG_INFO b on a.BUNYANG_SEQ = b.BUNYANG_SEQ
+        INNER JOIN TB_BUNYANG_REF_USER c on c.BUNYANG_SEQ = a.BUNYANG_SEQ and c.user_seq = a.use_user_seq and c.ref_type = 'USE_USER'
+        INNER JOIN TB_BUNYANG_GRAVE_ASSIGN d on a.SECTION_SEQ = d.SECTION_SEQ and a.ROW_SEQ = d.ROW_SEQ and a.COL_SEQ = d.COL_SEQ
+        LEFT OUTER JOIN TB_BUNYANG_GRAVE_ASSIGN e on a.BUNYANG_SEQ = e.BUNYANG_SEQ AND ((a.USE_USER_SEQ = e.USE_USER_SEQ1 AND e.assign_date1 is not null) or (a.USE_USER_SEQ = e.USE_USER_SEQ2 AND e.assign_date2 is not null))
+    </select>
+	
 </mapper>

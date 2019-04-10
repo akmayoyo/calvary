@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -40,8 +39,14 @@ public class MobileController {
 	/** 동산배정  URL */
 	public static final String ASSIGN_GRAVE = "/assignGrave";
 	
+	/** 사용신청 정보 저장  URL */
+	public static final String SAVE_REQUEST_GRAVE = "/saveRequestGrave";
+	
 	/** 부고알림을 위한 장례정보 입력  URL */
 	public static final String REGIST_FUNERAL_INFO = "/registFuneralInfo";
+	
+	/** 추모동산 사용현황 리스트 조회  URL */
+	public static final String GET_GRAVE_USE_LIST = "/getGraveUseList";
 	
 	
 	/** 
@@ -69,6 +74,8 @@ public class MobileController {
 		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 분양잔금
 		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT));// 관리비
 		
+		Map<String, Object> familyGraveRequestInfo = mobileService.getFamilyGraveRequestInfo(bunyangSeq);
+		
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName(ROOT_URL + MAIN);
 		mv.addObject("userVo", userVo);
@@ -77,6 +84,7 @@ public class MobileController {
 		mv.addObject("agentUser", agentUser);
 		mv.addObject("useUserList", useUserList);
 		mv.addObject("paymentList", paymentList);
+		mv.addObject("familyGraveRequestInfo", familyGraveRequestInfo);
 		return mv;
 	}
 	
@@ -145,6 +153,20 @@ public class MobileController {
 		return rtnMap;
 	}
 	
+	/** 
+	 * 사용신청정보 저장 
+	 */
+	@RequestMapping(value=SAVE_REQUEST_GRAVE)
+	@ResponseBody
+	public Object saveRequestGraveHandler(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception{
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean bRslt = false;
+		int iRslt = mobileService.requestGrave(productType, bunyangSeq, coupleSeq, userSeq, sectionSeq, rowSeq, colSeq, isReserved);
+		bRslt = iRslt > 0;
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
 	@RequestMapping(value=REGIST_FUNERAL_INFO)
 	public Object registFuneralInfoHandler(
 			@RequestParam(value="bunyangSeq", required=true) String bunyangSeq,
@@ -169,5 +191,15 @@ public class MobileController {
 		mv.addObject("contract3", contract3);
 		mv.setViewName(ROOT_URL + REGIST_FUNERAL_INFO);
 		return mv;
+	}
+	
+	/** 
+	 * 추모동산 사용현황 리스트 조회
+	 */
+	@RequestMapping(value=GET_GRAVE_USE_LIST)
+	@ResponseBody
+	public List<Object> getGraveUseListHandler() {
+		List<Object> graveUseList = adminService.getGraveUseList();
+		return graveUseList;
 	}
 }

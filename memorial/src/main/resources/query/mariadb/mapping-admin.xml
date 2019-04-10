@@ -369,6 +369,10 @@
 					case when a.user_seq = b.use_user_seq1 then 'OCCUPIED' 
 					else 'RESERVED' 
 					end 
+				when b.assign_status = 'REQUESTED' then 
+					case when a.user_seq = b.use_user_seq1 then 'REQUESTED' 
+					else 'COUPLE_REQUESTED' 
+					end 
 				else b.assign_status 
 			end couple_assign_status,
 			b.use_user_seq1,

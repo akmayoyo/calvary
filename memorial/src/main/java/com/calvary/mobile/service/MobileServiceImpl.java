@@ -13,6 +13,7 @@ import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.dao.CommonDao;
 import com.calvary.common.util.CommonUtil;
+import com.calvary.common.util.SessionUtil;
 
 @Service
 public class MobileServiceImpl implements IMobileService {
@@ -37,6 +38,14 @@ public class MobileServiceImpl implements IMobileService {
 		parameter.put("userSeq", userSeq);
 		parameter.put("coupleSeq", coupleSeq);
 		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("use.getReservedGraveInfo", parameter);
+		return rtnMap;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getFamilyGraveRequestInfo(String bunyangSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("use.getFamilyGraveRequestInfo", parameter);
 		return rtnMap;
 	}
 	
@@ -168,6 +177,69 @@ public class MobileServiceImpl implements IMobileService {
 			iRslt += commonDao.update("use.updateGrave", parameter);
 		}
 		
+		return iRslt;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Transactional
+	public int requestGrave(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception {
+		int iRslt = 0;
+		Map<String, Object> parameter = null;
+		String requestUserId = null;
+		if(SessionUtil.getCurrentBunyangUser() != null) {
+			requestUserId = SessionUtil.getCurrentBunyangUser().getUserId();
+		}
+		// 신청정보 저장
+		parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("sectionSeq", sectionSeq);
+		parameter.put("rowSeq", rowSeq);
+		parameter.put("colSeq", colSeq);
+		parameter.put("useUserSeq", userSeq);
+		parameter.put("requestUser", requestUserId);
+		iRslt += commonDao.insert("use.createGraveRequestInfo", parameter);
+		
+		// 추모동산 배치현황의 상태값을 신청상태로 변경
+		String graveType = coupleSeq > 0 ? CalvaryConstants.GRAVE_TYPE_COUPLE : CalvaryConstants.GRAVE_TYPE_SINGLE;
+		if(isReserved == 1) {// 배우자 또는 가족구성원이 이미 신청한 경우 예약된 자리가 있기 때문에 별도 처리안함
+			// TODO
+		} else {// 배정받은 자리가 없는 경우
+			int requireCnt = 1;
+			// 가족형인 경우 가족 구성원 자리까지 신청상태로함
+			if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productType)) {
+				List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
+				requireCnt = useUserList.size();
+				if(CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) {// 부부형인 경우 두명이 한자리
+					requireCnt = requireCnt/2;
+				}
+			}
+			// 신청 페이지 표시후 신청까지 경과 시긴이 있기때문에 현재도 사용가능한지 한번더 체크
+			parameter = new HashMap<String, Object>();
+			parameter.put("sectionSeq", sectionSeq);
+			parameter.put("graveType", graveType);
+			parameter.put("cnt", requireCnt);
+			Map<String, Object> availableGraveInfo = (HashMap<String, Object>)commonDao.selectOne("use.getAvailableSectionGraveInfo", parameter);
+			if(availableGraveInfo != null) {
+				int col = CommonUtil.convertToInt(availableGraveInfo.get("col_seq"));
+				if(col != colSeq) {
+					throw new Exception("requested col seq is not available!!");
+				}
+			} else {
+				throw new Exception("no available grave!!");
+			}
+			for(int i = 0; i < requireCnt; i++) {
+				parameter = new HashMap<String, Object>();
+				parameter.put("bunyangSeq", bunyangSeq);
+				parameter.put("coupleSeq", (i == 0 && CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) ? coupleSeq : null);
+				parameter.put("useUserSeq1", i == 0 ? userSeq : null);
+				parameter.put("useUserSeq2", null);
+				parameter.put("sectionSeq", sectionSeq);
+				parameter.put("rowSeq", rowSeq);
+				parameter.put("colSeq", colSeq+i);
+				parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_REQUESTED);
+				iRslt += commonDao.update("use.updateGraveRequestInfo", parameter);
+			}
+		}
 		return iRslt;
 	}
 	

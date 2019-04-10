@@ -196,61 +196,105 @@
     <!-- 사용가능한 동산 정보 조회 -->
     <select id="getAvailableGraveInfo" parameterType="map" resultType="map">
     	SELECT
-			section_seq, row_seq, col_seq
+			section_seq
+			,row_seq
+			,col_seq
 		FROM
 		(SELECT
-			section_seq, row_seq, count(1) cnt, min(col_seq) col_seq
-		FROM TB_BUNYANG_GRAVE_ASSIGN a
-		WHERE grave_type = #{graveType} AND assign_status = 'AVAILABLE'
-		GROUP BY section_seq, row_seq
+			section_seq
+			,row_seq
+			,min(col_seq) col_seq
+			,count(1) cnt
+		from
+		(select 
+			section_seq
+		    ,row_seq
+		    ,col_seq
+		    ,CASE WHEN @vsection_seq = a.section_seq and @vrow_seq = a.row_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+			,(@vsection_seq := a.section_seq) vsection_seq
+		    ,(@vrow_seq := a.row_seq) vrow_seq
+		from TB_BUNYANG_GRAVE_ASSIGN a, (SELECT @vsection_seq:='', @vrow_seq = 0, @rownum:=0 FROM DUAL) b
+		where grave_type = #{graveType} AND assign_status = 'AVAILABLE'
+		order by a.section_seq, a.row_seq, a.col_seq
 		) t
-		WHERE cnt >= #{cnt}
-		ORDER BY section_seq, row_seq, col_seq
+		group by section_seq, row_seq, (col_seq - rn)
+		) t
+		where cnt >= #{cnt}
+		order by section_seq, row_seq, t.col_seq
 		LIMIT 1
     </select>
     
     <!-- 사용가능한 동산 정보 조회 -->
     <select id="getAvailableSectionGraveInfo" parameterType="map" resultType="map">
     	SELECT
-			section_seq, row_seq, col_seq
+			section_seq
+			,row_seq
+			,col_seq
 		FROM
 		(SELECT
-			section_seq, row_seq, count(1) cnt, min(col_seq) col_seq
-		FROM TB_BUNYANG_GRAVE_ASSIGN a
-		WHERE a.section_seq = #{sectionSeq} and grave_type = #{graveType} AND assign_status = 'AVAILABLE'
-		GROUP BY section_seq, row_seq
+			section_seq
+			,row_seq
+			,min(col_seq) col_seq
+			,count(1) cnt
+		from
+		(select 
+			section_seq
+		    ,row_seq
+		    ,col_seq
+		    ,CASE WHEN @vsection_seq = a.section_seq and @vrow_seq = a.row_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+			,(@vsection_seq := a.section_seq) vsection_seq
+		    ,(@vrow_seq := a.row_seq) vrow_seq
+		from TB_BUNYANG_GRAVE_ASSIGN a, (SELECT @vsection_seq:='', @vrow_seq = 0, @rownum:=0 FROM DUAL) b
+		where section_seq = #{sectionSeq} AND grave_type = #{graveType} AND assign_status = 'AVAILABLE'
+		order by a.section_seq, a.row_seq, a.col_seq
 		) t
-		WHERE cnt >= #{cnt}
-		ORDER BY section_seq, row_seq, col_seq
+		group by section_seq, row_seq, (col_seq - rn)
+		) t
+		where cnt >= #{cnt}
+		order by section_seq, row_seq, t.col_seq
 		LIMIT 1
     </select>
     
     <!-- 사용가능한 동산 정보 조회(모든구역별로) -->
     <select id="getAvailableGraveInfoAll" parameterType="map" resultType="map">
-    	SELECT
+    	select
 			t.section_seq
-		    ,t.row_seq
-		    ,t.col_seq
-		    ,(select seq_no from TB_BUNYANG_GRAVE_ASSIGN ga where ga.section_seq = t.section_seq and ga.row_seq = t.row_seq and ga.col_seq = t.col_seq) seq_no
-		FROM
-		(SELECT
-			a.*
-		    ,CASE WHEN @vsection_seq = a.section_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
-		    ,(@vsection_seq := a.section_seq) vsection_seq
-		FROM
-		(SELECT
-			section_seq, row_seq, col_seq
-		FROM
-		(SELECT
-			section_seq, row_seq, count(1) cnt, min(col_seq) col_seq
-		FROM TB_BUNYANG_GRAVE_ASSIGN a
-		WHERE grave_type = #{graveType} AND assign_status = 'AVAILABLE'
-		GROUP BY section_seq, row_seq
-		) t
-		WHERE cnt >= #{cnt} 
-		) a, (SELECT @vsection_seq:='', @rownum:=0 FROM DUAL) b
-		) t
-		WHERE rn = 1
+			,t.row_seq
+			,t.col_seq
+			,(select seq_no from TB_BUNYANG_GRAVE_ASSIGN ga where ga.section_seq = t.section_seq and ga.row_seq = t.row_seq and ga.col_seq = t.col_seq) seq_no
+		from
+			(SELECT
+				a.*
+				,CASE WHEN @vsection_seq = a.section_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+				,(@vsection_seq := a.section_seq) vsection_seq
+			from
+				(SELECT
+					section_seq, row_seq, col_seq
+				FROM
+					(SELECT
+						section_seq
+						,row_seq
+						,min(col_seq) col_seq
+						,count(1) cnt
+					from
+						(select 
+							section_seq
+						    ,row_seq
+						    ,col_seq
+						    ,CASE WHEN @vsection_seq = a.section_seq and @vrow_seq = a.row_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+							,(@vsection_seq := a.section_seq) vsection_seq
+						    ,(@vrow_seq := a.row_seq) vrow_seq
+						from TB_BUNYANG_GRAVE_ASSIGN a, (SELECT @vsection_seq:='', @vrow_seq = 0, @rownum:=0 FROM DUAL) b
+						where grave_type = #{graveType} AND assign_status = 'AVAILABLE'
+						order by a.section_seq, a.row_seq, a.col_seq
+						) t
+					group by section_seq, row_seq, (col_seq - rn)
+					) t
+				where cnt >= #{cnt}
+				order by section_seq, row_seq, col_seq
+				) a, (SELECT @vsection_seq:='', @rownum:=0 FROM DUAL) b
+			) t
+		where rn = 1
     </select>
     
     <!-- 예약된 가족형 자리중에서 사용가능한 동산 정보 조회 -->
@@ -344,5 +388,90 @@
 			SET use_user_seq2 = #{useUserSeq2}, assign_status = #{assignStatus}, assign_date2 = CURRENT_TIMESTAMP
 		WHERE a.bunyang_seq = #{bunyangSeq} AND a.use_user_seq1 = #{useUserSeq1}
     </update>
+    
+    <!-- 동산 신청 정보 저장 -->
+    <update id="updateGraveRequestInfo" parameterType="map">
+    	UPDATE TB_BUNYANG_GRAVE_ASSIGN a
+			SET bunyang_seq = #{bunyangSeq},
+			use_user_seq1 = #{useUserSeq1},
+			use_user_seq2 = #{useUserSeq2},
+			couple_seq = #{coupleSeq},
+			assign_status = #{assignStatus}
+		WHERE a.section_seq = #{sectionSeq} 
+		AND a.row_seq = #{rowSeq}
+		AND a.col_seq = #{colSeq}
+    </update>
+    
+    <!-- 동산 신청 정보 저장 -->
+    <insert id="createGraveRequestInfo" parameterType="map">
+    	INSERT INTO TB_BUNYANG_GRAVE_REQUEST_INFO(
+    	BUNYANG_SEQ,
+		SECTION_SEQ,
+		ROW_SEQ,
+		COL_SEQ,
+		USE_USER_SEQ,
+		REQUEST_STATUS,
+		REQUEST_USER,
+		REQUEST_DATE
+		)
+		VALUES
+		(
+		#{bunyangSeq},
+		#{sectionSeq},
+		#{rowSeq},
+		#{colSeq},
+		#{useUserSeq},
+		'REQUESTED',
+		#{requestUser},
+		CURRENT_TIMESTAMP
+		)
+    </insert>
+    
+    <select id="getFamilyGraveRequestInfo" parameterType="map" resultType="map">
+    	SELECT
+    		a.bunyang_seq
+    		,b.use_user_seq1
+    	FROM TB_BUNYANG_INFO a INNER JOIN TB_BUNYANG_GRAVE_ASSIGN b on a.bunyang_seq = b.bunyang_seq
+    	WHERE a.bunyang_seq = #{bunyangSeq}
+    	AND a.product_type = 'FAMILY'
+    	AND b.assign_status = 'REQUESTED'
+    	AND b.use_user_seq1 is not null
+    	ORDER BY b.use_user_seq1
+    	LIMIT 1
+    </select>
+    
+    <select id="getGraveRequestList" parameterType="map" resultType="map">
+    	 SELECT
+        	a.bunyang_seq
+            ,b.bunyang_no
+            ,c.user_name
+            ,DATE_FORMAT(a.request_date, '%Y-%m-%d') request_date
+			,a.request_status
+            ,case 
+            	when a.request_status = 'REQUESTED' then '승인대기'
+                when a.request_status = 'APPROVAL' then '승인완료'
+            end as request_status_exp
+            ,d.section_seq as request_section_seq
+            ,d.row_seq as request_row_seq
+            ,d.col_seq as request_col_seq
+            ,d.seq_no as request_seq_no
+            ,e.section_seq as approval_section_seq
+            ,e.row_seq as approval_row_seq
+            ,e.col_seq as approval_col_seq
+            ,e.seq_no as approval_seq_no
+            ,DATE_FORMAT(
+            case 
+            	when a.use_user_seq = e.use_user_seq1 then e.assign_date1
+                when a.use_user_seq = e.use_user_seq2 then e.assign_date2
+            end, '%Y-%m-%d') as assign_date
+        FROM TB_BUNYANG_GRAVE_REQUEST_INFO a INNER JOIN TB_BUNYANG_INFO b on a.BUNYANG_SEQ = b.BUNYANG_SEQ
+        INNER JOIN TB_BUNYANG_REF_USER c on c.BUNYANG_SEQ = a.BUNYANG_SEQ and c.user_seq = a.use_user_seq and c.ref_type = 'USE_USER'
+        INNER JOIN TB_BUNYANG_GRAVE_ASSIGN d on a.SECTION_SEQ = d.SECTION_SEQ and a.ROW_SEQ = d.ROW_SEQ and a.COL_SEQ = d.COL_SEQ
+        LEFT OUTER JOIN TB_BUNYANG_GRAVE_ASSIGN e on a.BUNYANG_SEQ = e.BUNYANG_SEQ AND ((a.USE_USER_SEQ = e.USE_USER_SEQ1 AND e.assign_date1 is not null) or (a.USE_USER_SEQ = e.USE_USER_SEQ2 AND e.assign_date2 is not null))
+        ORDER BY CASE WHEN request_status = 'REQUESTED' then 1 else 2 end, request_date desc, b.bunyang_no
+        <if test="start != null">
+		LIMIT #{start}, #{count}
+		</if>
+    </select>
     
 </mapper>

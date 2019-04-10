@@ -49,6 +49,8 @@ public class CalvaryConstants {
 	public static final String GRAVE_ASSIGN_STATUS_HALF_OCCUPIED = "HALF_OCCUPIED";
 	/** 동산 배정 상태 : 사용예정 */
 	public static final String GRAVE_ASSIGN_STATUS_RESERVED = "RESERVED";
+	/** 동산 배정 상태 : 사용신청 */
+	public static final String GRAVE_ASSIGN_STATUS_REQUESTED = "REQUESTED";
 	/** 동산 배정 상태 : 사용가능 */
 	public static final String GRAVE_ASSIGN_STATUS_AVAILABLE = "AVAILABLE";
 	

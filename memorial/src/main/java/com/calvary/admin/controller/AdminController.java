@@ -843,15 +843,23 @@ public class AdminController {
 	/** 
 	 * 사용(봉안) 관리 페이지
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=USE_MGMT_URL)
 	public Object useMgmtHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU02_02");
+		
+		Map<String, Object> rtnMap = adminService.getGraveRequestList(searchVo);
+		List<Object> graveRequestList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
+		
 		mv.addObject("pMenuInfo", pMenuInfo);
 		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
+		mv.addObject("graveRequestList", graveRequestList);
 		mv.addObject("searchVo", searchVo);
 		mv.setViewName(ROOT_URL + USE_MGMT_URL);
 		return mv;

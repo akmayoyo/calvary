@@ -39,8 +39,8 @@
 				<a href="javascript:void(0)" style="font-size: 14px;">추모동산 배치도</a>
 			</div>
 			<div id="menu2">
-				<div class="padding-15" style="border-bottom: 1px solid #e7e7e7;">
-					<img alt="" src="${contextPath}/resources/assets/images/grave.png" style="width: 100%; border: 1px solid #f0f0f0;">
+				<div class="padding-15" style="border-bottom: 1px solid #e7e7e7; text-align: center;">
+					<img alt="" src="${contextPath}/resources/assets/images/grave.png" style="width: 100%; border: 1px solid #f0f0f0; max-width: 1002px;">
 				</div>
 			</div>
 		</div>
@@ -181,21 +181,22 @@ function showGraveMap() {
 	var colSeq = assignedInfo['colSeq'];
 	var seqNo = assignedInfo['seqNo'];
 	
-	$('#mapTitle').text('[' + sectionSeq + '구역] 사용(봉안)위치 정보');
-	$('#assignLegend').text('배정구역 (' + rowSeq + '행 - ' + seqToAlpha(colSeq) + '열)');
-	
-	common.ajax({
-		url:"${contextPath}/admin/getGraveUseList", 
-		data:{},
-		success: function(result) {
-			var sectionData = getSectionData(result, sectionSeq);
-			var gridData;
-			 if(sectionData != null && sectionData.length > 0) {
-				 gridData = getGridData(sectionData, false, 0, 15);
-				 makeGraveGrid('#grid', gridData);
-			 }
-		}
-	});
+	if(sectionSeq && rowSeq && colSeq) {
+		$('#mapTitle').text('[' + sectionSeq + '구역] 사용(봉안)위치 정보');
+		$('#assignLegend').text('배정구역 (' + rowSeq + '행 - ' + seqToAlpha(colSeq) + '열)');
+		common.ajax({
+			url:"${contextPath}/mobile/getGraveUseList", 
+			data:{},
+			success: function(result) {
+				var sectionData = getSectionData(result, sectionSeq);
+				var gridData;
+				 if(sectionData != null && sectionData.length > 0) {
+					 gridData = getGridData(sectionData, false, 0, 15);
+					 makeGraveGrid('#grid', gridData);
+				 }
+			}
+		});
+	}
 }
 
 /**
@@ -453,7 +454,8 @@ function _request() {
 	data.isReserved = isReserved;
 	
 	common.ajax({
-		url:"${contextPath}/mobile/assignGrave", 
+		//url:"${contextPath}/mobile/assignGrave", 
+		url:"${contextPath}/mobile/saveRequestGrave", 
 		data:data,
 		success: function(result) {
 			if(result && result.result) {
@@ -488,6 +490,21 @@ function seqToAlpha(seq) {
 	var seqOfA = "A".charCodeAt(0) + (seq-1);
 	var alpha = String.fromCharCode(seqOfA);
 	return alpha;
+}
+
+/**
+ * 로그아웃처리
+ */
+function _logout() {
+	common.ajax({
+		url:"${contextPath}/account/mobile/logout", 
+		data:{},
+		success: function(result) {
+			if(result) {
+				location.replace('${contextPath}/account/mobile/login');
+			}
+		}
+	});
 }
 
 </script>

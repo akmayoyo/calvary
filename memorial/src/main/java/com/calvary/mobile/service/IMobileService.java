@@ -11,6 +11,8 @@ public interface IMobileService {
 	
 	public Map<String, Object> getReservedGraveInfo(String bunyangSeq, int userSeq, int coupleSeq);
 	
+	public Map<String, Object> getFamilyGraveRequestInfo(String bunyangSeq);
+	
 	public List<Object> getContractMinister(String bunyangSeq);
 	
 	public Map<String, Object> getContract(String codeSeq);
@@ -22,4 +24,6 @@ public interface IMobileService {
 	public List<Object> getAvailableGraveInfoAll(String graveType, int cnt);
 	
 	public int assignGrave(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception;
+	
+	public int requestGrave(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception;
 }

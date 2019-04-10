@@ -128,7 +128,7 @@
 						</thead>
 						<tbody>
 							<c:forEach items="${useUserList}" var="rowItem">
-							<tr approvalYn="${not empty rowItem.approval_assign_date}" assignStatus="${rowItem.couple_assign_status}" <c:if test="${not empty rowItem.cancel_seq}">class="cancel"</c:if>>
+							<tr familyRequested="${not empty familyGraveRequestInfo}" approvalYn="${not empty bunyangInfo.use_approval_date}" assignStatus="${rowItem.couple_assign_status}" <c:if test="${not empty rowItem.cancel_seq}">class="cancel"</c:if>>
 								<td>${rowItem.user_name}</td>
 								<td>${rowItem.relation_type_name}</td>
 								<td>
@@ -147,6 +147,7 @@
 								<td>
 									<c:choose>
 										<c:when test="${rowItem.couple_assign_status == 'OCCUPIED'}">사용(봉안)중</c:when>
+										<c:when test="${rowItem.couple_assign_status == 'REQUESTED'}">신청승인중</c:when>
 										<c:otherwise>
 										<button class="btn btn-primary btn-sm" onclick="_requestGrave(this, '${rowItem.user_id}')" <c:if test="${not empty rowItem.cancel_seq}">disabled</c:if>>신청</button>
 										</c:otherwise>
@@ -190,6 +191,13 @@ function _requestGrave(btn, userId) {
 	}
 	if(tr.attr('assignStatus') == 'OCCUPIED') {
 		common.showAlert('이미 봉안된 사용자입니다.');
+		return;
+	} else if(tr.attr('assignStatus') == 'COUPLE_REQUESTED') {// 배우자의 신청건이 미승인인 경우
+		common.showAlert('배우자의 사용신청건이 승인완료 후 신청가능합니다.');
+		return;
+	}
+	if(tr.attr('familyRequested') == 'true') {
+		common.showAlert('가족형의 경우 가족 구성원중 최초 사용신청건의 승인이 완료된 후 신청가능합니다.');
 		return;
 	}
 	$('#userId').val(userId);
