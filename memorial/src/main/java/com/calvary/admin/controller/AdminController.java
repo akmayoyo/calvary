@@ -845,13 +845,13 @@ public class AdminController {
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=USE_MGMT_URL)
-	public Object useMgmtHandler(SearchVo searchVo) {
+	public Object useMgmtHandler(SearchVo searchVo, String requestStatus) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU02_02");
 		
-		Map<String, Object> rtnMap = adminService.getGraveRequestList(searchVo);
+		Map<String, Object> rtnMap = adminService.getGraveRequestList(searchVo, requestStatus);
 		List<Object> graveRequestList = (ArrayList<Object>)rtnMap.get("list");
 		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
 		searchVo.setTotalCount(total_count);
@@ -861,6 +861,7 @@ public class AdminController {
 		mv.addObject("menuList", menuList);
 		mv.addObject("graveRequestList", graveRequestList);
 		mv.addObject("searchVo", searchVo);
+		mv.addObject("requestStatus", requestStatus);
 		mv.setViewName(ROOT_URL + USE_MGMT_URL);
 		return mv;
 	}

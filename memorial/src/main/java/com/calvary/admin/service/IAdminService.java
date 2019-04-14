@@ -6,6 +6,7 @@ import java.util.Map;
 import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.vo.SearchVo;
+import com.calvary.popup.vo.ApprovalGraveVo;
 
 public interface IAdminService {
 
@@ -247,7 +248,17 @@ public interface IAdminService {
 	/** 
 	 * 사용신청 리스트 조회
 	 */
-	public Map<String, Object> getGraveRequestList(SearchVo searchVo);
+	public Map<String, Object> getGraveRequestList(SearchVo searchVo, String requestStatus);
+	
+	/** 
+	 * 사용신청된 정보로부터 승인해야할 동산 정보 리스트 조회
+	 */
+	public List<Object> getApprovalGraveList(String bunyangSeq, String userSeq, String coupleSeq);
+	
+	/** 
+	 * 사용신청 승인
+	 */
+	public int approvalRequestGrave(ApprovalGraveVo vo) throws Exception;
 	
 	/** 
 	 * 추모동산 사용현황 리스트 조회
@@ -288,6 +299,16 @@ public interface IAdminService {
 	 * 사용가능한 동산 정보 조회
 	 */
 	public Map<String, Object> getAvailableGraveInfo(String graveType, int cnt);
+	
+	/**
+	 * 신청한 자리가 이미 배정된 자리인지 체크
+	 */
+	public int checkAvaliableGrave(String bunyangSeq, String userSeq, int coupleSeq, String assignStatus, String sectionSeq, String rowSeq, String colSeq);
+	
+	/**
+	 * 사용신청건이 이미 승인됐는지 체크
+	 */
+	public int checkApprovalStatus(String bunyangSeq, String userSeq);
 	
 	
 	

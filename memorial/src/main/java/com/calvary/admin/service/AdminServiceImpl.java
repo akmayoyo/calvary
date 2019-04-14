@@ -18,6 +18,8 @@ import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.CommonUtil;
 import com.calvary.common.util.SessionUtil;
 import com.calvary.common.vo.SearchVo;
+import com.calvary.popup.vo.ApprovalGraveVo;
+import com.calvary.popup.vo.GraveInfoVo;
 
 @Service
 public class AdminServiceImpl implements IAdminService {
@@ -964,11 +966,12 @@ public class AdminServiceImpl implements IAdminService {
 	 * 사용신청 리스트 조회
 	 */
 	@SuppressWarnings("unchecked")
-	public Map<String, Object> getGraveRequestList(SearchVo searchVo) {
+	public Map<String, Object> getGraveRequestList(SearchVo searchVo, String requestStatus) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		parameter.put("requestStatus", requestStatus);
 		List<Object> list = commonDao.selectList("use.getGraveRequestList", parameter);
 		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getGraveRequestList", parameter);
 		int total_count = 0;
@@ -979,6 +982,98 @@ public class AdminServiceImpl implements IAdminService {
 		rtnMap.put("list", list);
 		rtnMap.put("total_count", total_count);
 		return rtnMap;
+	}
+	
+	/** 
+	 * 사용신청된 정보로부터 승인해야할 동산 정보 리스트 조회
+	 */
+	public List<Object> getApprovalGraveList(String bunyangSeq, String userSeq, String coupleSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("userSeq", userSeq);
+		parameter.put("coupleSeq", coupleSeq);
+		
+		// 부부형 배우자가 이미 사용중이거나 가족형의 구성원이 미리 예약한 자리가 있으면 해당 정보 반환
+		List<Object> approvalGraveList = commonDao.selectList("use.getReservedGraveInfo", parameter);
+		
+		// 배정된 자리가 없을 경우 신청된 정보 반환
+		if(approvalGraveList == null || approvalGraveList.size() == 0) {
+			approvalGraveList = commonDao.selectList("use.getApprovalGraveList", parameter);
+		}
+		return approvalGraveList;
+	}
+	
+	/** 
+	 * 사용신청 승인
+	 */
+	@Transactional
+	public int approvalRequestGrave(ApprovalGraveVo vo) throws Exception {
+		int iRslt = 0;
+		Map<String, Object> parameter = null;
+		GraveInfoVo info = null;
+		// 신규 신청된건
+		if(CalvaryConstants.GRAVE_ASSIGN_STATUS_REQUESTED.equals(vo.getAssignStatus())) {
+			
+			for(int i = 0; i < vo.getRequestGraveList().size(); i++) {
+				info = vo.getRequestGraveList().get(i);
+				parameter = new HashMap<String, Object>();
+				parameter.put("sectionSeq", info.getSectionSeq());
+				parameter.put("rowSeq", info.getRowSeq());
+				parameter.put("colSeq", info.getColSeq());
+				iRslt += commonDao.update("use.clearRequestGrave", parameter);
+			}
+			for(int i = 0; i < vo.getApprovalGraveList().size(); i++) {
+				info = vo.getApprovalGraveList().get(i);
+				parameter = new HashMap<String, Object>();
+				parameter.put("bunyangSeq", vo.getBunyangSeq());
+				if(i == 0) {
+					parameter.put("useUserSeq1", vo.getUserSeq());
+					parameter.put("coupleSeq", vo.getCoupleSeq() >= 0 ? vo.getCoupleSeq() : null);
+					parameter.put("assignStatus", null);
+				} else{
+					parameter.put("useUserSeq1", null);
+					parameter.put("coupleSeq", null);
+					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_RESERVED);
+				}
+				parameter.put("sectionSeq", info.getSectionSeq());
+				parameter.put("rowSeq", info.getRowSeq());
+				parameter.put("colSeq", info.getColSeq());
+				iRslt += commonDao.update("use.updateRequestGrave", parameter);
+			}
+			parameter = new HashMap<String, Object>();
+			parameter.put("bunyangSeq", vo.getBunyangSeq());
+			parameter.put("useUserSeq", vo.getUserSeq());
+			parameter.put("approvalUser", SessionUtil.getCurrentUserId());
+			iRslt += commonDao.update("use.approvalGraveRequestInfo", parameter);
+			
+		} else {// 부부형 또는 가족형으로 미리 배정된 자리가 있는경우
+			if(vo.getApprovalGraveList() != null && vo.getApprovalGraveList().size() > 0) {
+				info = vo.getApprovalGraveList().get(0);
+				if(CalvaryConstants.GRAVE_ASSIGN_STATUS_RESERVED.equals(vo.getAssignStatus())) {
+					parameter = new HashMap<String, Object>();
+					parameter.put("bunyangSeq", vo.getBunyangSeq());
+					parameter.put("useUserSeq1", vo.getUserSeq());
+					parameter.put("coupleSeq", vo.getCoupleSeq() >= 0 ? vo.getCoupleSeq() : null);
+					parameter.put("sectionSeq", info.getSectionSeq());
+					parameter.put("rowSeq", info.getRowSeq());
+					parameter.put("colSeq", info.getColSeq());
+					iRslt += commonDao.update("use.updateReservedGrave", parameter);
+				} else if(CalvaryConstants.GRAVE_ASSIGN_STATUS_HALF_OCCUPIED.equals(vo.getAssignStatus())) {
+					parameter = new HashMap<String, Object>();
+					parameter.put("bunyangSeq", vo.getBunyangSeq());
+					parameter.put("useUserSeq2", vo.getUserSeq());
+					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED);
+					parameter.put("coupleSeq", vo.getCoupleSeq() >= 0 ? vo.getCoupleSeq() : null);
+					iRslt += commonDao.update("use.updateCoupleGrave", parameter);
+				}
+				parameter = new HashMap<String, Object>();
+				parameter.put("bunyangSeq", vo.getBunyangSeq());
+				parameter.put("useUserSeq", vo.getUserSeq());
+				parameter.put("approvalUser", SessionUtil.getCurrentUserId());
+				iRslt += commonDao.update("use.approvalGraveRequestInfo", parameter);
+			}
+		}
+		return iRslt;
 	}
 	
 	/** 
@@ -1202,6 +1297,43 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("cnt", cnt);
 		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("use.getAvailableGraveInfo", parameter); 
 		return rtnMap;
+	}
+	
+	/**
+	 * 신청한 자리가 이미 배정된 자리인지 체크
+	 */
+	@SuppressWarnings("unchecked")
+	public int checkAvaliableGrave(String bunyangSeq, String userSeq, int coupleSeq, String assignStatus, String sectionSeq, String rowSeq, String colSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("userSeq", userSeq);
+		parameter.put("coupleSeq", coupleSeq >= 0 ? coupleSeq : null);
+		parameter.put("assignStatus", assignStatus);
+		parameter.put("sectionSeq", sectionSeq);
+		parameter.put("rowSeq", rowSeq);
+		parameter.put("colSeq", colSeq);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("use.checkAvaliableGrave", parameter); 
+		int rtnVal = 0;
+		if(rtnMap != null) {
+			rtnVal = CommonUtil.convertToInt(rtnMap.get("cnt"));
+		}
+		return rtnVal;
+	}
+	
+	/**
+	 * 사용신청건이 이미 승인됐는지 체크
+	 */
+	@SuppressWarnings("unchecked")
+	public int checkApprovalStatus(String bunyangSeq, String userSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("userSeq", userSeq);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("use.checkApprovalStatus", parameter); 
+		int rtnVal = 0;
+		if(rtnMap != null) {
+			rtnVal = CommonUtil.convertToInt(rtnMap.get("cnt"));
+		}
+		return rtnVal;
 	}
 	
 	

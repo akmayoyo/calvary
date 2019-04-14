@@ -424,7 +424,7 @@ function getRectFillColor(d) {
 		return "#C785C8";
 	} else if(d.assign_status == 'HALF_OCCUPIED') {
 		return "#C785C8";
-	} else if(d.assign_status == 'RESERVED') {
+	} else if(d.assign_status == 'RESERVED' || d.assign_status == 'REQUESTED') {
 		return "#47CCCA";
 	} else if(!d.is_rownum){
 		return "#fff";

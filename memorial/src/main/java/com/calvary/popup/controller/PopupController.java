@@ -28,6 +28,8 @@ import com.calvary.common.vo.SearchVo;
 import com.calvary.excel.ExcelForms;
 import com.calvary.excel.service.IExcelService;
 import com.calvary.popup.service.IPopupService;
+import com.calvary.popup.vo.ApprovalGraveVo;
+import com.calvary.popup.vo.GraveInfoVo;
 import com.calvary.popup.vo.SelectUserVo;
 import com.calvary.popup.vo.UpdateBunyangVo;
 import com.calvary.sysadmin.service.ISysAdminService;
@@ -54,6 +56,8 @@ public class PopupController {
 	public static final String SAVE_MANUAL_PAYMENT = "/saveManualPayment";
 	public static final String UPDATE_BUNYANG_PROGRESS = "/updateBunyangProgress";
 	public static final String SAVE_PAYMENT_ONE = "/savepaymentone";
+	public static final String APPROVAL_REQUEST_GRAVE = "/approvalRequestGrave";
+	public static final String SAVE_APPROVAL_REQUEST_GRAVE = "/saveApprovalRequestGrave";
 	/** 분양상세정보 페이지  URL */
 	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
 	/** comment 입력 팝업 URL */
@@ -658,5 +662,43 @@ public class PopupController {
 		mv.addObject("findType", findType);
 		mv.setViewName(ROOT_URL + FIND_ID_PWD_URL);
 		return mv;
+	}
+	
+	@RequestMapping(value=APPROVAL_REQUEST_GRAVE)
+	public Object approvalRequestGraveHandler(String bunyangSeq, String userSeq, String userId, String coupleSeq) {
+		List<Object> approvalGraveList = adminService.getApprovalGraveList(bunyangSeq, userSeq, coupleSeq);
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		Map<String, Object> requestUserInfo = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId);
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("userSeq", userSeq);
+		mv.addObject("coupleSeq", coupleSeq);
+		mv.addObject("approvalGraveList", approvalGraveList);
+		mv.addObject("bunyangInfo", bunyangInfo);
+		mv.addObject("requestUserInfo", requestUserInfo);
+		mv.setViewName(ROOT_URL + APPROVAL_REQUEST_GRAVE);
+		return mv;
+	}
+	
+	@RequestMapping(value=SAVE_APPROVAL_REQUEST_GRAVE)
+	@ResponseBody
+	public Object saveApprovalRequestGraveHandler(@RequestBody ApprovalGraveVo vo) throws Exception {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean bRslt = false;
+		int errorCode = 0;
+		int iRslt = 0;
+		String bunyangSeq = vo.getBunyangSeq();
+		String userSeq = vo.getUserSeq();
+		// 이미 승인이 된 건인지 체크 
+		int cnt = adminService.checkApprovalStatus(bunyangSeq, userSeq);
+		if(cnt > 0) {
+			iRslt = adminService.approvalRequestGrave(vo);
+			bRslt = iRslt > 0;
+		} else {
+			errorCode = 1;
+		}
+		rtnMap.put("result", bRslt);
+		rtnMap.put("errorCode", errorCode);
+		return rtnMap;
 	}
 }

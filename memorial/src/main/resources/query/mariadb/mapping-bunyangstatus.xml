@@ -355,7 +355,7 @@
         	grave_type
         	,section_seq
             ,sum(case when assign_status = 'AVAILABLE' then 2 else 0 end) available_cnt
-            ,sum(case when assign_status = 'RESERVED' then 2 when assign_status = 'HALF_OCCUPIED' then 1 else 0 end) reserved_cnt
+            ,sum(case when assign_status = 'RESERVED' then 2 when assign_status = 'HALF_OCCUPIED' then 1 when assign_status = 'REQUESTED' then 2 else 0 end) reserved_cnt
             ,sum(case when assign_status = 'OCCUPIED' then 2 when assign_status = 'HALF_OCCUPIED' then 1 else 0 end) occupied_cnt
             ,count(1) * 2 total_cnt
         from TB_BUNYANG_GRAVE_ASSIGN a
@@ -370,7 +370,7 @@
         	'sub_total' as grave_type
         	,'sub_total' as section_seq
             ,sum(case when assign_status = 'AVAILABLE' then 2 else 0 end) available_cnt
-            ,sum(case when assign_status = 'RESERVED' then 2 when assign_status = 'HALF_OCCUPIED' then 1 else 0 end) reserved_cnt
+            ,sum(case when assign_status = 'RESERVED' then 2 when assign_status = 'HALF_OCCUPIED' then 1 when assign_status = 'REQUESTED' then 2 else 0 end) reserved_cnt
             ,sum(case when assign_status = 'OCCUPIED' then 2 when assign_status = 'HALF_OCCUPIED' then 1 else 0 end) occupied_cnt
             ,count(1) * 2 total_cnt
         from TB_BUNYANG_GRAVE_ASSIGN a
@@ -385,7 +385,7 @@
         	grave_type
         	,section_seq
             ,sum(case when assign_status = 'AVAILABLE' then 1 else 0 end) available_cnt
-            ,sum(case when assign_status = 'RESERVED' then 1 else 0 end) reserved_cnt
+            ,sum(case when assign_status in ('RESERVED', 'REQUESTED') then 1 else 0 end) reserved_cnt
             ,sum(case when assign_status = 'OCCUPIED' then 1 else 0 end) occupied_cnt
             ,count(1) total_cnt
         from TB_BUNYANG_GRAVE_ASSIGN a
@@ -400,7 +400,7 @@
         	'sub_total' as grave_type
         	,'sub_total' as section_seq
             ,sum(case when assign_status = 'AVAILABLE' then 1 else 0 end) available_cnt
-            ,sum(case when assign_status = 'RESERVED' then 1 else 0 end) reserved_cnt
+            ,sum(case when assign_status in ('RESERVED', 'REQUESTED') then 1 else 0 end) reserved_cnt
             ,sum(case when assign_status = 'OCCUPIED' then 1 else 0 end) occupied_cnt
             ,count(1) total_cnt
         from TB_BUNYANG_GRAVE_ASSIGN a
@@ -417,9 +417,9 @@
             	case when assign_status = 'AVAILABLE' then 1 else 0 end
             end) available_cnt
             ,sum(case when grave_type = 'COUPLE' then 
-            	case when assign_status = 'RESERVED' then 2 when assign_status = 'HALF_OCCUPIED' then 1 else 0 end
+            	case when assign_status = 'RESERVED' then 2 when assign_status = 'HALF_OCCUPIED' then 1 when assign_status = 'REQUESTED' then 2 else 0 end
             else
-            	case when assign_status = 'RESERVED' then 1 else 0 end
+            	case when assign_status in ('RESERVED', 'REQUESTED') then 1 else 0 end
             end) reserved_cnt
             ,sum(case when grave_type = 'COUPLE' then 
             	case when assign_status = 'OCCUPIED' then 2 when assign_status = 'HALF_OCCUPIED' then 1 else 0 end
