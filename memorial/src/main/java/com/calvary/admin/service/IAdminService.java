@@ -258,7 +258,7 @@ public interface IAdminService {
 	/** 
 	 * 사용신청 승인
 	 */
-	public int approvalRequestGrave(ApprovalGraveVo vo) throws Exception;
+	public int approvalRequestGrave(ApprovalGraveVo vo, String approvalUser) throws Exception;
 	
 	/** 
 	 * 추모동산 사용현황 리스트 조회
@@ -309,6 +309,11 @@ public interface IAdminService {
 	 * 사용신청건이 이미 승인됐는지 체크
 	 */
 	public int checkApprovalStatus(String bunyangSeq, String userSeq);
+	
+	/**
+	 * 신청후 1시간이 경과된 사용신청 리스트 조회
+	 */
+	public List<Object> getNotApprovalGraveList();
 	
 	
 	

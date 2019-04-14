@@ -612,6 +612,10 @@ function _confirm() {
 		success: function(result) {
 			if(result.result) {
 				common.showAlert('승인되었습니다.');
+				if (window.opener && window.opener.approvalGraveCallBack != 'undefined') {
+			        window.opener.approvalGraveCallBack(true);
+			    }
+				common.closeWindow();
     		} else {
     			if(result.errorCode == 1) {
     				common.showAlert('이미 승인된 사용자입니다.');
@@ -624,11 +628,7 @@ function _confirm() {
 			common.showAlert('승인시 에러가 발생하였습니다.');
 		}
 	});
-	
-//     if (window.opener && window.opener.registDateCallBack != 'undefined') {
-//         window.opener.registDateCallBack(dateVal);
-//         common.closeWindow();
-//     }
+    
 }
 
 </script>

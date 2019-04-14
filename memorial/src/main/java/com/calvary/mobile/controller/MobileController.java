@@ -99,8 +99,9 @@ public class MobileController {
 		mv.setViewName(ROOT_URL + REQUEST_GRAVE);
 		boolean isOccupied = false;
 		if(useUserInfo != null) {
-			// 이미 사용중인 사용자인지 체크
-			if(CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED.equals(useUserInfo.get("couple_assign_status"))) {
+			// 이미 사용중이거나 신청중인 사용자인지 체크
+			if(CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED.equals(useUserInfo.get("couple_assign_status")) || 
+					CalvaryConstants.GRAVE_ASSIGN_STATUS_REQUESTED.equals(useUserInfo.get("request_status"))) {
 				isOccupied = true;
 			}
 			if(!isOccupied) {

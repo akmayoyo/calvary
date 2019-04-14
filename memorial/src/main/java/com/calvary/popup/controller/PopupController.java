@@ -692,7 +692,7 @@ public class PopupController {
 		// 이미 승인이 된 건인지 체크 
 		int cnt = adminService.checkApprovalStatus(bunyangSeq, userSeq);
 		if(cnt > 0) {
-			iRslt = adminService.approvalRequestGrave(vo);
+			iRslt = adminService.approvalRequestGrave(vo, null);
 			bRslt = iRslt > 0;
 		} else {
 			errorCode = 1;

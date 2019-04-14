@@ -146,8 +146,8 @@
 								</td>
 								<td>
 									<c:choose>
-										<c:when test="${rowItem.couple_assign_status == 'OCCUPIED'}">사용(봉안)중</c:when>
-										<c:when test="${rowItem.couple_assign_status == 'REQUESTED'}">신청승인중</c:when>
+										<c:when test="${rowItem.request_status == 'APPROVAL'}">사용(봉안)중</c:when>
+										<c:when test="${rowItem.request_status == 'REQUESTED'}">신청승인중</c:when>
 										<c:otherwise>
 										<button class="btn btn-primary btn-sm" onclick="_requestGrave(this, '${rowItem.user_id}')" <c:if test="${not empty rowItem.cancel_seq}">disabled</c:if>>신청</button>
 										</c:otherwise>

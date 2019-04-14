@@ -147,7 +147,7 @@ int currDay = currDt.get(Calendar.DATE);
 </div>
 
 <!-- 알림 메세지 확인 및 수신인 입력-->
-<div id="registContact" class="m_contents">
+<div id="registContact" class="m_contents" style="display:none;">
 	
 	<!-- 아코디언 메뉴 -->
 	<div id="m_menu" class="m_menu">

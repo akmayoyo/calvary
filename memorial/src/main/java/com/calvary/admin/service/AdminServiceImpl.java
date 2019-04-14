@@ -1,6 +1,8 @@
 package com.calvary.admin.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1007,7 +1009,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * 사용신청 승인
 	 */
 	@Transactional
-	public int approvalRequestGrave(ApprovalGraveVo vo) throws Exception {
+	public int approvalRequestGrave(ApprovalGraveVo vo, String approvalUser) throws Exception {
 		int iRslt = 0;
 		Map<String, Object> parameter = null;
 		GraveInfoVo info = null;
@@ -1043,7 +1045,7 @@ public class AdminServiceImpl implements IAdminService {
 			parameter = new HashMap<String, Object>();
 			parameter.put("bunyangSeq", vo.getBunyangSeq());
 			parameter.put("useUserSeq", vo.getUserSeq());
-			parameter.put("approvalUser", SessionUtil.getCurrentUserId());
+			parameter.put("approvalUser", StringUtils.isEmpty(approvalUser) ? SessionUtil.getCurrentUserId() : approvalUser);
 			iRslt += commonDao.update("use.approvalGraveRequestInfo", parameter);
 			
 		} else {// 부부형 또는 가족형으로 미리 배정된 자리가 있는경우
@@ -1069,9 +1071,19 @@ public class AdminServiceImpl implements IAdminService {
 				parameter = new HashMap<String, Object>();
 				parameter.put("bunyangSeq", vo.getBunyangSeq());
 				parameter.put("useUserSeq", vo.getUserSeq());
-				parameter.put("approvalUser", SessionUtil.getCurrentUserId());
+				parameter.put("approvalUser", StringUtils.isEmpty(approvalUser) ? SessionUtil.getCurrentUserId() : approvalUser);
 				iRslt += commonDao.update("use.approvalGraveRequestInfo", parameter);
 			}
+		}
+		// 30년 선납 관리비 납부정보 생성
+		if(iRslt > 0) {
+			String maintSeq = String.valueOf(commonService.getSeqNexVal("MAINT_SEQ"));
+			parameter = new HashMap<String, Object>();
+			parameter.put("bunyangSeq", vo.getBunyangSeq());
+			parameter.put("approvalDate", new SimpleDateFormat("yyyyMMdd").format(new Date()));
+			parameter.put("userSeq", vo.getUserSeq());
+			parameter.put("maintSeq", maintSeq);
+			iRslt += commonDao.insert("admin.createUseMaintPaymentInfo", parameter);
 		}
 		return iRslt;
 	}
@@ -1334,6 +1346,15 @@ public class AdminServiceImpl implements IAdminService {
 			rtnVal = CommonUtil.convertToInt(rtnMap.get("cnt"));
 		}
 		return rtnVal;
+	}
+	
+	/**
+	 * 신청후 1시간이 경과된 사용신청 리스트 조회
+	 */
+	public List<Object> getNotApprovalGraveList() {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		List<Object> list = commonDao.selectList("use.getNotApprovalGraveList", parameter); 
+		return list;
 	}
 	
 	

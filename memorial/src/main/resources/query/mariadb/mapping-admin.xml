@@ -364,6 +364,7 @@
 			b.product_type,
 			b.assign_status,
 			b.seq_no,
+			(select request_status from TB_BUNYANG_GRAVE_REQUEST_INFO gr where gr.bunyang_seq = a.bunyang_seq and gr.use_user_seq = a.user_seq) request_status,
 			case 
 				when b.assign_status = 'HALF_OCCUPIED' then 
 					case when a.user_seq = b.use_user_seq1 then 'OCCUPIED' 
@@ -552,6 +553,22 @@
 		year(str_to_date(#{approvalDate},'%Y%m%d')),
 		'N',
 		'BEFORE_USE'
+		)
+	</insert>
+	
+	<!-- 사용신청승인시 관리비 납부정보 생성 -->
+	<insert id="createUseMaintPaymentInfo" parameterType="map">
+		insert into TB_BUNYANG_MAINT_PAYMENT_INFO( MAINT_SEQ, BUNYANG_SEQ,USER_SEQ,PAYMENT_PRICE,MAINT_START_DATE,MAINT_END_DATE,MAINT_YEAR,PAYMENT_YN, PAYMENT_TYPE )
+		values(
+		#{maintSeq},
+		#{bunyangSeq}, 
+		#{userSeq}, 
+		(select code_value * 30 from TB_COM_CODE a WHERE a.CODE_SEQ = 'MAINT_PRICE' ),
+		str_to_date(#{approvalDate},'%Y%m%d'), 
+		DATE_ADD(DATE_ADD(str_to_date(#{approvalDate},'%Y%m%d'), INTERVAL 30 YEAR), INTERVAL -1 DAY), 
+		year(str_to_date(#{approvalDate},'%Y%m%d')),
+		'N',
+		'AFTER_USE'
 		)
 	</insert>
 	

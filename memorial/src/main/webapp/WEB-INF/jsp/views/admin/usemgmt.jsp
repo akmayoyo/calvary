@@ -142,9 +142,14 @@ function approvalRequestGrave(btn) {
 	var userSeq = tr.attr('userSeq');
 	var coupleSeq = tr.attr('coupleSeq');
 	var userId = tr.attr('userId');
-	var winoption = {width:1024, height:820};
+	var winoption = {width:1024, height:890};
 	var param = {bunyangSeq: bunyangSeq, userSeq: userSeq, userId: userId, coupleSeq: coupleSeq};
 	common.openWindow("${contextPath}/popup/approvalRequestGrave", "popApprovalRequestGrave", winoption, param);
+	window.approvalGraveCallBack = function(result) {
+		var frm = document.getElementById("frm");
+		frm.action = "${contextPath}/admin/usemgmt";
+		frm.submit();
+	}
 }
 
 </script>

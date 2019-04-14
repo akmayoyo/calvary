@@ -585,4 +585,43 @@
 		AND a.request_status = 'REQUESTED'
     </select>
     
+    <select id="getNotApprovalGraveList" parameterType="map" resultType="map">
+    	<![CDATA[
+		SELECT
+        	a.bunyang_seq
+        	,a.use_user_seq
+            ,b.bunyang_no
+            ,c.user_id
+            ,c.user_name
+            ,c.couple_seq
+            ,DATE_FORMAT(a.request_date, '%Y-%m-%d') request_date
+            ,d.section_seq
+            ,d.row_seq
+            ,d.col_seq
+            ,d.seq_no
+            ,d.assign_status
+            ,b.product_type
+        FROM TB_BUNYANG_GRAVE_REQUEST_INFO a INNER JOIN TB_BUNYANG_INFO b on a.BUNYANG_SEQ = b.BUNYANG_SEQ
+        INNER JOIN TB_BUNYANG_REF_USER c on c.BUNYANG_SEQ = a.BUNYANG_SEQ and c.user_seq = a.use_user_seq and c.ref_type = 'USE_USER'
+        INNER JOIN TB_BUNYANG_GRAVE_ASSIGN d on a.SECTION_SEQ = d.SECTION_SEQ and a.ROW_SEQ = d.ROW_SEQ and a.COL_SEQ = d.COL_SEQ
+        WHERE a.request_date < DATE_ADD(CURRENT_TIMESTAMP(), interval -1 hour) 
+    	and a.REQUEST_STATUS = 'REQUESTED'
+    	ORDER BY a.request_date, b.bunyang_no
+		]]>
+    </select>
+    
+    <select id="getFamilyRequestGraveList" parameterType="map" resultType="map">
+    	SELECT
+        	a.section_seq
+        	,a.row_seq
+        	,a.col_seq
+        	,a.seq_no
+        FROM TB_BUNYANG_GRAVE_ASSIGN a
+        WHERE a.bunyang_seq = #{bunyangSeq}
+        AND a.assign_status = 'REQUESTED'
+        AND a.use_user_seq1 is null
+        AND a.use_user_seq2 is null
+    </select>
+    
+    
 </mapper>
