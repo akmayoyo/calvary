@@ -246,5 +246,12 @@
 		FROM TB_COM_MENU a 
 		WHERE a.menu_seq = #{menuId}
 	</insert>
+	
+	<select id="getMsgContent" parameterType="map" resultType="map">
+		select
+			msg_key,msg_type,msg_contents,msg_desc,msg_subject
+		from TB_COM_SMS_MSG
+		where msg_key = #{msgKey}
+	</select>
 
 </mapper>

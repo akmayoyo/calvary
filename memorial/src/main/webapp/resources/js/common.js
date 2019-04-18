@@ -360,6 +360,35 @@
 		}
 		return sRtn;
 	}
+	
+	var sendSms = function(vo, successFunc, errorFunc) {
+		var sendSmsVo = $.extend(true, {
+			msgKey:null,
+			msgType:'S',
+			msgContents:null,
+			sender:null,
+			receivers:null,
+			subject:null,
+			sequences:null
+		}, vo);
+		
+		ajax({
+			url:"/commrest/sendSms", 
+			data:JSON.stringify(sendSmsVo),
+			contentType: 'application/json',
+			success: function(result) {
+				if(successFunc != undefined) {
+					successFunc(result);
+				}
+			},
+			error: function(xhr, status, message) {
+				showAlert('SMS 전송시 에러가 발생하였습니다.');
+				if(errorFunc != undefined) {
+					errorFunc(xhr, status, message);
+				}
+			}
+		});
+	}
 
 	var common = {};
 	common.ajax = ajax;
@@ -379,6 +408,7 @@
 	common.isValidPhone = isValidPhone;
 	common.isVisible = isVisible;
 	common.trimAll = trimAll;
+	common.sendSms = sendSms;
 
 	window.common = common;
 })();

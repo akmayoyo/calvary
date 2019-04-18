@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,8 +20,11 @@ import com.calvary.common.constant.CalvaryConstants;
 import com.calvary.common.dao.CommonDao;
 import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.CommonUtil;
+import com.calvary.common.util.SMSUtil;
 import com.calvary.common.util.SessionUtil;
+import com.calvary.common.vo.ResultSmsVo;
 import com.calvary.common.vo.SearchVo;
+import com.calvary.common.vo.SendSmsVo;
 import com.calvary.popup.vo.ApprovalGraveVo;
 import com.calvary.popup.vo.GraveInfoVo;
 
@@ -30,6 +35,9 @@ public class AdminServiceImpl implements IAdminService {
 	private CommonDao commonDao;
 	@Autowired
 	private ICommonService commonService;
+	
+	private static final Logger logger = LoggerFactory.getLogger(AdminServiceImpl.class);
+	private static final Logger errLogger = LoggerFactory.getLogger("ERROR_LOGGER");
 	
 	
 	//===============================================================================
@@ -478,7 +486,7 @@ public class AdminServiceImpl implements IAdminService {
 	 */
 	@SuppressWarnings("unchecked")
 	@Transactional(rollbackFor=Exception.class)
-	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks, String[] maintSeqs) throws Exception {
+	public int createPaymentHistory(String[] bunyangSeqs, int[] paymentAmounts, String[] paymentMethods, String[] paymentDates, String[] paymentDivisions, String[] paymentTypes, String[] paymentUsers, String[] remarks, String[] maintSeqs, String sendSmsYn) throws Exception {
 		int iRslt = 0;
 		if(bunyangSeqs != null && bunyangSeqs.length > 0) {
 			for(int i = 0; i < bunyangSeqs.length; i++) {
@@ -519,7 +527,7 @@ public class AdminServiceImpl implements IAdminService {
 								param.put("remark", remarks[i]);
 								param.put("maintSeq", maintSeqs[i]);
 								param.put("createUser", SessionUtil.getCurrentUser().getUserId());
-								iRslt += commonDao.insert("contract.insertDownPayment", param);
+								iRslt += insertPaymentAndSendSms(param, sendSmsYn);
 								paymentAmount = paymentAmount - requiredContractPrice;
 							}
 						}
@@ -541,7 +549,7 @@ public class AdminServiceImpl implements IAdminService {
 				param.put("remark", remarks[i]);
 				param.put("maintSeq", maintSeqs[i]);
 				param.put("createUser", SessionUtil.getCurrentUser().getUserId());
-				iRslt += commonDao.insert("contract.insertDownPayment", param);
+				iRslt += insertPaymentAndSendSms(param, sendSmsYn);
 				// 관리비 납부의 경우 관리비 납부 대상 정보도 납부상태로 업데이트 해줌
 				if(CalvaryConstants.PAYMENT_DIVISION_DEPOSIT.equals(paymentDivision)
 						&& CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT.equals(paymentType)) {
@@ -550,6 +558,48 @@ public class AdminServiceImpl implements IAdminService {
 				
 				//createPaymentHistory(bunyangSeqs[i], paymentAmounts[i], paymentMethods[i], paymentDates[i], paymentDivisions[i], paymentTypes[i], paymentUsers[i], remarks[i]);
 			}
+		}
+		return iRslt;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private int insertPaymentAndSendSms(Map<String, Object> param, String sendSmsYn) throws Exception {
+		int iRslt = 0;
+		iRslt = commonDao.insert("contract.insertDownPayment", param);
+		try {
+			if(iRslt > 0 && "Y".equals(sendSmsYn)) {
+				String bunyangSeq = (String)param.get("bunyangSeq");
+				if(CalvaryConstants.PAYMENT_DIVISION_DEPOSIT.equals(param.get("paymentDivision"))) {
+					List<Object> applyUserList = getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER);
+					if(applyUserList != null && applyUserList.size() > 0) {
+						Map<String, Object> applyUser = (HashMap<String, Object>)applyUserList.get(0);
+						String mobile = (String)applyUser.get("mobile");
+						Map<String, Object> tmp = commonService.getSmsMsg("M0004");
+						if(tmp != null && !StringUtils.isEmpty(mobile)) {
+							String msgContents = (String)tmp.get("msg_contents");
+							String msgType = (String)tmp.get("msg_type");
+							String subject = (String)tmp.get("msg_subject");
+							SendSmsVo smsVo = new SendSmsVo();
+							String paymentDate = (String)param.get("paymentDate");
+							if(!StringUtils.isEmpty(paymentDate) && paymentDate.length() == 8) {
+								paymentDate = paymentDate.substring(2, 4) + "/" + paymentDate.substring(4, 6) + "/" + paymentDate.substring(6, 8);
+							}
+							String paymentAmount = CommonUtil.getThousandSeperatorFormatString(CommonUtil.convertToInt(param.get("paymentAmount"))) + "원";
+							String[] sequences = new String[] {(String)applyUser.get("user_name"), paymentDate, paymentAmount};
+							msgContents = SMSUtil.getMsgContents(msgContents, sequences);
+							smsVo.setMsgContents(msgContents);
+							smsVo.setMsgType(msgType);
+							smsVo.setReceivers(mobile);
+							smsVo.setSubject(subject);
+							ResultSmsVo resultVo = SMSUtil.sendSms(smsVo);
+							logger.info(smsVo.toString());
+							logger.info(resultVo.toString());
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			errLogger.error("insertPaymentAndSendSms error occured!!", e);
 		}
 		return iRslt;
 	}

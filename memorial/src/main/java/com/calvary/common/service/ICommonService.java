@@ -28,4 +28,6 @@ public interface ICommonService {
 	 * 메뉴 접속 이력 생성
 	 */
 	public int createMenuAccessLog(String loginUser, String loginIP, String deviceType, String menuId) throws Exception;
+	
+	public Map<String, Object> getSmsMsg(String msgKey);
 }

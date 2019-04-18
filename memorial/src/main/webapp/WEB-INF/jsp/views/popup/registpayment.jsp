@@ -323,7 +323,7 @@ function _savePayment() {
     var fullPaymentBunyangSeqs = [];// 분양잔금이 모두 입금되어 완납상태로 변경해야될 분양건
     var bValidate = true;
     var summaryByBunyangSeq = {};// 계약번호별 입력된 납입금정보 합산을 위한 storage
-    
+    var existSmsReceiver = false;
     $('#tblList tbody tr').each(function(idx) {
         var tr = $(this);
         var data = tr.find('select[name="bunyangSeq"]').select2('data');
@@ -436,7 +436,10 @@ function _savePayment() {
             	summaryByBunyangSeq[bunyang_seq]['accum_balance_payment'] += payment_amount; 
             } else if(payment_type == '<%=CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT%>') {// 관리비
             	summaryByBunyangSeq[bunyang_seq]['accum_maint_payment'] += payment_amount; 
-            }	
+            }
+            if(payment_division == 'DEPOSIT') {
+            	existSmsReceiver = true;
+            }
         }
         bunyangSeqs.push(bunyang_seq);
         paymentDates.push(payment_date);
@@ -501,6 +504,9 @@ function _savePayment() {
     paymentInfo['maintSeqs'] = maintSeqs; 
     paymentInfo['contractBunyangSeqs'] = contractBunyangSeqs; 
     paymentInfo['fullPaymentBunyangSeqs'] = fullPaymentBunyangSeqs; 
+    if(existSmsReceiver && confirm('계약자에게 입금 안내 메세지를 전송하시겠습니까?')) {
+    	paymentInfo['sendSmsYn'] = 'Y';	
+    }
     common.ajax({
 		url:"${contextPath}/popup/savepayment", 
 		data:paymentInfo,

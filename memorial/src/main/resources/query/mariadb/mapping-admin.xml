@@ -267,6 +267,7 @@
 	       	,a.cancel_yn
 	       	,b.user_id as apply_user_id
 	       	,b.user_name as apply_user_name
+	       	,b.mobile as apply_user_mobile
           	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
           	,(SELECT remarks FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) remarks
           	,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) progress_update_date
@@ -310,6 +311,7 @@
 			  	,user_id
 				,user_name
 				,birth_date
+				,mobile
 				,church_officer
 				,diocese
 			  	,ref_type

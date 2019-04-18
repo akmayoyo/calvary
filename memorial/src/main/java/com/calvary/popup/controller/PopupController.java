@@ -264,7 +264,8 @@ public class PopupController {
 			@RequestParam(value="remarks[]") String[] remarks,
 			@RequestParam(value="maintSeqs[]") String[] maintSeqs,
 			@RequestParam(value="contractBunyangSeqs[]", required=false) String[] contractBunyangSeqs,
-			@RequestParam(value="fullPaymentBunyangSeqs[]", required=false) String[] fullPaymentBunyangSeqs
+			@RequestParam(value="fullPaymentBunyangSeqs[]", required=false) String[] fullPaymentBunyangSeqs,
+			@RequestParam(value="sendSmsYn", required=false) String sendSmsYn
 			) throws Exception {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		boolean bRslt = false;
@@ -278,7 +279,7 @@ public class PopupController {
 //			}
 //		}
 		
-		iRslt = adminService.createPaymentHistory(bunyangSeqs, paymentAmounts, paymentMethods, paymentDates, paymentDivisions, paymentTypes, paymentUsers, remarks, maintSeqs);
+		iRslt = adminService.createPaymentHistory(bunyangSeqs, paymentAmounts, paymentMethods, paymentDates, paymentDivisions, paymentTypes, paymentUsers, remarks, maintSeqs, sendSmsYn);
 		
 		// 계약금 납부가 된 건에 대해 계약상태로 업데이트(현재는 자동 상태 변경은 안하지만 혹시몰라 남겨둠)
 //		if(contractBunyangSeqs != null && contractBunyangSeqs.length > 0) {

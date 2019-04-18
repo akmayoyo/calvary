@@ -56,4 +56,13 @@
       <put-attribute name="body" value="/WEB-INF/jsp/views/mobile/{1}.jsp" />
     </definition>
     
+    <!-- anonymous -->    
+    <definition name="anonymous" template="/WEB-INF/jsp/tileslayout/anonymous.jsp">
+        <put-attribute name="footer" value="/WEB-INF/jsp/tileslayout/footer.jsp" />
+    </definition>
+    
+    <definition name="/anonymous/*" extends="anonymous">
+      <put-attribute name="body" value="/WEB-INF/jsp/views/anonymous/{1}.jsp" />
+    </definition>
+    
 </tiles-definitions>

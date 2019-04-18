@@ -92,11 +92,10 @@ public class ApprovalGraveScheduler {
 								if(familyRequestList != null && familyRequestList.size() > 0) {
 									for(int j = 0; j < familyRequestList.size(); j++) {
 										Map<String, Object> familyRequestInfo = (HashMap<String, Object>)familyRequestList.get(j);
-										familyRequestInfo.get("");
 										infoVo = new GraveInfoVo();
 										infoVo.setSectionSeq((String)familyRequestInfo.get("section_seq"));
-										infoVo.setRowSeq((String)familyRequestInfo.get("row_seq"));
-										infoVo.setColSeq((String)familyRequestInfo.get("col_seq"));
+										infoVo.setRowSeq(String.valueOf(CommonUtil.convertToInt(familyRequestInfo.get("row_seq"))));
+										infoVo.setColSeq(String.valueOf(CommonUtil.convertToInt(familyRequestInfo.get("col_seq"))));
 										requestGraveList.add(infoVo);
 										approvalGraveList.add(infoVo);
 									}

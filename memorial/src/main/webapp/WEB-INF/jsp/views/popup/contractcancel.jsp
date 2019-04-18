@@ -28,7 +28,7 @@
         	</colgroup>
             <tbody>
             	<tr>
-            		<th style="background-color: #f5f5f5;">신청자</th>
+            		<th style="background-color: #f5f5f5;">계약자</th>
             		<td align="left" colspan="3">${bunyangInfo.apply_user_name}</td>
             	</tr>
             	<tr>
@@ -124,6 +124,7 @@
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/moment.min.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/daterangepicker.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/jquery.number.min.js"></script>
 <script type="text/javascript">
 (function(){
 	common.datePicker($("#tiDepositDate"));
@@ -141,7 +142,7 @@ function _cancel() {
 	data['depositBank'] = $("#tiDepositBank").val();
 	data['depositAccount'] = $("#tiDepositAccount").val();
 	data['accountHolder'] = $("#tiAccountHolder").val();
-	data['cancelDate'] = $("#tiCancelDate").data('daterangepicker').startDate.format('YYYYMMDD');;
+	data['cancelDate'] = $("#tiCancelDate").data('daterangepicker').startDate.format('YYYYMMDD');
 	data['cancelReason'] = $("#tiCancelReason").val();
 	
 	if(!data['depositBank']) {
@@ -165,10 +166,33 @@ function _cancel() {
     		url:"${contextPath}/admin/cancelapproval", 
     		data:data,
     		success: function(result) {
-    			if(window.opener && window.opener.contractCancelCallBack != 'undefined') {
-        			window.opener.contractCancelCallBack(result);
-        		}
-        		common.closeWindow();
+    			var applyUserName = '${bunyangInfo.apply_user_name}';
+				var mobile = '${bunyangInfo.apply_user_mobile}';
+				if(result && result.result) {
+					var resultCache = result;
+					if(confirm('해약처리가 승인되었습니다.\n계약자에게 해약 안내 메세지를 전송하시겠습니까?')) {
+						var cancelDate = $("#tiCancelDate").data('daterangepicker').startDate.format('YY/MM/DD');// 해약일자
+						var depositPlanDate = $("#tiDepositDate").data('daterangepicker').startDate.format('YY/MM/DD');// 입금예정일
+						var bankAccount = data['depositBank'] + ' ' + data['depositAccount'];// 입금계좌
+						var depositAmount = $.number(data['depositAmount']);// 입금액
+						var sendSmsVo = {};
+						sendSmsVo.msgKey = 'M0005';
+						sendSmsVo.receivers = mobile;
+						sendSmsVo.sequences = [applyUserName, cancelDate, depositPlanDate, bankAccount, depositAmount];
+						common.sendSms(sendSmsVo, function(result) {
+							common.showAlert('메세지가 전송되었습니다.');
+							if(window.opener && window.opener.contractCancelCallBack != 'undefined') {
+			        			window.opener.contractCancelCallBack(resultCache);
+			        		}
+			        		common.closeWindow();
+						});
+					} else {
+						if(window.opener && window.opener.contractCancelCallBack != 'undefined') {
+		        			window.opener.contractCancelCallBack(result);
+		        		}
+		        		common.closeWindow();
+					}
+    			}
     		}
     	});
 	}

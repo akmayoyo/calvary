@@ -1028,7 +1028,6 @@ function cancelContract(progressStatus) {
 	common.openWindow("${contextPath}/popup/contractcancel", "popContractCancel", winoption, param);
 	window.contractCancelCallBack = function(result) {
 		if(result && result.result) {
-			common.showAlert('해약처리가 승인되었습니다.');
 			// 승인서 파일번호
 			var fileSeq = result.fileSeq;
 			donwloadFile(fileSeq);

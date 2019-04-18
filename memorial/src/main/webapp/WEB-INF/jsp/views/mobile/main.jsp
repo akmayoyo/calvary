@@ -128,7 +128,7 @@
 						</thead>
 						<tbody>
 							<c:forEach items="${useUserList}" var="rowItem">
-							<tr familyRequested="${not empty familyGraveRequestInfo}" approvalYn="${not empty bunyangInfo.use_approval_date}" assignStatus="${rowItem.couple_assign_status}" <c:if test="${not empty rowItem.cancel_seq}">class="cancel"</c:if>>
+							<tr requestStatus="${rowItem.request_status}" coupleSeq="${rowItem.couple_seq}" userSeq="${rowItem.user_seq }" familyRequested="${not empty familyGraveRequestInfo}" approvalYn="${not empty bunyangInfo.use_approval_date}" assignStatus="${rowItem.couple_assign_status}" <c:if test="${not empty rowItem.cancel_seq}">class="cancel"</c:if>>
 								<td>${rowItem.user_name}</td>
 								<td>${rowItem.relation_type_name}</td>
 								<td>
@@ -196,6 +196,13 @@ function _requestGrave(btn, userId) {
 		common.showAlert('배우자의 사용신청건이 승인완료 후 신청가능합니다.');
 		return;
 	}
+	var coupleTR = getCoupleTR(tr.attr('coupleSeq'), tr.attr('userSeq'));
+	if(coupleTR && coupleTR.length > 0) {
+		if(coupleTR.attr('requestStatus') == 'REQUESTED') {
+			common.showAlert('배우자의 사용신청건이 승인완료 후 신청가능합니다.');
+			return;
+		}
+	}
 	if(tr.attr('familyRequested') == 'true') {
 		common.showAlert('가족형의 경우 가족 구성원중 최초 사용신청건의 승인이 완료된 후 신청가능합니다.');
 		return;
@@ -204,6 +211,22 @@ function _requestGrave(btn, userId) {
 	var frm = document.getElementById("frm");
 	frm.action = "${contextPath}/mobile/requestGrave";
 	frm.submit();
+}
+
+/**
+ * 
+ */
+function getCoupleTR(coupleSeq, userSeq) {
+	var tr;
+	if(coupleSeq && userSeq) {
+		$('#tblUseUser tbody tr').each(function(idx) {
+			if($(this).attr('coupleSeq') == coupleSeq && $(this).attr('userSeq') != userSeq) {
+				tr = $(this);
+				return false;
+			}
+		});	
+	}
+	return tr;
 }
 
 /**

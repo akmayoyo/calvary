@@ -77,9 +77,9 @@
             <tbody>
             	<c:forEach items="${applyUser}" var="apply">
             	<tr>
-            		<td>${apply.user_name}</td>
+            		<td name="tdApplyUserName">${apply.user_name}</td>
             		<td>${cutil:getBirthDateFormatString(apply.birth_date)}</td>
-            		<td>${cutil:getMobileFormatString(apply.mobile)}</td>
+            		<td name="tdApplyUserMobile">${cutil:getMobileFormatString(apply.mobile)}</td>
             		<td>${apply.email}</td>
             		<td align="left">(${apply.post_number}) ${apply.address1} ${apply.address2}</td>
             		<td>${apply.church_officer_name}</td>
@@ -366,13 +366,34 @@ function apprContract(progressStatus) {
 					} else if(progressStatus == 'C') {
 						confirmMsg = '완납 처리 되었습니다.\n완납확인증명서를 다운로드하시겠습니까?';
 					}
-					if(confirm(confirmMsg)) {
-						donwloadFile(fileSeq);
-						setTimeout(function(){
+					var applyUserName = $('#tblApplyUser tbody tr').eq(0).find('td[name="tdApplyUserName"]').text();
+					var mobile = $('#tblApplyUser tbody tr').eq(0).find('td[name="tdApplyUserMobile"]').text();
+					if(progressStatus == 'B' && common.isValidMobile(mobile)) {
+						if(confirm('계약 처리 되었습니다.\n계약자에게 계약 승인메세지를 전송하시겠습니까?')) {
+							var sendSmsVo = {};
+							var dt = val;
+							if(dt && dt.length == 8) {
+								dt = dt.substring(2,4) + "/" + dt.substring(4,6) + "/" + dt.substring(6,8);
+							}
+							sendSmsVo.msgKey = 'M0003';
+							sendSmsVo.receivers = mobile;
+							sendSmsVo.sequences = [applyUserName, dt];
+							common.sendSms(sendSmsVo, function(result) {
+								common.showAlert('메세지가 전송되었습니다.');
+								refresh();
+							});
+						} else {
 							refresh();
-						}, 100);
+						}	
 					} else {
-						refresh();
+						if(confirm(confirmMsg)) {
+							donwloadFile(fileSeq);
+							setTimeout(function(){
+								refresh();
+							}, 100);
+						} else {
+							refresh();
+						}
 					}
 				}
 			}

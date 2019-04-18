@@ -339,7 +339,10 @@
     
     <!-- 가족형의 다른가족 또는 부부형 배우자가 사용시 내 자리는 이미 정해져있기때문에 그자리가 있는지 조회함 -->
     <select id="getReservedGraveInfo" parameterType="map" resultType="map">
-    	SELECT 
+    	SELECT
+    		a.*
+    	FROM
+    	(SELECT 
 			section_seq
 			,row_seq
 			,col_seq
@@ -351,8 +354,11 @@
 			,grave_type
 			,seq_no
 			,concat(a.section_seq, '구역 ', a.row_seq, '행-', char(64+a.col_seq), '열') as grave_exp
+			,(select count(1) from TB_BUNYANG_GRAVE_REQUEST_INFO gr where gr.section_seq = a.section_seq and gr.row_seq = a.row_seq and gr.col_seq = a.col_seq and gr.request_status = 'REQUESTED') request_count
 		FROM TB_BUNYANG_GRAVE_ASSIGN a
 		WHERE a.bunyang_seq = #{bunyangSeq}
+		) a
+		WHERE 1=1
 		AND (
 		case 
 			when a.grave_type = 'SINGLE' and a.assign_status = 'RESERVED' then 1
@@ -365,6 +371,7 @@
 			else 0
 		end
 		) = 1
+		AND a.request_count = 0
 		AND a.assign_status IN ('RESERVED', 'HALF_OCCUPIED')
 		ORDER BY section_seq, row_seq, col_seq
 		LIMIT 1

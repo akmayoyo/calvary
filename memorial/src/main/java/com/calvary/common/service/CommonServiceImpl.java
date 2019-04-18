@@ -98,5 +98,13 @@ public class CommonServiceImpl implements ICommonService {
 		int iRslt = commonDao.insert("common.createMenuAccessLog", parameter);
 		return iRslt;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getSmsMsg(String msgKey) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("msgKey", msgKey);
+		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("common.getMsgContent", param);
+		return rtnMap;
+	}
 
 }

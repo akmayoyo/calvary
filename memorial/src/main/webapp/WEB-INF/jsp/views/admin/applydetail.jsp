@@ -52,9 +52,9 @@
             <tbody>
             	<c:forEach items="${applyUser}" var="apply">
             	<tr>
-            		<td>${apply.user_name}</td>
+            		<td name="tdApplyUserName">${apply.user_name}</td>
             		<td>${apply.birth_date}</td>
-            		<td>${apply.mobile}</td>
+            		<td name="tdApplyUserMobile">${apply.mobile}</td>
             		<td>${apply.email}</td>
             		<td align="left">(${apply.post_number}) ${apply.address1} ${apply.address2}</td>
             		<td>${apply.church_officer_name}</td>
@@ -249,6 +249,7 @@
 <form id="frm" method="post">
 </form>
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
+<script type="text/javascript" src="${contextPath}/resources/js/moment.min.js"></script>
 <script type="text/javascript">
 // init 함수
 (function(){
@@ -287,13 +288,30 @@ function approval() {
 				if(result && result.result) {
 					// 승인서 파일번호
 					var fileSeq = result.fileSeq;
-					if(confirm('승인되었습니다.\n승인서를 다운로드하시겠습니까?')) {
-						donwloadFile(fileSeq);
-						setTimeout(function(){
+					var applyUserName = $('#tblApplyUser tbody tr').eq(0).find('td[name="tdApplyUserName"]').text();
+					var mobile = $('#tblApplyUser tbody tr').eq(0).find('td[name="tdApplyUserMobile"]').text();
+					if(common.isValidMobile(mobile)) {
+						if(confirm('승인되었습니다.\n신청자에게 승인메세지를 전송하시겠습니까?')) {
+							var sendSmsVo = {};
+							sendSmsVo.msgKey = 'M0001';
+							sendSmsVo.receivers = mobile;
+							sendSmsVo.sequences = [applyUserName, moment().format('YY/MM/DD')];
+							common.sendSms(sendSmsVo, function(result) {
+								common.showAlert('메세지가 전송되었습니다.');
+								refresh();
+							});
+						} else {
 							refresh();
-						}, 100);
+						}	
 					} else {
-						refresh();
+						if(confirm('승인되었습니다.\n승인서를 다운로드하시겠습니까?')) {
+							donwloadFile(fileSeq);
+							setTimeout(function(){
+								refresh();
+							}, 100);
+						} else {
+							refresh();
+						}
 					}
 				}
 			}
@@ -330,10 +348,32 @@ function reject() {
 			contentType: 'application/json',
 			success: function(result) {
 				if(result && result.result) {
-					common.showAlert("반려처리 되었습니다.");
-					var frm = document.getElementById("frm");
-					frm.action = "${contextPath}/admin/applymgmt";
-					frm.submit();
+					
+					var applyUserName = $('#tblApplyUser tbody tr').eq(0).find('td[name="tdApplyUserName"]').text();
+					var mobile = $('#tblApplyUser tbody tr').eq(0).find('td[name="tdApplyUserMobile"]').text();
+					if(common.isValidMobile(mobile)) {
+						if(confirm('반려처리 되었습니다.\n신청자에게 메세지를 전송하시겠습니까?')) {
+							var sendSmsVo = {};
+							sendSmsVo.msgKey = 'M0002';
+							sendSmsVo.receivers = mobile;
+							sendSmsVo.sequences = [applyUserName, val, moment().format('YY/MM/DD')];
+							common.sendSms(sendSmsVo, function(result) {
+								common.showAlert('메세지가 전송되었습니다.');
+								var frm = document.getElementById("frm");
+								frm.action = "${contextPath}/admin/applymgmt";
+								frm.submit();
+							});
+						} else {
+							var frm = document.getElementById("frm");
+							frm.action = "${contextPath}/admin/applymgmt";
+							frm.submit();
+						}	
+					} else {
+						common.showAlert("반려처리 되었습니다.");
+						var frm = document.getElementById("frm");
+						frm.action = "${contextPath}/admin/applymgmt";
+						frm.submit();
+					}
 				}
 			}
 		});
