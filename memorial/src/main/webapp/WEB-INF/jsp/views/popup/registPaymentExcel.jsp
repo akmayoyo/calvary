@@ -362,7 +362,7 @@ function _savePayment() {
     var rowNumbers = [];// 행번호
     var bValidate = true;
     var summaryByBunyangSeq = {};// 계약번호별 입력된 납입금정보 합산을 위한 storage
-    
+    var existSmsReceiver = false;
     $('#tblList tbody tr').each(function(idx) {
         var tr = $(this);
         var bunyangInfo;// 계약정보
@@ -458,7 +458,10 @@ function _savePayment() {
             	summaryByBunyangSeq[bunyang_seq]['accum_balance_payment'] += payment_amount; 
             } else if(payment_type == '<%=CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT%>') {// 관리비
             	summaryByBunyangSeq[bunyang_seq]['accum_maint_payment'] += payment_amount; 
-            }	
+            }
+            if(payment_division == 'DEPOSIT') {
+            	existSmsReceiver = true;
+            }
         }
         bunyangSeqs.push(bunyang_seq);
         paymentDates.push(payment_date);
@@ -468,7 +471,8 @@ function _savePayment() {
         paymentUsers.push(payment_user);
         paymentMethods.push(payment_method);
         remarks.push(remark);
-        maintSeqs.push(maint_seq);
+        //maintSeqs.push(maint_seq);
+        maintSeqs.push(maint_seq ? maint_seq : 'none');
         rowNumbers.push(rowNo);
     });
     
@@ -510,7 +514,9 @@ function _savePayment() {
     paymentInfo['paymentMethods'] = paymentMethods;
     paymentInfo['remarks'] = remarks;
     paymentInfo['maintSeqs'] = maintSeqs; 
-    
+    if(existSmsReceiver && confirm('계약자에게 입금 안내 메세지를 전송하시겠습니까?')) {
+    	paymentInfo['sendSmsYn'] = 'Y';	
+    }
     common.ajax({
 		url:"${contextPath}/popup/savepayment", 
 		data:paymentInfo,

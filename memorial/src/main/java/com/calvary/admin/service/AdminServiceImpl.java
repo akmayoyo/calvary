@@ -581,7 +581,7 @@ public class AdminServiceImpl implements IAdminService {
 							String subject = (String)tmp.get("msg_subject");
 							SendSmsVo smsVo = new SendSmsVo();
 							String paymentDate = (String)param.get("paymentDate");
-							if(!StringUtils.isEmpty(paymentDate) && paymentDate.length() == 8) {
+							if(!StringUtils.isEmpty(paymentDate) && paymentDate.length() >= 8) {
 								paymentDate = paymentDate.substring(2, 4) + "/" + paymentDate.substring(4, 6) + "/" + paymentDate.substring(6, 8);
 							}
 							String paymentAmount = CommonUtil.getThousandSeperatorFormatString(CommonUtil.convertToInt(param.get("paymentAmount"))) + "원";
@@ -591,9 +591,7 @@ public class AdminServiceImpl implements IAdminService {
 							smsVo.setMsgType(msgType);
 							smsVo.setReceivers(mobile);
 							smsVo.setSubject(subject);
-							ResultSmsVo resultVo = SMSUtil.sendSms(smsVo);
-							logger.info(smsVo.toString());
-							logger.info(resultVo.toString());
+							SMSUtil.sendSms(smsVo);
 						}
 					}
 				}

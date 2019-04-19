@@ -30,6 +30,7 @@ public class SMSUtil {
 	public static final String SMS_SECURE = "0ab3e384e97e239ce9f61a248f85f74a";
 	public static final String SMS_SENDER = "010-8951-1042";
 	
+	private static final Logger logger = LoggerFactory.getLogger(SMSUtil.class);
 	private static final Logger errLogger = LoggerFactory.getLogger("ERROR_LOGGER");
 	
 	public static ResultSmsVo sendSms(SendSmsVo smsVo) {
@@ -38,7 +39,6 @@ public class SMSUtil {
 		Socket socket = null;
 		BufferedWriter wr = null;
 		BufferedReader rd = null;
-		System.out.println(smsVo.getMsgContents());
 		try {
 			String sms_url = SMS_URL;// SMS 전송요청 URL
 			String[] sender = SMS_SENDER.split("-");
@@ -53,7 +53,7 @@ public class SMSUtil {
 	        String rtime = base64Encode("");
 	        String mode = base64Encode("1");
 	        String subject = base64Encode("");
-	        String testflag = base64Encode("Y");
+	        String testflag = base64Encode("");
 	        String destination = base64Encode("");
 	        String repeatFlag = base64Encode("");
 	        String repeatNum = base64Encode("");
@@ -153,6 +153,9 @@ public class SMSUtil {
 		        }
 		        resultVo.setResult(result);
 		        resultVo.setCount(count);
+		        logger.info("================ SEND SMS ================");
+		        logger.info(smsVo.toString());
+		        logger.info(resultVo.toString());
 	        }
 		} catch(Exception e) {
 			errLogger.error("sendSms error occured!!", e);

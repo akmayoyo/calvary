@@ -260,10 +260,38 @@ function _cancel() {
     		url:"${contextPath}/admin/cancelUseUser", 
     		data:data,
     		success: function(result) {
-    			if(window.opener && window.opener.useUserCancelCallBack != 'undefined') {
-        			window.opener.useUserCancelCallBack(result);
-        		}
-        		common.closeWindow();
+    			var applyUserName = '${bunyangInfo.apply_user_name}';
+				var mobile = '${bunyangInfo.apply_user_mobile}';
+				if(result && result.result) {
+					var resultCache = result;
+					if(confirm('해약처리가 승인되었습니다.\n계약자에게 해약 안내 메세지를 전송하시겠습니까?')) {
+						var cancelDate = $("#tiCancelDate").data('daterangepicker').startDate.format('YY/MM/DD');// 해약일자
+						var depositPlanDate = $("#tiDepositDate").data('daterangepicker').startDate.format('YY/MM/DD');// 입금예정일
+						var bankAccount = data['cancelBank'] + ' ' + data['cancelAccount'];// 입금계좌
+						var depositAmount = $.number(data['surrenderValue']);// 입금액
+						var sendSmsVo = {};
+						sendSmsVo.msgKey = 'M0007';
+						sendSmsVo.receivers = mobile;
+						sendSmsVo.sequences = [applyUserName, cancelDate, depositPlanDate, bankAccount, depositAmount];
+						common.sendSms(sendSmsVo, function(result) {
+							common.showAlert('메세지가 전송되었습니다.');
+							if(window.opener && window.opener.useUserCancelCallBack != 'undefined') {
+			        			window.opener.useUserCancelCallBack(resultCache);
+			        		}
+			        		common.closeWindow();
+						}, function(xhr, status, message) {
+							if(window.opener && window.opener.useUserCancelCallBack != 'undefined') {
+			        			window.opener.useUserCancelCallBack(resultCache);
+			        		}
+			        		common.closeWindow();
+						});
+					} else {
+						if(window.opener && window.opener.useUserCancelCallBack != 'undefined') {
+		        			window.opener.useUserCancelCallBack(resultCache);
+		        		}
+		        		common.closeWindow();
+					}
+    			}
     		}
     	});
 	}

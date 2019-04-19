@@ -58,9 +58,9 @@
             <tbody>
             	<c:forEach items="${applyUser}" var="apply">
             	<tr>
-            		<td>${apply.user_name}</td>
+            		<td name="tdApplyUserName">${apply.user_name}</td>
             		<td>${cutil:getBirthDateFormatString(apply.birth_date)}</td>
-            		<td>${cutil:getMobileFormatString(apply.mobile)}</td>
+            		<td name="tdApplyUserMobile">${cutil:getMobileFormatString(apply.mobile)}</td>
             		<td>${apply.email}</td>
             		<td align="left">(${apply.post_number}) ${apply.address1} ${apply.address2}</td>
             		<td>${apply.church_officer_name}</td>
@@ -481,10 +481,31 @@ function approval() {
 				data:data,
 				success: function(result) {
 					if(result && result.result) {
-						common.showAlert("사용승인되었습니다.");
-						var frm = document.getElementById("frm");
-						frm.action = "${contextPath}/admin/approvaldetail";
-						frm.submit();
+						var applyUserName = $('#tblApplyUser tbody tr').eq(0).find('td[name="tdApplyUserName"]').text();
+						var mobile = $('#tblApplyUser tbody tr').eq(0).find('td[name="tdApplyUserMobile"]').text();
+						if(common.isValidMobile(mobile)) {
+							if(confirm('사용승인되었습니다.\n계약자에게 사용승인 메세지를 전송하시겠습니까?')) {
+								var sendSmsVo = {};
+								var dt = val;
+								if(dt && dt.length == 8) {
+									dt = dt.substring(2,4) + "/" + dt.substring(4,6) + "/" + dt.substring(6,8);
+								}
+								sendSmsVo.msgKey = 'M0006';
+								sendSmsVo.receivers = mobile;
+								sendSmsVo.sequences = [applyUserName, dt];
+								common.sendSms(sendSmsVo, function(result) {
+									common.showAlert('메세지가 전송되었습니다.');
+									refresh();
+								}, function(xhr, status, message) {
+									refresh();
+								});
+							} else {
+								refresh();
+							}	
+						} else {
+							common.showAlert("사용승인되었습니다.");
+							refresh();
+						}
 					}
 				}
 			});
@@ -492,6 +513,12 @@ function approval() {
 	} else {
 		common.showAlert('사용(봉안) 대상자의 승인서가 모두 출력되어야 저장이 가능합니다.');
 	}
+}
+
+function refresh() {
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/admin/approvaldetail";
+	frm.submit();
 }
 
 /**

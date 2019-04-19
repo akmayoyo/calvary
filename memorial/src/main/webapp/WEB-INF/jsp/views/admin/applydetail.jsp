@@ -299,6 +299,8 @@ function approval() {
 							common.sendSms(sendSmsVo, function(result) {
 								common.showAlert('메세지가 전송되었습니다.');
 								refresh();
+							}, function(xhr, status, message) {
+								refresh();
 							});
 						} else {
 							refresh();
@@ -359,6 +361,10 @@ function reject() {
 							sendSmsVo.sequences = [applyUserName, val, moment().format('YY/MM/DD')];
 							common.sendSms(sendSmsVo, function(result) {
 								common.showAlert('메세지가 전송되었습니다.');
+								var frm = document.getElementById("frm");
+								frm.action = "${contextPath}/admin/applymgmt";
+								frm.submit();
+							}, function(xhr, status, message) {
 								var frm = document.getElementById("frm");
 								frm.action = "${contextPath}/admin/applymgmt";
 								frm.submit();

@@ -147,7 +147,7 @@ int currDay = currDt.get(Calendar.DATE);
 </div>
 
 <!-- 알림 메세지 확인 및 수신인 입력-->
-<div id="registContact" class="m_contents" style="display:none;">
+<div id="registContact" class="m_contents" style="display: none;">
 	
 	<!-- 아코디언 메뉴 -->
 	<div id="m_menu" class="m_menu">
@@ -161,18 +161,22 @@ int currDay = currDt.get(Calendar.DATE);
 					[부고] 갈보리교회 <span id="sUserName2"></span>님 소천
 				</p>
 				<p>
-					<span id="sUserName"></span>성도께서 하나님의 부름심을 받아 <span id="sDeathDate"></span> 하늘나라로 가셨기에 다음과 같이 알립니다.
+					<span id="sUserName"></span>성도께서 하나님의 부름심을 받아 하늘나라로 가셨기에 다음과 같이 알립니다.
 				</p>
 				<p>
-				1. 장례식장 : <span id="sFuneralHall"></span><br>
+				1. 소천일시 : <span id="sDeathDate"></span><br>
+				2. 장례식장 : <span id="sFuneralHall"></span><br>
+				&nbsp;&nbsp;- 주소 : <span id="sFuneralHallLocation"></span><br>
 				&nbsp;&nbsp;- 전화번호 : <span id="sFuneralHallPhone"></span><br>
-				&nbsp;&nbsp;- 위치 : <span id="sFuneralHallLocation"></span><br>
-				2. 발인일시 : <span id="sBorneOutDate"></span><br>
-				3. 장지 : 용인공원 갈보리 추모동산&nbsp;&nbsp;<span id="sSection"></span><br>
-				4. 알리는분<br>
+				3. 장지 : 용인공원 갈보리추모동산&nbsp;&nbsp;<span id="sSection"></span><br>
+				4. 발인일시 : <span id="sBorneOutDate"></span><br>
+				5. 알리는분<br>
 				&nbsp;&nbsp;- 성명 : <span id="sSenderName"></span><br>
 				&nbsp;&nbsp;- 연락처 : <span id="sSenderPhone"></span>
 				</p>
+				<div><span>6. 추가메세지</span><textarea id="taMessage" style="width: 100%;" rows="2" maxlength="100" placeholder="100자이내로 입력"></textarea></div>
+				<div><span id="sMessageLength" style="float: right; color: #777;">(0/100)</span></div>
+				<div class="clearfix"></div>
 			</div>
 		</div>
 		<div class="panel">
@@ -308,6 +312,15 @@ int currDay = currDt.get(Calendar.DATE);
 	
 	$('#selDeathDay option[value=' + <%=currDay%> + ']').attr('selected', 'selected');
 	$('#selBorneOutDay option[value=' + <%=currDay%> + ']').attr('selected', 'selected');
+	
+	$("#taMessage").keyup(function(){
+		var maxLen = $(this).attr('maxLength');
+		var len = $(this).val().length;
+		if(len > maxLen) {
+			len = maxLen;
+		}
+	  $("#sMessageLength").text('(' + len + '/' + maxLen + ')');
+	});
 	
 })();
 
@@ -547,16 +560,40 @@ function _sendSms() {
 		}
 	});
 	
+	if(receivers.length == 0) {
+		common.showAlert('메세지 수신정보가 없습니다.');
+		return;
+	}
+	
 	if(bValid) {
-		// TODO
-		common.loading(true);
-		setTimeout(function(){ 
-			common.loading(false);
-			common.showAlert('부고 알림 메세지를 정상적으로 전송하였습니다.');
+		var userName = $('#sUserName').text();
+		var deathDate = $('#sDeathDate').text();
+		var funeralHall = $('#sFuneralHall').text();
+		var funeralHallLocation = $('#sFuneralHallLocation').text();
+		var funeralHallPhone = $('#sFuneralHallPhone').text();
+		var borneOutDate = $('#sBorneOutDate').text();
+		var senderName = $('#sSenderName').text();
+		var senderPhone = $('#sSenderPhone').text();
+		var extraMessage = $('#taMessage').val();
+		
+		if(!common.trimAll(extraMessage)) {
+			extraMessage = '';
+		}
+		
+		var sendSmsVo = {};
+		sendSmsVo.msgKey = 'M0008';
+		sendSmsVo.receivers = receivers.join(',');
+		sendSmsVo.sequences = [userName, userName, deathDate, funeralHall, funeralHallLocation, funeralHallPhone, borneOutDate, senderName, senderPhone, extraMessage];
+		common.sendSms(sendSmsVo, function(result) {
+			common.showAlert('메세지가 전송되었습니다.');
 			var frm = document.getElementById("frm");
 			frm.action = "${contextPath}/mobile/main";
 			frm.submit();
-		}, 1500);
+		}, function(xhr, status, message) {
+			var frm = document.getElementById("frm");
+			frm.action = "${contextPath}/mobile/main";
+			frm.submit();
+		});
 	}
 }
 

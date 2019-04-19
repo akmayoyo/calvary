@@ -19,12 +19,11 @@
 </header>
 
 <!-- 분양현황 -->
-<div style="margin-top: 60px; padding: 15px;">
-    <div class="col-xs-8" style="margin: 0 auto; float: none; text-align: center; padding:40px 10px; ">
-        <p style="font-size: 26px; font-weight: bold; color: #333;">갈보리 추모동산 분양현황</p>
-        <p style="font-size: 18px; font-weight: bold; color: #333;">${currDate} 기준</p>
+<div style="margin-top: 60px; padding: 15px 0;">
+    <div class="col-xs-8" style="margin: 0 auto; float: none; text-align: center; padding:40px 10px; padding-bottom: 30px; ">
+        <p style="font-size: 23px; font-weight: bold; color: #333;">갈보리 추모동산 분양현황</p>
 
-        <div style="margin-top: 20px; border-top: 1px solid #999;">
+        <div style="margin-top: 10px; border-top: 1px solid #999;">
             <table id="tblBunyangStatus" class="table table-style table-bordered">
                 <colgroup>
                     <col width="10%">
@@ -66,10 +65,62 @@
     </div>
 </div>
 
+<!-- 분양현황 -->
+<div>
+    <div class="col-xs-8" style="margin: 0 auto; float: none; text-align: center; padding:40px 10px; padding-top: 0;">
+        <p style="font-size: 23px; font-weight: bold; color: #333;">추모동산 사용(봉안)현황</p>
+
+        <div style="margin-top: 10px; border-top: 1px solid #999;">
+            <table class="table table-style table-bordered" style="border-top: 0;">
+	        	<colgroup>
+	        		<col width="16%">
+	        		<col width="16%">
+	        		<col width="16%">
+	        		<col width="16%">
+	        		<col width="16%">
+	        		<col width="16%">
+	        	</colgroup>
+				<thead>
+					<tr>
+						<th scope="col">구분</th>
+						<th scope="col">구역명</th>
+						<th scope="col">사용중</th>
+						<th scope="col">사용예정</th>
+						<th scope="col">사용가능</th>
+						<th scope="col">전체</th>
+					</tr>
+				</thead>
+	            <tbody>
+	            	<c:forEach items="${graveStatusList}" var="rowItem">
+	            	<tr <c:if test="${rowItem.grave_type == 'sub_total' || rowItem.grave_type == 'total'}">style="background-color: #FFFCCC; font-weight: bold;"</c:if>>
+	            		<td class="tdgraveType" graveType="${rowItem.grave_type}" <c:if test="${rowItem.grave_type == 'sub_total' || rowItem.grave_type == 'total'}">colspan="2"</c:if>>
+	            			<c:choose>
+	            				<c:when test="${rowItem.grave_type == 'COUPLE'}">부부형</c:when>
+	            				<c:when test="${rowItem.grave_type == 'SINGLE'}">1인형</c:when>
+	            				<c:when test="${rowItem.grave_type == 'sub_total'}">소계</c:when>
+	            				<c:when test="${rowItem.grave_type == 'total'}">합계</c:when>
+	            			</c:choose>
+	            		</td>
+	            		<c:if test="${rowItem.grave_type != 'sub_total' && rowItem.grave_type != 'total'}">
+	            		<td >${rowItem.section_seq}</td>
+	            		</c:if>
+	            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.occupied_cnt)}</td>
+	            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.reserved_cnt)}</td>
+	            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.available_cnt)}</td>
+	            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.total_cnt)}</td>
+	            	</tr>
+	            	</c:forEach>
+	            </tbody>
+	        </table>
+        </div>
+
+    </div>
+</div>
+
 <!-- 추모동산 배치판 -->
 <div style="background-color: #E0EFFC; padding: 10px 10px;">
     <div style="text-align: center;">
-        <h3 style="display: inline-block;">추모동산 사용(봉안) 현황</h3>
+        <h3 style="display: inline-block;">추모동산 배치판</h3>
     </div>
     <div style="text-align: center; margin-top: 5px;">
         <div style="width: 10px; height: 10px; background-color: #C785C8; display: inline-block;">
@@ -158,6 +209,8 @@
 <script type="text/javascript" src="${contextPath}/resources/js/d3.min.js"></script>
 <script type="text/javascript">
 (function(){
+	
+	rowSpan();
 	
 	// add for programmatically d3 click event
 	$.fn.d3Click = function () {
@@ -551,6 +604,26 @@ function seqToAlpha(seq) {
 	var seqOfA = "A".charCodeAt(0) + (seq-1);
 	var alpha = String.fromCharCode(seqOfA);
 	return alpha;
+}
+
+/**
+ * 
+ */
+function rowSpan(){
+    $(".tdgraveType").each(function() {
+    	var val = $(this).attr('graveType');
+    	if(val == 'COUPLE' || val == 'SINGLE') {
+    		var rows = $(".tdgraveType" + ":contains('" + $(this).text() + "')");
+            if (rows.length > 1) {
+            	var row = rows.eq(0); 
+            	row.attr("rowspan", rows.length);
+            	for(var i = 1; i < rows.length; i++) {
+            		row = rows.eq(i);
+            		row.remove();
+            	}
+            }
+    	}
+    });
 }
 
 </script>

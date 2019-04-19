@@ -341,13 +341,12 @@
 			  ,c.user_id agent_user_id
 			  ,c.user_name agent_user_name
 			  ,c.relation_type agent_user_relation
-			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = c.relation_type AND cc.parent_code_seq = 'USER_RELATION') agent_user_relation_name
+			  ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = c.relation_type) agent_user_relation_name
 			  ,d.user_id use_user_id
 			  ,d.user_name use_user_name
 			  ,d.relation_type use_user_relation
-			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
+			  ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = d.relation_type) use_user_relation_name
 			  ,d.cnt use_user_cnt
-			  ,d.approval_user_cnt
 			  ,a.regist_user_id
 			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
 		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
@@ -383,7 +382,6 @@
 			(SELECT
 				*
 				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
-				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER' and approval_no is not null) approval_user_cnt
 			FROM
 				(SELECT
 					bunyang_seq
@@ -411,15 +409,23 @@
 		<if test="apply_user_name != null and apply_user_name != ''">
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
 		</if>
+		<if test='progressStatus == "A"'>
+		<![CDATA[
+		AND progress_status = 'A' AND down_payment < (total_price / 10)
+		]]>
+		</if>
 		<if test='progressStatus == "B"'>
-		AND progress_status in ('B', 'C') AND approval_user_cnt = 0
+		AND progress_status = 'B'
+		</if>
+		<if test='progressStatus == "C"'>
+		AND progress_status = 'C'
 		</if>
 		<if test='progressStatus == "E"'>
 		AND progress_status = 'E'
 		</if>
 		<if test='progressStatus == "B0"'>
 		<![CDATA[
-		AND progress_status = 'A' AND down_payment > 0
+		AND progress_status = 'A' AND down_payment >= (total_price / 10)
 		]]>
 		</if>
 		<if test="bunyangTimes != null and bunyangTimes > 0">
@@ -461,7 +467,7 @@
 	<!-- 사용승인리스트 조회 -->
     <select id="getApprovalList" parameterType="map" resultType="map">
     	SELECT
-    		COUNT(1) as total_count 
+    		COUNT(1) as total_count
     	FROM
 		    (SELECT
 			  a.bunyang_seq
@@ -481,11 +487,11 @@
 			  ,c.user_id agent_user_id
 			  ,c.user_name agent_user_name
 			  ,c.relation_type agent_user_relation
-			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = c.relation_type AND cc.parent_code_seq = 'USER_RELATION') agent_user_relation_name
+			  ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = c.relation_type) agent_user_relation_name
 			  ,d.user_id use_user_id
 			  ,d.user_name use_user_name
 			  ,d.relation_type use_user_relation
-			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = d.relation_type AND cc.parent_code_seq = 'USER_RELATION') use_user_relation_name
+			  ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = d.relation_type) use_user_relation_name
 			  ,d.cnt use_user_cnt
 			  ,a.regist_user_id
 			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
@@ -499,7 +505,7 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,user_name
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -509,7 +515,7 @@
 			(SELECT
 				bunyang_seq
 			  	,user_id
-				,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+				,user_name
 			  	,ref_type
 				,relation_type
 			FROM TB_BUNYANG_REF_USER a
@@ -531,7 +537,7 @@
 					(SELECT 
 						 bunyang_seq
 					   	,user_id
-					   	,CASE WHEN user_id IS NULL THEN user_name ELSE (SELECT user_name FROM TB_COM_USER b WHERE a.user_id = b.user_id) END user_name
+					   	,user_name
 					   	,relation_type 
 					FROM TB_BUNYANG_REF_USER a
 					WHERE a.ref_type = 'USE_USER'

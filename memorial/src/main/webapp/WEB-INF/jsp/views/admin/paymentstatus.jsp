@@ -136,7 +136,7 @@
 function _search(pageIndex) {
 	$("#pageIndex").val(pageIndex ? pageIndex : 1);
 	var frm = document.getElementById("frm");
-	frm.action = "${contextPath}/admin/bunyangstatus";
+	frm.action = "${contextPath}/admin/paymentstatus";
 	frm.submit();
 }
 

@@ -616,12 +616,9 @@ function cancelContract(btn) {
 	}
 	common.openWindow("${contextPath}/popup/useUserCancel", "popUseUserCancel", winoption, param);
 	window.useUserCancelCallBack = function(result) {
-		if(result && result.result) {
-			common.showAlert('해약처리가 승인되었습니다.');
-			var frm = document.getElementById("frm");
-			frm.action = "${contextPath}/admin/useChangeDetail";
-			frm.submit();
-		}		
+		var frm = document.getElementById("frm");
+		frm.action = "${contextPath}/admin/useChangeDetail";
+		frm.submit();	
 	}
 }
 

@@ -185,6 +185,11 @@ function _cancel() {
 			        			window.opener.contractCancelCallBack(resultCache);
 			        		}
 			        		common.closeWindow();
+						}, function(xhr, status, message) {
+							if(window.opener && window.opener.contractCancelCallBack != 'undefined') {
+			        			window.opener.contractCancelCallBack(resultCache);
+			        		}
+			        		common.closeWindow();
 						});
 					} else {
 						if(window.opener && window.opener.contractCancelCallBack != 'undefined') {

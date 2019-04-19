@@ -58,7 +58,7 @@
 	    	<button class="btn btn-primary" type="button" onclick="_search()" style="width: 70px;">조회</button>
 			<button class="btn btn-primary" type="button" style="width: 70px;" onclick="_registPayment()">등록</button>
 			<button class="btn btn-primary" type="button" onclick="_registPaymentExcel()">엑셀등록</button>
-			<button class="btn btn-primary" type="button" onclick="_registManualExcel()">입출대장</button>
+<!-- 			<button class="btn btn-primary" type="button" onclick="_registManualExcel()">입출대장</button> -->
 			<button class="btn btn-success" type="button" style="width: 70px;" onclick="_downloadExcel()">Excel</button>
 	    </div>
 	    

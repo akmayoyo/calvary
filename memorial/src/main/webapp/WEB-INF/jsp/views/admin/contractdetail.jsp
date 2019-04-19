@@ -381,6 +381,8 @@ function apprContract(progressStatus) {
 							common.sendSms(sendSmsVo, function(result) {
 								common.showAlert('메세지가 전송되었습니다.');
 								refresh();
+							}, function(xhr, status, message) {
+								refresh();
 							});
 						} else {
 							refresh();

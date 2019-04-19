@@ -41,9 +41,11 @@ public class AnonymousController {
 		Map<String, Object> statusByGraveType = adminService.getStatusByGraveType();
 		Map<String, Object> statusByProductType = adminService.getStatusByProductType();
 		Map<String, Object> statusByProgress = adminService.getStatusByProgress();
+		List<Object> graveStatusList = adminService.getGraveStatusList();
 		mv.addObject("statusByGraveType", statusByGraveType);
 		mv.addObject("statusByProductType", statusByProductType);
 		mv.addObject("statusByProgress", statusByProgress);
+		mv.addObject("graveStatusList", graveStatusList);
 		mv.addObject("currDate", new SimpleDateFormat("yy.MM.dd").format(new Date()));
 		mv.setViewName(ROOT_URL + BUNYANG_STATUS_URL);
 		return mv;
