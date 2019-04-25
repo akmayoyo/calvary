@@ -147,7 +147,7 @@ int currDay = currDt.get(Calendar.DATE);
 </div>
 
 <!-- 알림 메세지 확인 및 수신인 입력-->
-<div id="registContact" class="m_contents" style="display: none;">
+<div id="registContact" class="m_contents">
 	
 	<!-- 아코디언 메뉴 -->
 	<div id="m_menu" class="m_menu">
@@ -209,32 +209,33 @@ int currDay = currDt.get(Calendar.DATE);
 						<tr>
 							<th scope="sel">3. 용인공원담당</th>
 							<td class="text-left">
-								<span name="receiver">${contract2.mobile}</span>
+								<span name="receiverNot">${contract2.mobile}</span>
 							</td>
 						</tr>
+<!-- 						<tr> -->
+<!-- 							<th scope="sel">4. 용인공원라이프</th> -->
+<!-- 							<td class="text-left"> -->
+<!-- 								<select id="receiverYongin" class="form-control"> -->
+<%-- 								<c:forEach items="${contract3}" var="rowItem"> --%>
+<%-- 									<option value="${rowItem.mobile}">${rowItem.mobile}</option> --%>
+<%-- 								</c:forEach> --%>
+<!-- 								</select> -->
+<!-- 							</td> -->
+<!-- 						</tr> -->
 						<tr>
-							<th scope="sel">4. 용인공원라이프</th>
-							<td class="text-left">
-								<select id="receiverYongin" class="form-control">
-								<c:forEach items="${contract3}" var="rowItem">
-									<option value="${rowItem.mobile}">${rowItem.mobile}</option>
-								</c:forEach>
-								</select>
-							</td>
-						</tr>
-						<tr>
-							<th scope="sel">5. 상조회사</th>
+							<th scope="sel">4. 상조회사</th>
 							<td class="text-left">
 								<div style="margin-bottom: 5px;">
 									<input id="companyPhone1" type="tel" class="form-control input-sm tel_input"><span> - </span>
 									<input id="companyPhone2" type="tel" class="form-control input-sm tel_input"><span> - </span>
 									<input id="companyPhone3" type="tel" class="form-control input-sm tel_input">
 								</div>
-								<span style="color: #337AB7;">※ 필요한 경우만 입력</span>
+								<div><input type="checkbox" id="chkYonginLife"> <label for="chkYonginLife">용인공원라이프</label></div>
+<!-- 								<span style="color: #337AB7;">※ 필요한 경우만 입력</span> -->
 							</td>
 						</tr>
 						<tr>
-							<th scope="sel">6. 추가연락처</th>
+							<th scope="sel">5. 추가연락처</th>
 							<td class="text-left">
 								<div>
 									<input name="extraPhone1" type="tel" class="form-control input-sm tel_input"><span> - </span>
@@ -275,6 +276,12 @@ int currDay = currDt.get(Calendar.DATE);
     </div>
 	
 </div>
+
+<<ul style="display: none;">
+<c:forEach items="${contract3}" var="rowItem"> --%>
+	<li name="yonginLife" mobile="${rowItem.mobile}"></li>
+</c:forEach>
+</ul>
 
 <script type="text/javascript" src="${contextPath}/resources/js/jquery.mask.js"></script>
 <script type="text/javascript">
@@ -321,6 +328,21 @@ int currDay = currDt.get(Calendar.DATE);
 		}
 	  $("#sMessageLength").text('(' + len + '/' + maxLen + ')');
 	});
+	
+	$('#chkYonginLife').change(function() {
+	    if($(this).is(':checked')) {
+	    	var contact = $('li[name="yonginLife"]').eq(0).attr("mobile");
+	    	if(contact) {
+	    		var splited = contact.split('-');
+	    		if(splited && splited.length == 3) {
+	    			var idx = 0;
+	    			$('#companyPhone1').val(splited[idx++]);
+	    			$('#companyPhone2').val(splited[idx++]);
+	    			$('#companyPhone3').val(splited[idx++]);
+	    		}
+	    	}
+	    }
+	  });
 	
 })();
 
@@ -499,10 +521,10 @@ function _sendSms() {
 		receivers.push(mobile);
 	}
 	// 용인공원라이프
-	mobile = $('#receiverYongin option:selected').val();
-	if(mobile && receivers.indexOf(mobile) < 0) {
-		receivers.push(mobile);
-	}
+// 	mobile = $('#receiverYongin option:selected').val();
+// 	if(mobile && receivers.indexOf(mobile) < 0) {
+// 		receivers.push(mobile);
+// 	}
 	
 	// 상조회사
 	var companyPhone1 = $('#companyPhone1').val();
@@ -525,7 +547,7 @@ function _sendSms() {
 			return;
 		}
 		if(companyPhone && receivers.indexOf(companyPhone) < 0) {
-			receivers.push(companyPhone);
+			//receivers.push(companyPhone);
 		}
 	}
 	var bValid = true;
@@ -555,7 +577,7 @@ function _sendSms() {
 				return false;
 			}
 			if(phone && receivers.indexOf(phone) < 0) {
-				receivers.push(phone);
+				//receivers.push(phone);
 			}
 		}
 	});

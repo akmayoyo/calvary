@@ -17,15 +17,17 @@
 		<div class="table-responsive" style="border-top: 1px solid #999;">
 	        <table class="table table-style table-bordered" style="border-top: 0;">
 	        	<colgroup>
-	        		<col width="33%">
-	        		<col width="33%">
-	        		<col width="33%">
+	        		<col width="25%">
+	        		<col width="25%">
+	        		<col width="25%">
+	        		<col width="25%">
 	        	</colgroup>
 				<thead>
 					<tr>
 						<th scope="col">연도</th>
 						<th scope="col">입금액</th>
 						<th scope="col">출금액</th>
+						<th scope="col">잔액</th>
 					</tr>
 				</thead>
 	            <tbody>
@@ -39,6 +41,7 @@
 	            		</td>
 	            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.deposit_amount)}</td>
 	            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.withdrawal_amount)}</td>
+	            		<td align="right">${cutil:getThousandSeperatorFormatString(rowItem.deposit_amount - rowItem.withdrawal_amount)}</td>
 	            	</tr>
 	            	</c:forEach>
 	            </tbody>
@@ -76,9 +79,20 @@
 	            	<tr>
 	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">입출금기간</p></th>
 	            		<td>
-	            			<div class="input-group date" data-provide="datepicker" style="width: 225px;">
-							    <input id="tiPaymentDate" type="text" class="form-control">
-							    <div class="input-group-addon">
+	            			
+<!-- 	            			<input id="tiPaymentStartDate" type="text" class="form-control" style="width: 100px; display: inline-block;"> -->
+<!-- 	            			<span style="margin-left: 5px; margin-right: 5px;">~</span> -->
+<!-- 	            			<input id="tiPaymentEndDate" type="text" class="form-control" style="width: 100px; display: inline-block;"> -->
+							<div class="input-group date" data-provide="datepicker" style="width: 133px; float: left;">
+							    <input id="tiPaymentStartDate" type="text" class="form-control" style="display: inline-block;">
+							    <div class="input-group-addon" style="cursor: pointer;">
+							        <span class="glyphicon glyphicon-calendar"></span>
+							    </div>
+							</div>
+							<div style="float: left; margin-top: 8px;"><span style="margin-left: 5px; margin-right: 5px;">~</span></div>
+							<div class="input-group date" data-provide="datepicker" style="width: 133px; float: left;">
+							    <input id="tiPaymentEndDate" type="text" class="form-control">
+							    <div class="input-group-addon"  style="cursor: pointer;">
 							        <span class="glyphicon glyphicon-calendar"></span>
 							    </div>
 							</div>
@@ -169,13 +183,12 @@
 	var fromDt = $("#fromDt").val();
 	var toDt = $("#toDt").val();
 	
-	var option = {};
-	option['singleDatePicker'] = false;
-	if(fromDt && toDt) {
-		option['startDate'] = fromDt;
-		option['endDate'] = toDt;
-	}
-	common.datePicker($("#tiPaymentDate"),option);
+	common.datePicker($("#tiPaymentStartDate"), {startDate:fromDt});
+	common.datePicker($("#tiPaymentEndDate"),{startDate:toDt});
+	
+	$('#tiPaymentStartDate, #tiPaymentEndDate').next().click(function() {
+		$(this).prev().focus();
+	});
 	
 	$('#selPaymentDivision').change(function(e) {
 		filterPaymentType();
@@ -245,17 +258,22 @@ function getPaymentTypeOption(el, addprefix) {
  * 조회
  */
 function _search(pageIndex) {
-	var dateData = $('#tiPaymentDate').data('daterangepicker');
+	var fromData = $('#tiPaymentStartDate').data('daterangepicker');
+	var toData = $('#tiPaymentEndDate').data('daterangepicker');
 	var fromDt = '', toDt = '', paymentDivision = '', paymentType = '', parentCodeSeq = '';
 	
-	if(dateData) {
-		if(dateData.startDate) {
-			fromDt = dateData.startDate.format('YYYYMMDD');
-		}
-		if(dateData.endDate) {
-			toDt = dateData.endDate.format('YYYYMMDD');
-		}
+	if(fromData && fromData.startDate) {
+		fromDt = fromData.startDate.format('YYYYMMDD');
 	}
+	if(toData && toData.startDate) {
+		toDt = toData.startDate.format('YYYYMMDD');
+	}
+	if(fromDt > toDt) {
+		common.showAlert("입출금기간의 시작일이 종료일보다 큽니다.");
+		$('#tiPaymentStartDate').focus();
+		return;
+	}
+	
 	paymentDivision = $('#selPaymentDivision option:selected').val();
 	paymentType = $('#selPaymentType option:selected').val();
 	parentCodeSeq = $('#selPaymentType option:selected').attr('parent_code_seq');

@@ -13,7 +13,10 @@
 
 <div class="content" style="padding: 10px 10px;">
 	
-	<div class="input-group date" data-provide="datepicker"><input id="tiDate" type="text" class="form-control text-center"><div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div></div>
+	<div class="input-group date" data-provide="datepicker">
+		<input id="tiDate" type="text" class="form-control text-center">
+		<div class="input-group-addon" style="cursor: pointer;"><span class="glyphicon glyphicon-calendar"></span></div>
+	</div>
 
 	<div class="text-center" style="margin-top: 20px;">
         <button type="button" class="btn btn-primary btn-lg" onclick="_confirm()">확인</button>
@@ -28,6 +31,10 @@
 (function() {
 	
 	common.datePicker($('#tiDate'));
+	
+	$('#tiDate').next().click(function() {
+		$(this).prev().focus();
+	});
 	
     // 닫기 클릭
     $("button.btnClose").click(function(e) {

@@ -34,9 +34,16 @@
             	<tr>
             		<th style="background-color: #f5f5f5;">입출금기간</th>
             		<td>
-            			<div class="input-group date" data-provide="datepicker" style="width: 225px;">
-						    <input id="tiPeriod" type="text" class="form-control">
-						    <div class="input-group-addon">
+            			<div class="input-group date" data-provide="datepicker" style="width: 133px; float: left;">
+						    <input id="tiStartDate" type="text" class="form-control" style="display: inline-block;">
+						    <div class="input-group-addon" style="cursor: pointer;">
+						        <span class="glyphicon glyphicon-calendar"></span>
+						    </div>
+						</div>
+						<div style="float: left; margin-top: 8px;"><span style="margin-left: 5px; margin-right: 5px;">~</span></div>
+						<div class="input-group date" data-provide="datepicker" style="width: 133px; float: left;">
+						    <input id="tiEndDate" type="text" class="form-control">
+						    <div class="input-group-addon"  style="cursor: pointer;">
 						        <span class="glyphicon glyphicon-calendar"></span>
 						    </div>
 						</div>
@@ -119,11 +126,12 @@ var files;
 
 (function() {
 	
-	var option = {};
-	option['singleDatePicker'] = false;
-	option['startDate'] = moment().subtract(1, 'month');
-	option['endDate'] = moment();
-	common.datePicker($("#tiPeriod"),option);
+	common.datePicker($("#tiStartDate"), {startDate:moment().subtract(1, 'month')});
+	common.datePicker($("#tiEndDate"),{startDate:moment()});
+	
+	$('#tiStartDate, #tiEndDate').next().click(function() {
+		$(this).prev().focus();
+	});
 	
 	$("label[for=file]").click(function(event) {
         event.preventDefault();
@@ -164,17 +172,23 @@ function _uploadExcel() {
 		return;
 	}
 	// 입출금기간
-	var dateData = $('#tiPeriod').data('daterangepicker');
+	var fromData = $('#tiStartDate').data('daterangepicker');
+	var toData = $('#tiEndDate').data('daterangepicker');
+	
 	var fromDt = '';
 	var toDt = '';
-	if(dateData) {
-		if(dateData.startDate) {
-			fromDt = dateData.startDate.format('YYYYMMDD');
-		}
-		if(dateData.endDate) {
-			toDt = dateData.endDate.format('YYYYMMDD');
-		}
+	if(fromData && fromData.startDate) {
+		fromDt = fromData.startDate.format('YYYYMMDD');
 	}
+	if(toData && toData.startDate) {
+		toDt = toData.startDate.format('YYYYMMDD');
+	}
+	if(fromDt > toDt) {
+		common.showAlert("입출금기간의 시작일이 종료일보다 큽니다.");
+		$('#tiStartDate').focus();
+		return;
+	}
+	console.log(fromDt, toDt);
 	
 	var fileFrm = new FormData();
 	fileFrm.append("file", files[0]);
@@ -363,6 +377,7 @@ function _savePayment() {
     var bValidate = true;
     var summaryByBunyangSeq = {};// 계약번호별 입력된 납입금정보 합산을 위한 storage
     var existSmsReceiver = false;
+    var tmpMap = {};
     $('#tblList tbody tr').each(function(idx) {
         var tr = $(this);
         var bunyangInfo;// 계약정보
@@ -436,6 +451,18 @@ function _savePayment() {
         	bValidate = false;
         	return false;
         }
+     	
+        var key;
+       	if(bunyang_seq) {
+       		key = payment_date + '_' +bunyang_seq;
+           	if(tmpMap[key]) {
+           		common.showAlert('입출일자/계약정보가 중복된 데이터가 있습니다.\n입출일자 : ' + payment_date + ', 계약번호 : ' + bunyang_no);
+            	bValidate = false;
+            	return false;
+           	} else {
+           		tmpMap[key] = true;
+           	}	
+       	}
         
         // 동일 계약건에 대해 복수개 입력가능하기 때문에 입력된 납입금의 validation 체크는 누적 데이터를 생성후 마지막에 수행함
         if(bunyang_seq && !summaryByBunyangSeq.hasOwnProperty(bunyang_seq)) {

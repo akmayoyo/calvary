@@ -29,9 +29,16 @@
 	            		</td>
 	            		<th style="background-color: #f5f5f5;"><p class="form-control-static">접속기간</p></th>
 	            		<td>
-	            			<div class="input-group date" data-provide="datepicker" style="width: 225px;">
-							    <input id="tiSearchDate" type="text" class="form-control">
-							    <div class="input-group-addon">
+	            			<div class="input-group date" data-provide="datepicker" style="width: 133px; float: left;">
+							    <input id="tiStartDate" type="text" class="form-control" style="display: inline-block;">
+							    <div class="input-group-addon" style="cursor: pointer;">
+							        <span class="glyphicon glyphicon-calendar"></span>
+							    </div>
+							</div>
+							<div style="float: left; margin-top: 8px;"><span style="margin-left: 5px; margin-right: 5px;">~</span></div>
+							<div class="input-group date" data-provide="datepicker" style="width: 133px; float: left;">
+							    <input id="tiEndDate" type="text" class="form-control">
+							    <div class="input-group-addon"  style="cursor: pointer;">
 							        <span class="glyphicon glyphicon-calendar"></span>
 							    </div>
 							</div>
@@ -105,13 +112,12 @@
 	var fromDt = $("#fromDt").val();
 	var toDt = $("#toDt").val();
 	
-	var option = {};
-	option['singleDatePicker'] = false;
-	if(fromDt && toDt) {
-		option['startDate'] = fromDt;
-		option['endDate'] = toDt;
-	}
-	common.datePicker($("#tiSearchDate"),option);
+	common.datePicker($("#tiStartDate"), {startDate:fromDt});
+	common.datePicker($("#tiEndDate"),{startDate:toDt});
+	
+	$('#tiStartDate, #tiEndDate').next().click(function() {
+		$(this).prev().focus();
+	});
 	
 })();
 
@@ -119,16 +125,21 @@
  * 조회
  */
 function _search(pageIndex) {
-	var dateData = $('#tiSearchDate').data('daterangepicker');
+	var fromData = $('#tiStartDate').data('daterangepicker');
+	var toData = $('#tiEndDate').data('daterangepicker');
+	
 	var fromDt = '', toDt = '', paymentDivision = '', paymentType = '', parentCodeSeq = '';
 	
-	if(dateData) {
-		if(dateData.startDate) {
-			fromDt = dateData.startDate.format('YYYYMMDD');
-		}
-		if(dateData.endDate) {
-			toDt = dateData.endDate.format('YYYYMMDD');
-		}
+	if(fromData && fromData.startDate) {
+		fromDt = fromData.startDate.format('YYYYMMDD');
+	}
+	if(toData && toData.startDate) {
+		toDt = toData.startDate.format('YYYYMMDD');
+	}
+	if(fromDt > toDt) {
+		common.showAlert("검색조건 기간의 시작일이 종료일보다 큽니다.");
+		$('#tiStartDate').focus();
+		return;
 	}
 	$("#pageIndex").val(pageIndex ? pageIndex : 1);
 	$("#fromDt").val(fromDt);

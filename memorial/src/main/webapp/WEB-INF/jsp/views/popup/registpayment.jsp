@@ -93,7 +93,7 @@
 function _addRow() {
     var tr = $('<tr/>');
     // 입출일자
-    tr.append('<td><div class="input-group date" data-provide="datepicker"><input name="paymentDate" type="text" class="form-control text-center font-13"><div class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span></div></div></td>');
+    tr.append('<td><div class="input-group date" data-provide="datepicker"><input name="paymentDate" type="text" class="form-control text-center font-13"><div class="input-group-addon" style="cursor: pointer;"><span class="glyphicon glyphicon-calendar"></span></div></div></td>');
     // 입출금액
     tr.append('<td><input name="paymentAmount" type="text" class="form-control text-right font-13"></td>');
     // 입출구분
@@ -179,6 +179,10 @@ function _addRow() {
 
     // 납입일 datepicker
     common.datePicker($(tr).find('input[name="paymentDate"]'));
+    
+    $('input[name="paymentDate"]').next().click(function() {
+		$(this).prev().focus();
+	});
 
     // 납입금 포맷
     $(tr).find("input[name='paymentAmount']").focusout(function(e) {
@@ -324,6 +328,7 @@ function _savePayment() {
     var bValidate = true;
     var summaryByBunyangSeq = {};// 계약번호별 입력된 납입금정보 합산을 위한 storage
     var existSmsReceiver = false;
+    var tmpMap = {};
     $('#tblList tbody tr').each(function(idx) {
         var tr = $(this);
         var data = tr.find('select[name="bunyangSeq"]').select2('data');
@@ -413,6 +418,19 @@ function _savePayment() {
         	bValidate = false;
         	return false;
         }
+        
+       	var key;
+       	if(bunyang_seq) {
+       		key = payment_date + '_' +bunyang_seq;
+       		if(tmpMap[key]) {
+           		common.showAlert('입출일자/계약정보가 중복된 데이터가 있습니다.\n입출일자 : ' + payment_date + ', 계약번호 : ' + bunyang_no);
+            	bValidate = false;
+            	return false;
+           	} else {
+           		tmpMap[key] = true;
+           	}	
+       	}
+        
         // 동일 계약건에 대해 복수개 입력가능하기 때문에 입력된 납입금의 validation 체크는 누적 데이터를 생성후 마지막에 수행함
         if(bunyang_seq && !summaryByBunyangSeq.hasOwnProperty(bunyang_seq)) {
         	summaryByBunyangSeq[bunyang_seq] = {};
