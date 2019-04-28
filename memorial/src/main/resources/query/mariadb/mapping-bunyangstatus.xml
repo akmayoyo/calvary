@@ -133,7 +133,7 @@
 			,t1.total_cnt
 			,t1.payment_cnt
 		    ,t1.not_payment_cnt
-		    ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = t1.bunyang_seq and bh.progress_status = 'D') use_approval_date
+		    ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = t1.bunyang_seq and bh.progress_status = 'D' order by bh.update_date desc limit 1) use_approval_date
 		    ,CASE 
         		WHEN t4.cnt > 1 THEN CONCAT(t4.user_name,'(',t4.relation_type_name,')',' 외 ',t4.cnt-1,'명')
           		ELSE  CONCAT(t4.user_name,'(',t4.relation_type_name,')')

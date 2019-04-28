@@ -29,8 +29,8 @@
 			  ,a.product_type
 			  ,a.cancel_yn
 			  ,a.bunyang_times
-			  ,(SELECT remarks FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) remarks
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) progress_update_date
+			  ,(SELECT remarks FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end order by tbh.update_date desc limit 1) remarks
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end order by tbh.update_date desc limit 1) progress_update_date
 			  ,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
 			  ,a.couple_type_count
 			  ,a.single_type_count
@@ -178,11 +178,11 @@
 		      ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
               ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
 			  ,CASE WHEN progress_status = 'D' THEN 'Y' ELSE 'N' END AS approval_yn
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'A') apply_approval_date
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E') cancel_approval_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'A' order by bh.update_date desc limit 1) apply_approval_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B' order by bh.update_date desc limit 1) contract_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C' order by bh.update_date desc limit 1) full_payment_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D' order by bh.update_date desc limit 1) use_approval_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E' order by bh.update_date desc limit 1) cancel_approval_date
 			FROM TB_BUNYANG_INFO a INNER JOIN       
 			(SELECT
 				bunyang_seq
@@ -269,8 +269,8 @@
 	       	,b.user_name as apply_user_name
 	       	,b.mobile as apply_user_mobile
           	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.product_type AND cc.parent_code_seq = 'PRODUCT_TYPE') product_type_name
-          	,(SELECT remarks FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) remarks
-          	,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end) progress_update_date
+          	,(SELECT remarks FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end order by tbh.update_date desc limit 1) remarks
+          	,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = CASE WHEN a.cancel_yn = 'Y' then 'CA' else a.progress_status end order by tbh.update_date desc limit 1) progress_update_date
 	       	,a.service_charge_type
           	,(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.service_charge_type AND cc.parent_code_seq = 'SERVICE_CHARGE_TYPE') service_charge_type_name
           	,(SELECT user_name from TB_BUNYANG_REF_USER bru where bru.bunyang_seq = a.bunyang_seq and bru.is_maint_charger = 'Y' ) maint_charger_name
@@ -298,11 +298,11 @@
 			,file_seq_reject
 	       	,DATE_FORMAT(a.cancel_deposit_plan_date, '%Y-%m-%d') AS cancel_deposit_plan_date
 	       	,DATE_FORMAT(a.cancel_deposit_confirm_date, '%Y-%m-%d') AS cancel_deposit_confirm_date
-	       	,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'A') apply_approval_date
-			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
-			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
-			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
-			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E') cancel_approval_date
+	       	,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'A' order by bh.update_date desc limit 1) apply_approval_date
+			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B' order by bh.update_date desc limit 1) contract_date
+			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C' order by bh.update_date desc limit 1) full_payment_date
+			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D' order by bh.update_date desc limit 1) use_approval_date
+			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E' order by bh.update_date desc limit 1) cancel_approval_date
 			,(SELECT COUNT(1) FROM TB_BUNYANG_REF_USER bru WHERE bru.bunyang_seq = a.bunyang_seq AND bru.ref_type = 'USE_USER') use_user_cnt
 			,(SELECT COUNT(1) FROM TB_BUNYANG_REF_USER bru WHERE bru.bunyang_seq = a.bunyang_seq AND bru.ref_type = 'USE_USER' and approval_file_seq is not null) approval_use_user_cnt
 	  	FROM TB_BUNYANG_INFO a INNER JOIN       

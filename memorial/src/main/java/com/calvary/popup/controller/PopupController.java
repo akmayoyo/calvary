@@ -522,6 +522,7 @@ public class PopupController {
 		mv.addObject("fileList", adminService.getBunyangFileList(bunyangSeq));// 분양 파일 양식 리스트
 		paymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);// 계약금 납부내역
 		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 분양잔금
+		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT));// 관리비
 		mv.addObject("paymentList", paymentList);
 		mv.addObject("totalPaymentInfo", adminService.getTotalPayment(bunyangSeq));
 		mv.setViewName(ROOT_URL + BUNYANG_INFO_URL);

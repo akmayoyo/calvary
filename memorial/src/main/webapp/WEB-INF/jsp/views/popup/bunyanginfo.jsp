@@ -127,7 +127,9 @@
                     <th scope="col">관계</th>
                     <th scope="col">교인여부</th>
                     <th scope="col">이장대상</th>
-                    <th scope="col">상태</th>
+                    <th scope="col">승인상태</th>
+					<th scope="col">봉안여부</th>
+					<th scope="col">사용구역</th>
                 </tr>
             </thead>
             <tbody>
@@ -152,12 +154,23 @@
             		<td>${use.is_church_person}</td>
             		<td>${use.is_move}</td>
             		<td>
-            		<c:choose>
-            			<c:when test="${not empty use.cancel_seq}">해약</c:when>
-            			<c:when test="${not empty use.approval_no}">사용승인</c:when>
-            			<c:otherwise>사용미승인</c:otherwise>
-            		</c:choose>
-            		</td>
+						<c:choose>
+							<c:when test="${not empty use.cancel_seq}">해약</c:when>
+							<c:when test="${not empty bunyangInfo.use_approval_date}">승인</c:when>
+							<c:otherwise>미승인</c:otherwise>
+						</c:choose>
+					</td>
+					<td>
+						<c:choose>
+							<c:when test="${use.couple_assign_status == 'OCCUPIED'}">Y</c:when>
+							<c:otherwise>N</c:otherwise>
+						</c:choose>
+					</td>
+					<td>
+						<c:choose>
+							<c:when test="${use.couple_assign_status == 'OCCUPIED'}"><span name="section_info" section_seq="${use.section_seq}" row_seq="${use.row_seq}" col_seq="${use.col_seq}" seq_no="${use.seq_no}"></span></c:when>
+						</c:choose>
+					</td>
             	</tr>
             	</c:forEach>
             </tbody>
@@ -209,13 +222,12 @@
     <c:if test="${not empty paymentList}">
     <!-- 잔금 납부 내역 -->
 	<div style="margin-top: 15px;">
-		<div class="pull-left"><h4>납부 내역 (총 ₩${cutil:getThousandSeperatorFormatString(totalPaymentInfo.total_amount)})</h4></div>
+		<div class="pull-left"><h4>납부 내역</h4></div>
 	</div>
     <div class="clearfix"></div>
     <div class="table-responsive">
         <table class="table table-style table-bordered">
         	<colgroup>
-        		<col width="10%">
         		<col width="18%">
         		<col width="18%">
         		<col width="18%">
@@ -224,7 +236,6 @@
         	</colgroup>
             <thead>
                 <tr>
-                    <th scope="col">회차</th>
                     <th scope="col">납입일</th>
                     <th scope="col">납입금</th>
                     <th scope="col">납입유형</th>
@@ -235,7 +246,6 @@
             <tbody id="tbodyPayment">
             	<c:forEach items="${paymentList}" var="payment" varStatus="status">
             		<tr>
-            			<td>${status.count}</td>
 	            		<td>${payment.payment_date}</td>
 	            		<td align="right">${cutil:getThousandSeperatorFormatString(payment.payment_amount)}</td>
 	            		<td>${payment.payment_type_name}</td>
@@ -327,6 +337,13 @@
         common.closeWindow();
     });
 	
+ 	// 사용구역표시
+	$('span[name="section_info"]').each(function(idx) {
+		var section = $(this).attr('section_seq') + '구역';
+		section += '  ' + $(this).attr('row_seq') + '행-' + seqToAlpha($(this).attr('col_seq')) + '열 (고유번호:' + $(this).attr('seq_no') + ')';
+		$(this).text(section);
+	});
+	
 })();
 
 /**
@@ -334,6 +351,15 @@
  */
 function donwloadFile(fileSeq) {
 	$.fileDownload("/file/downloadFile?fileSeq=" + fileSeq).done(function(){}).fail(function(){common.showAlert("파일다운로드중 에러가 발생하였습니다.")});
+}
+
+/**
+ * 
+ */
+function seqToAlpha(seq) {
+	var seqOfA = "A".charCodeAt(0) + (seq-1);
+	var alpha = String.fromCharCode(seqOfA);
+	return alpha;
 }
 
 </script>

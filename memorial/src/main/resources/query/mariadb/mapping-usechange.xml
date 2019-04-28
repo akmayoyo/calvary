@@ -49,9 +49,9 @@
 		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
 		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
 			  ,CASE WHEN progress_status = 'D' THEN 'Y' ELSE 'N' END AS approval_yn
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B') contract_date
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C') full_payment_date
-			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D') use_approval_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'B' order by bh.update_date desc limit 1) contract_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C' order by bh.update_date desc limit 1) full_payment_date
+			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D' order by bh.update_date desc limit 1) use_approval_date
 			FROM TB_BUNYANG_INFO a INNER JOIN       
 			(SELECT
 				bunyang_seq

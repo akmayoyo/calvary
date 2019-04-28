@@ -60,10 +60,10 @@
 		      ,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
 			  ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
               ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
-              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'A') approval_date
-              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'B') contract_date
-              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'C') fullpayment_date
-              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'E') cancel_date
+              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'A' order by tbh.update_date desc limit 1) approval_date
+              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'B' order by tbh.update_date desc limit 1) contract_date
+              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'C' order by tbh.update_date desc limit 1) fullpayment_date
+              ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY tbh WHERE tbh.bunyang_seq = a.bunyang_seq and tbh.progress_status = 'E' order by tbh.update_date desc limit 1) cancel_date
               ,(SELECT DATE_FORMAT(MAX(payment_date), '%Y-%m-%d') FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment_date
 			FROM TB_BUNYANG_INFO a INNER JOIN       
 			(SELECT
