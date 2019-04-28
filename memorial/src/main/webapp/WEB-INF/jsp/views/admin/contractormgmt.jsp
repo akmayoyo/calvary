@@ -118,8 +118,8 @@ function _search(pageIndex) {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호","신청자","사용자","신청형태","부부형","1인형","총분양대금","상태","납부금액","계약여부","완납여부","계약/해약일"];
-	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","total_price","progress_status_exp","total_payment","contract_yn","full_payment_yn","action_date"];
+	var excelHeaders = ["번호","신청자","연락처","사용자","신청형태","부부형","1인형","총분양대금","상태","납부금액","계약여부","완납여부","계약/해약일"];
+	var excelFields = ["bunyang_no","apply_user_name","apply_user_mobile","use_user_exp","product_type_name","couple_type_count","single_type_count","total_price","progress_status_exp","total_payment","contract_yn","full_payment_yn","action_date"];
 	var searchKeys = ["apply_user_name", "progressStatus", "bunyangTimes"];
 	var searchValues = ["${searchVo.searchVal}", "${searchVo.progressStatus}", "${searchVo.bunyangTimes}"];
 	var queryId = "contractor.getContractorList";

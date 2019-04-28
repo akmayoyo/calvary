@@ -137,7 +137,7 @@ function _applyRegist() {
  */
 function _downloadExcel() {
 	var excelHeaders = ["승인번호","신청자","연락처","사용자","신청형태","부부형","1인형","신청일자","신청상태","비고"];
-	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count","regist_date","progress_status_exp","remarks_exp"];
+	var excelFields = ["bunyang_no","apply_user_name","apply_user_mobile","use_user_exp","product_type_name","couple_type_count","single_type_count","regist_date","progress_status_exp","remarks_exp"];
 	var searchKeys = ["bunyangTimes", "progressStatus", "apply_user_name"];
 	var bunyangTimes = $('select[name="bunyangTimes"] option:selected').val();
 	var progressStatus = $('select[name="progressStatus"] option:selected').val();

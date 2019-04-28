@@ -116,11 +116,11 @@ function _search(pageIndex) {
  */
 function _downloadExcel() {
 	var excelHeaders = [
-		"번호", "신청자", "사용자", "신청형태",  "부부형", "1인형"
+		"번호", "신청자", "연락처", "사용자", "신청형태",  "부부형", "1인형"
 		,"총 분양대금","상태", "계약일자","완납일자","사용승인일자"
 		];
 	var excelFields = [
-		"bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count","single_type_count"
+		"bunyang_no","apply_user_name","apply_user_mobile","use_user_exp","product_type_name","couple_type_count","single_type_count"
 		,"total_price","progress_status_exp","contract_date","full_payment_date","use_approval_date"
 		];
 	var searchKeys = ["apply_user_name", "progressStatus", "bunyangTimes"];

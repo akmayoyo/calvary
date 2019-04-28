@@ -128,6 +128,7 @@
 			t2.bunyang_seq
 		    ,t2.bunyang_no
 		    ,t3.user_name as apply_user_name
+		    ,t3.mobile as apply_user_mobile
 		    ,t1.total_price
 		    ,t1.total_payment
 			,t1.total_cnt

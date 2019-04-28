@@ -144,8 +144,8 @@ function _search(pageIndex) {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["번호","신청자","사용자","신청형태","부부형","1인형","신청일자","계약일자","완납여부","사용승인일자","상태"];
-	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","product_type_name","couple_type_count"
+	var excelHeaders = ["번호","신청자","연락처","사용자","신청형태","부부형","1인형","신청일자","계약일자","완납여부","사용승인일자","상태"];
+	var excelFields = ["bunyang_no","apply_user_name","apply_user_mobile","use_user_exp","product_type_name","couple_type_count"
 		,"single_type_count","regist_date","contract_date","full_payment_yn","use_approval_date","progress_status_exp"];
 	var searchKeys = ["${searchVo.searchKey}"];
 	var searchValues = ["${searchVo.searchVal}"];

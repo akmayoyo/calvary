@@ -261,6 +261,10 @@ public class ExcelController {
                 		cell.setCellStyle(numericStyle);
                 		cell.setCellType(CellType.NUMERIC);
                 		cell.setCellValue(objTmp == null ? null : ((BigDecimal)objTmp).doubleValue());
+                	}else if(objTmp instanceof Double) {
+                		cell.setCellStyle(numericStyle);
+                		cell.setCellType(CellType.NUMERIC);
+                		cell.setCellValue((double)objTmp);
                 	}else {
                 		cell.setCellValue((String)objTmp);
                 	}

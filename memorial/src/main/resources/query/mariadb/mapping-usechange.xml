@@ -34,6 +34,7 @@
 			  ,b.user_id apply_user_id
 			  ,b.user_name apply_user_name
 			  ,b.relation_type apply_user_relation
+			  ,b.mobile apply_user_mobile
 			  ,c.user_id agent_user_id
 			  ,c.user_name agent_user_name
 			  ,c.relation_type agent_user_relation
@@ -59,6 +60,7 @@
 				,user_name
 			  	,ref_type
 				,relation_type
+				,mobile
 			FROM TB_BUNYANG_REF_USER a
 			WHERE ref_type = 'APPLY_USER'
 			) b ON a.bunyang_seq = b.bunyang_seq  

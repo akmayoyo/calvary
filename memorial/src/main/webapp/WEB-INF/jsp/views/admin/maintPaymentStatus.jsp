@@ -149,8 +149,8 @@ function _search(pageIndex) {
  * Excel 다운로드
  */
 function _downloadExcel() {
-	var excelHeaders = ["계약번호","계약자","사용자","사용승인일","총관리비","납부금액","납부건수","미납건수","납부상태"];
-	var excelFields = ["bunyang_no","apply_user_name","use_user_exp","use_approval_date","total_price","total_payment","payment_cnt","not_payment_cnt","maint_status_exp"];
+	var excelHeaders = ["계약번호","계약자","연락처","사용자","사용승인일","총관리비","납부금액","납부건수","미납건수","납부상태"];
+	var excelFields = ["bunyang_no","apply_user_name","apply_user_mobile","use_user_exp","use_approval_date","total_price","total_payment","payment_cnt","not_payment_cnt","maint_status_exp"];
 	var searchKeys = ["apply_user_name", "maintYear", "maintStatus"];
 	var searchValues = ["${searchVo.searchVal}", "${searchVo.maintYear}", "${searchVo.maintStatus}"];
 	var queryId = "bunyangstatus.getMaintPaymentList";
