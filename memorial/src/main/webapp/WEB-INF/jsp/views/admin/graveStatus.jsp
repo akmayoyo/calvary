@@ -158,7 +158,9 @@
 	// add for programmatically d3 click event
 	$.fn.d3Click = function () {
 		this.each(function (i, e) {
-			var evt = new MouseEvent("click");
+			//var evt = new MouseEvent("click");
+			var evt = document.createEvent("MouseEvent");
+			evt.initMouseEvent("click",true,true,window,0,0,0,0,0,false,false,false,false,0,null);
 			e.dispatchEvent(evt);
 		});
 	};
@@ -519,10 +521,16 @@ function _getGraveAssignInfo(d) {
 	});
 }
 
+var searching = false;
+
 /**
  * 
  */
 function searchUser() {
+	if(searching) {
+		return;
+	}
+	searching = true;
 	var userName = $('#tiSearchUser').val();
 	if(!userName) {
 		common.showAlert('검색할 사용자명을 입력하세요.');
@@ -544,6 +552,10 @@ function searchUser() {
 			} else {
 				common.showAlert('해당 이름으로 등록된 사용(봉안)자가 없습니다.');
 			}
+			searching = false;
+		},
+		error: function(xhr, status, message) {
+			searching = false;
 		}
 	});
 }

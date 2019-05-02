@@ -16,7 +16,19 @@
 <div class="content" style="padding: 15px 15px;">
     <!-- 신청자 -->
     <div>
-    	<div class="pull-left"><h4>신청자</h4></div>
+    	<div class="pull-left">
+    		<p style="font-weight: bold; font-size: 18px; margin: 10px 8px 8px 0; display: inline-block;">신청자</p>
+    		<c:choose>
+    			<c:when test="${bunyangInfo.progress_status == 'N'}"><span class="label label-success">신청</span></c:when>
+    			<c:when test="${bunyangInfo.cancel_yn == 'Y'}"><span class="label label-danger">취소</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'A' && bunyangInfo.cancel_yn != 'Y'}"><span class="label label-info">승인</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'B'}"><span class="label label-info">계약완료</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'C'}"><span class="label label-info">완납</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'D'}"><span class="label label-info">사용승인</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'E'}"><span class="label label-danger">해약</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'R'}"><span class="label label-danger">반려</span></c:when>
+    		</c:choose>
+    	</div>
     </div>
     <div class="clearfix"></div>
     <div class="table-responsive">
