@@ -1044,7 +1044,7 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("coupleSeq", coupleSeq);
 		
 		// 부부형 배우자가 이미 사용중이거나 가족형의 구성원이 미리 예약한 자리가 있으면 해당 정보 반환
-		List<Object> approvalGraveList = commonDao.selectList("use.getReservedGraveInfo", parameter);
+		List<Object> approvalGraveList = commonDao.selectList("use.getReservedGraveInfo2", parameter);
 		
 		// 배정된 자리가 없을 경우 신청된 정보 반환
 		if(approvalGraveList == null || approvalGraveList.size() == 0) {
@@ -1738,6 +1738,24 @@ public class AdminServiceImpl implements IAdminService {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("userName", userName);
 		Map<String, Object> rtnMap = (Map<String, Object>)commonDao.selectOne("bunyangstatus.getGraveUserInfo", parameter); 
+		return rtnMap;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getRequestGraveInfo(String bunyangSeq, int userSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("userSeq", userSeq);
+		Map<String, Object> rtnMap = (Map<String, Object>)commonDao.selectOne("admin.getRequestGraveInfo", parameter); 
+		return rtnMap;
+	}
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getCoupleRequestGraveInfo(String bunyangSeq, int userSeq, int coupleSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("userSeq", userSeq);
+		parameter.put("coupleSeq", coupleSeq);
+		Map<String, Object> rtnMap = (Map<String, Object>)commonDao.selectOne("admin.getCoupleRequestGraveInfo", parameter); 
 		return rtnMap;
 	}
 	

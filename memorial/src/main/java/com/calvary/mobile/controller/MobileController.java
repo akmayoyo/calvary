@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -93,21 +94,42 @@ public class MobileController {
 	 */
 	@RequestMapping(value=REQUEST_GRAVE)
 	public Object requestGraveHandler(String bunyangSeq, String userId) {
+		Map<String, Object> familyGraveRequestInfo = mobileService.getFamilyGraveRequestInfo(bunyangSeq);
 		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
 		Map<String, Object> useUserInfo = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId);
+		
+		int userSeq = CommonUtil.convertToInt(useUserInfo.get("user_seq"));
+		int coupleSeq = CommonUtil.convertToInt(useUserInfo.get("couple_seq"));
+		
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName(ROOT_URL + REQUEST_GRAVE);
-		boolean isOccupied = false;
-		if(useUserInfo != null) {
-			// 이미 사용중이거나 신청중인 사용자인지 체크
-			if(CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED.equals(useUserInfo.get("couple_assign_status")) || 
-					CalvaryConstants.GRAVE_ASSIGN_STATUS_REQUESTED.equals(useUserInfo.get("request_status"))) {
-				isOccupied = true;
+		
+		String errorCode = "";
+		
+		if(familyGraveRequestInfo != null) {// 가족형 최초 신청건이 승인대기중인 경우
+			errorCode = "1";
+		}else {
+			Map<String, Object> requestInfo = adminService.getRequestGraveInfo(bunyangSeq, userSeq);
+			if(requestInfo != null) {
+				String requestStatus = (String)requestInfo.get("request_status");
+				if("REQUESTED".equals(requestStatus)) {// 이미 신청해서 승인대기중인경우
+					errorCode = "4";
+				} else if("APPROVAL".equals(requestStatus)) {// 이미 사용중
+					errorCode = "2";
+				}
 			}
-			if(!isOccupied) {
+			// 부부형일 경우 배우자 신청건이 승인중인지 체크
+			if(StringUtils.isEmpty(errorCode) && coupleSeq > 0) {
+				requestInfo = adminService.getCoupleRequestGraveInfo(bunyangSeq, userSeq, coupleSeq);
+				if(requestInfo != null) {
+					String requestStatus = (String)requestInfo.get("request_status");
+					if("REQUESTED".equals(requestStatus)) {// 배우자 신청건이 승인대기중인경우
+						errorCode = "3";
+					}
+				}
+			}
+			if(StringUtils.isEmpty(errorCode)) {
 				String productType = (String)bunyangInfo.get("product_type");
-				int userSeq = CommonUtil.convertToInt(useUserInfo.get("user_seq"));
-				int coupleSeq = CommonUtil.convertToInt(useUserInfo.get("couple_seq"));
 				String graveType = null;
 				// 이미 배정된 자리가 있는지 조회
 				Map<String, Object> assignedGraveInfo = mobileService.getReservedGraveInfo(bunyangSeq, userSeq, coupleSeq);
@@ -135,8 +157,8 @@ public class MobileController {
 				mv.addObject("bunyangSeq", bunyangSeq);
 				mv.addObject("userId", userId);
 			}
-			mv.addObject("isOccupied", isOccupied);
 		}
+		mv.addObject("errorCode", errorCode);
 		return mv;
 	}
 	
@@ -159,12 +181,42 @@ public class MobileController {
 	 */
 	@RequestMapping(value=SAVE_REQUEST_GRAVE)
 	@ResponseBody
-	public Object saveRequestGraveHandler(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception{
+	public Object saveRequestGraveHandler(String productType, String bunyangSeq, int coupleSeq, int userSeq, String userId, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception{
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		boolean bRslt = false;
-		int iRslt = mobileService.requestGrave(productType, bunyangSeq, coupleSeq, userSeq, sectionSeq, rowSeq, colSeq, isReserved);
-		bRslt = iRslt > 0;
+		String errorCode = "";
+		
+		Map<String, Object> familyGraveRequestInfo = mobileService.getFamilyGraveRequestInfo(bunyangSeq);
+		
+		if(familyGraveRequestInfo != null) {// 가족형 최초 신청건이 승인대기중인 경우
+			errorCode = "1";
+		}else {
+			Map<String, Object> requestInfo = adminService.getRequestGraveInfo(bunyangSeq, userSeq);
+			if(requestInfo != null) {
+				String requestStatus = (String)requestInfo.get("request_status");
+				if("REQUESTED".equals(requestStatus)) {// 이미 신청해서 승인대기중인경우
+					errorCode = "4";
+				} else if("APPROVAL".equals(requestStatus)) {// 이미 사용중
+					errorCode = "2";
+				}
+			}
+			// 부부형일 경우 배우자 신청건이 승인중인지 체크
+			if(StringUtils.isEmpty(errorCode) && coupleSeq > 0) {
+				requestInfo = adminService.getCoupleRequestGraveInfo(bunyangSeq, userSeq, coupleSeq);
+				if(requestInfo != null) {
+					String requestStatus = (String)requestInfo.get("request_status");
+					if("REQUESTED".equals(requestStatus)) {// 배우자 신청건이 승인대기중인경우
+						errorCode = "3";
+					}
+				}
+			}
+		}
+		if(StringUtils.isEmpty(errorCode)) {
+			int iRslt = mobileService.requestGrave(productType, bunyangSeq, coupleSeq, userSeq, sectionSeq, rowSeq, colSeq, isReserved);
+			bRslt = iRslt > 0;
+		}
 		rtnMap.put("result", bRslt);
+		rtnMap.put("errorCode", errorCode);
 		return rtnMap;
 	}
 	

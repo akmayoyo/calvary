@@ -6,9 +6,41 @@
 	<input type="hidden" name="seqNo">
 </form>
 <c:choose>
-<c:when test="${isOccupied }">
+<c:when test="${errorCode == '1'}">
 <script type="text/javascript">
-	alert('이미 사용(봉안)중인 사용자입니다.');
+	alert('가족형의 경우 가족 구성원중 최초 사용신청건의 승인이 완료된 후 신청가능합니다.');
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/mobile/main";
+	frm.submit();
+</script>
+</c:when>
+<c:when test="${errorCode == '2'}">
+<script type="text/javascript">
+	alert('이미 봉안된 사용자입니다.');
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/mobile/main";
+	frm.submit();
+</script>
+</c:when>
+<c:when test="${errorCode == '3'}">
+<script type="text/javascript">
+	alert('배우자의 사용신청건이 승인완료 후 신청가능합니다.');
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/mobile/main";
+	frm.submit();
+</script>
+</c:when>
+<c:when test="${errorCode == '4'}">
+<script type="text/javascript">
+	alert('이미 신청된 사용자입니다.');
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/mobile/main";
+	frm.submit();
+</script>
+</c:when>
+<c:when test="${errorCode == '5'}">
+<script type="text/javascript">
+	alert('사용자 정보를 조회할 수 없습니다.');
 	var frm = document.getElementById("frm");
 	frm.action = "${contextPath}/mobile/main";
 	frm.submit();
@@ -135,6 +167,7 @@
 <input id="coupleSeq" type="hidden" value="${useUserInfo.couple_seq}">
 </c:if>
 <input id="userSeq" type="hidden" value="${useUserInfo.user_seq}">
+<input id="userId" type="hidden" value="${useUserInfo.user_id}">
 <c:if test="${!empty assignedGraveInfo}">
 <input id="assignedSectionSeq" type="hidden" value="${assignedGraveInfo.section_seq}">
 <input id="assignedRowSeq" type="hidden" value="${assignedGraveInfo.row_seq}">
@@ -448,6 +481,7 @@ function _request() {
 	data.bunyangSeq = '${bunyangInfo.bunyang_seq}';
 	data.coupleSeq = $('#coupleSeq').val() ? $('#coupleSeq').val() : 0;
 	data.userSeq = $('#userSeq').val();
+	data.userId = $('#userId').val();
 	data.sectionSeq = sectionSeq;
 	data.rowSeq = rowSeq;
 	data.colSeq = colSeq;
@@ -468,8 +502,22 @@ function _request() {
 				frm.action = "${contextPath}/mobile/registFuneralInfo";
 				frm.submit();
 			} else {
-				common.showAlert('저장에 실패하였습니다.');
+				var errorCode = result.errorCode;
+				if(errorCode == '1') {
+					common.showAlert('가족형의 경우 가족 구성원중 최초 사용신청건의 승인이 완료된 후 신청가능합니다.');
+				} else if(errorCode == '2') {
+					common.showAlert('이미 봉안된 사용자입니다.');
+				} else if(errorCode == '3') {
+					common.showAlert('배우자의 사용신청건이 승인완료 후 신청가능합니다.');
+				} else if(errorCode == '4') {
+					common.showAlert('이미 신청된 사용자입니다.');
+				} else {
+					common.showAlert('저장에 실패하였습니다.');	
+				}
 			}
+		},
+		error: function(xhr, status, message) {
+			common.showAlert('사용(봉안)신청시 에러가 발생하였습니다.');	
 		}
 	});
 }

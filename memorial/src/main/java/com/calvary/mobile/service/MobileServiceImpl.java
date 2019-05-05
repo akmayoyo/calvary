@@ -185,19 +185,20 @@ public class MobileServiceImpl implements IMobileService {
 	public int requestGrave(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception {
 		int iRslt = 0;
 		Map<String, Object> parameter = null;
+		Map<String, Object> parameter2 = null;
 		String requestUserId = null;
 		if(SessionUtil.getCurrentBunyangUser() != null) {
 			requestUserId = SessionUtil.getCurrentBunyangUser().getUserId();
 		}
 		// 신청정보 저장
-		parameter = new HashMap<String, Object>();
-		parameter.put("bunyangSeq", bunyangSeq);
-		parameter.put("sectionSeq", sectionSeq);
-		parameter.put("rowSeq", rowSeq);
-		parameter.put("colSeq", colSeq);
-		parameter.put("useUserSeq", userSeq);
-		parameter.put("requestUser", requestUserId);
-		iRslt += commonDao.insert("use.createGraveRequestInfo", parameter);
+		parameter2 = new HashMap<String, Object>();
+		parameter2.put("bunyangSeq", bunyangSeq);
+		parameter2.put("sectionSeq", sectionSeq);
+		parameter2.put("rowSeq", rowSeq);
+		parameter2.put("colSeq", colSeq);
+		parameter2.put("useUserSeq", userSeq);
+		parameter2.put("requestUser", requestUserId);
+		iRslt += commonDao.insert("use.createGraveRequestInfo", parameter2);
 		
 		// 추모동산 배치현황의 상태값을 신청상태로 변경
 		String graveType = coupleSeq > 0 ? CalvaryConstants.GRAVE_TYPE_COUPLE : CalvaryConstants.GRAVE_TYPE_SINGLE;
@@ -222,10 +223,14 @@ public class MobileServiceImpl implements IMobileService {
 			if(availableGraveInfo != null) {
 				int col = CommonUtil.convertToInt(availableGraveInfo.get("col_seq"));
 				if(col != colSeq) {
-					throw new Exception("requested col seq is not available!!");
+					// 동일메서드 Exception Transaction 안걸려서 수동으로 삭제해줌
+					commonDao.delete("use.deleteGraveRequestInfo", parameter2);
+					throw new Exception("requested col seq is not available!! col : " + col + ", colSeq : " + colSeq);
 				}
 			} else {
-				throw new Exception("no available grave!!");
+				// 동일메서드 Exception Transaction 안걸려서 수동으로 삭제해줌
+				commonDao.delete("use.deleteGraveRequestInfo", parameter2);
+				throw new Exception("no available grave!! sectionSeq : " + sectionSeq);
 			}
 			for(int i = 0; i < requireCnt; i++) {
 				parameter = new HashMap<String, Object>();

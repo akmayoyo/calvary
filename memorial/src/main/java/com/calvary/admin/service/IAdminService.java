@@ -419,6 +419,9 @@ public interface IAdminService {
 	 */
 	public Map<String, Object> getGraveUserInfo(String userName);
 	
+	public Map<String, Object> getRequestGraveInfo(String bunyangSeq, int userSeq);
+	public Map<String, Object> getCoupleRequestGraveInfo(String bunyangSeq, int userSeq, int coupleSeq);
+	
 	//===============================================================================
 	// 메뉴 관리
 	//===============================================================================

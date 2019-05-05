@@ -211,10 +211,9 @@
 			section_seq
 		    ,row_seq
 		    ,col_seq
-		    ,CASE WHEN @vsection_seq = a.section_seq and @vrow_seq = a.row_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
-			,(@vsection_seq := a.section_seq) vsection_seq
-		    ,(@vrow_seq := a.row_seq) vrow_seq
-		from TB_BUNYANG_GRAVE_ASSIGN a, (SELECT @vsection_seq:='', @vrow_seq = 0, @rownum:=0 FROM DUAL) b
+		    ,CASE WHEN @v_group = concat(a.section_seq, a.row_seq) THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+			,(@v_group := concat(a.section_seq, a.row_seq)) v_group
+		from TB_BUNYANG_GRAVE_ASSIGN a, (SELECT @v_group:='', @rownum:=0 FROM DUAL) b
 		where grave_type = #{graveType} AND assign_status = 'AVAILABLE'
 		order by a.section_seq, a.row_seq, a.col_seq
 		) t
@@ -242,10 +241,9 @@
 			section_seq
 		    ,row_seq
 		    ,col_seq
-		    ,CASE WHEN @vsection_seq = a.section_seq and @vrow_seq = a.row_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
-			,(@vsection_seq := a.section_seq) vsection_seq
-		    ,(@vrow_seq := a.row_seq) vrow_seq
-		from TB_BUNYANG_GRAVE_ASSIGN a, (SELECT @vsection_seq:='', @vrow_seq = 0, @rownum:=0 FROM DUAL) b
+		    ,CASE WHEN @v_group = concat(a.section_seq, a.row_seq) THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+			,(@v_group := concat(a.section_seq, a.row_seq)) v_group
+		from TB_BUNYANG_GRAVE_ASSIGN a, (SELECT @v_group:='', @rownum:=0 FROM DUAL) b
 		where section_seq = #{sectionSeq} AND grave_type = #{graveType} AND assign_status = 'AVAILABLE'
 		order by a.section_seq, a.row_seq, a.col_seq
 		) t
@@ -282,10 +280,9 @@
 							section_seq
 						    ,row_seq
 						    ,col_seq
-						    ,CASE WHEN @vsection_seq = a.section_seq and @vrow_seq = a.row_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
-							,(@vsection_seq := a.section_seq) vsection_seq
-						    ,(@vrow_seq := a.row_seq) vrow_seq
-						from TB_BUNYANG_GRAVE_ASSIGN a, (SELECT @vsection_seq:='', @vrow_seq = 0, @rownum:=0 FROM DUAL) b
+						    ,CASE WHEN @vgroup = concat(a.section_seq, a.row_seq) THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+							,(@vgroup := concat(a.section_seq, a.row_seq)) vgroup
+						from TB_BUNYANG_GRAVE_ASSIGN a, (SELECT @vgroup:='', @rownum:=0 FROM DUAL) b
 						where grave_type = #{graveType} AND assign_status = 'AVAILABLE'
 						order by a.section_seq, a.row_seq, a.col_seq
 						) t
@@ -373,6 +370,35 @@
 		) = 1
 		AND a.request_count = 0
 		AND a.assign_status IN ('RESERVED', 'HALF_OCCUPIED')
+		ORDER BY section_seq, row_seq, col_seq
+		LIMIT 1
+    </select>
+    
+    <!-- 가족형의 다른가족 또는 부부형 배우자가 사용시 내 자리는 이미 정해져있기때문에 그자리가 있는지 조회함 -->
+    <select id="getReservedGraveInfo2" parameterType="map" resultType="map">
+    	SELECT
+    		a.*
+    	FROM
+    	(SELECT 
+			a.section_seq
+			,a.row_seq
+			,a.col_seq
+			,a.bunyang_seq
+			,a.use_user_seq1
+			,a.use_user_seq2
+			,a.couple_seq
+			,a.assign_status
+			,a.grave_type
+			,a.seq_no
+			,concat(a.section_seq, '구역 ', a.row_seq, '행-', char(64+a.col_seq), '열') as grave_exp
+		FROM TB_BUNYANG_GRAVE_ASSIGN a 
+		INNER JOIN TB_BUNYANG_GRAVE_REQUEST_INFO b 
+		ON a.bunyang_seq = b.bunyang_seq AND a.section_seq = b.section_seq AND a.row_seq = b.row_seq AND a.col_seq = b.col_seq
+		WHERE a.bunyang_seq = #{bunyangSeq} 
+		AND b.use_user_seq = #{userSeq} 
+		AND a.assign_status IN ('RESERVED', 'HALF_OCCUPIED')
+		AND b.request_status = 'REQUESTED'
+		) a
 		ORDER BY section_seq, row_seq, col_seq
 		LIMIT 1
     </select>
@@ -489,6 +515,17 @@
 		CURRENT_TIMESTAMP
 		)
     </insert>
+    
+    <!-- 동산 신청 정보 삭제 -->
+    <delete id="deleteGraveRequestInfo" parameterType="map">
+    	DELETE FROM TB_BUNYANG_GRAVE_REQUEST_INFO 
+    	WHERE BUNYANG_SEQ = #{bunyangSeq}
+    	AND SECTION_SEQ = #{sectionSeq}
+    	AND ROW_SEQ = #{rowSeq}
+    	AND COL_SEQ = #{colSeq}
+    	AND USE_USER_SEQ = #{useUserSeq}
+    	AND REQUEST_STATUS = 'REQUESTED'
+    </delete>
     
     <select id="getFamilyGraveRequestInfo" parameterType="map" resultType="map">
     	SELECT

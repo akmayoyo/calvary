@@ -631,4 +631,40 @@
 		LIMIT 0,1
 	</select>
 	
+	<select id="getRequestGraveInfo" parameterType="map" resultType="map">
+		select
+			bunyang_seq,
+			section_seq,
+			row_seq,
+			col_seq,
+			use_user_seq,
+			request_status,
+			request_user,
+			request_date,
+			approval_user,
+			approval_date
+		from TB_BUNYANG_GRAVE_REQUEST_INFO a
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		AND a.use_user_seq = #{userSeq}
+		LIMIT 0,1
+	</select>
+	
+	<select id="getCoupleRequestGraveInfo" parameterType="map" resultType="map">
+		select
+			bunyang_seq,
+			section_seq,
+			row_seq,
+			col_seq,
+			use_user_seq,
+			request_status,
+			request_user,
+			request_date,
+			approval_user,
+			approval_date
+		from TB_BUNYANG_GRAVE_REQUEST_INFO a
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		AND a.use_user_seq = (select user_seq FROM TB_BUNYANG_REF_USER t WHERE t.bunyang_seq = #{bunyangSeq} AND t.ref_type = 'USE_USER' AND t.user_seq != #{userSeq} AND t.couple_seq = #{coupleSeq})
+		LIMIT 0,1
+	</select>
+	
 </mapper>
