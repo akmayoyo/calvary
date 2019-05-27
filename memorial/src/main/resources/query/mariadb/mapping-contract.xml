@@ -19,7 +19,7 @@
         	,CASE WHEN down_payment + balance_payment >= total_price THEN 'Y' ELSE 'N' END AS full_payment_yn
         	,CASE 
         		WHEN progress_status = 'A' THEN CASE WHEN down_payment >= (total_price/10) THEN '계약미진행' ELSE '신청승인' END
-        		WHEN progress_status = 'B' THEN '계약완료'
+        		WHEN progress_status = 'B' THEN CASE WHEN down_payment + balance_payment >= total_price THEN '완납(미승인)' ELSE '계약완료' END
         		WHEN progress_status = 'C' THEN '완납'
         		WHEN progress_status = 'E' THEN '계약취소'
         	END progress_status_exp
@@ -124,7 +124,9 @@
 		]]>
 		</if>
 		<if test='progressStatus == "B"'>
-		AND progress_status = 'B'
+		<![CDATA[
+		AND progress_status = 'B' AND (down_payment + balance_payment) < total_price
+		]]>
 		</if>
 		<if test='progressStatus == "C"'>
 		AND progress_status = 'C'
@@ -135,6 +137,11 @@
 		<if test='progressStatus == "B0"'>
 		<![CDATA[
 		AND progress_status = 'A' AND down_payment >= (total_price / 10)
+		]]>
+		</if>
+		<if test='progressStatus == "C0"'>
+		<![CDATA[
+		AND progress_status = 'B' AND (down_payment + balance_payment) >= total_price
 		]]>
 		</if>
 		<if test="bunyangTimes != null and bunyangTimes > 0">

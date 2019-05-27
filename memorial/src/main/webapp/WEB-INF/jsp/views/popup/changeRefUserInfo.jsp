@@ -41,7 +41,15 @@
             		<tr>
             			<th>직분/교구</th>
 	            		<td align="left" class="form-inline">
-	            			${refUserInfo.church_officer_name} / ${refUserInfo.diocese}
+	            			<span style="font-size: 13px;">직분</span>
+	            			<select id="selOfficer" class="form-control" style="width: 98px; margin-left: 5px; margin-right: 18px;">
+	            				<option value="">선택</option>
+	            				<c:forEach items="${officerList}" var="officer">
+	            					<option value="${officer.code_seq}">${officer.code_name}</option>
+	            				</c:forEach>
+	            			</select>
+	            			<span style="font-size: 13px;">교구</span>
+	            			<input id="tiDiocese" type="text" class="form-control" style="width: 80px; margin-left: 5px;">
 	            		</td>
             		</tr>
             		</c:if>
@@ -145,6 +153,8 @@
         common.closeWindow();
     });
     
+    var churchOfficer = '${refUserInfo.church_officer}';
+	var diocese = '${refUserInfo.diocese}';
     var mobile = '${refUserInfo.mobile}';
     var mobile1 = '';
     var mobile2 = '';
@@ -160,6 +170,9 @@
     var emailAddr = '';
     var emailDomain = '';
     var arrTmp;
+    
+    $('#selOfficer option[value=' + churchOfficer + ']').attr('selected', 'selected');	
+    $('#tiDiocese').val(diocese);
     
     if(common.isValidMobile(mobile)) {
     	mobile = common.toNumeric(mobile);
@@ -205,6 +218,23 @@
  */
 function _confirm() {
 	var userName, birthDate, gender, mobile, mobile2, mobile3, phone, phone1, phone2, phone3, postNumber, address1, address2, fulladdress, officer, officerName, diocese, email, relationType, relationTypeName, changeReason, remarks;
+	
+	// 직분/교구
+	if($('#selOfficer').length > 0) {
+		officer = $('#selOfficer option:selected').val();
+		officerName = officer ? $('#selOfficer option:selected').text() : '';
+		if(!officer) {
+			common.showAlert('직분을 선택해주세요.');
+			$('#selOfficer').focus();
+			return;
+		}
+		diocese = $('#tiDiocese').val();
+		if(!diocese) {
+			common.showAlert('교구를 입력해주세요.');
+			$('#tiDiocese').focus();
+			return;
+		}
+	}
 	
 	// 휴대전화
 	mobile = $('#selMobile1 option:selected').text();
@@ -268,6 +298,9 @@ function _confirm() {
     selectedItems.push(postNumber);
     selectedItems.push(address1);
     selectedItems.push(address2);
+    selectedItems.push(officer);
+    selectedItems.push(officerName);
+    selectedItems.push(diocese);
     selectedItems.push(email);
     if(window.opener && window.opener.selectuserCallBack != 'undefined') {
 		window.opener.selectuserCallBack(selectedItems);

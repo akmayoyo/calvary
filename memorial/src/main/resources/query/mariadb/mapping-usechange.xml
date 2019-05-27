@@ -166,7 +166,9 @@
 		UPDATE TB_BUNYANG_REF_USER
 		SET email = #{email}, mobile = #{mobile}
 		, phone = #{phone}, post_number = #{postNumber}
-		, address1 = #{address1}, address2 = #{address2} 
+		, address1 = #{address1}, address2 = #{address2}
+		, church_officer = #{churchOfficer}
+		, diocese = #{diocese}
 		WHERE bunyang_seq = #{bunyangSeq} and user_id = #{userId}
 		AND ref_type = #{refType}
 	</update>

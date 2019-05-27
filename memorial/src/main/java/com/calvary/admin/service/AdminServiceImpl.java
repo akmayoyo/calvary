@@ -1473,6 +1473,8 @@ public class AdminServiceImpl implements IAdminService {
 		param.put("postNumber", bunyangUserVo.getPostNumber());
 		param.put("address1", bunyangUserVo.getAddress1());
 		param.put("address2", bunyangUserVo.getAddress2());
+		param.put("churchOfficer", bunyangUserVo.getChurchOfficer());
+		param.put("diocese", bunyangUserVo.getDiocese());
 		param.put("bunyangSeq", bunyangUserVo.getBunyangSeq());
 		param.put("refType", bunyangUserVo.getRefType());
 		// 변경전 이력정보 생성

@@ -399,7 +399,7 @@ function succeedContractor() {
 	
 	// 팝업 callback 함수
 	window.selectuserCallBack = function(item) {
-		var idx = 0, userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', diocese = '', relationType = '', relationTypeName = '', changeReason = '', remarks = '';
+		var idx = 0, userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', churchOfficerName = '', diocese = '', relationType = '', relationTypeName = '', changeReason = '', remarks = '';
 		if(item && item.length > 0) {
 			userName = item[idx++];
 			birthDate = item[idx++];
@@ -465,7 +465,7 @@ function editApplyUser() {
 	
 	// 팝업 callback 함수
 	window.selectuserCallBack = function(item) {
-		var idx = 0, userId = '', userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', diocese = '', relationType = '', relationTypeName = '', changeReason = '', remarks = '';
+		var idx = 0, userId = '', userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', churchOfficerName = '', diocese = '', relationType = '', relationTypeName = '', changeReason = '', remarks = '';
 		if(item && item.length > 0) {
 			userId = item[idx++];
 			mobile = item[idx++];
@@ -473,6 +473,9 @@ function editApplyUser() {
 			postNumber = item[idx++];
 			address1 = item[idx++];
 			address2 = item[idx++];
+			churchOfficer = item[idx++];
+			churchOfficerName = item[idx++];
+			diocese = item[idx++];
 			email = item[idx++];
 			
 			var userVo = {};
@@ -483,6 +486,8 @@ function editApplyUser() {
 			userVo['postNumber'] = postNumber;
 			userVo['address1'] = address1;
 			userVo['address2'] = address2;
+			userVo['churchOfficer'] = churchOfficer;
+			userVo['diocese'] = diocese;
 			userVo['email'] = email;
 			userVo['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>';
 			

@@ -25,24 +25,24 @@
 <!--     </bean> -->
     
 	<!-- Data Source(mariadb) 개발 -->
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://calvarydev.cafe24.com:3306/calvarydev?autoReconnect=true&amp;serverTimezone=UTC"/>
-<!-- 		<property name="url" value="jdbc:mysql://localhost:3306/calvarydev?autoReconnect=true&amp;serverTimezone=UTC"/> -->
-		<property name="username" value="calvarydev"/>
-        <property name="password" value="calvarydev!"/>
-        <property name="validationQuery" value="select 1"/>
-    </bean>
-    
-    <!-- Data Source(mariadb) 운영 -->
 <!-- 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"> -->
 <!--         <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/> -->
-<!--         <property name="url" value="jdbc:mysql://mparkcalvary.com:3306/parksp7275?autoReconnect=true&amp;serverTimezone=UTC"/> -->
-<!-- 		<property name="url" value="jdbc:mysql://localhost:3306/parksp7275?autoReconnect=true&amp;serverTimezone=UTC"/> --> 
-<!-- 		<property name="username" value="parksp7275"/> -->
-<!--         <property name="password" value="parksp7275!"/> -->
+<!--         <property name="url" value="jdbc:mysql://calvarydev.cafe24.com:3306/calvarydev?autoReconnect=true&amp;serverTimezone=UTC"/> -->
+<!-- 		<property name="url" value="jdbc:mysql://localhost:3306/calvarydev?autoReconnect=true&amp;serverTimezone=UTC"/> -->
+<!-- 		<property name="username" value="calvarydev"/> -->
+<!--         <property name="password" value="calvarydev!"/> -->
 <!--         <property name="validationQuery" value="select 1"/> -->
 <!--     </bean> -->
+    
+    <!-- Data Source(mariadb) 운영 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.cj.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://mparkcalvary.com:3306/parksp7275?autoReconnect=true&amp;serverTimezone=UTC"/>
+<!-- 		<property name="url" value="jdbc:mysql://localhost:3306/parksp7275?autoReconnect=true&amp;serverTimezone=UTC"/>  -->
+		<property name="username" value="parksp7275"/>
+        <property name="password" value="parksp7275!"/>
+        <property name="validationQuery" value="select 1"/>
+    </bean>
     
     <bean id="sqlSession" class="org.mybatis.spring.SqlSessionFactoryBean">
         <property name="dataSource" ref="dataSource" />

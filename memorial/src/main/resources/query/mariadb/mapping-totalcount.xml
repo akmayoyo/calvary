@@ -297,10 +297,14 @@
 		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
 		</if>
 		<if test='progressStatus == "A"'>
-		AND progress_status = 'A'
+		<![CDATA[
+		AND progress_status = 'A' AND down_payment < (total_price / 10)
+		]]>
 		</if>
 		<if test='progressStatus == "B"'>
-		AND progress_status = 'B'
+		<![CDATA[
+		AND progress_status = 'B' AND (down_payment + balance_payment) < total_price
+		]]>
 		</if>
 		<if test='progressStatus == "C"'>
 		AND progress_status = 'C'
@@ -311,6 +315,11 @@
 		<if test='progressStatus == "B0"'>
 		<![CDATA[
 		AND progress_status = 'A' AND down_payment >= (total_price / 10)
+		]]>
+		</if>
+		<if test='progressStatus == "C0"'>
+		<![CDATA[
+		AND progress_status = 'B' AND (down_payment + balance_payment) >= total_price
 		]]>
 		</if>
 		<if test="bunyangTimes != null and bunyangTimes > 0">
