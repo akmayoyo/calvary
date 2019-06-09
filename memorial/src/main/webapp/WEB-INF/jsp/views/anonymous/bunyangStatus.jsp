@@ -204,12 +204,26 @@
     </div>
 </div>
 
+<div id="dummyDiv"></div>
 
 <script type="text/javascript" src="${contextPath}/resources/js/common.js"></script>
 <script type="text/javascript" src="${contextPath}/resources/js/d3.min.js"></script>
 <script type="text/javascript">
 (function(){
 	
+	// gradient for rectangle half fill  
+	var svg = d3.select("#dummyDiv")
+    .append("svg")
+    .attr("width",0)
+    .attr("height",0);
+	
+	var grad = svg.append("defs")
+    .append("linearGradient").attr("id", "grad")
+    .attr("x1", "0%").attr("x2", "100%").attr("y1", "0%").attr("y2", "0%");
+
+  	grad.append("stop").attr("offset", "50%").style("stop-color", "#C785C8");
+  	grad.append("stop").attr("offset", "50%").style("stop-color", "#47CCCA");
+  	
 	rowSpan();
 	
 	// add for programmatically d3 click event
@@ -474,7 +488,7 @@ function getRectFillColor(d) {
 	if(d.assign_status == 'OCCUPIED') {
 		return "#C785C8";
 	} else if(d.assign_status == 'HALF_OCCUPIED') {
-		return "#C785C8";
+		return "url(#grad)";
 	} else if(d.assign_status == 'RESERVED' || d.assign_status == 'REQUESTED') {
 		return "#47CCCA";
 	} else if(!d.is_rownum){
