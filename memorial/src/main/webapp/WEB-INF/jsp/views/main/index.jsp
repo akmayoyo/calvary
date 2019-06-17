@@ -1,4 +1,37 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<style>
+.btn.btn-round{
+    border-radius: 100px;
+}
+.btn.btn-lg {
+    padding: 0 34px;
+    font-size: 16px;
+    height: 67px;
+    line-height: 65px;
+}
+.btn-color {
+    color: #fff;
+    border-color: #2589e6;
+    background-color: #2589e6;
+}
+.btn-color:hover {
+    color: #fff;
+    background-color: #4a9dea;
+}
+.btn {
+    padding: 0 28px;
+    height: 55px;
+    line-height: 53px;
+    border-radius: 0;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 1px;
+    -webkit-transition: all .3s ease;
+    transition: all .3s ease;
+    font-weight: 400;
+    font-family: Noto Sans, sans-serif;
+}
+</style>
 <!-- 컨텐츠 -->
 <div class="contents main">
 
@@ -14,10 +47,6 @@
 					그리하면 그것이 네가 장수하여 많은 해를 누리게 하며 평강을 더하게 하리라”</p>
 				<p>잠언 3:1~2</p>
 			</div>
-			<div class="mb-35">
-				<p>갈보리추모동산 분양을 다음과 같이 공고 합니다.</p>
-				<p>추모동산에 분양에 참여코자하는 성도님께서는 교회 행정실에 비치되어 있는 분양 안내서를 보시고 신청하시기 바랍니다.</p>
-			</div>
 		</div>
 	</div>
 	
@@ -32,11 +61,14 @@
 							<hr>
 						</div>
 					</div>
-					<div class="col-sm-8">
+					<div class="col-sm-4">
 						<div class="text">
-							<p>(재)용인공원 구역내 갈보리추모동산 묘역<br>
-							<span class="txt-gray">경기도 용인시 처인구모현면새래로156-33</span></p>
+							<p style="word-spacing: -2px">(재)용인공원 구역내 갈보리추모동산 묘역<br>
+							<span class="txt-gray" style="word-spacing: -2px">경기도 용인시 처인구 모현면 새래로 156-33</span><br><br></p>
 						</div>
+					</div>
+					<div class="col-sm-4">
+						<a href="http://www.yongin-park.com/c1/map.asp" class="btn btn-color btn-round btn-lg" target="_blank">가는 길 확인하기</a>
 					</div>
 				</div>
 			</div>
@@ -53,7 +85,7 @@
 					</div>
 					<div class="col-sm-8">
 						<div class="text">
-							<p><span class="txt-gray">1,000기</span></p>
+							<p><span class="txt-gray">1,000기</span><br><br></p>
 						</div>
 					</div>
 				</div>
@@ -65,13 +97,13 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>3. 분양신청 기간<span class="dot"></span></h3>
+							<h3>3. 추모동산 사용 자격<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
 					<div class="col-sm-8">
 						<div class="text">
-							<p>2018년 9월 16일 ~2018년 10월 31일</p>
+							<p>신청자격 요건에 충족되는 성도의 직계 존비속<br><br></p>
 						</div>
 					</div>
 				</div>
@@ -83,13 +115,13 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>4. 신청자격<span class="dot"></span></h3>
+							<h3>4. 추모동산 분양 및 봉안 현황<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
 					<div class="col-sm-8">
 						<div class="text">
-							<p>갈보리교회 등록 교인으로서 갈보리교회 헌법 제29조(교인총회의 조직)에서 정한 교인총회 참여 요건에 합당한 성도</p>
+							<a href="http://www.mparkcalvary.com/anonymous/bunyangStatus" class="btn btn-color btn-round btn-lg" target="_blank">분양 및 봉안 현황보기 </a>
 						</div>
 					</div>
 				</div>
@@ -101,31 +133,13 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>5. 추모동산 사용 자격<span class="dot"></span></h3>
+							<h3>5. 추모동산 모바일 연결<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
 					<div class="col-sm-8">
 						<div class="text">
-							<p>신청자격 요건에 충족되는 성도의 직계 존비속</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<div class="group">
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-4">
-						<div class="title">
-							<h3>6. 추모동산 형태<span class="dot"></span></h3>
-							<hr>
-						</div>
-					</div>
-					<div class="col-sm-8">
-						<div class="text">
-							<p>평장형(화장(火葬)후 유분을유골함에 넣어매장)</p>
+							<a href="http://www.mparkcalvary.com/mobile/main" class="btn btn-color btn-round btn-lg" target="_blank">추모동산 모바일 연결</a>
 						</div>
 					</div>
 				</div>
@@ -137,71 +151,14 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>7. 분양 유형 및 기당 가격<span class="dot"></span></h3>
+							<h3>6. 추모동산 분양상담<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
 					<div class="col-sm-8">
 						<div class="text">
-							<p>개별형<br>
-								– 1인형  : 1인 1기 형(분양가격 200만원)<br>
-								– 부부형 : 2인 1기 형(분양가격 400만원)<br>
-								가족형: 1인형 또는 부부형을 기준으로 신청기수 만큼 연속된 일정 구역의 형태</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<div class="group">
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-4">
-						<div class="title">
-							<h3>8. 분양대금 납부 기간<span class="dot"></span></h3>
-							<hr>
-						</div>
-					</div>
-					<div class="col-sm-8">
-						<div class="text">
-							<p>2018년 9월 16일~2019년 3월 31일</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="group">
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-4">
-						<div class="title">
-							<h3>9. 분양대금 납부 방법<span class="dot"></span></h3>
-							<hr>
-						</div>
-					</div>
-					<div class="col-sm-8">
-						<div class="text">
-							<p>계약금: 분양대금의 10%로 청약승인 후 30일 이내 납부.<br>
-								잔    금: 분양대금의 90%로 2019년 3월 31일까지 자유 분할 납부.</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="group">
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-4">
-						<div class="title">
-							<h3>10. 관리비<span class="dot"></span></h3>
-							<hr>
-						</div>
-					</div>
-					<div class="col-sm-8">
-						<div class="text">
-							<p>1인형 기준 기당 18,000원/년으로, 추모동산 사용(봉안)전에는 자율적 헌금으로 충당하며, 사용(봉안)시는 30년간의 관리비를 선납</p>
+							<p>갈보리교회 추모동산추진위원회에서 상담해 드립니다.<br>
+								교회행정실(본당3층)에 자세한 안내문이 배치되어 있습니다.<br><br></p>
 						</div>
 					</div>
 				</div>
@@ -210,108 +167,9 @@
 		
 	</div>
 	
-	
-	<!-- 분양상담안내 -->
-	<div class="img-container guide">
-		<div class="img-title">
-			<div class="title center">
-				<h2>분양 상담 및 안내<span class="dot"></span></h2>
-				<hr>
-			</div>
-			<div>
-				<p>분양신청기간 중 매주일 09시~16:00까지 본당1층 사랑실(110호 요한실)에서 분양상담 및 안내를 해드립니다.</p>
-			</div>
-		</div>
-	</div>
 	
 	<!-- 안내 -->
 	<div class="container section">
-		<div class="row">
-			<div class="col-sm-4">
-				<div class="text-center">
-					<div class="title center">
-						<i class="icon-calendar"></i>
-						<h3>분양설명회 장소 및 일정 안내 (1층 갈릴리성전)</h3>
-						<hr>
-					</div>
-					<div class="mb-35">
-						<div class="table-responsive">
-							<table class="table table-line table-hover">
-								<colgroup>
-									<col width="25%"/>
-									<col width="75%"/>
-								</colgroup>
-								<tbody>
-									<tr>
-										<td class="table-point text-center">1차</td>
-										<td class="text-left">9월19일(수) 수요예배 후 13시~</td>
-									</tr>
-
-									<tr>
-										<td class="table-point text-center">2차</td>
-										<td class="text-left">9월26일(수) 수요예배 후 13시~ (*추석 연휴 마지막날)</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<div class="col-sm-4">
-				<div class="text-center">
-					<div class="title center">
-						<i class="icon-map"></i>
-						<h3>추모동산 현장 방문 셔틀버스 운행 안내</h3>
-						<hr>
-					</div>
-					<div class="mb-35">
-						<div class="table-responsive">
-							<table class="table table-line table-hover">
-								<colgroup>
-									<col width="25%"/>
-									<col width="75%"/>
-								</colgroup>
-								<tbody>
-									<tr>
-										<td class="table-point text-center">1회</td>
-										<td class="text-left">2018년 9월 19일(수) 수요예배 후 14시~</td>
-									</tr>
-
-									<tr>
-										<td class="table-point text-center">2회</td>
-										<td class="text-left">2018년 10월 3일(수) 수요예배 후 13시~(개천절)</td>
-									</tr>
-
-									<tr>
-										<td class="table-point text-center">3회</td>
-										<td class="text-left">2018년 10월 9일(화) 오전 10시~ (한글날)</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<div class="col-sm-4">
-				<div class="text-center">
-					<div class="title center">
-						<i class="icon-heart"></i>
-						<h3>상조서비스</h3>
-						<hr>
-					</div>
-					<div class="mb-35">
-						<div class="text-center txt-333">
-							<p>추모동산 분양관련 행정 안내 문의</p>
-							<p>행정실 임효진 간사(031-789-8803)</p>
-							<p>분양기간 중 용인공원 상조서비스 안내를<br>
-								받으실 수 있습니다.</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
 		
 		<div class="row">
 			<div class="col-sm-4">
