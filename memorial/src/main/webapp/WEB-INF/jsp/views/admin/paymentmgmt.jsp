@@ -166,9 +166,27 @@
 function filterPaymentType(parent_code_seq, code_seq) {
 	var selected = $('#selPaymentDivision').find('option:selected').val();
 	var paymentType = $('#selPaymentType');
+	var option;
 	paymentType.html('');
 	paymentType.append($('<option value="">전체</option>'));
-	var option;
+	if(!selected) {
+		option = $('<option/>');
+		option.val('DEPOSITALL');
+		option.text('전체(입금)');
+		option.attr('parent_code_seq', 'DEPOSIT');
+		paymentType.append(option);
+		if(code_seq == 'DEPOSITALL') {
+			option.attr('selected', 'selected');
+		}
+		option = $('<option/>');
+		option.val('WITHDRAWALL');
+		option.text('전체(출금)');
+		option.attr('parent_code_seq', 'WITHDRAWAL');
+		paymentType.append(option);
+		if(code_seq == 'WITHDRAWALL') {
+			option.attr('selected', 'selected');
+		}
+	}
 	if(selected) {
 		$('#'+selected+'List li').each(function(idx) {
 			option = getPaymentTypeOption($(this),false);
