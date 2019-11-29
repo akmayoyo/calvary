@@ -132,8 +132,10 @@
 					<th><p class="form-control-static">분양차수</p></th>
 	           		<td align="left" class="form-inline">
 						<select id="selBunyangTimes" class="form-control" style="width: 110px;">
-							<c:forEach items="${bunyangTimesList}" var="bunyangTimesItem">
+							<c:forEach items="${bunyangTimesList}" var="bunyangTimesItem" varStatus="status">
+								<c:if test="${status.count eq 1 }">
 								<option value="${bunyangTimesItem.code_value}" codeSeq="${bunyangTimesItem.code_seq}">${bunyangTimesItem.code_name}</option>
+								</c:if>
 							</c:forEach>
 						</select>
 	           		</td>
