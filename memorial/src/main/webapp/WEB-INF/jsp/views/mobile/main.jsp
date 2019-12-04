@@ -128,13 +128,24 @@
 						</thead>
 						<tbody>
 							<c:forEach items="${useUserList}" var="rowItem">
-							<tr requestStatus="${rowItem.request_status}" coupleSeq="${rowItem.couple_seq}" userSeq="${rowItem.user_seq }" familyRequested="${not empty familyGraveRequestInfo}" approvalYn="${not empty bunyangInfo.use_approval_date}" assignStatus="${rowItem.couple_assign_status}" <c:if test="${not empty rowItem.cancel_seq}">class="cancel"</c:if>>
-								<td>${rowItem.user_name}</td>
+							<tr 
+								bunyangSeq="${rowItem.bunyang_seq }"
+								requestStatus="${rowItem.request_status}" 
+								coupleSeq="${rowItem.couple_seq}" 
+								userSeq="${rowItem.user_seq }" 
+								familyRequested="${not empty familyGraveRequestInfo}" 
+								approvalYn="${not empty rowItem.use_approval_date}" 
+								assignStatus="${rowItem.couple_assign_status}" <c:if test="${not empty rowItem.cancel_seq}">class="cancel"</c:if>
+								type="${rowItem.type}"
+								>
+								<td>${rowItem.user_name}
+								<c:if test="${rowItem.type eq 'connect' }"><br>(추가분양)</c:if>
+								</td>
 								<td>${rowItem.relation_type_name}</td>
 								<td>
 									<c:choose>
 										<c:when test="${not empty rowItem.cancel_seq}">해약</c:when>
-										<c:when test="${not empty bunyangInfo.use_approval_date}">승인</c:when>
+										<c:when test="${not empty rowItem.use_approval_date}">승인</c:when>
 										<c:otherwise>미승인</c:otherwise>
 									</c:choose>
 								</td>
@@ -149,7 +160,7 @@
 										<c:when test="${rowItem.request_status == 'APPROVAL'}">사용(봉안)중</c:when>
 										<c:when test="${rowItem.request_status == 'REQUESTED'}">신청승인중</c:when>
 										<c:otherwise>
-										<button class="btn btn-primary btn-sm" onclick="_requestGrave(this, '${rowItem.user_id}')" <c:if test="${not empty rowItem.cancel_seq}">disabled</c:if>>신청</button>
+										<button class="btn btn-primary btn-sm" onclick="_requestGrave(this, '${rowItem.bunyang_seq}', '${rowItem.user_id}')" <c:if test="${not empty rowItem.cancel_seq}">disabled</c:if>>신청</button>
 										</c:otherwise>
 									</c:choose>
 								</td>
@@ -183,7 +194,7 @@
 /**
  * 추모동산 사용신청
  */
-function _requestGrave(btn, userId) {
+function _requestGrave(btn, bunyangSeq, userId) {
 	var tr = $(btn).parent('td').parent('tr');
 	if(tr.attr('approvalYn') != 'true') {
 		common.showAlert('사용승인 후 신청가능합니다.');
@@ -196,7 +207,7 @@ function _requestGrave(btn, userId) {
 		common.showAlert('배우자의 사용신청건이 승인완료 후 신청가능합니다.');
 		return;
 	}
-	var coupleTR = getCoupleTR(tr.attr('coupleSeq'), tr.attr('userSeq'));
+	var coupleTR = getCoupleTR(tr.attr('bunyangSeq'), tr.attr('coupleSeq'), tr.attr('userSeq'));
 	if(coupleTR && coupleTR.length > 0) {
 		if(coupleTR.attr('requestStatus') == 'REQUESTED') {
 			common.showAlert('배우자의 사용신청건이 승인완료 후 신청가능합니다.');
@@ -207,6 +218,20 @@ function _requestGrave(btn, userId) {
 		common.showAlert('가족형의 경우 가족 구성원중 최초 사용신청건의 승인이 완료된 후 신청가능합니다.');
 		return;
 	}
+	if(tr.attr('type') == 'connect') {// 가족형 추가분양건의 경우 연결된 분양건중 최초 신청건이 미승인이 있는지 체크함
+		var bExistRequestedFamilyInfo = false;
+		$('#tblUseUser tbody tr').each(function(idx) {
+			if($(this).attr('familyRequested') == 'true') {
+				bExistRequestedFamilyInfo = true;
+				return false;
+			}
+		});
+		if(bExistRequestedFamilyInfo) {
+			common.showAlert('가족형의 경우 가족 구성원중 최초 사용신청건의 승인이 완료된 후 신청가능합니다.');
+			return;
+		}
+	}
+	$('#bunyangSeq').val(bunyangSeq);
 	$('#userId').val(userId);
 	var frm = document.getElementById("frm");
 	frm.action = "${contextPath}/mobile/requestGrave";
@@ -216,11 +241,11 @@ function _requestGrave(btn, userId) {
 /**
  * 
  */
-function getCoupleTR(coupleSeq, userSeq) {
+function getCoupleTR(bunyangSeq, coupleSeq, userSeq) {
 	var tr;
-	if(coupleSeq && userSeq) {
+	if(bunyangSeq && coupleSeq && userSeq) {
 		$('#tblUseUser tbody tr').each(function(idx) {
-			if($(this).attr('coupleSeq') == coupleSeq && $(this).attr('userSeq') != userSeq) {
+			if($(this).attr('bunyangSeq') == bunyangSeq && $(this).attr('coupleSeq') == coupleSeq && $(this).attr('userSeq') != userSeq) {
 				tr = $(this);
 				return false;
 			}

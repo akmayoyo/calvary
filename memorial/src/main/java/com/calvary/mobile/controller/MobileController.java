@@ -59,6 +59,7 @@ public class MobileController {
 		BunyangUserVo userVo = SessionUtil.getCurrentBunyangUser();
 		String bunyangSeq = userVo.getBunyangSeq();
 		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		List<Object> connectBunyangInfo = adminService.getConnectBunyangInfo(bunyangSeq);
 		List<Object> applyUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER);
 		List<Object> agentUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER);
 		Map<String, Object> applyUser = null;
@@ -70,6 +71,11 @@ public class MobileController {
 			agentUser = (HashMap<String, Object>)agentUserList.get(0);
 		}
 		List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
+		List<Object> connectUseUserList = adminService.getConnectBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
+		
+		if(useUserList != null && connectUseUserList != null) {
+			useUserList.addAll(connectUseUserList);
+		}
 		
 		List<Object> paymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);// 계약금 납부내역
 		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 분양잔금
@@ -81,9 +87,11 @@ public class MobileController {
 		mv.setViewName(ROOT_URL + MAIN);
 		mv.addObject("userVo", userVo);
 		mv.addObject("bunyangInfo", bunyangInfo);
+		mv.addObject("connectBunyangInfo", connectBunyangInfo);
 		mv.addObject("applyUser", applyUser);
 		mv.addObject("agentUser", agentUser);
 		mv.addObject("useUserList", useUserList);
+		mv.addObject("connectUseUserList", connectUseUserList);
 		mv.addObject("paymentList", paymentList);
 		mv.addObject("familyGraveRequestInfo", familyGraveRequestInfo);
 		return mv;
@@ -129,7 +137,7 @@ public class MobileController {
 				}
 			}
 			if(StringUtils.isEmpty(errorCode)) {
-				String productType = (String)bunyangInfo.get("product_type");
+				String productType = (String)bunyangInfo.get("connect_product_type");
 				String graveType = null;
 				// 이미 배정된 자리가 있는지 조회
 				Map<String, Object> assignedGraveInfo = mobileService.getReservedGraveInfo(bunyangSeq, userSeq, coupleSeq);
@@ -212,7 +220,10 @@ public class MobileController {
 			}
 		}
 		if(StringUtils.isEmpty(errorCode)) {
-			int iRslt = mobileService.requestGrave(productType, bunyangSeq, coupleSeq, userSeq, sectionSeq, rowSeq, colSeq, isReserved);
+			Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+			String groupSeq = (String)bunyangInfo.get("group_seq");
+			
+			int iRslt = mobileService.requestGrave(productType, groupSeq, bunyangSeq, coupleSeq, userSeq, sectionSeq, rowSeq, colSeq, isReserved);
 			bRslt = iRslt > 0;
 		}
 		rtnMap.put("result", bRslt);

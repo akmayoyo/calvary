@@ -1,5 +1,6 @@
 package com.calvary.admin.service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +39,11 @@ public interface IAdminService {
 	public Map<String, Object> getBunyangInfo(String bunyangSeq);
 	
 	/** 
+	 * 분양 정보 조회(추가분양 연결)
+	 */
+	public List<Object> getConnectBunyangInfo(String bunyangSeq);
+	
+	/** 
 	 * 분양 정보 조회 
 	 */
 	public Map<String, Object> getBunyangInfoByNo(String bunyangNo);
@@ -46,6 +52,11 @@ public interface IAdminService {
 	 * 분양관련 사용자 정보 조회 
 	 */
 	public List<Object> getBunyangRefUserInfo(String bunyangSeq, String refType);
+	
+	/** 
+	 * 분양관련 사용자 정보 조회(추가분양 연결)
+	 */
+	public List<Object> getConnectBunyangRefUserInfo(String bunyangSeq, String refType);
 	
 	/** 
 	 * 분양관련 사용자 정보 조회 
@@ -266,6 +277,18 @@ public interface IAdminService {
 	public List<Object> getGraveUseList();
 	
 	/** 
+	 * 동산 위치 수정 정보 저장 
+	 */
+	public int saveChangedGrave(
+			String[] selected_section_seqs,
+			String[] selected_row_seqs,
+			String[] selected_col_seqs,
+			String[] modify_section_seqs,
+			String[] modify_row_seqs,
+			String[] modify_col_seqs
+			) throws Exception;
+	
+	/** 
 	 * 특정 구역에 배정된 정보 조회
 	 */
 	public List<Object> getGraveAssignInfo(String sectionSeq, int rowSeq, int colSeq);
@@ -274,6 +297,11 @@ public interface IAdminService {
 	 * 특정 구역에 배정된 정보 조회
 	 */
 	public Map<String, Object> getGraveAssignInfoBySeqNo(String sectionSeq, String seqNo);
+	
+	/** 
+	 * 가족형으로 묶인 모든 배정 정보 조회
+	 */
+	public List<Object> getGraveAssignInfoByFamily(String group_seq, String bunyang_seq, String sectionSeq, String rowSeq, String colSeq);
 	
 	/** 
 	 * 동산 사용신청 리스트 조회
@@ -437,4 +465,25 @@ public interface IAdminService {
 	 * @param roleId 사용자그룹
 	 */
 	public List<Object> getRoleMenuList(String roleId);
+	
+	
+	/** 
+	 * 특정 분양건에 추가연결된 분양리스트 조회 
+	 */
+	public List<Object> getAddedBunyangList(String group_seq, String bunyang_seq);
+	
+	/** 
+	 * 추가분양 연결정보 생성
+	 */
+	public int createConnectBunyangInfo(String group_seq, String bunyang_seq, String[] selected_bunyang_seqs) throws Exception;
+	
+	/** 
+	 * 추가분양 연결정보 해제
+	 */
+	public int disConnectBunyangInfo(String group_seq, String bunyang_seq) throws Exception;
+	
+	/** 
+	 * 그룹으로 연결된 분양건이 몇건인지 조회
+	 */
+	public int getGroupSeqCount(String group_seq); 
 }

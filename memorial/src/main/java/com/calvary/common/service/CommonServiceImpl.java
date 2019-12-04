@@ -65,7 +65,7 @@ public class CommonServiceImpl implements ICommonService {
 		if(iRslt > 0) {
 			Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("common.getSeqNexVal", param);
 			if(rtnMap != null && rtnMap.containsKey("seq")) {
-				seq = (long)rtnMap.get("seq");
+				seq = Long.valueOf(String.valueOf(rtnMap.get("seq")));
 			}
 		}
 		return seq;

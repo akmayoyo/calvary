@@ -21,8 +21,9 @@
 					<div class="input-group">
 						<input type="text" name="searchVal" class="form-control" value="${searchVo.searchVal}">
 						<span class="input-group-btn pl-10">
-							<button class="btn btn-primary" type="button" onclick="_search()" style="width: 70px;">조회</button>
-							<button class="btn btn-success" type="button" style="margin-left: 4px; width: 70px;" onclick="_downloadExcel()">Excel</button>
+							<button class="btn btn-primary" type="button" onclick="_search()" style="width: 90px;">조회</button>
+							<button class="btn btn-primary" type="button" style="margin-left: 4px; width: 90px;" onclick="_modifyGrave()">위치수정</button>
+							<button class="btn btn-success" type="button" style="margin-left: 4px; width: 90px;" onclick="_downloadExcel()">Excel</button>
 						</span>
 					</div>
 				</div>
@@ -150,6 +151,15 @@ function approvalRequestGrave(btn) {
 		frm.action = "${contextPath}/admin/usemgmt";
 		frm.submit();
 	}
+}
+
+/**
+ * 위치수정
+ */
+function _modifyGrave() {
+	var frm = document.getElementById("frm");
+	frm.action = "${contextPath}/admin/modifyGrave";
+	frm.submit();
 }
 
 </script>

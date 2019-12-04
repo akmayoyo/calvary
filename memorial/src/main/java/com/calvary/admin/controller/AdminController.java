@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -831,17 +833,28 @@ public class AdminController {
 	
 	
 	//===============================================================================
-	// 사용(봉안) 관리
+	// 사용(봉안)신청 관리
 	//===============================================================================
-	/** 사용(봉안) 관리 페이지  URL */
+	/** 사용(봉안)신청 관리 페이지  URL */
 	public static final String USE_MGMT_URL = "/usemgmt";
 	/** 추모동산 사용현황 리스트 조회  URL */
 	public static final String GET_GRAVE_USE_LIST = "/getGraveUseList";
 	/** 특정 구역에 배정된 정보 조회  URL */
 	public static final String GET_GRAVE_ASSIGN_INFO = "/getGraveAssignInfo";
+	/** 가족형으로 묶인 모든 배정 정보 조회  URL */
+	public static final String GET_GRAVE_ASSIGN_INFO_BY_FAMILY = "/getGraveAssignInfoByFamily";
+	
+	/** 동산 위치 수정 페이지  URL */
+	public static final String MODIFY_GRAVE_URL = "/modifyGrave";
+	
+	/** 동산 위치 수정 페이지(다음 Step)  URL */
+	public static final String MODIFY_GRAVE_NEXT_URL = "/modifyGraveNext";
+	
+	/** 동산 위치 수정 정보 저장  URL */
+	public static final String SAVE_CHANGED_GRAVE_URL = "/saveChangedGrave";
 	
 	/** 
-	 * 사용(봉안) 관리 페이지
+	 * 사용(봉안)신청 관리 페이지
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=USE_MGMT_URL)
@@ -867,6 +880,80 @@ public class AdminController {
 	}
 	
 	/** 
+	 * 동산 위치 수정 페이지
+	 */
+	@RequestMapping(value=MODIFY_GRAVE_URL)
+	public Object modifyGraveHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU02_02");
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("step", 1);
+		mv.setViewName(ROOT_URL + MODIFY_GRAVE_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 동산 위치 수정 페이지(다음 Step)
+	 */
+	@RequestMapping(value=MODIFY_GRAVE_NEXT_URL)
+	public Object modifyGraveNextHandler(
+			SearchVo searchVo, 
+			String group_seq, 
+			String bunyang_seq, 
+			String sectionSeq, 
+			String rowSeq, 
+			String colSeq
+			) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU02_02");
+		
+		List<Object> graveAssignList = adminService.getGraveAssignInfoByFamily(group_seq, bunyang_seq, sectionSeq, rowSeq, colSeq);
+		
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("searchVo", searchVo);
+		mv.addObject("group_seq", group_seq);
+		mv.addObject("bunyang_seq", bunyang_seq);
+		mv.addObject("sectionSeq", sectionSeq);
+		mv.addObject("rowSeq", rowSeq);
+		mv.addObject("colSeq", colSeq);
+		mv.addObject("graveAssignList", graveAssignList);
+		mv.addObject("step", 2);
+		mv.setViewName(ROOT_URL + MODIFY_GRAVE_URL);
+		return mv;
+	}
+	
+	/** 
+	 * 동산 위치 수정 정보 저장
+	 */
+	@RequestMapping(value=SAVE_CHANGED_GRAVE_URL)
+	@ResponseBody
+	public Object saveChangedGraveHandler(HttpServletRequest request) throws Exception {
+		boolean bRslt = false;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		// source
+		String[] selected_section_seqs = request.getParameterValues("selected_section_seq");
+		String[] selected_row_seqs = request.getParameterValues("selected_row_seq");
+		String[] selected_col_seqs = request.getParameterValues("selected_col_seq");
+		// target
+		String[] modify_section_seqs = request.getParameterValues("modify_section_seq");
+		String[] modify_row_seqs = request.getParameterValues("modify_row_seq");
+		String[] modify_col_seqs = request.getParameterValues("modify_col_seq");
+		int iRslt = adminService.saveChangedGrave(selected_section_seqs, selected_row_seqs, selected_col_seqs, modify_section_seqs, modify_row_seqs, modify_col_seqs);
+		bRslt = iRslt > 0;
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
+	/** 
 	 * 추모동산 사용현황 리스트 조회
 	 */
 	@RequestMapping(value=GET_GRAVE_USE_LIST)
@@ -883,6 +970,22 @@ public class AdminController {
 	@ResponseBody
 	public List<Object> getGraveAssignInfoHandler(String sectionSeq, int rowSeq, int colSeq) {
 		List<Object> graveAssignList = adminService.getGraveAssignInfo(sectionSeq, rowSeq, colSeq);
+		return graveAssignList;
+	}
+	
+	/** 
+	 * 가족형으로 묶인 모든 배정 정보 조회
+	 */
+	@RequestMapping(value=GET_GRAVE_ASSIGN_INFO_BY_FAMILY)
+	@ResponseBody
+	public List<Object> getGraveAssignInfoByFamilyHandler(
+			String group_seq, 
+			String bunyang_seq, 
+			String sectionSeq, 
+			String rowSeq, 
+			String colSeq
+			) {
+		List<Object> graveAssignList = adminService.getGraveAssignInfoByFamily(group_seq, bunyang_seq, sectionSeq, rowSeq, colSeq);
 		return graveAssignList;
 	}
 	
@@ -1404,6 +1507,70 @@ public class AdminController {
 		mv.addObject("menuList", menuList);
 		mv.setViewName(ROOT_URL + MENU_MGMT_URL);
 		return mv;
+	}
+	
+	
+	//===============================================================================
+	// 추가분양관리
+	//===============================================================================
+	/** 추가분양관리 메인 페이지  URL */
+	public static final String CONNECT_BUNYANG_URL = "/connectbunyang";
+	/** 추가분양관리 상세 페이지  URL */
+	public static final String CONNECT_DETAIL_URL = "/connectdetail";
+	/** 추가분양 연결정보 해제 URL */
+	public static final String DISCONNECT_BUNYANG_URL = "/disconnectbunyang";
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=CONNECT_BUNYANG_URL)
+	public Object connectBunyangHandler(SearchVo searchVo) {
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		List<Object> bunyangTimesList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_BUNYANG_TIMES);
+		ModelAndView mv = new ModelAndView();
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_07");
+		Map<String, Object> rtnMap = adminService.getBunyangList(searchVo);
+		List<Object> bunyangList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("menuList", menuList);
+		mv.addObject("bunyangTimesList", bunyangTimesList);
+		mv.addObject("bunyangList", bunyangList);
+		mv.addObject("searchVo", searchVo);
+		mv.setViewName(ROOT_URL + CONNECT_BUNYANG_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=CONNECT_DETAIL_URL)
+	public Object connectDetailHandler(String groupSeq, String bunyangSeq, SearchVo searchVo) {
+		ModelAndView mv = new ModelAndView();
+		List<Object> addedBunyangList = adminService.getAddedBunyangList(groupSeq, bunyangSeq);
+		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
+		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
+		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_07");
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		mv.addObject("menuList", menuList);
+		mv.addObject("pMenuInfo", pMenuInfo);
+		mv.addObject("menuInfo", menuInfo);
+		mv.addObject("addedBunyangList", addedBunyangList);
+		mv.addObject("bunyangInfo", bunyangInfo);
+		mv.addObject("groupSeq", groupSeq);
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("searchVo", searchVo);
+		mv.setViewName(ROOT_URL + CONNECT_DETAIL_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=DISCONNECT_BUNYANG_URL)
+	@ResponseBody
+	public Object disconnectbunyangHandler(String groupSeq, String bunyangSeq) throws Exception {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		boolean bRslt = false;
+		int iRslt = adminService.disConnectBunyangInfo(groupSeq, bunyangSeq);
+		bRslt = iRslt > 0;
+		rtnMap.put("result", bRslt);
+		return rtnMap;
 	}
 	
 }

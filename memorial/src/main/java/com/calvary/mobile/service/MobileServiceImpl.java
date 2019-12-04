@@ -58,6 +58,13 @@ public class MobileServiceImpl implements IMobileService {
 		return requiredCnt;
 	}
 	
+	public List<Object> getRequiredGraveList(String bunyangSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		List<Object> list = commonDao.selectList("mobile.getRequiredGraveList", parameter);
+		return list;
+	}
+	
 	public List<Object> getAvailableGraveInfoAll(String graveType, int cnt) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("graveType", graveType);
@@ -182,7 +189,7 @@ public class MobileServiceImpl implements IMobileService {
 	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	public int requestGrave(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception {
+	public int requestGrave(String productType, String groupSeq, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception {
 		int iRslt = 0;
 		Map<String, Object> parameter = null;
 		Map<String, Object> parameter2 = null;
@@ -205,16 +212,13 @@ public class MobileServiceImpl implements IMobileService {
 		if(isReserved == 1) {// 배우자 또는 가족구성원이 이미 신청한 경우 예약된 자리가 있기 때문에 별도 처리안함
 			// TODO
 		} else {// 배정받은 자리가 없는 경우
+			List<Object> requireList = getRequiredGraveList(bunyangSeq);
 			int requireCnt = 1;
 			// 가족형인 경우 가족 구성원 자리까지 신청상태로함
 			if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productType)) {
-				List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
-				requireCnt = useUserList.size();
-				if(CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) {// 부부형인 경우 두명이 한자리
-					requireCnt = requireCnt/2;
-				}
+				requireCnt = getRequiredGraveCount(bunyangSeq);
 			}
-			// 신청 페이지 표시후 신청까지 경과 시긴이 있기때문에 현재도 사용가능한지 한번더 체크
+			// 신청 페이지 표시후 신청까지 경과 시간이 있기때문에 현재도 사용가능한지 한번더 체크
 			parameter = new HashMap<String, Object>();
 			parameter.put("sectionSeq", sectionSeq);
 			parameter.put("graveType", graveType);
@@ -232,15 +236,38 @@ public class MobileServiceImpl implements IMobileService {
 				commonDao.delete("use.deleteGraveRequestInfo", parameter2);
 				throw new Exception("no available grave!! sectionSeq : " + sectionSeq);
 			}
-			for(int i = 0; i < requireCnt; i++) {
+			
+			if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productType)) {
+				int idx = 0;
+				for(int i = 0; i < requireList.size(); i++) {
+					Map<String, Object> tmp = (HashMap<String, Object>)requireList.get(i);
+					String tBunyangSeq = String.valueOf(tmp.get("bunyang_seq"));
+					int tRequireCnt = Integer.parseInt(String.valueOf(tmp.get("require_cnt")));
+					for(int j = 0; j < tRequireCnt; j++) {
+						parameter = new HashMap<String, Object>();
+						parameter.put("groupSeq", groupSeq);
+						parameter.put("bunyangSeq", tBunyangSeq);
+						parameter.put("coupleSeq", (idx == 0 && CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) ? coupleSeq : null);
+						parameter.put("useUserSeq1", idx == 0 ? userSeq : null);
+						parameter.put("useUserSeq2", null);
+						parameter.put("sectionSeq", sectionSeq);
+						parameter.put("rowSeq", rowSeq);
+						parameter.put("colSeq", colSeq+idx);
+						parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_REQUESTED);
+						iRslt += commonDao.update("use.updateGraveRequestInfo", parameter);
+						idx++;
+					}
+				}
+			} else {
 				parameter = new HashMap<String, Object>();
+				parameter.put("groupSeq", groupSeq);
 				parameter.put("bunyangSeq", bunyangSeq);
-				parameter.put("coupleSeq", (i == 0 && CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) ? coupleSeq : null);
-				parameter.put("useUserSeq1", i == 0 ? userSeq : null);
+				parameter.put("coupleSeq", (CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) ? coupleSeq : null);
+				parameter.put("useUserSeq1", userSeq);
 				parameter.put("useUserSeq2", null);
 				parameter.put("sectionSeq", sectionSeq);
 				parameter.put("rowSeq", rowSeq);
-				parameter.put("colSeq", colSeq+i);
+				parameter.put("colSeq", colSeq);
 				parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_REQUESTED);
 				iRslt += commonDao.update("use.updateGraveRequestInfo", parameter);
 			}

@@ -2,9 +2,6 @@ package com.calvary.common.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.springframework.util.StringUtils;
 
@@ -122,6 +119,18 @@ public class CommonUtil {
 			sRtn = val.replaceAll("(\r\n|\r|\n|\n\r)", "");
 		}
 		return sRtn;
+	}
+	
+	public static String getGraveSectionExp(String section_seq, String row_seq, int col_seq, int seq_no) {
+		String sRtn = section_seq + "구역";
+		sRtn += " " + row_seq + "행-" + seqToAlpha(col_seq) + "열(고유번호:" + seq_no + ")";
+		return sRtn;
+	}
+	
+	public static String seqToAlpha(int seq) {
+		int seqOfA = "A".charAt(0) + (seq-1);
+		char alpha = (char)seqOfA; 
+		return String.valueOf(alpha);
 	}
 	
 	

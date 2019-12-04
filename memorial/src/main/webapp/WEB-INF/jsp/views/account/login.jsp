@@ -118,6 +118,8 @@
     				var frm = document.getElementById("frm");
     				frm.action = "${contextPath}${requestUrl}";
     				frm.submit();
+    			} else {
+    				common.showAlert('아이디 또는 비밀번호가 맞지않습니다.');
     			}
     		}
     	});

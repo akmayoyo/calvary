@@ -81,9 +81,31 @@
     <!-- 필요한 묘 개수 조회 -->
     <select id="getRequiredGraveCount" parameterType="map" resultType="map">
 	    select
-			cast((select count(1) from TB_BUNYANG_REF_USER ru WHERE ru.ref_type = 'USE_USER' and ru.bunyang_seq = a.bunyang_seq) * (case when couple_type_count > 0 then 0.5 else 1 end) as int) as required_cnt   
-		from TB_BUNYANG_INFO a 
+			cast(CONNECT_COUPLE_TYPE_COUNT + CONNECT_SINGLE_TYPE_COUNT as int) as required_cnt   
+		from vw_bunyang_connect_info a 
 		where BUNYANG_SEQ = #{bunyangSeq}
+	</select>
+	
+    <!-- 필요한 묘 리스트 조회 -->
+    <select id="getRequiredGraveList" parameterType="map" resultType="map">
+	    select 
+	    	group_seq
+	    	, bunyang_seq
+	    	, couple_type_count + single_type_count as require_cnt
+	    from 
+	    tb_bunyang_info 
+	    where bunyang_seq = #{bunyangSeq} 
+	    
+	    union all
+ 
+		(select 
+			group_seq
+	    	, bunyang_seq
+	    	, couple_type_count + single_type_count as require_cnt 
+		from tb_bunyang_info 
+		where group_seq = (select group_seq from tb_bunyang_info where bunyang_seq = #{bunyangSeq}) and bunyang_seq != #{bunyangSeq} 
+		order by bunyang_seq
+		)
 	</select>
 	
     <!-- 교구목사 연락처 -->

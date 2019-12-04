@@ -21,9 +21,11 @@ public interface IMobileService {
 	
 	public int getRequiredGraveCount(String bunyangSeq);
 	
+	public List<Object> getRequiredGraveList(String bunyangSeq);
+	
 	public List<Object> getAvailableGraveInfoAll(String graveType, int cnt);
 	
 	public int assignGrave(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception;
 	
-	public int requestGrave(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception;
+	public int requestGrave(String productType, String groupSeq, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception;
 }

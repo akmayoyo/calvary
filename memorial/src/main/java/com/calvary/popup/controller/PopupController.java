@@ -82,6 +82,10 @@ public class PopupController {
 	public static final String SELECT_USER_ROLE_URL = "/selectUserRole";
 	/** 아이디/비밀번호 찾기 팝업 */
 	public static final String FIND_ID_PWD_URL = "/findIdPwd";
+	/** 추가분양 선택 팝업 */
+	public static final String SELECT_CONNECT_BUNYANG_URL = "/selectConnectBunyang";
+	/** 선택분양을 추가분양으로 연결 */
+	public static final String CONNECT_SELECTED_BUNYANG_URL = "/connectSelectedBunyang";
 	
 	@Autowired
 	private IPopupService popupService;
@@ -701,6 +705,43 @@ public class PopupController {
 		}
 		rtnMap.put("result", bRslt);
 		rtnMap.put("errorCode", errorCode);
+		return rtnMap;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@RequestMapping(value=SELECT_CONNECT_BUNYANG_URL)
+	public Object selectConnectBunyangHandler(String groupSeq, String bunyangSeq, SearchVo searchVo) throws Exception {
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		List<Object> bunyangTimesList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_BUNYANG_TIMES);
+		Map<String, Object> rtnMap = adminService.getBunyangList(searchVo);
+		List<Object> bunyangList = (ArrayList<Object>)rtnMap.get("list");
+		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
+		searchVo.setTotalCount(total_count);
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("groupSeq", groupSeq);
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("bunyangInfo", bunyangInfo);
+		mv.addObject("bunyangList", bunyangList);
+		mv.addObject("bunyangTimesList", bunyangTimesList);
+		mv.addObject("searchVo", searchVo);
+		mv.setViewName(ROOT_URL + SELECT_CONNECT_BUNYANG_URL);
+		return mv;
+	}
+	
+	@RequestMapping(value=CONNECT_SELECTED_BUNYANG_URL)
+	@ResponseBody
+	public Object connectSelectedBunyangHandler(HttpServletRequest request) throws Exception {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		String[] selectedBunyangSeq = request.getParameterValues("selectedBunyangSeq");
+		String groupSeq = request.getParameter("groupSeq");
+		String bunyangSeq = request.getParameter("bunyangSeq");
+		boolean bRslt = false;
+		if(StringUtils.isEmpty(groupSeq)) {
+			groupSeq = String.valueOf(commonService.getSeqNexVal("GROUP_SEQ"));
+		}
+		int iRslt = adminService.createConnectBunyangInfo(groupSeq, bunyangSeq, selectedBunyangSeq);
+		bRslt = iRslt > 0;
+		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
 }

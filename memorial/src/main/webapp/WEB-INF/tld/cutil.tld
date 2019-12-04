@@ -55,11 +55,29 @@
     </function>
     
      <function>
+         <description>null 문자열 처리</description>
+         <name>nullToEmpty</name>
+         <function-class>com.calvary.common.util.CommonUtil</function-class>
+         <function-signature>
+              java.lang.String nullToEmpty(java.lang.Object)
+         </function-signature>
+    </function>
+    
+     <function>
          <description>개행문자제거</description>
          <name>replaceNewLine</name>
          <function-class>com.calvary.common.util.CommonUtil</function-class>
          <function-signature>
               java.lang.String replaceNewLine(java.lang.String)
+         </function-signature>
+    </function>
+    
+     <function>
+         <description>동산특정구역에 대한 표현식</description>
+         <name>getGraveSectionExp</name>
+         <function-class>com.calvary.common.util.CommonUtil</function-class>
+         <function-signature>
+              java.lang.String getGraveSectionExp(java.lang.String,java.lang.String,int,int)
          </function-signature>
     </function>
     

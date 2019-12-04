@@ -36,7 +36,15 @@
 	            </thead>
 	            <tbody>
 	            <c:forEach items="${approvalGraveList}" var="rowItem" varStatus="status">
-					<tr assignStatus="${rowItem.assign_status}" bunyangSeq="${rowItem.bunyang_seq}" graveType="${rowItem.grave_type}" sectionSeq="${rowItem.section_seq}" rowSeq="${rowItem.row_seq}" colSeq="${rowItem.col_seq}">
+					<tr 
+						assignStatus="${rowItem.assign_status}" 
+						groupSeq="${rowItem.group_seq}" 
+						bunyangSeq="${rowItem.bunyang_seq}" 
+						graveType="${rowItem.grave_type}" 
+						sectionSeq="${rowItem.section_seq}" 
+						rowSeq="${rowItem.row_seq}" 
+						colSeq="${rowItem.col_seq}"
+						>
 						<td>
 						<c:choose>
 							<c:when test="${status.first}">
@@ -573,23 +581,31 @@ function _confirm() {
 		// 신청자리
 		$('#tblRequestInfo tbody tr').each(function(idx) {
 			graveInfoVo = {};
+			graveInfoVo.groupSeq = $(this).attr('groupSeq');
+			graveInfoVo.bunyangSeq = $(this).attr('bunyangSeq');
 			graveInfoVo.sectionSeq = $(this).attr('sectionSeq');
 			graveInfoVo.rowSeq = $(this).attr('rowSeq');
 			graveInfoVo.colSeq = $(this).attr('colSeq');
 			requestGraveList.push(graveInfoVo);
 		});
 		// 승인자리
+		var iTmp = 0;
 		d3.select('#divGrave').selectAll('.square').each(function(d, i) {
 			if(d.assign_status == 'REAL_REQUESTED' || d.assign_status == 'APPROVAL' || d.assign_status == 'APPROVAL_RESERVED') {
 				graveInfoVo = {};
+				graveInfoVo.groupSeq = requestGraveList[iTmp].groupSeq;
+				graveInfoVo.bunyangSeq = requestGraveList[iTmp].bunyangSeq;
 				graveInfoVo.sectionSeq = d.section_seq;
 				graveInfoVo.rowSeq = d.row_seq;
 				graveInfoVo.colSeq = d.col_seq;
 				approvalGraveList.push(graveInfoVo);
+				iTmp++;
 			}
 		});
 	} else {// 부부형 또는 가족형 예약자리가 이미 있는 경우
 		graveInfoVo = {};
+		graveInfoVo.groupSeq = tr.attr('groupSeq');
+		graveInfoVo.bunyangSeq = tr.attr('bunyangSeq');
 		graveInfoVo.sectionSeq = tr.attr('sectionSeq');
 		graveInfoVo.rowSeq = tr.attr('rowSeq');
 		graveInfoVo.colSeq = tr.attr('colSeq');

@@ -52,6 +52,7 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("start", (searchVo.getPageIndex()-1) * searchVo.getCountPerPage());
 		parameter.put("count", searchVo.getCountPerPage());
 		parameter.put(searchVo.getSearchKey(), searchVo.getSearchVal());
+		parameter.put("bunyangTimes", searchVo.getBunyangTimes());
 		List<Object> list = commonDao.selectList("admin.getBunyangList", parameter); 
 		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("totalcount.getBunyangList", parameter);
 		int total_count = 0;
@@ -126,6 +127,16 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
+	 * 분양 정보 조회(추가분양 연결)
+	 */
+	public List<Object> getConnectBunyangInfo(String bunyangSeq) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		List<Object> rtn = commonDao.selectList("admin.getConnectBunyangInfo", param); 
+		return rtn;
+	}
+	
+	/** 
 	 * 분양 정보 조회 
 	 */
 	@SuppressWarnings("unchecked")
@@ -144,6 +155,17 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("bunyangSeq", bunyangSeq);
 		parameter.put("refType", refType);
 		List<Object> list = commonDao.selectList("admin.getBunyangRefUserInfo", parameter); 
+		return list;
+	}
+	
+	/** 
+	 * 분양관련 사용자 정보 조회(추가분양 연결)
+	 */
+	public List<Object> getConnectBunyangRefUserInfo(String bunyangSeq, String refType) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("refType", refType);
+		List<Object> list = commonDao.selectList("admin.getConnectBunyangRefUserInfo", parameter); 
 		return list;
 	}
 	
@@ -1075,7 +1097,8 @@ public class AdminServiceImpl implements IAdminService {
 			for(int i = 0; i < vo.getApprovalGraveList().size(); i++) {
 				info = vo.getApprovalGraveList().get(i);
 				parameter = new HashMap<String, Object>();
-				parameter.put("bunyangSeq", vo.getBunyangSeq());
+				parameter.put("groupSeq", info.getGroupSeq());
+				parameter.put("bunyangSeq", info.getBunyangSeq());
 				if(i == 0) {
 					parameter.put("useUserSeq1", vo.getUserSeq());
 					parameter.put("coupleSeq", vo.getCoupleSeq() >= 0 ? vo.getCoupleSeq() : null);
@@ -1146,6 +1169,119 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
+	 * 동산 위치 수정 정보 저장 
+	 */
+	@SuppressWarnings("unchecked")
+	@Transactional
+	public int saveChangedGrave(
+			String[] selected_section_seqs,
+			String[] selected_row_seqs,
+			String[] selected_col_seqs,
+			String[] modify_section_seqs,
+			String[] modify_row_seqs,
+			String[] modify_col_seqs
+			) throws Exception {
+		int iRslt = 0;
+		
+		Map<String, Object> param = null;
+		
+		List<Object> selectedGraveInfoes = new ArrayList<Object>();
+		List<Object> modifyGraveInfoes = new ArrayList<Object>();
+		List<Object> listTmp = null;
+		
+		String group_seq = null;
+		String bunyang_seq = null;
+		String selected_section_seq = null;
+		String selected_row_seq = null;
+		String selected_col_seq = null;
+		String modify_section_seq = null;
+		String modify_row_seq = null;
+		String modify_col_seq = null;
+		String assign_status = null;
+		
+		int i = 0;
+		
+		// source, target 동산 정보를 업데이트전 미리 담아둠
+		for(i = 0; i < selected_section_seqs.length; i++) {
+			selected_section_seq = selected_section_seqs[i];
+			selected_row_seq = selected_row_seqs[i];
+			selected_col_seq = selected_col_seqs[i];
+			modify_section_seq = modify_section_seqs[i];
+			modify_row_seq = modify_row_seqs[i];
+			modify_col_seq = modify_col_seqs[i];
+			listTmp = getGraveAssignInfo(selected_section_seq, Integer.parseInt(selected_row_seq), Integer.parseInt(selected_col_seq));
+			selectedGraveInfoes.add(listTmp.get(0));
+			listTmp = getGraveAssignInfo(modify_section_seq, Integer.parseInt(modify_row_seq), Integer.parseInt(modify_col_seq));
+			modifyGraveInfoes.add(listTmp.get(0));
+		}
+		
+		for(i = 0; i < selectedGraveInfoes.size(); i++) {
+			
+			Map<String, Object> selectedInfo = (HashMap<String, Object>)selectedGraveInfoes.get(i);// source
+			Map<String, Object> modifyInfo = (HashMap<String, Object>)modifyGraveInfoes.get(i);// target
+			
+			assign_status = (String)modifyInfo.get("assign_status");
+			
+			group_seq = CommonUtil.nullToEmpty(String.valueOf(selectedInfo.get("group_seq")));
+			bunyang_seq = CommonUtil.nullToEmpty(String.valueOf(selectedInfo.get("bunyang_seq")));
+			
+			if(!group_seq.equals(modifyInfo.get("group_seq")) && !bunyang_seq.equals(modifyInfo.get("bunyang_seq"))) {
+				if(!CalvaryConstants.GRAVE_ASSIGN_STATUS_AVAILABLE.equals(assign_status)) {
+					throw new Exception("target grave is not avaliable!!");
+				}
+			}
+			
+			// target 동산 위치 정보를 source 동산 위치 정보로 변경
+			param = new HashMap<String, Object>();
+			param.put("section_seq", modifyInfo.get("section_seq"));
+			param.put("row_seq", modifyInfo.get("row_seq"));
+			param.put("col_seq", modifyInfo.get("col_seq"));
+			param.put("group_seq", selectedInfo.get("group_seq"));
+			param.put("bunyang_seq", selectedInfo.get("bunyang_seq"));
+			param.put("assign_status", selectedInfo.get("assign_status"));
+			param.put("use_user_seq1", selectedInfo.get("use_user_seq1"));
+			param.put("use_user_seq2", selectedInfo.get("use_user_seq2"));
+			param.put("couple_seq", selectedInfo.get("couple_seq"));
+			iRslt += commonDao.update("changeGrave", param);
+			
+			// source 동산 위치 정보를 사용가능 상태로 클리어
+			boolean targetContainsSource = false;
+			for(int j = 0; j < modify_section_seqs.length; j++) {
+				if(String.valueOf(selectedInfo.get("section_seq")).equals(modify_section_seqs[j])
+						&& String.valueOf(selectedInfo.get("row_seq")).equals(modify_row_seqs[j])
+						&& String.valueOf(selectedInfo.get("col_seq")).equals(modify_col_seqs[j])
+						) {
+					targetContainsSource = true;
+					break;
+				}
+			}
+			// target 동산중에 source 동산이 있을 경우 clear 안함
+			if(!targetContainsSource) {
+				param = new HashMap<String, Object>();
+				param.put("section_seq", selectedInfo.get("section_seq"));
+				param.put("row_seq", selectedInfo.get("row_seq"));
+				param.put("col_seq", selectedInfo.get("col_seq"));
+				iRslt += commonDao.update("changeGraveToAvaliable", param);
+			}
+			
+			// 혹시 승인되지 않은 신청 정보가 있을 경우 변경된 위치로 업데이트해주고 승인상태로 변경 
+			param = new HashMap<String, Object>();
+			param.put("section_seq", modifyInfo.get("section_seq"));
+			param.put("row_seq", modifyInfo.get("row_seq"));
+			param.put("col_seq", modifyInfo.get("col_seq"));
+			param.put("bunyang_seq", selectedInfo.get("bunyang_seq"));
+			param.put("use_user_seq", selectedInfo.get("use_user_seq1"));
+			param.put("approval_user", SessionUtil.getCurrentUserId());
+			iRslt += commonDao.update("changeGraveRequestInfo", param);
+			
+			param.put("use_user_seq", selectedInfo.get("use_user_seq2"));
+			iRslt += commonDao.update("changeGraveRequestInfo", param);
+		}
+		
+		return iRslt;
+	}
+	
+	/** 
 	 * 특정 구역에 배정된 정보 조회
 	 */
 	public List<Object> getGraveAssignInfo(String sectionSeq, int rowSeq, int colSeq) {
@@ -1167,6 +1303,20 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("seqNo", seqNo);
 		Map<String, Object> rtn = (HashMap<String, Object>)commonDao.selectOne("use.getGraveAssignInfoBySeqNo", parameter); 
 		return rtn;
+	}
+	
+	/** 
+	 * 가족형으로 묶인 모든 배정 정보 조회
+	 */
+	public List<Object> getGraveAssignInfoByFamily(String group_seq, String bunyang_seq, String sectionSeq, String rowSeq, String colSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("group_seq", group_seq);
+		parameter.put("bunyang_seq", bunyang_seq);
+		parameter.put("sectionSeq", sectionSeq);
+		parameter.put("rowSeq", rowSeq);
+		parameter.put("colSeq", colSeq);
+		List<Object> list = commonDao.selectList("use.getGraveAssignInfoByFamily", parameter); 
+		return list;
 	}
 	
 	/** 
@@ -1841,6 +1991,78 @@ public class AdminServiceImpl implements IAdminService {
 			}
 		}
 		return rtnList;
+	}
+	
+	
+	/** 
+	 * 특정 분양건에 추가연결된 분양리스트 조회 
+	 */
+	public List<Object> getAddedBunyangList(String group_seq, String bunyang_seq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("group_seq", group_seq);
+		parameter.put("bunyang_seq", bunyang_seq);
+		List<Object> list = commonDao.selectList("connectbunyang.getAddedBunyangList", parameter);
+		return list;
+	}
+	
+	/** 
+	 * 추가분양 연결정보 생성
+	 */
+	@Transactional
+	public int createConnectBunyangInfo(String group_seq, String bunyang_seq, String[] selected_bunyang_seqs) throws Exception {
+		int iRslt = 0;
+		Map<String, Object> param = null;
+		if(selected_bunyang_seqs != null) {
+			// 1. 분양정보 연결
+			for(int i = 0; i < selected_bunyang_seqs.length; i++) {
+				param = new HashMap<String, Object>();
+				param.put("group_seq", group_seq);
+				param.put("bunyang_seq", selected_bunyang_seqs[i]);
+				iRslt += commonDao.update("connectbunyang.createConnectBunyangInfo", param);
+				//iRslt += commonDao.update("connectbunyang.createConnectBunyangGraveAssign", param);
+			}
+			param = new HashMap<String, Object>();
+			param.put("group_seq", group_seq);
+			param.put("bunyang_seq", bunyang_seq);
+			iRslt += commonDao.update("connectbunyang.createConnectBunyangInfo", param);
+			//iRslt += commonDao.update("connectbunyang.createConnectBunyangGraveAssign", param);
+		}
+		return iRslt;
+	}
+	
+	/** 
+	 * 추가분양 연결정보 해제
+	 */
+	@Transactional
+	public int disConnectBunyangInfo(String group_seq, String bunyang_seq) throws Exception {
+		int iRslt = 0;
+		int groupCount = getGroupSeqCount(group_seq);
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("group_seq", group_seq);
+		param.put("bunyang_seq", bunyang_seq);
+		if(groupCount >= 3) {// 연결된 분양정보가 3개 이상일 경우는 해당 분양정보만 연결해제
+			iRslt += commonDao.update("connectbunyang.disConnectBunyangInfo", param);
+			iRslt += commonDao.update("connectbunyang.disConnectBunyangGraveAssign", param);
+		} else {
+			iRslt += commonDao.update("connectbunyang.clearGroupSeq", param);
+			iRslt += commonDao.update("connectbunyang.clearBunyangGraveAssign", param);
+		}
+		return iRslt;
+	}
+	
+	/** 
+	 * 그룹으로 연결된 분양건이 몇건인지 조회
+	 */
+	@SuppressWarnings("unchecked")
+	public int getGroupSeqCount(String group_seq) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("group_seq", group_seq);
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("connectbunyang.getGroupSeqCount", param);
+		int cnt = 0;
+		if(countMap != null) {
+			cnt = CommonUtil.convertToInt(countMap.get("cnt"));
+		}
+		return cnt;
 	}
 	
 }

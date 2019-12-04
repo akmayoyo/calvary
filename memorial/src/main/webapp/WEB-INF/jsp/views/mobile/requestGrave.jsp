@@ -477,7 +477,7 @@ function _request() {
 	}
 	
 	var data = {};
-	data.productType = '${bunyangInfo.product_type}';
+	data.productType = '${bunyangInfo.connect_product_type}';
 	data.bunyangSeq = '${bunyangInfo.bunyang_seq}';
 	data.coupleSeq = $('#coupleSeq').val() ? $('#coupleSeq').val() : 0;
 	data.userSeq = $('#userSeq').val();
