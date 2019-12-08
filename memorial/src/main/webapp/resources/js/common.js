@@ -389,6 +389,14 @@
 			}
 		});
 	}
+	
+	var isFreeBunyang = function(price) {
+		var bRtn = false;
+		if(!price || price == 0) {
+			bRtn = true;
+		}
+		return bRtn;
+	}
 
 	var common = {};
 	common.ajax = ajax;
@@ -409,6 +417,7 @@
 	common.isVisible = isVisible;
 	common.trimAll = trimAll;
 	common.sendSms = sendSms;
+	common.isFreeBunyang = isFreeBunyang;
 
 	window.common = common;
 })();

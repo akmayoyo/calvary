@@ -18,7 +18,7 @@
 <div class="col-md-9">
 
 	<!-- 분양 정보 -->
-	<div style="margin-top: 15px;">
+	<div>
 		<div class="pull-left"><h4>분양 정보</h4></div>	
 	</div>
     <div class="clearfix"></div>

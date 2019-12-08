@@ -53,7 +53,7 @@
 						<th scope="col">완납<br>여부</th>
 						<th scope="col">사용승인<br>일자</th>
 						<th scope="col">상태</th>
-						<th scope="col">추가분양<br>연결</th>
+						<th scope="col">추가분양<br>관리</th>
 					</tr>
 				</thead>
 				<tbody>

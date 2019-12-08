@@ -518,8 +518,14 @@ public class PopupController {
 	public Object bunyangInfoHandler(String bunyangSeq) {
 		ModelAndView mv = new ModelAndView();
 		List<Object> paymentList = null;
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		String group_seq = null;
+		if(bunyangInfo != null) {
+			group_seq = String.valueOf(bunyangInfo.get("group_seq"));
+		}
+		List<Object> addedBunyangList = adminService.getAddedBunyangList(group_seq, bunyangSeq);
 		mv.addObject("bunyangSeq", bunyangSeq);
-		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
+		mv.addObject("bunyangInfo", bunyangInfo);// 분양정보
 		mv.addObject("applyUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER));// 신청자정보
 		mv.addObject("agentUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER));// 대리신청인정보
 		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
@@ -528,6 +534,7 @@ public class PopupController {
 		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 분양잔금
 		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT));// 관리비
 		mv.addObject("paymentList", paymentList);
+		mv.addObject("addedBunyangList", addedBunyangList);
 		mv.addObject("totalPaymentInfo", adminService.getTotalPayment(bunyangSeq));
 		mv.setViewName(ROOT_URL + BUNYANG_INFO_URL);
 		return mv;

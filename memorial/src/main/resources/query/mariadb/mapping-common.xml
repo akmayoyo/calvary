@@ -134,6 +134,9 @@
 	       	A.display_order
 	  	FROM TB_COM_CODE A
 	  	WHERE A.parent_code_seq = #{parentCodeSeq}
+	  	<if test="displayYn != null and displayYn != ''">
+	  	AND A.DISPLAY_YN = #{displayYn}
+	  	</if>
 	  	ORDER BY A.display_order
 	</select>
 	

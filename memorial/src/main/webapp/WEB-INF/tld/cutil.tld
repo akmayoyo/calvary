@@ -81,4 +81,13 @@
          </function-signature>
     </function>
     
+     <function>
+         <description>무료 분양여부 반환</description>
+         <name>isFreeBunyang</name>
+         <function-class>com.calvary.common.util.CommonUtil</function-class>
+         <function-signature>
+              boolean isFreeBunyang(int)
+         </function-signature>
+    </function>
+    
 </taglib>

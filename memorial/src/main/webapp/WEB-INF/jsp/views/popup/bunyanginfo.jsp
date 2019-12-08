@@ -17,17 +17,26 @@
     <!-- 신청자 -->
     <div>
     	<div class="pull-left">
-    		<p style="font-weight: bold; font-size: 18px; margin: 10px 8px 8px 0; display: inline-block;">신청자</p>
+    		<h4>신청자
     		<c:choose>
-    			<c:when test="${bunyangInfo.progress_status == 'N'}"><span class="label label-success">신청</span></c:when>
-    			<c:when test="${bunyangInfo.cancel_yn == 'Y'}"><span class="label label-danger">취소</span></c:when>
-    			<c:when test="${bunyangInfo.progress_status == 'A' && bunyangInfo.cancel_yn != 'Y'}"><span class="label label-info">승인</span></c:when>
-    			<c:when test="${bunyangInfo.progress_status == 'B'}"><span class="label label-info">계약완료</span></c:when>
-    			<c:when test="${bunyangInfo.progress_status == 'C'}"><span class="label label-info">완납</span></c:when>
-    			<c:when test="${bunyangInfo.progress_status == 'D'}"><span class="label label-info">사용승인</span></c:when>
-    			<c:when test="${bunyangInfo.progress_status == 'E'}"><span class="label label-danger">해약</span></c:when>
-    			<c:when test="${bunyangInfo.progress_status == 'R'}"><span class="label label-danger">반려</span></c:when>
+    			<c:when test="${cutil:isFreeBunyang(bunyangInfo.price_per_count)}">
+    				<c:set var="bunyangDesc" value="${bunyangInfo.bunyang_times }차(무료분양) - "></c:set>
+    			</c:when>
+    			<c:otherwise>
+    				<c:set var="bunyangDesc" value="${bunyangInfo.bunyang_times }차 - "></c:set>
+    			</c:otherwise>
     		</c:choose>
+    		<c:choose>
+    			<c:when test="${bunyangInfo.progress_status == 'N'}"><span class="label label-success">${bunyangDesc }신청</span></c:when>
+    			<c:when test="${bunyangInfo.cancel_yn == 'Y'}"><span class="label label-danger">${bunyangDesc }취소</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'A' && bunyangInfo.cancel_yn != 'Y'}"><span class="label label-info">${bunyangDesc }승인</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'B'}"><span class="label label-info">${bunyangDesc }계약완료</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'C'}"><span class="label label-info">${bunyangDesc }완납</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'D'}"><span class="label label-info">${bunyangDesc }사용승인</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'E'}"><span class="label label-danger">${bunyangDesc }해약</span></c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'R'}"><span class="label label-danger">${bunyangDesc }반려</span></c:when>
+    		</c:choose>
+    		</h4>
     	</div>
     </div>
     <div class="clearfix"></div>
@@ -237,8 +246,8 @@
 		<div class="pull-left"><h4>납부 내역</h4></div>
 	</div>
     <div class="clearfix"></div>
-    <div class="table-responsive">
-        <table class="table table-style table-bordered">
+    <div class="table-responsive" style="border-top: 1px solid #999;">
+        <table class="table table-style table-bordered" style="border-top: 0;">
         	<colgroup>
         		<col width="18%">
         		<col width="18%">
@@ -319,6 +328,53 @@
             	</tr>
             </tbody>
         </table>
+    </div>
+    </c:if>
+    
+    <!-- 추가분양리스트 -->
+    <c:if test="${not empty addedBunyangList}">
+    <div style="margin-top: 15px;">
+		<div class="pull-left"><h4>추가 분양 리스트</h4></div>	
+	</div>
+	<div class="clearfix"></div>
+    
+    <div class="table-responsive" style="border-top: 1px solid #999;">
+         <table class="table table-style">
+			<thead>
+				<tr>
+					<th scope="col">번호</th>
+					<th scope="col">신청자</th>
+					<th scope="col">사용자</th>
+					<th scope="col">신청형태</th>
+					<th scope="col">부부형</th>
+					<th scope="col">1인형</th>
+					<th scope="col">신청일자</th>
+					<th scope="col">계약<br>여부</th>
+					<th scope="col">계약일자</th>
+					<th scope="col">완납<br>여부</th>
+					<th scope="col">사용승인<br>일자</th>
+					<th scope="col">상태</th>
+				</tr>
+			</thead>
+			<tbody>
+				<c:forEach items="${addedBunyangList}" var="bunyangItem">
+					<tr bunyangSeq="${bunyangItem.bunyang_seq}" <c:if test="${bunyangItem.cancel_yn == 'Y' || bunyangItem.progress_status == 'E' || bunyangItem.progress_status == 'R'}">class="cancel"</c:if>>
+						<td>${bunyangItem.bunyang_no}</td>
+						<td>${bunyangItem.apply_user_name}</td>
+						<td>${bunyangItem.use_user_exp}</td>
+						<td>${bunyangItem.product_type_name}</td>
+						<td>${bunyangItem.couple_type_count}</td>
+						<td>${bunyangItem.single_type_count}</td>
+						<td>${bunyangItem.regist_date}</td>
+						<td><c:if test="${not empty bunyangItem.contract_date}">O</c:if></td>
+						<td>${bunyangItem.contract_date}</td>
+						<td><c:if test="${not empty bunyangItem.full_payment_date}">O</c:if></td>
+						<td>${bunyangItem.use_approval_date}</td>
+						<td style="text-decoration:none;">${bunyangItem.progress_status_exp}</td>
+					</tr>
+				</c:forEach>
+			</tbody>
+		</table>
     </div>
     </c:if>
     

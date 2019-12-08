@@ -5,6 +5,7 @@ import java.math.BigInteger;
 
 import org.springframework.util.StringUtils;
 
+import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.common.constant.CalvaryConstants;
 
 public class CommonUtil {
@@ -13,6 +14,9 @@ public class CommonUtil {
 	 * 금액을 한글로 변환 
 	 */
 	public static String convertPriceToHangul(int price) {
+		if(price <= 0) {
+			return "0";
+		}
 		String[] han1 = {"","일","이","삼","사","오","육","칠","팔","구"}; 
 		String[] han2 = {"","십","백","천"}; 
 		String[] han3 = {"","만","억","조","경"}; 
@@ -131,6 +135,19 @@ public class CommonUtil {
 		int seqOfA = "A".charAt(0) + (seq-1);
 		char alpha = (char)seqOfA; 
 		return String.valueOf(alpha);
+	}
+	
+	public static boolean isFreeBunyang(BunyangInfoVo bunyangInfoVo) {
+		boolean bRtn = isFreeBunyang(bunyangInfoVo.getPricePerCount());
+		return bRtn;
+	}
+	
+	public static boolean isFreeBunyang(int price) {
+		boolean bRtn = false;
+		if(price <= 0) {
+			bRtn = true;
+		}
+		return bRtn;
 	}
 	
 	

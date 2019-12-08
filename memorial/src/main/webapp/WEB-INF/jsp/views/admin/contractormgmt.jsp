@@ -55,6 +55,7 @@
 						<th scope="col">계약금<br>납부여부</th>
 						<th scope="col">완납여부</th>
 						<th scope="col">계약/해약일</th>
+						<th scope="col">해약금</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -71,6 +72,7 @@
 	                    <td>${cutil:getThousandSeperatorFormatString(contract.total_payment)}</td>
 	                    <td><c:if test="${contract.contract_yn == 'Y'}">O</c:if></td>
 	                    <td><c:if test="${contract.full_payment_yn == 'Y'}">O</c:if></td>
+	                    <td>${contract.action_date}</td>
 	                    <td>${contract.action_date}</td>
 					</tr>
 					</c:forEach>

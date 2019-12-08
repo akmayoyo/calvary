@@ -96,7 +96,7 @@ public class AdminController {
 	@RequestMapping(value=APPLY_REGIST_URL)
 	public Object applyRegistHandler(SearchVo searchVo) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
-		List<Object> bunyangTimesList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_BUNYANG_TIMES);
+		List<Object> bunyangTimesList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_BUNYANG_TIMES, "Y");
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
@@ -119,13 +119,20 @@ public class AdminController {
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_01");
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		String group_seq = null;
+		if(bunyangInfo != null) {
+			group_seq = String.valueOf(bunyangInfo.get("group_seq"));
+		}
+		List<Object> addedBunyangList = adminService.getAddedBunyangList(group_seq, bunyangSeq);
 		mv.addObject("pMenuInfo", pMenuInfo);
 		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("submenuName", "분양신청 상세 정보");
 		mv.addObject("menuList", menuList);
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("searchVo", searchVo);
-		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
+		mv.addObject("bunyangInfo", bunyangInfo);// 분양정보
+		mv.addObject("addedBunyangList", addedBunyangList);// 추가 분양 리스트
 		mv.addObject("applyUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER));// 신청자정보
 		mv.addObject("agentUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER));// 대리신청인정보
 		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
@@ -153,6 +160,17 @@ public class AdminController {
 				param.put("file_seq_use_user", useUserFileSeq);
 				int iRslt = adminService.updateBunyangFileSeq(param);
 				bRslt = iRslt > 0;
+			}
+			// 무료분양인 경우 즉시 완납상태까지 진행
+			if(CommonUtil.isFreeBunyang(bunyangInfoVo)) {
+				String updateDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
+				bunyangInfoVo.setBunyangSeq(bunyangSeq);
+				// 신청 승인
+				approvalHandler(bunyangInfoVo);
+				// 계약 승인
+				apprContractHandler(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_B, updateDate);
+				// 완납 승인
+				apprContractHandler(bunyangSeq, CalvaryConstants.PROGRESS_STATUS_C, updateDate);
 			}
 		}
 		rtnMap.put("result", bRslt);
@@ -272,13 +290,20 @@ public class AdminController {
 		List<Object> paymentList = null;
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_02");
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		String group_seq = null;
+		if(bunyangInfo != null) {
+			group_seq = String.valueOf(bunyangInfo.get("group_seq"));
+		}
+		List<Object> addedBunyangList = adminService.getAddedBunyangList(group_seq, bunyangSeq);
 		mv.addObject("pMenuInfo", pMenuInfo);
 		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("submenuName", "계약 상세 정보");
 		mv.addObject("menuList", menuList);
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("searchVo", searchVo);
-		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
+		mv.addObject("bunyangInfo", bunyangInfo);// 분양정보
+		mv.addObject("addedBunyangList", addedBunyangList);// 추가 분양 리스트
 		mv.addObject("applyUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER));// 신청자정보
 		mv.addObject("agentUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER));// 대리신청인정보
 		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
@@ -428,12 +453,19 @@ public class AdminController {
 		List<Object> paymentList = null;
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU01");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU01_03");
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		String group_seq = null;
+		if(bunyangInfo != null) {
+			group_seq = String.valueOf(bunyangInfo.get("group_seq"));
+		}
+		List<Object> addedBunyangList = adminService.getAddedBunyangList(group_seq, bunyangSeq);
 		mv.addObject("pMenuInfo", pMenuInfo);
 		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("searchVo", searchVo);
-		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
+		mv.addObject("bunyangInfo", bunyangInfo);// 분양정보
+		mv.addObject("addedBunyangList", addedBunyangList);// 추가연결된 분양리스트
 		mv.addObject("applyUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER));// 신청자정보
 		mv.addObject("agentUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER));// 대리신청인정보
 		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
@@ -608,7 +640,14 @@ public class AdminController {
 		if(agentUserList != null && agentUserList.size() > 0) {
 			agentUser = (HashMap<String, Object>)agentUserList.get(0);
 		}
-		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		String group_seq = null;
+		if(bunyangInfo != null) {
+			group_seq = String.valueOf(bunyangInfo.get("group_seq"));
+		}
+		List<Object> addedBunyangList = adminService.getAddedBunyangList(group_seq, bunyangSeq);
+		mv.addObject("bunyangInfo", bunyangInfo);// 분양정보
+		mv.addObject("addedBunyangList", addedBunyangList);// 추가 분양 리스트
 		mv.addObject("applyUser", applyUser);// 신청자정보
 		mv.addObject("agentUser", agentUser);// 대리신청인정보
 		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보
@@ -1059,7 +1098,14 @@ public class AdminController {
 		if(agentUserList != null && agentUserList.size() > 0) {
 			agentUser = (HashMap<String, Object>)agentUserList.get(0);
 		}
-		mv.addObject("bunyangInfo", adminService.getBunyangInfo(bunyangSeq));// 분양정보
+		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+		String group_seq = null;
+		if(bunyangInfo != null) {
+			group_seq = String.valueOf(bunyangInfo.get("group_seq"));
+		}
+		List<Object> addedBunyangList = adminService.getAddedBunyangList(group_seq, bunyangSeq);
+		mv.addObject("bunyangInfo", bunyangInfo);// 분양정보
+		mv.addObject("addedBunyangList", addedBunyangList);// 추가 분양 리스트
 		mv.addObject("applyUser", applyUser);// 신청자정보
 		mv.addObject("agentUser", agentUser);// 대리신청인정보
 		mv.addObject("useUser", adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER));// 사용(봉안) 대상자 정보

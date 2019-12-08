@@ -546,7 +546,7 @@
     	<if test="userId != null and userId != ''">
 	  	AND a.user_id = #{userId}
 	  	</if>
-    	ORDER BY a.user_seq
+    	ORDER BY a.bunyang_seq, a.user_seq
 	</select>
 	
 	<!-- 배우자 정보 조회 -->

@@ -36,7 +36,15 @@ public class CommonServiceImpl implements ICommonService {
 	
 	@Override
 	public List<Object> getChildCodeList(String parentCodeSeq) {
-		List<Object> list = commonDao.selectList("common.getChildCodeList", parentCodeSeq);
+		return getChildCodeList(parentCodeSeq, null);
+	}
+	
+	@Override
+	public List<Object> getChildCodeList(String parentCodeSeq, String displayYn) {
+		Map<String, Object> param = new HashMap<String, Object>();
+		param.put("parentCodeSeq", parentCodeSeq);
+		param.put("displayYn", displayYn);
+		List<Object> list = commonDao.selectList("common.getChildCodeList", param);
 		return list;
 	}
 	

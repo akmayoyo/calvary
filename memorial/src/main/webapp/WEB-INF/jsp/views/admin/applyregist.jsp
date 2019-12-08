@@ -133,11 +133,10 @@
 	           		<td align="left" class="form-inline">
 						<select id="selBunyangTimes" class="form-control" style="width: 110px;">
 							<c:forEach items="${bunyangTimesList}" var="bunyangTimesItem" varStatus="status">
-								<c:if test="${status.count eq 1 }">
 								<option value="${bunyangTimesItem.code_value}" codeSeq="${bunyangTimesItem.code_seq}">${bunyangTimesItem.code_name}</option>
-								</c:if>
 							</c:forEach>
 						</select>
+						<span id="sBunyangPriceInfo" class="info" style="margin-left: 5px;"></span>
 	           		</td>
 	           	</tr>
             	<tr>
@@ -242,16 +241,22 @@ var bunyangRefUser = {
 	// 분양차수 변경이벤트
 	$('#selBunyangTimes').change(function(e) {
 		var price = $(this).find('option:selected').val();
-		if(!price || price === 0) {
-			$('#sBunyangPrice').hide();
-			$('#tiBunyangPrice').val('');
-			$('#tiBunyangPrice').show();
+		var codeSeq = $(this).find('option:selected').attr("codeSeq");
+		if(!price) {
+			price = 0;
+		}
+		var priceExp = "₩" + $.number(price) + '원';
+		$('#sBunyangPrice').text(priceExp);	
+		$('#tiBunyangPrice').val('');
+		$('#tiBunyangPrice').hide();
+		$('#sBunyangPrice').show();
+		if(isFreeBunyang()) {// 단가 0인 경우 단가 직접입력 -> 무료 분양으로 변경 @191207
+// 			$('#sBunyangPrice').hide();
+// 			$('#tiBunyangPrice').val('');
+// 			$('#tiBunyangPrice').show();
+			$('#sBunyangPriceInfo').text('※' + codeSeq + '차 분양의 경우 무료 분양으로 1인형만 신청 가능합니다.');	
 		} else {
-			var priceExp = "₩" + $.number(price) + '원';
-			$('#sBunyangPrice').text(priceExp);	
-			$('#tiBunyangPrice').val('');
-			$('#tiBunyangPrice').hide();
-			$('#sBunyangPrice').show();
+			$('#sBunyangPriceInfo').text('');
 		}
 		updateBunyangInfo();
 	});
@@ -461,6 +466,10 @@ function registAgentUser() {
  * 사용(봉안) 대상자 입력
  */
 function registUseUser(type) {
+	if(isFreeBunyang() && type == 'couple') {
+		common.showAlert('무료 분양의 경우 1인형만 신청 가능합니다.');
+		return;
+	}
 	var applyUser = bunyangRefUser.applyUser;
 	if(!applyUser || !applyUser.userName) {
 		common.showAlert('신청자 정보를 먼저 입력해주세요.');
@@ -548,6 +557,12 @@ function registUseUser(type) {
  * 사용(봉안)대상자 정보 수정
  */
 function editUseUser(btn, type) {
+	
+	if(isFreeBunyang() && type == 'couple') {
+		common.showAlert('무료 분양의 경우 1인형만 신청 가능합니다.');
+		return;
+	}
+	
 	// 선택한 행 index
 	var startIdx = $(btn).parent('td').parent('tr').index();
 	var count = $(btn).parent('td').attr('rowspan');
@@ -704,6 +719,12 @@ function saveApply() {
 		return;
 	}
 	
+	// 무료분양의 경우 부부형 입력 불가
+	if(isFreeBunyang() && coupleTypeCount > 0) {
+		common.showAlert('무료 분양의 경우 1인형만 신청 가능합니다.');
+		return;
+	}
+	
 	// 분양단가 직접입력 차수에서 단가체크
 	if(common.isVisible($('#tiBunyangPrice'))) {
 		if(!$('#tiBunyangPrice').val()){
@@ -766,23 +787,25 @@ function saveApply() {
 	bunyangInfo['pricePerCount'] = pricePerCount;
 	bunyangInfo['progressStatus'] = "<%=CalvaryConstants.PROGRESS_STATUS_NEW%>";
 	
-	// 저장 호출
-	common.ajax({
-		url:"${contextPath}/admin/saveapply", 
-		data:JSON.stringify(bunyangInfo),
-		contentType: 'application/json',
-		success: function(result) {
-			if(result && result.result) {
-				common.showAlert("저장되었습니다.");
-				// 상세정보 페이지로 이동
-				var bunyangSeq = result.bunyangSeq;
-				$("#bunyangSeq").val(bunyangSeq);
-				var frm = document.getElementById("frm");
-				frm.action = "${contextPath}/admin/applydetail";
-				frm.submit();
+	if(!isFreeBunyang() || confirm('무료 분양의 경우 신청 즉시 완납상태로 처리됩니다.\n진행하시겠습니까?')) {
+		// 저장 호출
+		common.ajax({
+			url:"${contextPath}/admin/saveapply", 
+			data:JSON.stringify(bunyangInfo),
+			contentType: 'application/json',
+			success: function(result) {
+				if(result && result.result) {
+					common.showAlert("저장되었습니다.");
+					// 상세정보 페이지로 이동
+					var bunyangSeq = result.bunyangSeq;
+					$("#bunyangSeq").val(bunyangSeq);
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/admin/applydetail";
+					frm.submit();
+				}
 			}
-		}
-	});
+		});	
+	}
 }
 
 /**
@@ -940,6 +963,12 @@ function getUserParam(param) {
 		});
 	}
 	return param;
+}
+
+function isFreeBunyang() {
+	var price = $('#selBunyangTimes option:selected').val();
+	var bRtn = common.isFreeBunyang(price);
+	return bRtn;
 }
 
 

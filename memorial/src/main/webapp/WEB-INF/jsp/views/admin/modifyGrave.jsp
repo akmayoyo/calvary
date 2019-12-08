@@ -156,10 +156,11 @@
     
     <div class="mt-30 text-center">
     	<c:if test="${step eq 1 }">
-    	<button id="btnNext" type="button" class="btn btn-primary btn-lg" style="width: 120px;" disabled="disabled" onclick="_next()">다음</button>
+    	<button id="btnNext" type="button" class="btn btn-primary btn-lg" style="width: 120px;" disabled="disabled" onclick="_next()">다음단계</button>
     	</c:if>
     	<c:if test="${step eq 2 }">
     	<button id="btnSave" type="button" class="btn btn-primary btn-lg" style="width: 120px;" disabled="disabled" onclick="_save()">저장</button>
+    	<button type="button" class="btn btn-default btn-lg" style="width: 120px; margin-left: 5px;" onclick="_prev()">이전단계</button>
     	</c:if>
         <button type="button" class="btn btn-default btn-lg" style="width: 120px; margin-left: 5px;" onclick="goToList()">취소</button>
     </div>
@@ -614,7 +615,7 @@ function applySelectedStyle(el, selected, d, byClick) {
 	}else if(getCurrentStep() == 2) {// Step2
 		var selectedGraveType = selectedGraves.length > 0 ? $(selectedGraves[0]).attr('grave_type') : "";
 		// 배정되지 않았거나 Step1에서 선택한 위치중 두번째 자리부터는 선택이 가능
-		if(selectedGraveType == d.grave_type && (!d.bunyang_seq || isInSelectedGravesExceptFirst($(el)))) {
+		if(selectedGraveType == d.grave_type && (!d.bunyang_seq || isInSelectedGraves($(el)))) {
 			var nextEl = el;
 			var availableCount = 0;
 			var selectedGraveCount = selectedGraves.length;
@@ -623,7 +624,7 @@ function applySelectedStyle(el, selected, d, byClick) {
 				if(!nextEl || nextEl.length == 0) {
 					break;
 				}
-				if($(nextEl).attr('assign_status') == 'AVAILABLE' || isInSelectedGravesExceptFirst($(nextEl))) {
+				if($(nextEl).attr('assign_status') == 'AVAILABLE' || isInSelectedGraves($(nextEl))) {
 					availableCount++;
 				}else {
 					break;
@@ -644,10 +645,10 @@ function applySelectedStyle(el, selected, d, byClick) {
 /**
  * Step1에서 선택한 위치들중 element 가 포함되는지 확인(첫번째는 제외)
  */
-function isInSelectedGravesExceptFirst(el) {
+function isInSelectedGraves(el) {
 	var bRtn = false;
 	for(var i = 0; i < selectedGraves.length; i++) {
-		if($(selectedGraves[i]).attr('id') == el.attr('id') && i > 0) {
+		if($(selectedGraves[i]).attr('id') == el.attr('id')) {
 			bRtn = true;
 			break;
 		}
@@ -822,6 +823,7 @@ function _prev() {
 function _save() {
 	var frmData = new FormData();
 	var bAdded = false;
+	var isChanged = false;
 	$('#tblModifyInfo tbody tr td[name="modifyGraveInfo"]').each(function(idx) {
 		var selected_section_seq = $(this).attr('selected_section_seq');
 		var selected_row_seq = $(this).attr('selected_row_seq');
@@ -840,8 +842,17 @@ function _save() {
 			frmData.append("modify_row_seq", modify_row_seq);
 			frmData.append("modify_col_seq", modify_col_seq);	
 			bAdded = true;
+			if(selected_section_seq != modify_section_seq || selected_row_seq != modify_row_seq || selected_col_seq != modify_col_seq) {
+				isChanged = true;
+			}
 		}
 	});
+	
+	if(!isChanged) {
+		common.showAlert('변경할 위치가 선택한 위치와 동일합니다.');
+		return;
+	}
+	
 	if(bAdded) {
 		$.ajax({
 	   		dataType : 'text',

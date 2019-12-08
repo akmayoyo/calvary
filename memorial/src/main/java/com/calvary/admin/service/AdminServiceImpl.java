@@ -2019,13 +2019,15 @@ public class AdminServiceImpl implements IAdminService {
 				param.put("group_seq", group_seq);
 				param.put("bunyang_seq", selected_bunyang_seqs[i]);
 				iRslt += commonDao.update("connectbunyang.createConnectBunyangInfo", param);
-				//iRslt += commonDao.update("connectbunyang.createConnectBunyangGraveAssign", param);
+				// 기존 사용신청된 동산 정보가 있을 경우 group_seq 업데이트
+				iRslt += commonDao.update("connectbunyang.createConnectBunyangGraveAssign", param);
 			}
 			param = new HashMap<String, Object>();
 			param.put("group_seq", group_seq);
 			param.put("bunyang_seq", bunyang_seq);
 			iRslt += commonDao.update("connectbunyang.createConnectBunyangInfo", param);
-			//iRslt += commonDao.update("connectbunyang.createConnectBunyangGraveAssign", param);
+			// 기존 사용신청된 동산 정보가 있을 경우 group_seq 업데이트
+			iRslt += commonDao.update("connectbunyang.createConnectBunyangGraveAssign", param);
 		}
 		return iRslt;
 	}

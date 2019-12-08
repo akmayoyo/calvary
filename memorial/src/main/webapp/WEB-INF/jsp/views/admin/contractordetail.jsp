@@ -350,6 +350,53 @@
             </tbody>
         </table>
     </div>
+
+	<!-- 추가분양리스트 -->
+    <c:if test="${not empty addedBunyangList}">
+    <div style="margin-top: 35px;">
+		<div class="pull-left"><h4>추가 분양 리스트</h4></div>	
+	</div>
+	<div class="clearfix"></div>
+    
+    <div class="table-responsive" style="border-top: 1px solid #999;">
+         <table class="table table-style">
+			<thead>
+				<tr>
+					<th scope="col">번호</th>
+					<th scope="col">신청자</th>
+					<th scope="col">사용자</th>
+					<th scope="col">신청형태</th>
+					<th scope="col">부부형</th>
+					<th scope="col">1인형</th>
+					<th scope="col">신청일자</th>
+					<th scope="col">계약<br>여부</th>
+					<th scope="col">계약일자</th>
+					<th scope="col">완납<br>여부</th>
+					<th scope="col">사용승인<br>일자</th>
+					<th scope="col">상태</th>
+				</tr>
+			</thead>
+			<tbody>
+				<c:forEach items="${addedBunyangList}" var="bunyangItem">
+					<tr bunyangSeq="${bunyangItem.bunyang_seq}" <c:if test="${bunyangItem.cancel_yn == 'Y' || bunyangItem.progress_status == 'E' || bunyangItem.progress_status == 'R'}">class="cancel"</c:if>>
+						<td><a href="javascript:void(0)" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.bunyang_no}</a></td>
+						<td><a href="javascript:void(0)" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.apply_user_name}</a></td>
+						<td><a href="javascript:void(0)" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.use_user_exp}</a></td>
+						<td>${bunyangItem.product_type_name}</td>
+						<td>${bunyangItem.couple_type_count}</td>
+						<td>${bunyangItem.single_type_count}</td>
+						<td>${bunyangItem.regist_date}</td>
+						<td><c:if test="${not empty bunyangItem.contract_date}">O</c:if></td>
+						<td>${bunyangItem.contract_date}</td>
+						<td><c:if test="${not empty bunyangItem.full_payment_date}">O</c:if></td>
+						<td>${bunyangItem.use_approval_date}</td>
+						<td style="text-decoration:none;">${bunyangItem.progress_status_exp}</td>
+					</tr>
+				</c:forEach>
+			</tbody>
+		</table>
+    </div>
+    </c:if>
     
     <!-- 관련 양식 -->
 	<div style="margin-top: 35px;">
@@ -1038,6 +1085,15 @@ function cancelContract(progressStatus) {
 			}, 100);
 		}		
 	}
+}
+
+/**
+ * 분양 상세정보를 팝업으로 표시
+ */
+function _showBunyangInfo(el) {
+	var bunyangSeq = $(el).parent('td').parent('tr').attr('bunyangSeq');
+	var winoption = {width:1120, height:750};
+	common.openWindow("${contextPath}/popup/bunyanginfo", "popBunyangInfo", winoption, {bunyangSeq:bunyangSeq});
 }
 
 /**

@@ -11,6 +11,8 @@ public interface ICommonService {
 	
 	public List<Object> getChildCodeList(String parentCodeSeq);
 	
+	public List<Object> getChildCodeList(String parentCodeSeq, String displayYn);
+	
 	public List<Object> getRelationCodeList();
 	
 	public Map<String, Object> getMenuInfo(String menuSeq);
