@@ -13,6 +13,7 @@
 	<input type="hidden" id="sectionSeq" name="sectionSeq">
 	<input type="hidden" id="rowSeq" name="rowSeq">
 	<input type="hidden" id="colSeq" name="colSeq">
+	<input type="hidden" id="assign_status" name="assign_status">
 </form>
 
 <!-- 그리드 샘플 -->
@@ -684,6 +685,7 @@ function getGraveAssignInfo(d) {
 	$('#sectionSeq').val('');
 	$('#rowSeq').val('');
 	$('#colSeq').val('');
+	$('#assign_status').val('');
 	$('#tblModifyInfo tbody').html('');
 	$('#btnNext').attr('disabled', true);
 	
@@ -718,6 +720,7 @@ function getGraveAssignInfo(d) {
 				$('#sectionSeq').val(data.sectionSeq);
 				$('#rowSeq').val(data.rowSeq);
 				$('#colSeq').val(data.colSeq);
+				$('#assign_status').val(d.assign_status);
 				$('#btnNext').attr('disabled', false);
 			}
 		}
@@ -798,6 +801,10 @@ function seqToAlpha(seq) {
  * 변경할 동산 선택후 다음 Step 이동
  */
 function _next() {
+	if($('#assign_status').val() == 'REQUESTED') {
+		common.showAlert('선택하신 위치는 현재 사용 신청 승인 대기중 입니다.\n승인 완료후 위치 수정이 가능합니다.');
+		return;
+	}
 	if($('#tblModifyInfo tbody tr').not('tr.nodata').length > 0) {
 		var frm = document.getElementById("frm");
 		frm.action = "${contextPath}/admin/modifyGraveNext";

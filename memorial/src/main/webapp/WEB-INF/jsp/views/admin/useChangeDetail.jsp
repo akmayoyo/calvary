@@ -30,6 +30,10 @@
     			<c:set var="statusExp" value="사용 승인"/>
     			<c:set var="statusClass" value="label-info"/>
     			</c:when>
+    			<c:when test="${bunyangInfo.progress_status == 'E'}">
+    			<c:set var="statusExp" value="해약"/>
+    			<c:set var="statusClass" value="label-danger"/>
+    			</c:when>
     		</c:choose>
     		<span class="label ${statusClass}" style="margin-left: 10px; font-weight: normal;">${bunyangInfo.bunyang_times}차 - ${statusExp}</span>
     		</h4>
@@ -159,7 +163,7 @@
             </thead>
             <tbody>
             	<c:forEach items="${useUser}" var="use" varStatus="status">
-            	<tr userId="${use.user_id}" coupleSeq="${use.couple_seq}" assignStatus="${use.assign_status}">
+            	<tr userId="${use.user_id}" coupleSeq="${use.couple_seq}" assignStatus="${use.couple_assign_status}">
             		<c:choose>
             			<c:when test="${!empty use.couple_seq}">
             				<c:set var="nextVal" value="${useUser[status.count]}"/>
@@ -268,7 +272,9 @@
 								<c:if test="${bunyangInfo.service_charge_type == 'REPRESENT' && user.is_maint_charger == 'Y'}">selected</c:if>>${user.user_name}</option>
 							</c:forEach>
 						</select>
+						<c:if test="${bunyangInfo.progress_status != 'E'}">
 						<button class="btn btn-primary" type="button" style="margin-left: 5px;" onclick="changeServiceCharger()">저장</button>
+						</c:if>
             		</td>
             	</tr>
             	<tr>

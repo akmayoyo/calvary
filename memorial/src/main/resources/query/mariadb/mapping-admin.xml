@@ -543,6 +543,7 @@
 		WHERE c.group_seq = (select group_seq from TB_BUNYANG_INFO where bunyang_seq = #{bunyangSeq})
 		and c.bunyang_seq != #{bunyangSeq}
     	AND a.ref_type = #{refType}
+    	AND c.progress_status not in ('E', 'R')
     	<if test="userId != null and userId != ''">
 	  	AND a.user_id = #{userId}
 	  	</if>

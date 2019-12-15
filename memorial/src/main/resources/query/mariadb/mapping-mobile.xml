@@ -91,19 +91,20 @@
 	    select 
 	    	group_seq
 	    	, bunyang_seq
-	    	, couple_type_count + single_type_count as require_cnt
-	    from 
-	    tb_bunyang_info 
-	    where bunyang_seq = #{bunyangSeq} 
+	    	, couple_count + single_count as require_cnt
+	    from vw_bunyang_info 
+	    where bunyang_seq = #{bunyangSeq}
+	    and progress_status != 'E'
 	    
 	    union all
  
 		(select 
 			group_seq
 	    	, bunyang_seq
-	    	, couple_type_count + single_type_count as require_cnt 
-		from tb_bunyang_info 
-		where group_seq = (select group_seq from tb_bunyang_info where bunyang_seq = #{bunyangSeq}) and bunyang_seq != #{bunyangSeq} 
+	    	, couple_count + single_count as require_cnt 
+		from vw_bunyang_info 
+		where group_seq = (select group_seq from TB_BUNYANG_INFO where bunyang_seq = #{bunyangSeq}) and bunyang_seq != #{bunyangSeq}
+		and progress_status != 'E' 
 		order by bunyang_seq
 		)
 	</select>

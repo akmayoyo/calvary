@@ -22,6 +22,7 @@
 						<option value="">전체</option>
 						<option value="<%=CalvaryConstants.PROGRESS_STATUS_C %>" <c:if test="${searchVo.progressStatus == 'C'}">selected</c:if>>사용 미승인</option>
 						<option value="<%=CalvaryConstants.PROGRESS_STATUS_D %>" <c:if test="${searchVo.progressStatus == 'D'}">selected</c:if>>사용 승인</option>
+						<option value="<%=CalvaryConstants.PROGRESS_STATUS_E %>" <c:if test="${searchVo.progressStatus == 'E'}">selected</c:if>>해약</option>
 					</select>
 				</div>
 				<div class="col-xs-8 col-md-8 pl-0">
@@ -52,6 +53,7 @@
 						<th scope="col">계약일자</th>
 						<th scope="col">완납일자</th>
 						<th scope="col">사용승인일자</th>
+						<th scope="col">비고</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -69,6 +71,11 @@
 	                    <td>${useChange.contract_date}</td>
 	                    <td>${useChange.full_payment_date}</td>
 	                    <td>${useChange.use_approval_date}</td>
+	                    <td>
+	                    <c:choose>
+	                    	<c:when test="${useChange.cancel_user_cnt gt 0 }">납부금액 : ${cutil:getThousandSeperatorFormatString(useChange.total_payment)}<br>해약반환금 : ${cutil:getThousandSeperatorFormatString(useChange.cancel_payment)}</c:when>
+	                    </c:choose>
+	                    </td>
 					</tr>
 					</c:forEach>
 				</tbody>

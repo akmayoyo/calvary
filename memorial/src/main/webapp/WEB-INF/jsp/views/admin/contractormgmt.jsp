@@ -55,7 +55,7 @@
 						<th scope="col">계약금<br>납부여부</th>
 						<th scope="col">완납여부</th>
 						<th scope="col">계약/해약일</th>
-						<th scope="col">해약금</th>
+						<th scope="col">비고</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -73,7 +73,11 @@
 	                    <td><c:if test="${contract.contract_yn == 'Y'}">O</c:if></td>
 	                    <td><c:if test="${contract.full_payment_yn == 'Y'}">O</c:if></td>
 	                    <td>${contract.action_date}</td>
-	                    <td>${contract.action_date}</td>
+	                    <td>
+	                    <c:choose>
+	                    	<c:when test="${contract.progress_status eq 'E'}">해약반환금 : ${cutil:getThousandSeperatorFormatString(contract.cancel_payment)}</c:when>
+	                    </c:choose>
+	                    </td>
 					</tr>
 					</c:forEach>
 				</tbody>

@@ -1265,17 +1265,17 @@ public class AdminServiceImpl implements IAdminService {
 			}
 			
 			// 혹시 승인되지 않은 신청 정보가 있을 경우 변경된 위치로 업데이트해주고 승인상태로 변경 
-			param = new HashMap<String, Object>();
-			param.put("section_seq", modifyInfo.get("section_seq"));
-			param.put("row_seq", modifyInfo.get("row_seq"));
-			param.put("col_seq", modifyInfo.get("col_seq"));
-			param.put("bunyang_seq", selectedInfo.get("bunyang_seq"));
-			param.put("use_user_seq", selectedInfo.get("use_user_seq1"));
-			param.put("approval_user", SessionUtil.getCurrentUserId());
-			iRslt += commonDao.update("changeGraveRequestInfo", param);
-			
-			param.put("use_user_seq", selectedInfo.get("use_user_seq2"));
-			iRslt += commonDao.update("changeGraveRequestInfo", param);
+//			param = new HashMap<String, Object>();
+//			param.put("section_seq", modifyInfo.get("section_seq"));
+//			param.put("row_seq", modifyInfo.get("row_seq"));
+//			param.put("col_seq", modifyInfo.get("col_seq"));
+//			param.put("bunyang_seq", selectedInfo.get("bunyang_seq"));
+//			param.put("use_user_seq", selectedInfo.get("use_user_seq1"));
+//			param.put("approval_user", SessionUtil.getCurrentUserId());
+//			iRslt += commonDao.update("changeGraveRequestInfo", param);
+//			
+//			param.put("use_user_seq", selectedInfo.get("use_user_seq2"));
+//			iRslt += commonDao.update("changeGraveRequestInfo", param);
 		}
 		
 		return iRslt;
@@ -1665,6 +1665,7 @@ public class AdminServiceImpl implements IAdminService {
 	 * @return
 	 * @throws Exception
 	 */
+	@SuppressWarnings("unchecked")
 	@Transactional
 	public int cancelUseUser(String bunyangSeq
 			,String userId1
@@ -1734,6 +1735,26 @@ public class AdminServiceImpl implements IAdminService {
 		String remark = cancelReason;
 		
 		iRslt += createPaymentHistory(bunyangSeq, paymentAmount, paymentMethod, paymentDate, paymentDivision, paymentType, paymentUser, remark);
+		
+		// 모든 사용자가 해약 상태인 경우 분양 정보 상태를 해약으로 변경
+		param = new HashMap<String, Object>();
+		param.put("bunyangSeq", bunyangSeq);
+		Map<String, Object> countMap = (HashMap<String, Object>)commonDao.selectOne("usechange.getNotCanceledUserCount", param);
+		if(countMap != null) {
+			int cnt = CommonUtil.convertToInt(countMap.get("cnt"));
+			if(cnt == 0) {
+				param = new HashMap<String, Object>();
+				param.put("bunyangSeq", bunyangSeq);
+				param.put("progressStatus", CalvaryConstants.PROGRESS_STATUS_E);
+				param.put("userId", SessionUtil.getCurrentUserId());
+				param.put("updateDate", new SimpleDateFormat("yyyyMMdd").format(new Date()));
+				param.put("remarks", "");
+				// 상태 업데이트
+				iRslt += commonDao.update("admin.updateBunyangProgressStatus", param);
+				// 변경이력
+				iRslt += commonDao.insert("admin.createBunyangHistory", param);
+			}
+		}
 		return iRslt;
 	}
 	
