@@ -28,7 +28,7 @@ public class SMSUtil {
 	public static final String SMS_URL = "https://sslsms.cafe24.com/sms_sender.php";
 	public static final String SMS_USER_ID = "mparkcalvary";
 	public static final String SMS_SECURE = "0ab3e384e97e239ce9f61a248f85f74a";
-	public static final String SMS_SENDER = "010-8951-1042";
+	public static final String SMS_SENDER = "031-789-8803";
 	
 	private static final Logger logger = LoggerFactory.getLogger(SMSUtil.class);
 	private static final Logger errLogger = LoggerFactory.getLogger("ERROR_LOGGER");
@@ -53,10 +53,8 @@ public class SMSUtil {
 	        String rtime = base64Encode("");
 	        String mode = base64Encode("1");
 	        String subject = base64Encode("");
-	        String testflag = base64Encode("Y");
-	        if("M0008".equals(smsVo.getMsgKey())) {
-	        	testflag = base64Encode("");
-	        }
+	        //String testflag = base64Encode("Y");
+	        String testflag = base64Encode("");
 	        String destination = base64Encode("");
 	        String repeatFlag = base64Encode("");
 	        String repeatNum = base64Encode("");
