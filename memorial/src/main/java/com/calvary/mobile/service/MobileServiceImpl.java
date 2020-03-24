@@ -1,5 +1,6 @@
 package com.calvary.mobile.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,14 +32,14 @@ public class MobileServiceImpl implements IMobileService {
 		return userVo;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> getReservedGraveInfo(String bunyangSeq, int userSeq, int coupleSeq) {
+	public List<Object> getReservedGraveInfo(String bunyangSeq, int userSeq, int coupleSeq, String graveType) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("bunyangSeq", bunyangSeq);
 		parameter.put("userSeq", userSeq);
 		parameter.put("coupleSeq", coupleSeq);
-		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("use.getReservedGraveInfo", parameter);
-		return rtnMap;
+		parameter.put("graveType", graveType);
+		List<Object> list = commonDao.selectList("use.getReservedGraveInfo", parameter);
+		return list;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -189,7 +190,7 @@ public class MobileServiceImpl implements IMobileService {
 	
 	@SuppressWarnings("unchecked")
 	@Transactional
-	public int requestGrave(String productType, String groupSeq, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception {
+	public int requestGrave(String productType, String groupSeq, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int firstColSeq, int isReserved) throws Exception {
 		int iRslt = 0;
 		Map<String, Object> parameter = null;
 		Map<String, Object> parameter2 = null;
@@ -210,7 +211,29 @@ public class MobileServiceImpl implements IMobileService {
 		// 추모동산 배치현황의 상태값을 신청상태로 변경
 		String graveType = coupleSeq > 0 ? CalvaryConstants.GRAVE_TYPE_COUPLE : CalvaryConstants.GRAVE_TYPE_SINGLE;
 		if(isReserved == 1) {// 배우자 또는 가족구성원이 이미 신청한 경우 예약된 자리가 있기 때문에 별도 처리안함
-			// TODO
+			// 신청하려는 자리의 분양건이 신청건과 다른 경우 두개의 자리 분양 seq 를 스왑
+			List<Object> tmpList = getBunyangSeqOfGrave(sectionSeq, String.valueOf(rowSeq), String.valueOf(colSeq));
+			Map<String, Object> tmpMap = null;
+			if(tmpList != null && tmpList.size() > 0) {
+				tmpMap = (HashMap<String, Object>)tmpList.get(0);
+				String bunyangSeq2 = String.valueOf(tmpMap.get("bunyang_seq"));
+				if(!bunyangSeq.equals(bunyangSeq2)) {
+					// 신청 분양 seq로 예약된 자리중 첫번째 자리의 분양 seq 업데이트
+					tmpList = getFirstReservedInfo(bunyangSeq);
+					if(tmpList != null && tmpList.size() > 0) {
+						// 신청 자리의 분양 seq 업데이트
+						updateGraveBunyangSeq(sectionSeq, String.valueOf(rowSeq), String.valueOf(colSeq), bunyangSeq);
+						tmpMap = (HashMap<String, Object>)tmpList.get(0);
+						updateGraveBunyangSeq(
+								String.valueOf(tmpMap.get("section_seq"))
+								, String.valueOf(tmpMap.get("row_seq"))
+								, String.valueOf(tmpMap.get("col_seq"))
+								, bunyangSeq2
+						);
+					}
+					
+				}
+			}
 		} else {// 배정받은 자리가 없는 경우
 			List<Object> requireList = getRequiredGraveList(bunyangSeq);
 			int requireCnt = 1;
@@ -226,10 +249,10 @@ public class MobileServiceImpl implements IMobileService {
 			Map<String, Object> availableGraveInfo = (HashMap<String, Object>)commonDao.selectOne("use.getAvailableSectionGraveInfo", parameter);
 			if(availableGraveInfo != null) {
 				int col = CommonUtil.convertToInt(availableGraveInfo.get("col_seq"));
-				if(col != colSeq) {
+				if(col != firstColSeq) {
 					// 동일메서드 Exception Transaction 안걸려서 수동으로 삭제해줌
 					commonDao.delete("use.deleteGraveRequestInfo", parameter2);
-					throw new Exception("requested col seq is not available!! col : " + col + ", colSeq : " + colSeq);
+					throw new Exception("requested col seq is not available!! col : " + col + ", colSeq : " + firstColSeq);
 				}
 			} else {
 				// 동일메서드 Exception Transaction 안걸려서 수동으로 삭제해줌
@@ -238,26 +261,47 @@ public class MobileServiceImpl implements IMobileService {
 			}
 			
 			if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productType)) {
+				int i = 0, j = 0;
+				List<Integer> reservedColSeqs = new ArrayList<Integer>();
+				for(i = 0; i < requireCnt; i++) {
+					if(colSeq != firstColSeq+i) {
+						reservedColSeqs.add(firstColSeq+i);
+					}
+				}
 				int idx = 0;
-				for(int i = 0; i < requireList.size(); i++) {
+				for(i = 0; i < requireList.size(); i++) {
 					Map<String, Object> tmp = (HashMap<String, Object>)requireList.get(i);
 					String tBunyangSeq = String.valueOf(tmp.get("bunyang_seq"));
 					int tRequireCnt = Integer.parseInt(String.valueOf(tmp.get("require_cnt")));
-					for(int j = 0; j < tRequireCnt; j++) {
+					if(bunyangSeq.equals(tBunyangSeq)) {
+						tRequireCnt -= 1;
+					}
+					for(j = 0; j < tRequireCnt; j++) {
 						parameter = new HashMap<String, Object>();
 						parameter.put("groupSeq", groupSeq);
 						parameter.put("bunyangSeq", tBunyangSeq);
-						parameter.put("coupleSeq", (idx == 0 && CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) ? coupleSeq : null);
-						parameter.put("useUserSeq1", idx == 0 ? userSeq : null);
+						parameter.put("coupleSeq", null);
+						parameter.put("useUserSeq1", null);
 						parameter.put("useUserSeq2", null);
 						parameter.put("sectionSeq", sectionSeq);
 						parameter.put("rowSeq", rowSeq);
-						parameter.put("colSeq", colSeq+idx);
+						parameter.put("colSeq", reservedColSeqs.get(idx));
 						parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_REQUESTED);
 						iRslt += commonDao.update("use.updateGraveRequestInfo", parameter);
 						idx++;
 					}
 				}
+				parameter = new HashMap<String, Object>();
+				parameter.put("groupSeq", groupSeq);
+				parameter.put("bunyangSeq", bunyangSeq);
+				parameter.put("coupleSeq", CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType) ? coupleSeq : null);
+				parameter.put("useUserSeq1", userSeq);
+				parameter.put("useUserSeq2", null);
+				parameter.put("sectionSeq", sectionSeq);
+				parameter.put("rowSeq", rowSeq);
+				parameter.put("colSeq", colSeq);
+				parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_REQUESTED);
+				iRslt += commonDao.update("use.updateGraveRequestInfo", parameter);
 			} else {
 				parameter = new HashMap<String, Object>();
 				parameter.put("groupSeq", groupSeq);
@@ -295,5 +339,33 @@ public class MobileServiceImpl implements IMobileService {
 		parameter.put("codeSeq", codeSeq);
 		List<Object> rtnList = commonDao.selectList("mobile.getContractList", parameter);
 		return rtnList;
+	}
+	
+	public List<Object> getBunyangSeqOfGrave(String section_seq, String row_seq, String col_seq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("section_seq", section_seq);
+		parameter.put("row_seq", row_seq);
+		parameter.put("col_seq", col_seq);
+		List<Object> rtnList = commonDao.selectList("mobile.getBunyangSeqOfGrave", parameter);
+		return rtnList;
+	}
+	
+	public List<Object> getFirstReservedInfo(String bunyang_seq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyang_seq", bunyang_seq);
+		List<Object> rtnList = commonDao.selectList("mobile.getFirstReservedInfo", parameter);
+		return rtnList;
+	}
+	
+	@Transactional
+	public int updateGraveBunyangSeq(String section_seq, String row_seq, String col_seq, String bunyang_seq) throws Exception {
+		int iRslt = 0;
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyang_seq", bunyang_seq);
+		parameter.put("section_seq", section_seq);
+		parameter.put("row_seq", row_seq);
+		parameter.put("col_seq", col_seq);
+		iRslt += commonDao.update("mobile.updateGraveBunyangSeq", parameter);
+		return iRslt;
 	}
 }

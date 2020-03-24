@@ -102,7 +102,6 @@
             						</c:choose>
 								</td>
 							</tr>
-							<c:if test="${empty assignedGraveInfo}">
 							<tr>
 								<th scope="sel">구역</th>
 								<td class="text-left">
@@ -118,14 +117,62 @@
 									</c:choose>
 								</td>
 							</tr>
-							</c:if>
 							<tr>
 								<th scope="sel">사용(봉안)위치</th>
 								<td class="text-left">
-									<a id="aDetailGraveInfo" href="javascript:void(0);" style="padding: 5px 0;"></a>
-									<c:if test="${empty assignedGraveInfo}">
-									<span style="color: #007BFF;">※사용(봉안)위치는 선택하신 구역내 순차적으로 배정됩니다.</span>
-									</c:if>
+									<c:choose>
+										<c:when test="${empty assignedGraveInfo}">
+											<ul id="ulGrave"></ul>
+										</c:when>
+										<c:otherwise>
+											<ul id="ulGrave">
+												<c:forEach items="${assignedGraveList}" var="rowItem">
+													<c:choose>
+														<c:when test="${coupuleReserved eq '1'}">
+															<c:choose>
+																<c:when test="${rowItem.couple_reserved eq '1' }">
+																	<li>
+																		<label class="radio-inline">
+																			<input type="radio" name="rbRequest" sectionSeq="${rowItem.section_seq}" rowSeq="${rowItem.row_seq}" colSeq="${rowItem.col_seq}"  seqNo="${rowItem.seq_no}" onchange="rbRequestChange()">${rowItem.grave_exp}
+																		</label>
+																	</li>
+																</c:when>
+																<c:otherwise>
+																	<li>
+																		<label class="radio-inline">
+																			<input type="radio" name="rbRequest" sectionSeq="${rowItem.section_seq}" rowSeq="${rowItem.row_seq}" colSeq="${rowItem.col_seq}"  seqNo="${rowItem.seq_no}" disabled>${rowItem.grave_exp} (선택불가)
+																		</label>
+																	</li>
+																</c:otherwise>
+															</c:choose>
+														</c:when>
+														<c:otherwise>
+															<c:choose>
+																<c:when test="${rowItem.assign_status eq 'RESERVED' && rowItem.request_count eq 0 }">
+																	<li>
+																		<label class="radio-inline">
+																			<input type="radio" name="rbRequest" sectionSeq="${rowItem.section_seq}" rowSeq="${rowItem.row_seq}" colSeq="${rowItem.col_seq}"  seqNo="${rowItem.seq_no}" onchange="rbRequestChange()">${rowItem.grave_exp}
+																		</label>
+																	</li>
+																</c:when>
+																<c:otherwise>
+																	<li>
+																		<label class="radio-inline">
+																			<input type="radio" name="rbRequest" sectionSeq="${rowItem.section_seq}" rowSeq="${rowItem.row_seq}" colSeq="${rowItem.col_seq}"  seqNo="${rowItem.seq_no}" disabled>${rowItem.grave_exp} (선택불가)
+																		</label>
+																	</li>
+																</c:otherwise>
+															</c:choose>
+														</c:otherwise>
+													</c:choose>
+												</c:forEach>
+											</ul>
+<!-- 											<a id="aDetailGraveInfo" href="javascript:void(0);" style="padding: 5px 0;"></a> -->
+<%-- 											<c:if test="${empty assignedGraveInfo}"> --%>
+<!-- 												<span style="color: #007BFF;">※사용(봉안)위치는 선택하신 구역내 순차적으로 배정됩니다.</span> -->
+<%-- 											</c:if> --%>
+										</c:otherwise>
+									</c:choose>
 								</td>
 							</tr>
 						</tbody>
@@ -141,7 +188,12 @@
 							<span>사용중</span>
 							<div style="width: 10px; height: 10px; background-color: #007BFF; display: inline-block; margin-left: 15px;">
 							</div>
-							<span id="assignLegend">배정구역</span>
+							<span id="assignLegend">신청위치</span>
+							<c:if test="${requiredCnt > 1 && bunyangInfo.connect_product_type eq 'FAMILY' }">
+								<div style="width: 10px; height: 10px; background-color: #47CCCA; display: inline-block; margin-left: 15px;">
+								</div>
+								<span id="assignLegend">가족</span>
+							</c:if>
 						</div>
 						
 						<div id="grid" style="text-align: center; margin-top: 20px;">
@@ -179,17 +231,28 @@
 <script type="text/javascript">
 
 (function() {
-	if($('#assignedSectionSeq').val()) {
+	
+	if(isAssigned()) {
 		var sectionSeq = $('#assignedSectionSeq').val();
 		var rowSeq = $('#assignedRowSeq').val();
 		var colSeq = $('#assignedColSeq').val();
 		var seqNo = $('#assignedSeqNo').val();
-		showGraveMap();
-		showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo);
+		showGraveMap(sectionSeq, rowSeq, colSeq, seqNo);
 	} else {
 		$('#selGraveSection').trigger('change');	
 	}
 })();
+
+/** 
+ * 이미 배정된 자리가 있는지 여부 반환
+ */
+function isAssigned() {
+	var bRtn = false;
+	if($('#assignedSectionSeq').val()) {
+		bRtn = true;
+	}
+	return bRtn;
+}
 
 /**
  * 
@@ -200,23 +263,16 @@ function _changeGraveSection() {
 	var rowSeq = selectedOption.attr('rowSeq');
 	var colSeq = selectedOption.attr('colSeq');
 	var seqNo = selectedOption.attr('seqNo');
-	showGraveMap();
-	showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo);
+	showGraveMap(sectionSeq, rowSeq, colSeq, seqNo);
 }
 
 /**
  * 
  */
-function showGraveMap() {
-	var assignedInfo = getAssignedGraveInfo();
-	var sectionSeq = assignedInfo['sectionSeq'];
-	var rowSeq = assignedInfo['rowSeq'];
-	var colSeq = assignedInfo['colSeq'];
-	var seqNo = assignedInfo['seqNo'];
+function showGraveMap(sectionSeq, rowSeq, colSeq, seqNo) {
 	
 	if(sectionSeq && rowSeq && colSeq) {
 		$('#mapTitle').text('[' + sectionSeq + '구역] 사용(봉안)위치 정보');
-		$('#assignLegend').text('배정구역 (' + rowSeq + '행 - ' + seqToAlpha(colSeq) + '열)');
 		common.ajax({
 			url:"${contextPath}/mobile/getGraveUseList", 
 			data:{},
@@ -227,8 +283,93 @@ function showGraveMap() {
 					 gridData = getGridData(sectionData, false, 0, 15);
 					 makeGraveGrid('#grid', gridData);
 				 }
+				 showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo);
 			}
 		});
+	}
+}
+
+/**
+ * 
+ */
+function showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo) {
+	if(sectionSeq) {
+		var detailGraveInfo = '';
+		var requiredCnt = getRequiredCnt();
+		if(!isAssigned()) {
+			var html = '';
+			for(var i = 0; i < requiredCnt; i++) {
+				detailGraveInfo = sectionSeq + '구역';
+				var colSeq2 = Number(colSeq)+i;
+				//detailGraveInfo += '  ' + (rowSeq ? rowSeq : '') + '행 - ' + seqToAlpha(Number(colSeq)+i) + '열 (고유번호 : ' + (seqNo ? seqNo : '') + ')';
+				detailGraveInfo += '  ' + (rowSeq ? rowSeq : '') + '행 - ' + seqToAlpha(colSeq2) + '열';
+				html += '<li><label class="radio-inline"><input type="radio" name="rbRequest" sectionSeq="' + sectionSeq + '" rowSeq="' + rowSeq + '" colSeq="' + colSeq2 + '">' + detailGraveInfo + '</label></li>';
+			}
+			$('#ulGrave').html(html);
+			$('#ulGrave li input[name="rbRequest"]:radio').change(rbRequestChange);
+			$('#ulGrave li input[name="rbRequest"]:radio').each(function(idx) {
+				if(idx == 0) {
+					$(this).attr('checked', true);
+					$(this).trigger('change');
+				}
+			});
+		} else {
+			var bChecked = false;
+			$('#ulGrave li input[name="rbRequest"]:radio').each(function(idx) {
+				if($(this).is(':enabled') && !bChecked) {
+					bChecked = true;
+					$(this).attr('checked', true);
+					$(this).trigger('change');	
+				}
+			});
+		}
+		
+		
+		if(requiredCnt > 1) {// 가족형인 경우 선택가능한 리스트를 표시
+			
+		} else {
+// 			detailGraveInfo = sectionSeq + '구역';
+// 			//detailGraveInfo += '  ' + (rowSeq ? rowSeq : '') + '행 - ' + seqToAlpha(colSeq) + '열 (고유번호 : ' + (seqNo ? seqNo : '') + ')';
+// 			detailGraveInfo += '  ' + (rowSeq ? rowSeq : '') + '행 - ' + seqToAlpha(colSeq) + '열';
+// 			$('#aDetailGraveInfo').text(detailGraveInfo);
+// 			$('#assignLegend').text('신청위치 (' + rowSeq + '행 - ' + seqToAlpha(colSeq) + '열)');
+		}
+	}
+}
+
+/**
+ * 이전에 클릭한 square 클릭상태 해제를 위해 저장해둠
+ */
+var clickedInfo = {};
+
+/** 
+ *
+ */
+function rbRequestChange(e) {
+	var selectedInput = $(":input:radio[name=rbRequest]:checked");
+	var sectionSeq = selectedInput.attr('sectionSeq');
+	var rowSeq = selectedInput.attr('rowSeq');
+	var colSeq = selectedInput.attr('colSeq');
+	var squareId = 'square' + sectionSeq + '_' + rowSeq + '_' + colSeq;
+	var square = $('#' + squareId)[0];
+	var d = squareData[squareId];
+	if(clickedInfo && clickedInfo.square) {
+		setSelectedStyle(clickedInfo.square, false, clickedInfo.data);
+	}
+	clickedInfo.square = square;
+	clickedInfo.data = d;
+	setSelectedStyle(square, true, d);	
+	$('#assignLegend').text('신청위치 (' + rowSeq + '행 - ' + seqToAlpha(colSeq) + '열)');
+}
+
+/** 
+ * 필요한 묘개수 반환
+ */
+function getRequiredCnt() {
+	if('${bunyangInfo.connect_product_type}' == 'FAMILY') {
+		return Number(${requiredCnt});	
+	} else {
+		return 1;
 	}
 }
 
@@ -321,11 +462,14 @@ function getGridData(data, reverse, offset, w, h) {
     return rtnData; 
 }
 
+var squareData = {};
+
 /**
  * 추모동산 배정현황 그리드 생성
  */
 function makeGraveGrid(grid, gridData) {
 	d3.select("svg").remove();
+	squareData = {};
 	var totalwidth = gridData.totalwidth;
 	var totalheight = gridData.totalheight;
 	var grid = d3.select(grid)
@@ -346,6 +490,11 @@ function makeGraveGrid(grid, gridData) {
 		.attr("y", function(d) { return d.y; })
 		.attr("width", function(d) { return d.width; })
 		.attr("height", function(d) { return d.height; })
+		.attr("id",function(d) {
+			var id = 'square' + d.section_seq + '_' + d.row_seq + '_' + d.col_seq;
+			squareData[id] = d;
+			return id;
+		})
 		.style("fill", function(d) {
 			return getRectFillColor(d);
 		})
@@ -370,19 +519,10 @@ function makeGraveGrid(grid, gridData) {
 			return "9px";
 		}
 	})
-    .attr("fill", function(d) {
-    	var assignedInfo = getAssignedGraveInfo();
-    	var sectionSeq = assignedInfo['sectionSeq'];
-    	var rowSeq = assignedInfo['rowSeq'];
-    	var colSeq = assignedInfo['colSeq'];
-    	if(d.is_rownum) {
-    		return "#fff";
-		} else if(d.section_seq == sectionSeq && d.row_seq == rowSeq && d.col_seq == colSeq) {
-			return "#fff";
-		} else {
-			return "#999";	
-		}
+	.attr("fill", function(d) {
+    	return getTextFillColor(d);
     })
+    .attr("id",function(d) {return 'txt' + d.section_seq + '_' + d.row_seq + '_' + d.col_seq})
 	.text(function(d) {
 		if(d.is_rownum) {
 			return d.row_seq;
@@ -403,19 +543,98 @@ function makeGraveGrid(grid, gridData) {
 /**
  * 
  */
+function setSelectedStyle(el, selected, d) {
+	var txt = $('#' + $(el).attr('id').replace('square', 'txt'));
+	if(selected) {
+		d3.select(el).style("cursor", "pointer"); 
+		d3.select(el).style("fill", "#007BFF"); 
+		txt.attr("fill", "#fff");	
+	} else {
+		d3.select(el).style("cursor", "default"); 
+		d3.select(el).style("fill", getRectFillColor(d)); 
+		txt.attr("fill", getTextFillColor(d));	
+	}
+}
+
+/**
+ * 
+ */
 function getRectFillColor(d) {
-	var assignedInfo = getAssignedGraveInfo();
-	var sectionSeq = assignedInfo['sectionSeq'];
-	var rowSeq = assignedInfo['rowSeq'];
-	var colSeq = assignedInfo['colSeq'];
-	if(d.section_seq == sectionSeq && d.row_seq == rowSeq && d.col_seq == colSeq) {// 배정구역
-		return "#007BFF";
+	var groupSeq = '${bunyangInfo.group_seq}';
+	var bunyangSeq = '${bunyangInfo.bunyang_seq}';
+	var isFamilyGrave = false;
+	
+	if(isAssigned()) {
+		if(!groupSeq) {
+			if(bunyangSeq == d.bunyang_seq) {
+				isFamilyGrave = true;
+			}
+		} else {
+			if(groupSeq == d.group_seq) {
+				isFamilyGrave = true;
+			}
+		}	
+	} else {
+		var selectedOption = $('#selGraveSection').find('option:selected');
+		var sectionSeq = selectedOption.val();
+		var rowSeq = selectedOption.attr('rowSeq');
+		var colSeq = selectedOption.attr('colSeq');
+		var seqNo = selectedOption.attr('seqNo');
+		var requiredCnt = getRequiredCnt();
+		if(d.section_seq == sectionSeq && d.row_seq == rowSeq && Number(d.col_seq) >= Number(colSeq) && Number(d.col_seq) < (Number(colSeq) + requiredCnt)) {
+			isFamilyGrave = true;
+		}
+	}
+	
+	if(isFamilyGrave) {// 가족자리
+		return "#47CCCA";
 	} else if(d.is_rownum){// 행번호
 		return "#92D050";
 	} else if(d.assign_status != 'AVAILABLE') {// 사용중
 		return "#BFBFBF";
 	} else {
 		return "#fff";
+	}
+}
+
+/**
+ * 
+ */
+function getTextFillColor(d) {
+	var groupSeq = '${bunyangInfo.group_seq}';
+	var bunyangSeq = '${bunyangInfo.bunyang_seq}';
+	var isFamilyGrave = false;
+	
+	if(isAssigned()) {
+		if(!groupSeq) {
+			if(bunyangSeq == d.bunyang_seq) {
+				isFamilyGrave = true;
+			}
+		} else {
+			if(groupSeq == d.group_seq) {
+				isFamilyGrave = true;
+			}
+		}	
+	} else {
+		var selectedOption = $('#selGraveSection').find('option:selected');
+		var sectionSeq = selectedOption.val();
+		var rowSeq = selectedOption.attr('rowSeq');
+		var colSeq = selectedOption.attr('colSeq');
+		var seqNo = selectedOption.attr('seqNo');
+		var requiredCnt = getRequiredCnt();
+		if(d.section_seq == sectionSeq && d.row_seq == rowSeq && Number(d.col_seq) >= Number(colSeq) && Number(d.col_seq) < (Number(colSeq) + requiredCnt)) {
+			isFamilyGrave = true;
+		}
+	}
+	
+	if(isFamilyGrave) {// 가족자리
+		return "#fff";
+	} else if(d.is_rownum){// 행번호
+		return "#fff";
+	} else if(d.assign_status != 'AVAILABLE') {// 사용중
+		return "#fff";
+	} else {
+		return "#999";
 	}
 }
 
@@ -448,32 +667,23 @@ function getAssignedGraveInfo() {
 /**
  * 
  */
-function showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo) {
-	if(sectionSeq) {
-		var detailGraveInfo = sectionSeq + '구역';
-		detailGraveInfo += '  ' + (rowSeq ? rowSeq : '') + '행 - ' + seqToAlpha(colSeq) + '열 (고유번호 : ' + (seqNo ? seqNo : '') + ')';
-		$('#aDetailGraveInfo').text(detailGraveInfo);	
-	}
-}
-
-/**
- * 
- */
 function _request() {
-	var sectionSeq = '', rowSeq = 0, colSeq = 0, isReserved = 0, seqNo = '';
+	var sectionSeq = '', rowSeq = 0, colSeq = 0, firstColSeq = 0, isReserved = 0, seqNo = '';
 	var assignedSectionSeq = $('#assignedSectionSeq').val();
-	if(assignedSectionSeq) {
+	if(assignedSectionSeq) {// 배정된 자리가 있는 경우
 		isReserved = 1;
-		sectionSeq = assignedSectionSeq;
-		rowSeq = $('#assignedRowSeq').val();
-		colSeq = $('#assignedColSeq').val();
-		seqNo = $('#assignedSeqNo').val();
-	}else {
+		sectionSeq = clickedInfo.data['section_seq'];
+		rowSeq = clickedInfo.data['row_seq'];
+		colSeq = clickedInfo.data['col_seq'];
+		firstColSeq = colSeq;
+		seqNo = clickedInfo.data['seq_no'];
+	}else {// 신규 신청인 경우
 		var selectedOption = $('#selGraveSection').find('option:selected');
-		sectionSeq = selectedOption.val();
-		rowSeq = selectedOption.attr('rowSeq');
-		colSeq = selectedOption.attr('colSeq');
-		seqNo = selectedOption.attr('seqNo');
+		sectionSeq = clickedInfo.data['section_seq'];
+		rowSeq = clickedInfo.data['row_seq'];
+		colSeq = clickedInfo.data['col_seq'];
+		firstColSeq = parseInt(selectedOption.attr('colSeq'));
+		seqNo = clickedInfo.data['seq_no'];
 	}
 	
 	var data = {};
@@ -485,6 +695,7 @@ function _request() {
 	data.sectionSeq = sectionSeq;
 	data.rowSeq = rowSeq;
 	data.colSeq = colSeq;
+	data.firstColSeq = firstColSeq;
 	data.isReserved = isReserved;
 	
 	common.ajax({

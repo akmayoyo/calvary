@@ -889,6 +889,9 @@ public class AdminController {
 	/** 동산 위치 수정 페이지(다음 Step)  URL */
 	public static final String MODIFY_GRAVE_NEXT_URL = "/modifyGraveNext";
 	
+	/** 위치 수정할 분양건에 대해 승인되지 않은 신청 정보가 있는지 조회 */
+	public static final String NOT_APPROVAL_GRAVE_LIST_URL = "/notApprovalGraveList";
+	
 	/** 동산 위치 수정 정보 저장  URL */
 	public static final String SAVE_CHANGED_GRAVE_URL = "/saveChangedGrave";
 	
@@ -968,6 +971,16 @@ public class AdminController {
 		mv.addObject("step", 2);
 		mv.setViewName(ROOT_URL + MODIFY_GRAVE_URL);
 		return mv;
+	}
+	
+	/** 
+	 * 위치 수정할 분양건에 대해 승인되지 않은 신청 정보가 있는지 조회
+	 */
+	@RequestMapping(value=NOT_APPROVAL_GRAVE_LIST_URL)
+	@ResponseBody
+	public Object notApprovalGraveListHandler(HttpServletRequest request, String bunyang_seq) throws Exception {
+		List<Object> notApprovalGraveList = adminService.getNotApprovalGraveList(bunyang_seq);
+		return notApprovalGraveList;
 	}
 	
 	/** 

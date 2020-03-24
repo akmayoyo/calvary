@@ -100,6 +100,7 @@ public class MobileController {
 	/** 
 	 * 사용신청 페이지 
 	 */
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=REQUEST_GRAVE)
 	public Object requestGraveHandler(String bunyangSeq, String userId) {
 		Map<String, Object> familyGraveRequestInfo = mobileService.getFamilyGraveRequestInfo(bunyangSeq);
@@ -137,29 +138,43 @@ public class MobileController {
 				}
 			}
 			if(StringUtils.isEmpty(errorCode)) {
-				String productType = (String)bunyangInfo.get("connect_product_type");
 				String graveType = null;
+				if(coupleSeq > 0) {
+					graveType = CalvaryConstants.GRAVE_TYPE_COUPLE;
+				} else {
+					graveType = CalvaryConstants.GRAVE_TYPE_SINGLE;
+				}
 				// 이미 배정된 자리가 있는지 조회
-				Map<String, Object> assignedGraveInfo = mobileService.getReservedGraveInfo(bunyangSeq, userSeq, coupleSeq);
+				List<Object> assignedGraveList = mobileService.getReservedGraveInfo(bunyangSeq, userSeq, coupleSeq, graveType);
+				
+				Map<String, Object> assignedGraveInfo = null;
+				
+				String coupuleReserved = "0";
+				
+				if(assignedGraveList != null && assignedGraveList.size() > 0) {
+					assignedGraveInfo = (Map<String, Object>)assignedGraveList.get(0);
+					for(int i = 0; i < assignedGraveList.size(); i++) {
+						Map<String, Object> tmp = (Map<String, Object>)assignedGraveList.get(i);
+						if("1".equals(String.valueOf(tmp.get("couple_reserved")))) {
+							coupuleReserved = "1";
+							break;
+						}					
+					}
+				}
 				
 				List<Object> avaliableGraveList = null;
 				
+				int requiredCnt = mobileService.getRequiredGraveCount(bunyangSeq);
+				
 				// 배정된 자리가 없는 경우 사용가능한 자리 조회
 				if(assignedGraveInfo == null) {
-					int requiredCnt = 1;
-					// 가족형인 경우 
-					if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productType)) {
-						requiredCnt = mobileService.getRequiredGraveCount(bunyangSeq);
-					}
-					if(coupleSeq > 0) {
-						graveType = CalvaryConstants.GRAVE_TYPE_COUPLE;
-					} else {
-						graveType = CalvaryConstants.GRAVE_TYPE_SINGLE;
-					}
 					avaliableGraveList = mobileService.getAvailableGraveInfoAll(graveType, requiredCnt);
 				}
+				mv.addObject("coupuleReserved", coupuleReserved);
+				mv.addObject("requiredCnt", requiredCnt);
 				mv.addObject("bunyangInfo", bunyangInfo);
 				mv.addObject("useUserInfo", useUserInfo);
+				mv.addObject("assignedGraveList", assignedGraveList);
 				mv.addObject("assignedGraveInfo", assignedGraveInfo);
 				mv.addObject("avaliableGraveList", avaliableGraveList);
 				mv.addObject("bunyangSeq", bunyangSeq);
@@ -189,7 +204,18 @@ public class MobileController {
 	 */
 	@RequestMapping(value=SAVE_REQUEST_GRAVE)
 	@ResponseBody
-	public Object saveRequestGraveHandler(String productType, String bunyangSeq, int coupleSeq, int userSeq, String userId, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception{
+	public Object saveRequestGraveHandler(
+			String productType, 
+			String bunyangSeq,
+			int coupleSeq,
+			int userSeq, 
+			String userId, 
+			String sectionSeq, 
+			int rowSeq, 
+			int colSeq, 
+			int firstColSeq, 
+			int isReserved
+			) throws Exception{
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		boolean bRslt = false;
 		String errorCode = "";
@@ -223,7 +249,7 @@ public class MobileController {
 			Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
 			String groupSeq = (String)bunyangInfo.get("group_seq");
 			
-			int iRslt = mobileService.requestGrave(productType, groupSeq, bunyangSeq, coupleSeq, userSeq, sectionSeq, rowSeq, colSeq, isReserved);
+			int iRslt = mobileService.requestGrave(productType, groupSeq, bunyangSeq, coupleSeq, userSeq, sectionSeq, rowSeq, colSeq, firstColSeq, isReserved);
 			bRslt = iRslt > 0;
 		}
 		rtnMap.put("result", bRslt);

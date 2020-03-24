@@ -21,6 +21,7 @@ import com.calvary.admin.service.IAdminService;
 import com.calvary.admin.vo.BunyangInfoVo;
 import com.calvary.admin.vo.BunyangUserVo;
 import com.calvary.common.constant.CalvaryConstants;
+import com.calvary.common.dao.CommonDao;
 import com.calvary.common.service.ICommonService;
 import com.calvary.common.util.CommonUtil;
 import com.calvary.common.util.SessionUtil;
@@ -58,6 +59,8 @@ public class PopupController {
 	public static final String SAVE_PAYMENT_ONE = "/savepaymentone";
 	public static final String APPROVAL_REQUEST_GRAVE = "/approvalRequestGrave";
 	public static final String SAVE_APPROVAL_REQUEST_GRAVE = "/saveApprovalRequestGrave";
+	public static final String CHANGE_FAMILY_GRAVE_ORDER = "/changeFamilyGraveOrder";
+	public static final String SAVE_FAMILY_GRAVE_ORDER = "/saveFamilyGraveOrder";
 	/** 분양상세정보 페이지  URL */
 	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
 	/** comment 입력 팝업 URL */
@@ -97,6 +100,8 @@ public class PopupController {
 	private ISysAdminService sysAdminService;
 	@Autowired
 	private IExcelService excelService;
+	@Autowired
+	private CommonDao commonDao;
 	
 	@RequestMapping(value=SELECT_USER_URL)
 	public Object selectUserHandler(SelectUserVo selectUserVo) {
@@ -677,16 +682,43 @@ public class PopupController {
 		return mv;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@RequestMapping(value=APPROVAL_REQUEST_GRAVE)
 	public Object approvalRequestGraveHandler(String bunyangSeq, String userSeq, String userId, String coupleSeq) {
-		List<Object> approvalGraveList = adminService.getApprovalGraveList(bunyangSeq, userSeq, coupleSeq);
+		List<Object> approvalGraveList = null;
+		List<Object> changeGraveList = null;
 		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
 		Map<String, Object> requestUserInfo = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId);
+		
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("userSeq", userSeq);
+		parameter.put("coupleSeq", coupleSeq);
+		List<Object> reservedList = commonDao.selectList("use.getReservedGraveInfo2", parameter);
+		int isReserved = 0;
+		// 예약된 자리가 있을 경우
+		if(reservedList != null && reservedList.size() > 0) {
+			Map<String, Object> tmp = (Map<String, Object>)reservedList.get(0);
+			if(CalvaryConstants.GRAVE_ASSIGN_STATUS_HALF_OCCUPIED.equals(tmp.get("assign_status"))) {// 부부형 예약 자리가 있는 경우 자리변경 불가
+				approvalGraveList = new ArrayList<Object>();
+				approvalGraveList.add(reservedList.get(0));
+				changeGraveList = approvalGraveList;
+			} else {
+				approvalGraveList = reservedList;
+				changeGraveList = reservedList;
+			}
+			isReserved = 1;
+		} else {
+			approvalGraveList = adminService.getApprovalGraveList(bunyangSeq, userSeq, coupleSeq);
+			changeGraveList = approvalGraveList;
+		}
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("userSeq", userSeq);
 		mv.addObject("coupleSeq", coupleSeq);
 		mv.addObject("approvalGraveList", approvalGraveList);
+		mv.addObject("changeGraveList", changeGraveList);
+		mv.addObject("isReserved", isReserved);
 		mv.addObject("bunyangInfo", bunyangInfo);
 		mv.addObject("requestUserInfo", requestUserInfo);
 		mv.setViewName(ROOT_URL + APPROVAL_REQUEST_GRAVE);
@@ -712,6 +744,27 @@ public class PopupController {
 		}
 		rtnMap.put("result", bRslt);
 		rtnMap.put("errorCode", errorCode);
+		return rtnMap;
+	}
+	
+	@RequestMapping(value=CHANGE_FAMILY_GRAVE_ORDER)
+	public Object changeFamilyGraveOrderHandler(String groupSeq, String bunyangSeq, SearchVo searchVo) throws Exception {
+		List<Object> graveAssignList = adminService.getGraveAssignInfoByFamily(groupSeq, bunyangSeq, null, null, null);
+		ModelAndView mv = new ModelAndView();
+		mv.addObject("groupSeq", groupSeq);
+		mv.addObject("bunyangSeq", bunyangSeq);
+		mv.addObject("graveAssignList", graveAssignList);
+		mv.setViewName(ROOT_URL + CHANGE_FAMILY_GRAVE_ORDER);
+		return mv;
+	}
+	
+	@RequestMapping(value=SAVE_FAMILY_GRAVE_ORDER)
+	@ResponseBody
+	public Object saveFamilyGraveOrderHandler(@RequestBody ApprovalGraveVo vo) throws Exception {
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		int iRslt = adminService.saveFamilyGraveOrder(vo);
+		boolean bRslt = iRslt > 0;
+		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
 	

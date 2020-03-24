@@ -272,6 +272,11 @@ public interface IAdminService {
 	public int approvalRequestGrave(ApprovalGraveVo vo, String approvalUser) throws Exception;
 	
 	/** 
+	 * 가족형 순서변경
+	 */
+	public int saveFamilyGraveOrder(ApprovalGraveVo vo) throws Exception;
+	
+	/** 
 	 * 추모동산 사용현황 리스트 조회
 	 */
 	public List<Object> getGraveUseList();
@@ -302,6 +307,11 @@ public interface IAdminService {
 	 * 가족형으로 묶인 모든 배정 정보 조회
 	 */
 	public List<Object> getGraveAssignInfoByFamily(String group_seq, String bunyang_seq, String sectionSeq, String rowSeq, String colSeq);
+	
+	/** 
+	 * 위치 수정할 분양건에 대해 승인되지 않은 신청 정보가 있는지 조회
+	 */
+	public List<Object> getNotApprovalGraveList(String bunyang_seq);
 	
 	/** 
 	 * 동산 사용신청 리스트 조회

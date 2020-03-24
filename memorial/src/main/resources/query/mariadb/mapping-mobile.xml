@@ -140,5 +140,37 @@
 	    WHERE a.parent_code_seq = 'CONTRACT' 
 	    and a.code_seq like concat(#{codeSeq},'%')
 	</select>
+	
+	<!-- 특정 묘자리의 분양 seq 정보 반환 -->
+    <select id="getBunyangSeqOfGrave" parameterType="map" resultType="map">
+	    select
+	    	bunyang_seq
+	    from TB_BUNYANG_GRAVE_ASSIGN a
+	    WHERE a.section_seq = #{section_seq}
+	    and  a.row_seq = #{row_seq}
+	    and  a.col_seq = #{col_seq}
+	</select>
+	
+	<!-- 특정 분양정보에 예약된 자리중 첫번째 자리 반환 -->
+    <select id="getFirstReservedInfo" parameterType="map" resultType="map">
+	    select
+	    	section_seq
+	    	,row_seq
+	    	,col_seq
+	    from TB_BUNYANG_GRAVE_ASSIGN a
+	    WHERE a.bunyang_seq = #{bunyang_seq}
+	    and a.assign_status = 'RESERVED'
+	    ORDER BY a.section_seq, a.row_seq, a.col_seq
+	    LIMIT 1
+	</select>
+	
+	<!-- 특정 묘자리의 분양 seq 업데이트 -->
+    <update id="updateGraveBunyangSeq" parameterType="map">
+    	UPDATE TB_BUNYANG_GRAVE_ASSIGN a
+			SET bunyang_seq = #{bunyang_seq}
+		WHERE a.section_seq = #{section_seq} 
+		AND a.row_seq = #{row_seq}
+		AND a.col_seq = #{col_seq}
+    </update>
     
 </mapper>

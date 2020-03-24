@@ -85,37 +85,67 @@
     <!-- 가족형으로 묶인 모든 배정 정보 조회 -->
     <select id="getGraveAssignInfoByFamily" parameterType="map" resultType="map">
     	SELECT
+    		T.*
+    		,CASE 
+        		WHEN cnt > 1 THEN CONCAT(use_user_name,' 외 ',cnt-1,'명')
+          		ELSE  use_user_name
+        	END use_user_exp
+    	FROM
+    	(SELECT
 	  		a.bunyang_seq
 	  		,a.group_seq
-	  		,b.bunyang_no
 			,a.section_seq
 		    ,a.row_seq
 		    ,a.col_seq
 		    ,a.seq_no
 		    ,a.grave_type
             ,a.assign_status
+            ,a.use_user_seq1
+            ,a.use_user_seq2
+            ,a.couple_seq
+            ,DATE_FORMAT(a.assign_date1, '%Y%m%d%H%i%s') assign_date1
+            ,DATE_FORMAT(a.assign_date2, '%Y%m%d%H%i%s') assign_date2
+	  		,b.bunyang_no
+	  		,b.connect_product_type
             ,COALESCE(c.user_name, (SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = c.user_id)) AS apply_user_name
-		    ,d.user_seq
-            ,d.user_id
-            ,d.relation_type
-            ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = d.relation_type) relation_type_name
-            ,COALESCE(d.user_name, e.user_name) AS user_name
-		    ,COALESCE(d.birth_date, e.birth_date) AS birth_date
-		    ,COALESCE(d.gender, e.gender) AS gender
-		    ,COALESCE(d.email, e.email) AS email
-		    ,COALESCE(d.mobile, e.mobile) AS mobile
-		    ,COALESCE(d.phone, e.phone) AS phone
-		    ,COALESCE(d.post_number, e.post_number) AS post_number
-		    ,COALESCE(d.address1, e.address1) AS address1
-		    ,COALESCE(d.address2, e.address2) AS address2
-		    ,CASE 
+            ,COALESCE(d.user_name, e.user_name) AS use_user_name
+            ,d.cnt
+            ,CASE 
 		    	WHEN a.use_user_seq1 = d.user_seq then DATE_FORMAT(a.assign_date1, '%Y-%m-%d')
 		    	WHEN a.use_user_seq2 = d.user_seq then DATE_FORMAT(a.assign_date2, '%Y-%m-%d')
 		    END assign_date
 		FROM TB_BUNYANG_GRAVE_ASSIGN a 
-		LEFT OUTER JOIN TB_BUNYANG_INFO b ON a.bunyang_seq = b.bunyang_seq
+		LEFT OUTER JOIN vw_bunyang_connect_info b ON a.bunyang_seq = b.bunyang_seq
 		LEFT OUTER JOIN TB_BUNYANG_REF_USER c ON a.bunyang_seq = c.bunyang_seq AND c.ref_type = 'APPLY_USER'
-		LEFT OUTER JOIN TB_BUNYANG_REF_USER d ON d.ref_type = 'USE_USER' and a.bunyang_seq = d.bunyang_seq and (a.use_user_seq1 = d.user_seq or a.use_user_seq2 = d.user_seq)
+		LEFT OUTER JOIN (
+		SELECT
+				*
+				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
+			FROM
+				(SELECT
+					bunyang_seq
+				  	,user_id
+					,user_name
+					,relation_type
+					,is_move
+					,user_seq
+					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
+                    ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
+				FROM      
+					(SELECT 
+						 bunyang_seq
+					   	,user_id
+					   	,user_name
+					   	,relation_type
+					   	,is_move
+					   	,user_seq 
+					FROM TB_BUNYANG_REF_USER a
+					WHERE a.ref_type = 'USE_USER'
+					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
+				ORDER BY bunyang_seq, CASE WHEN relation_type = 'ONESELF' THEN 1 ELSE 2 end, user_seq
+			  ) t
+			  WHERE rn = 1
+		) d ON a.bunyang_seq = d.bunyang_seq and (a.use_user_seq1 = d.user_seq or a.use_user_seq2 = d.user_seq)
         LEFT OUTER JOIN TB_COM_USER e ON d.user_id = e.user_id
 		WHERE 1=1
 		<if test="group_seq != null and group_seq != ''">
@@ -129,7 +159,8 @@
 		AND a.row_seq = #{rowSeq}
 		AND a.col_seq = #{colSeq}
 		</if>
-		ORDER BY b.bunyang_no, d.user_seq
+		) T
+		ORDER BY section_seq, row_seq, col_seq, bunyang_no
     </select>
     
     <!-- 동산 사용신청 리스트 조회 -->
@@ -397,46 +428,6 @@
     		a.*
     	FROM
     	(SELECT 
-			section_seq
-			,row_seq
-			,col_seq
-			,bunyang_seq
-			,use_user_seq1
-			,use_user_seq2
-			,couple_seq
-			,assign_status
-			,grave_type
-			,seq_no
-			,concat(a.section_seq, '구역 ', a.row_seq, '행-', char(64+a.col_seq), '열') as grave_exp
-			,(select count(1) from TB_BUNYANG_GRAVE_REQUEST_INFO gr where gr.section_seq = a.section_seq and gr.row_seq = a.row_seq and gr.col_seq = a.col_seq and gr.request_status = 'REQUESTED') request_count
-		FROM TB_BUNYANG_GRAVE_ASSIGN a
-		WHERE a.bunyang_seq = #{bunyangSeq}
-		) a
-		WHERE 1=1
-		AND (
-		case 
-			when a.grave_type = 'SINGLE' and a.assign_status = 'RESERVED' then 1
-			when a.grave_type = 'COUPLE' then
-				case 
-					when a.assign_status = 'RESERVED' then 1
-					when a.assign_status = 'HALF_OCCUPIED' and a.couple_seq = #{coupleSeq} then 1 
-					else 0 
-				end
-			else 0
-		end
-		) = 1
-		AND a.request_count = 0
-		AND a.assign_status IN ('RESERVED', 'HALF_OCCUPIED')
-		ORDER BY section_seq, row_seq, col_seq
-		LIMIT 1
-    </select>
-    
-    <!-- 가족형의 다른가족 또는 부부형 배우자가 사용시 내 자리는 이미 정해져있기때문에 그자리가 있는지 조회함 -->
-    <select id="getReservedGraveInfo2" parameterType="map" resultType="map">
-    	SELECT
-    		a.*
-    	FROM
-    	(SELECT 
 			a.section_seq
 			,a.row_seq
 			,a.col_seq
@@ -448,16 +439,64 @@
 			,a.grave_type
 			,a.seq_no
 			,concat(a.section_seq, '구역 ', a.row_seq, '행-', char(64+a.col_seq), '열') as grave_exp
+			,(select count(1) from TB_BUNYANG_GRAVE_REQUEST_INFO gr where gr.section_seq = a.section_seq and gr.row_seq = a.row_seq and gr.col_seq = a.col_seq and gr.request_status = 'REQUESTED') request_count
+			,case when a.assign_status = 'HALF_OCCUPIED' and a.bunyang_seq = b.bunyang_seq and a.couple_seq = #{coupleSeq} then 1 else 0 end as couple_reserved
+		FROM TB_BUNYANG_GRAVE_ASSIGN a INNER JOIN vw_bunyang_connect_info b ON ((b.group_seq is not null and b.group_seq = a.group_seq) or (b.group_seq is null and b.bunyang_seq = a.bunyang_seq))
+		WHERE b.bunyang_seq = #{bunyangSeq}
+		and a.grave_type = #{graveType}
+		and a.assign_status IN ('RESERVED', 'HALF_OCCUPIED')
+		) a
+		ORDER BY section_seq, row_seq, col_seq
+    </select>
+    
+    <!-- 가족형의 다른가족 또는 부부형 배우자가 사용시 내 자리는 이미 정해져있기때문에 그자리가 있는지 조회함 -->
+    <select id="getReservedGraveInfo2" parameterType="map" resultType="map">
+    	SELECT
+    		a.*
+    	FROM
+    	(SELECT 
+    		a.group_seq
+			,a.section_seq
+			,a.row_seq
+			,a.col_seq
+			,b.bunyang_seq
+			,b.use_user_seq use_user_seq1
+			,a.use_user_seq2
+			,a.couple_seq
+			,a.assign_status
+			,a.grave_type
+			,a.seq_no
+			,concat(a.section_seq, '구역 ', a.row_seq, '행-', char(64+a.col_seq), '열') as grave_exp
+			,b.use_user_seq
 		FROM TB_BUNYANG_GRAVE_ASSIGN a 
 		INNER JOIN TB_BUNYANG_GRAVE_REQUEST_INFO b 
-		ON a.bunyang_seq = b.bunyang_seq AND a.section_seq = b.section_seq AND a.row_seq = b.row_seq AND a.col_seq = b.col_seq
-		WHERE a.bunyang_seq = #{bunyangSeq} 
+		ON a.section_seq = b.section_seq AND a.row_seq = b.row_seq AND a.col_seq = b.col_seq
+		WHERE b.bunyang_seq = #{bunyangSeq} 
 		AND b.use_user_seq = #{userSeq} 
 		AND a.assign_status IN ('RESERVED', 'HALF_OCCUPIED')
 		AND b.request_status = 'REQUESTED'
+		UNION
+		SELECT 
+			a.group_seq
+			,a.section_seq
+			,a.row_seq
+			,a.col_seq
+			,a.bunyang_seq
+			,a.use_user_seq1
+			,a.use_user_seq2
+			,a.couple_seq
+			,a.assign_status
+			,a.grave_type
+			,a.seq_no
+			,concat(a.section_seq, '구역 ', a.row_seq, '행-', char(64+a.col_seq), '열') as grave_exp
+			,null use_user_seq
+		FROM TB_BUNYANG_GRAVE_ASSIGN a 
+		INNER JOIN vw_bunyang_connect_info b ON (a.group_seq is not null and a.group_seq = b.group_seq) or (a.group_seq is null and a.bunyang_seq = b.bunyang_seq)
+		WHERE b.bunyang_seq = #{bunyangSeq} 
+		AND NOT EXISTS(SELECT 1 FROM TB_BUNYANG_GRAVE_REQUEST_INFO c WHERE a.section_seq = c.section_seq AND a.row_seq = c.row_seq AND a.col_seq = c.col_seq AND c.request_status = 'REQUESTED')
+		AND a.assign_status = 'RESERVED'
 		) a
-		ORDER BY section_seq, row_seq, col_seq
-		LIMIT 1
+		ORDER BY case when use_user_seq is not null then 1 else 2 end, section_seq, row_seq, col_seq
     </select>
     
     <!-- 동산 배정 -->
@@ -470,6 +509,22 @@
 			couple_seq = #{coupleSeq},
 			assign_date1 = case when #{useUserSeq1} is not null then CURRENT_TIMESTAMP else null end,
 			assign_date2 = case when #{useUserSeq2} is not null then CURRENT_TIMESTAMP else null end
+		WHERE a.section_seq = #{sectionSeq} 
+		AND a.row_seq = #{rowSeq}
+		AND a.col_seq = #{colSeq}
+    </update>
+    
+    <!-- 동산 배정 -->
+    <update id="updateGrave2" parameterType="map">
+    	UPDATE TB_BUNYANG_GRAVE_ASSIGN a
+			SET group_seq = #{group_seq},
+			bunyang_seq = #{bunyang_seq},
+			use_user_seq1 = #{use_user_seq1},
+			use_user_seq2 = #{use_user_seq2},
+			assign_status = #{assign_status},
+			couple_seq = #{couple_seq},
+			assign_date1 = case when #{assign_date1} is not null then STR_TO_DATE(#{assign_date1}, '%Y%m%d%H%i%s') else null end,
+			assign_date2 = case when #{assign_date2} is not null then STR_TO_DATE(#{assign_date2}, '%Y%m%d%H%i%s') else null end
 		WHERE a.section_seq = #{sectionSeq} 
 		AND a.row_seq = #{rowSeq}
 		AND a.col_seq = #{colSeq}
@@ -523,6 +578,22 @@
 			ASSIGN_DATE2 = null
 		WHERE a.assign_status = 'REQUESTED'
 		AND a.section_seq = #{sectionSeq} 
+		AND a.row_seq = #{rowSeq}
+		AND a.col_seq = #{colSeq}
+    </update>
+    
+    <!-- 동산 정보 clear -->
+    <update id="clearGrave" parameterType="map">
+    	UPDATE TB_BUNYANG_GRAVE_ASSIGN a
+			SET bunyang_seq = null,
+			GROUP_SEQ = null,
+			USE_USER_SEQ1 = null,
+			USE_USER_SEQ2 = null,
+			ASSIGN_STATUS = 'AVAILABLE',
+			COUPLE_SEQ = null,
+			ASSIGN_DATE1 = null,
+			ASSIGN_DATE2 = null
+		WHERE a.section_seq = #{sectionSeq} 
 		AND a.row_seq = #{rowSeq}
 		AND a.col_seq = #{colSeq}
     </update>
@@ -666,6 +737,7 @@
         where b.BUNYANG_SEQ = #{bunyangSeq} 
         AND a.ASSIGN_STATUS = 'REQUESTED'
         AND (case when b.connect_product_type = 'FAMILY' THEN 1 else case when a.USE_USER_SEQ1 = #{userSeq} then 1 else 0 end end) = 1
+        ORDER BY case when a.USE_USER_SEQ1 = #{userSeq} then 1 else 2 end, a.section_seq, a.row_seq, a.col_seq
     </select>
     
     <select id="checkAvaliableGrave" parameterType="map" resultType="map">
@@ -694,7 +766,8 @@
     <select id="getNotApprovalGraveList" parameterType="map" resultType="map">
     	<![CDATA[
 		SELECT
-        	a.bunyang_seq
+			b.group_seq
+        	,a.bunyang_seq
         	,a.use_user_seq
             ,b.bunyang_no
             ,c.user_id
@@ -706,8 +779,10 @@
             ,d.col_seq
             ,d.seq_no
             ,d.assign_status
-            ,b.product_type
-        FROM TB_BUNYANG_GRAVE_REQUEST_INFO a INNER JOIN TB_BUNYANG_INFO b on a.BUNYANG_SEQ = b.BUNYANG_SEQ
+            ,b.connect_product_type product_type
+            ,d.use_user_seq1
+            ,d.use_user_seq2
+        FROM TB_BUNYANG_GRAVE_REQUEST_INFO a INNER JOIN vw_bunyang_connect_info b on a.BUNYANG_SEQ = b.bunyang_seq
         INNER JOIN TB_BUNYANG_REF_USER c on c.BUNYANG_SEQ = a.BUNYANG_SEQ and c.user_seq = a.use_user_seq and c.ref_type = 'USE_USER'
         INNER JOIN TB_BUNYANG_GRAVE_ASSIGN d on a.SECTION_SEQ = d.SECTION_SEQ and a.ROW_SEQ = d.ROW_SEQ and a.COL_SEQ = d.COL_SEQ
         WHERE a.request_date < DATE_ADD(CURRENT_TIMESTAMP(), interval -1 hour) 
@@ -716,17 +791,33 @@
 		]]>
     </select>
     
+    <select id="getNotApprovalGraveList2" parameterType="map" resultType="map">
+    	<![CDATA[
+		SELECT
+			c.*
+        FROM TB_BUNYANG_INFO a 
+        INNER JOIN TB_BUNYANG_INFO b on ((a.group_seq is not null and a.group_seq = b.group_seq) or (a.group_seq is null and a.bunyang_seq = b.bunyang_seq))
+        INNER JOIN TB_BUNYANG_GRAVE_REQUEST_INFO c on b.bunyang_seq = c.bunyang_seq
+        WHERE a.bunyang_seq = #{bunyang_seq}
+        AND c.request_status = 'REQUESTED'
+		]]>
+    </select>
+    
     <select id="getFamilyRequestGraveList" parameterType="map" resultType="map">
     	SELECT
-        	a.section_seq
-        	,a.row_seq
-        	,a.col_seq
-        	,a.seq_no
-        FROM TB_BUNYANG_GRAVE_ASSIGN a
-        WHERE a.bunyang_seq = #{bunyangSeq}
-        AND a.assign_status = 'REQUESTED'
-        AND a.use_user_seq1 is null
-        AND a.use_user_seq2 is null
+    		b.bunyang_seq
+    		,a.group_seq
+        	,b.section_seq
+        	,b.row_seq
+        	,b.col_seq
+        	,b.seq_no
+        	,b.use_user_seq1
+        	,b.use_user_seq2
+    	FROM vw_bunyang_connect_info a INNER JOIN TB_BUNYANG_GRAVE_ASSIGN b on ((a.group_seq is not null and a.group_seq = b.group_seq) or (a.group_seq is null and a.bunyang_seq = b.bunyang_seq))
+    	WHERE a.bunyang_seq = #{bunyangSeq}
+    	AND b.assign_status = 'REQUESTED'
+        AND b.use_user_seq1 is null
+        AND b.use_user_seq2 is null
     </select>
     
      <!-- 동산 위치 변경 -->

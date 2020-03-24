@@ -1064,14 +1064,7 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("bunyangSeq", bunyangSeq);
 		parameter.put("userSeq", userSeq);
 		parameter.put("coupleSeq", coupleSeq);
-		
-		// 부부형 배우자가 이미 사용중이거나 가족형의 구성원이 미리 예약한 자리가 있으면 해당 정보 반환
-		List<Object> approvalGraveList = commonDao.selectList("use.getReservedGraveInfo2", parameter);
-		
-		// 배정된 자리가 없을 경우 신청된 정보 반환
-		if(approvalGraveList == null || approvalGraveList.size() == 0) {
-			approvalGraveList = commonDao.selectList("use.getApprovalGraveList", parameter);
-		}
+		List<Object> approvalGraveList = commonDao.selectList("use.getApprovalGraveList", parameter);
 		return approvalGraveList;
 	}
 	
@@ -1097,13 +1090,14 @@ public class AdminServiceImpl implements IAdminService {
 			for(int i = 0; i < vo.getApprovalGraveList().size(); i++) {
 				info = vo.getApprovalGraveList().get(i);
 				parameter = new HashMap<String, Object>();
-				parameter.put("groupSeq", info.getGroupSeq());
+				parameter.put("groupSeq", StringUtils.isEmpty(info.getGroupSeq()) ? null : info.getGroupSeq());
 				parameter.put("bunyangSeq", info.getBunyangSeq());
-				if(i == 0) {
+				
+				if(vo.getBunyangSeq().equals(info.getBunyangSeq()) && vo.getUserSeq().equals(info.getUseUserSeq1())) {
 					parameter.put("useUserSeq1", vo.getUserSeq());
 					parameter.put("coupleSeq", vo.getCoupleSeq() >= 0 ? vo.getCoupleSeq() : null);
 					parameter.put("assignStatus", null);
-				} else{
+				} else {
 					parameter.put("useUserSeq1", null);
 					parameter.put("coupleSeq", null);
 					parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_RESERVED);
@@ -1123,14 +1117,42 @@ public class AdminServiceImpl implements IAdminService {
 			if(vo.getApprovalGraveList() != null && vo.getApprovalGraveList().size() > 0) {
 				info = vo.getApprovalGraveList().get(0);
 				if(CalvaryConstants.GRAVE_ASSIGN_STATUS_RESERVED.equals(vo.getAssignStatus())) {
-					parameter = new HashMap<String, Object>();
-					parameter.put("bunyangSeq", vo.getBunyangSeq());
-					parameter.put("useUserSeq1", vo.getUserSeq());
-					parameter.put("coupleSeq", vo.getCoupleSeq() >= 0 ? vo.getCoupleSeq() : null);
-					parameter.put("sectionSeq", info.getSectionSeq());
-					parameter.put("rowSeq", info.getRowSeq());
-					parameter.put("colSeq", info.getColSeq());
-					iRslt += commonDao.update("use.updateReservedGrave", parameter);
+//					parameter = new HashMap<String, Object>();
+//					parameter.put("bunyangSeq", vo.getBunyangSeq());
+//					parameter.put("useUserSeq1", vo.getUserSeq());
+//					parameter.put("coupleSeq", vo.getCoupleSeq() >= 0 ? vo.getCoupleSeq() : null);
+//					parameter.put("sectionSeq", info.getSectionSeq());
+//					parameter.put("rowSeq", info.getRowSeq());
+//					parameter.put("colSeq", info.getColSeq());
+//					iRslt += commonDao.update("use.updateReservedGrave", parameter);
+					for(int i = 0; i < vo.getRequestGraveList().size(); i++) {
+						info = vo.getRequestGraveList().get(i);
+						parameter = new HashMap<String, Object>();
+						parameter.put("sectionSeq", info.getSectionSeq());
+						parameter.put("rowSeq", info.getRowSeq());
+						parameter.put("colSeq", info.getColSeq());
+						iRslt += commonDao.update("use.clearGrave", parameter);
+					}
+					for(int i = 0; i < vo.getApprovalGraveList().size(); i++) {
+						info = vo.getApprovalGraveList().get(i);
+						parameter = new HashMap<String, Object>();
+						parameter.put("groupSeq", StringUtils.isEmpty(info.getGroupSeq()) ? null : info.getGroupSeq());
+						parameter.put("bunyangSeq", info.getBunyangSeq());
+						
+						if(vo.getBunyangSeq().equals(info.getBunyangSeq()) && vo.getUserSeq().equals(info.getUseUserSeq1())) {
+							parameter.put("useUserSeq1", vo.getUserSeq());
+							parameter.put("coupleSeq", vo.getCoupleSeq() >= 0 ? vo.getCoupleSeq() : null);
+							parameter.put("assignStatus", null);
+						} else {
+							parameter.put("useUserSeq1", null);
+							parameter.put("coupleSeq", null);
+							parameter.put("assignStatus", CalvaryConstants.GRAVE_ASSIGN_STATUS_RESERVED);
+						}
+						parameter.put("sectionSeq", info.getSectionSeq());
+						parameter.put("rowSeq", info.getRowSeq());
+						parameter.put("colSeq", info.getColSeq());
+						iRslt += commonDao.update("use.updateRequestGrave", parameter);
+					}
 				} else if(CalvaryConstants.GRAVE_ASSIGN_STATUS_HALF_OCCUPIED.equals(vo.getAssignStatus())) {
 					parameter = new HashMap<String, Object>();
 					parameter.put("bunyangSeq", vo.getBunyangSeq());
@@ -1157,6 +1179,43 @@ public class AdminServiceImpl implements IAdminService {
 			iRslt += commonDao.insert("admin.createUseMaintPaymentInfo", parameter);
 		}
 		return iRslt;
+	}
+	
+	/** 
+	 * 가족형 순서변경
+	 */
+	@Transactional
+	public int saveFamilyGraveOrder(ApprovalGraveVo vo) throws Exception {
+		int iRslt = 0;
+		List<GraveInfoVo> list = vo.getRequestGraveList();
+		if(list != null && list.size() > 0) {
+			for(int i = 0; i < list.size(); i++) {
+				GraveInfoVo infoVo = list.get(i);
+				Map<String, Object> parameter = new HashMap<String, Object>();
+				parameter.put("group_seq", emptyToNull(infoVo.getGroupSeq()));
+				parameter.put("bunyang_seq", infoVo.getBunyangSeq());
+				parameter.put("use_user_seq1", emptyToNull(infoVo.getUseUserSeq1()));
+				parameter.put("use_user_seq2", emptyToNull(infoVo.getUseUserSeq2()));
+				parameter.put("assign_status", emptyToNull(infoVo.getAssignStatus()));
+				parameter.put("couple_seq", emptyToNull(infoVo.getCoupleSeq()));
+				parameter.put("assign_date1", emptyToNull(infoVo.getAssignDate1()));
+				parameter.put("assign_date2", emptyToNull(infoVo.getAssignDate2()));
+				parameter.put("sectionSeq", infoVo.getSectionSeq());
+				parameter.put("rowSeq", infoVo.getRowSeq());
+				parameter.put("colSeq", infoVo.getColSeq());
+				iRslt += commonDao.update("use.updateGrave2", parameter);
+			}
+		}
+		return iRslt;
+	}
+	
+	/** */
+	private String emptyToNull(String val) {
+		String sRtn = val;
+		if(StringUtils.isEmpty(sRtn)) {
+			sRtn = null;
+		}
+		return sRtn;
 	}
 	
 	/** 
@@ -1316,6 +1375,16 @@ public class AdminServiceImpl implements IAdminService {
 		parameter.put("rowSeq", rowSeq);
 		parameter.put("colSeq", colSeq);
 		List<Object> list = commonDao.selectList("use.getGraveAssignInfoByFamily", parameter); 
+		return list;
+	}
+	
+	/** 
+	 * 위치 수정할 분양건에 대해 승인되지 않은 신청 정보가 있는지 조회
+	 */
+	public List<Object> getNotApprovalGraveList(String bunyang_seq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyang_seq", bunyang_seq);
+		List<Object> list = commonDao.selectList("use.getNotApprovalGraveList2", parameter); 
 		return list;
 	}
 	

@@ -47,12 +47,15 @@ public class ApprovalGraveScheduler {
 				for(int i = 0; i < notApprovalList.size(); i++) {
 					try {
 						Map<String, Object> tmp = (HashMap<String, Object>)notApprovalList.get(i);
+						String groupSeq = (String)tmp.get("group_seq");
 						String bunyangSeq = (String)tmp.get("bunyang_seq");
 						String sectionSeq = (String)tmp.get("section_seq");
 						String rowSeq = String.valueOf(CommonUtil.convertToInt(tmp.get("row_seq")));
 						String colSeq = String.valueOf(CommonUtil.convertToInt(tmp.get("col_seq")));
 						String assignStatus = (String)tmp.get("assign_status");
 						String userSeq = String.valueOf(CommonUtil.convertToInt(tmp.get("use_user_seq")));
+						String useUserSeq1 = String.valueOf(CommonUtil.convertToInt(tmp.get("use_user_seq1")));
+						String useUserSeq2 = String.valueOf(CommonUtil.convertToInt(tmp.get("use_user_seq2")));
 						int coupleSeq = CommonUtil.convertToInt(tmp.get("couple_seq"));
 						String userName = (String)tmp.get("user_name");
 						String bunyangNo = (String)tmp.get("bunyang_no");
@@ -72,16 +75,24 @@ public class ApprovalGraveScheduler {
 						if(CalvaryConstants.GRAVE_ASSIGN_STATUS_HALF_OCCUPIED.equals(assignStatus) ||
 								CalvaryConstants.GRAVE_ASSIGN_STATUS_RESERVED.equals(assignStatus)) {
 							infoVo = new GraveInfoVo();
+							infoVo.setGroupSeq(groupSeq);
+							infoVo.setBunyangSeq(bunyangSeq);
 							infoVo.setSectionSeq(sectionSeq);
 							infoVo.setRowSeq(rowSeq);
 							infoVo.setColSeq(colSeq);
+							infoVo.setUseUserSeq1(userSeq);
+							infoVo.setUseUserSeq2(useUserSeq2);
 							requestGraveList.add(infoVo);
 							approvalGraveList.add(infoVo);
 						} else if(CalvaryConstants.GRAVE_ASSIGN_STATUS_REQUESTED.equals(assignStatus)) {// 신규신청된 경우
 							infoVo = new GraveInfoVo();
+							infoVo.setGroupSeq(groupSeq);
+							infoVo.setBunyangSeq(bunyangSeq);
 							infoVo.setSectionSeq(sectionSeq);
 							infoVo.setRowSeq(rowSeq);
 							infoVo.setColSeq(colSeq);
+							infoVo.setUseUserSeq1(useUserSeq1);
+							infoVo.setUseUserSeq2(useUserSeq2);
 							requestGraveList.add(infoVo);
 							approvalGraveList.add(infoVo);
 							// 가족형의 경우 가족자리까지 미리 신청하기때문에 해당정보 조회
@@ -93,9 +104,13 @@ public class ApprovalGraveScheduler {
 									for(int j = 0; j < familyRequestList.size(); j++) {
 										Map<String, Object> familyRequestInfo = (HashMap<String, Object>)familyRequestList.get(j);
 										infoVo = new GraveInfoVo();
+										infoVo.setBunyangSeq((String)familyRequestInfo.get("bunyang_seq"));
+										infoVo.setGroupSeq((String)familyRequestInfo.get("group_seq"));
 										infoVo.setSectionSeq((String)familyRequestInfo.get("section_seq"));
 										infoVo.setRowSeq(String.valueOf(CommonUtil.convertToInt(familyRequestInfo.get("row_seq"))));
 										infoVo.setColSeq(String.valueOf(CommonUtil.convertToInt(familyRequestInfo.get("col_seq"))));
+										infoVo.setUseUserSeq1(String.valueOf(CommonUtil.convertToInt(familyRequestInfo.get("use_user_seq1"))));
+										infoVo.setUseUserSeq2(String.valueOf(CommonUtil.convertToInt(familyRequestInfo.get("use_user_seq2"))));
 										requestGraveList.add(infoVo);
 										approvalGraveList.add(infoVo);
 									}

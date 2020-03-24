@@ -9,7 +9,7 @@ public interface IMobileService {
 
 	public BunyangUserVo getBunyangUserVo(String userName, String birthDate);
 	
-	public Map<String, Object> getReservedGraveInfo(String bunyangSeq, int userSeq, int coupleSeq);
+	public List<Object> getReservedGraveInfo(String bunyangSeq, int userSeq, int coupleSeq, String graveType);
 	
 	public Map<String, Object> getFamilyGraveRequestInfo(String bunyangSeq);
 	
@@ -27,5 +27,11 @@ public interface IMobileService {
 	
 	public int assignGrave(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception;
 	
-	public int requestGrave(String productType, String groupSeq, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception;
+	public int requestGrave(String productType, String groupSeq, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int firstColSeq, int isReserved) throws Exception;
+	
+	public List<Object> getBunyangSeqOfGrave(String section_seq, String row_seq, String col_seq);
+	
+	public List<Object> getFirstReservedInfo(String bunyang_seq);
+	
+	public int updateGraveBunyangSeq(String section_seq, String row_seq, String col_seq, String bunyang_seq) throws Exception;
 }

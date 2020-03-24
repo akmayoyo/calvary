@@ -132,7 +132,7 @@
 	            					<c:when test="${row.grave_type eq 'SINGLE' }">1인형</c:when>
 	            				</c:choose>
 	            			</td>
-	            			<td>${cutil:nullToEmpty(row.user_name) }</td>
+	            			<td>${cutil:nullToEmpty(row.use_user_exp) }</td>
 	            			<td>
 	            				<div style="width: 10px; height: 10px; background-color: #007BFF; display: inline-block; margin-left: 10px;"></div>
 	            				${cutil:getGraveSectionExp(row.section_seq, row.row_seq, row.col_seq, row.seq_no) }
@@ -157,13 +157,14 @@
     
     <div class="mt-30 text-center">
     	<c:if test="${step eq 1 }">
-    	<button id="btnNext" type="button" class="btn btn-primary btn-lg" style="width: 120px;" disabled="disabled" onclick="_next()">다음단계</button>
+    	<button id="btnNext" type="button" class="btn btn-primary btn-lg" style="width: 160px;" disabled="disabled" onclick="_next()">위치변경</button>
+    	<button id="btnChgFamily" type="button" class="btn btn-primary btn-lg" disabled="disabled" style="width: 180px; margin-left: 5px; display: none;" onclick="_changeFamilyGraveOrder()">가족형 순서변경</button>
     	</c:if>
     	<c:if test="${step eq 2 }">
-    	<button id="btnSave" type="button" class="btn btn-primary btn-lg" style="width: 120px;" disabled="disabled" onclick="_save()">저장</button>
-    	<button type="button" class="btn btn-default btn-lg" style="width: 120px; margin-left: 5px;" onclick="_prev()">이전단계</button>
+    	<button id="btnSave" type="button" class="btn btn-primary btn-lg" style="width: 160px;" disabled="disabled" onclick="_save()">저장</button>
+    	<button type="button" class="btn btn-default btn-lg" style="width: 160px; margin-left: 5px;" onclick="_prev()">이전단계</button>
     	</c:if>
-        <button type="button" class="btn btn-default btn-lg" style="width: 120px; margin-left: 5px;" onclick="goToList()">취소</button>
+        <button type="button" class="btn btn-default btn-lg" style="width: 160px; margin-left: 5px;" onclick="goToList()">취소</button>
     </div>
 	
 </div>
@@ -688,6 +689,8 @@ function getGraveAssignInfo(d) {
 	$('#assign_status').val('');
 	$('#tblModifyInfo tbody').html('');
 	$('#btnNext').attr('disabled', true);
+	$('#btnChgFamily').attr('disabled', true);
+	$('#btnChgFamily').hide();
 	
 	common.ajax({
 		url:"${contextPath}/admin/getGraveAssignInfoByFamily", 
@@ -695,17 +698,20 @@ function getGraveAssignInfo(d) {
 		success: function(result) {
 			if(result) {
 				var len = result.length;
+				var connect_product_type;
 				$.each(result, function(idx, item){
 					var tr = $('<tr/>');
+					tr.attr('bunyangSeq', item.bunyang_seq);
 					var bunyang_no = item.bunyang_no ? item.bunyang_no : '';
 					var apply_user_name = item.apply_user_name ? item.apply_user_name : '';
 					var graveType = item.grave_type == 'COUPLE' ? '부부형' : '1인형';
 					var section = item.section_seq + '구역';
+					connect_product_type = item.connect_product_type;
 					section += '  ' + item.row_seq + '행-' + seqToAlpha(item.col_seq) + '열(고유번호:' + item.seq_no + ')';
 					tr.append('<td>'+ bunyang_no +'</td>');
 					tr.append('<td>'+ apply_user_name +'</td>');
 					tr.append('<td>'+ graveType +'</td>');
-					tr.append('<td>'+ (item.user_name ? item.user_name : '') +'</td>');
+					tr.append('<td>'+ (item.use_user_exp ? item.use_user_exp : '') +'</td>');
 					tr.append('<td>'+ section +'</td>');
 					tr.append('<td></td>');
 					$('#tblModifyInfo tbody').append(tr);
@@ -722,6 +728,10 @@ function getGraveAssignInfo(d) {
 				$('#colSeq').val(data.colSeq);
 				$('#assign_status').val(d.assign_status);
 				$('#btnNext').attr('disabled', false);
+				if(connect_product_type == '<%=CalvaryConstants.PRODUCT_TYPE_FAMILY%>') {
+					$('#btnChgFamily').attr('disabled', false);
+					$('#btnChgFamily').show();	
+				}
 			}
 		}
 	});
@@ -801,17 +811,75 @@ function seqToAlpha(seq) {
  * 변경할 동산 선택후 다음 Step 이동
  */
 function _next() {
+	
 	if($('#assign_status').val() == 'REQUESTED') {
-		common.showAlert('선택하신 위치는 현재 사용 신청 승인 대기중 입니다.\n승인 완료후 위치 수정이 가능합니다.');
+		common.showAlert('승인 대기중인 사용 신청건이 있습니다.\n승인 완료후 위치 수정이 가능합니다.');
 		return;
 	}
-	if($('#tblModifyInfo tbody tr').not('tr.nodata').length > 0) {
-		var frm = document.getElementById("frm");
-		frm.action = "${contextPath}/admin/modifyGraveNext";
-		frm.submit();
-	} else {
+	if($('#tblModifyInfo tbody tr').not('tr.nodata').length == 0) {
 		common.showAlert('선택된 동산 정보가 없습니다.');
 		return;
+	}
+	
+	var bunyang_seq =$('#tblModifyInfo tbody tr').eq(0).attr('bunyangSeq');
+	
+	common.ajax({
+		url:"${contextPath}/admin/notApprovalGraveList", 
+		data:{bunyang_seq:bunyang_seq},
+		success: function(result) {
+			if(result && result.length > 0) {
+				common.showAlert('승인 대기중인 사용 신청건이 있습니다.\n승인 완료후 위치 수정이 가능합니다.');
+				return;
+			} else {
+				var frm = document.getElementById("frm");
+				frm.action = "${contextPath}/admin/modifyGraveNext";
+				frm.submit();
+			}
+		}
+	});
+}
+
+/*
+ * 가족형 순서변경
+ */
+function _changeFamilyGraveOrder() {
+	if($('#assign_status').val() == 'REQUESTED') {
+		common.showAlert('승인 대기중인 사용 신청건이 있습니다.\n승인 완료후 위치 수정이 가능합니다.');
+		return;
+	}
+	if($('#tblModifyInfo tbody tr').not('tr.nodata').length == 0) {
+		common.showAlert('선택된 동산 정보가 없습니다.');
+		return;
+	}
+	var bunyang_seq =$('#tblModifyInfo tbody tr').eq(0).attr('bunyangSeq');
+	common.ajax({
+		url:"${contextPath}/admin/notApprovalGraveList", 
+		data:{bunyang_seq:bunyang_seq},
+		success: function(result) {
+			if(result && result.length > 0) {
+				common.showAlert('승인 대기중인 사용 신청건이 있습니다.\n승인 완료후 위치 수정이 가능합니다.');
+				return;
+			} else {
+				doChangeFamilyGraveOrder();
+			}
+		}
+	});
+}
+
+/*
+ * 
+ */
+function doChangeFamilyGraveOrder() {
+	var groupSeq = $('#group_seq').val();
+	var bunyangSeq = $('#bunyang_seq').val();
+	var winoption = {width:950, height:400};
+	common.openWindow("${contextPath}/popup/changeFamilyGraveOrder", "popChangeFamilyGraveOrder", winoption, {groupSeq:groupSeq, bunyangSeq:bunyangSeq});
+	window.changeFamilyCallBack = function(val) {
+		if(val) {
+			var frm = document.getElementById("frm");
+			frm.action = "${contextPath}/admin/modifyGrave";
+			frm.submit();
+		}
 	}
 }
 

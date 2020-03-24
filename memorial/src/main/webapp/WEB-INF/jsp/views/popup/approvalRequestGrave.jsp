@@ -24,6 +24,9 @@
 	        		<col width="25%">
 	        		<col width="25%">
 	        		<col width="25%">
+	        		<c:if test="${fn:length(changeGraveList) > 1}">
+	        		<col width="25%">
+	        		</c:if>
 	        		<col width="25%">
 	        	</colgroup>
 	            <thead>
@@ -31,6 +34,9 @@
 	                    <th scope="col">사용(봉안)자</th>
 	                    <th scope="col">신청위치</th>
 	                    <th scope="col">승인위치</th>
+	                    <c:if test="${fn:length(changeGraveList) > 1}">
+	                    <th scope="col">가족형<br>위치변경</th>
+	                    </c:if>
 	                    <th scope="col">비고</th>
 	                </tr>
 	            </thead>
@@ -44,10 +50,12 @@
 						sectionSeq="${rowItem.section_seq}" 
 						rowSeq="${rowItem.row_seq}" 
 						colSeq="${rowItem.col_seq}"
+						useUserSeq1="${rowItem.use_user_seq1}"
+						useUserSeq2="${rowItem.use_user_seq2}"
 						>
 						<td>
 						<c:choose>
-							<c:when test="${status.first}">
+							<c:when test="${rowItem.bunyang_seq eq bunyangSeq && (rowItem.use_user_seq1 eq userSeq || rowItem.use_user_seq2 eq userSeq || rowItem.use_user_seq eq userSeq) }">
 							${requestUserInfo.user_name}
 							</c:when>
 							<c:otherwise>
@@ -56,11 +64,24 @@
 						</c:choose>
 	                    </td>
 	                    <td>${rowItem.grave_exp}</td>
-	                    <td><span name="approvalInfo">${rowItem.grave_exp}</span></td>
+	                    <td name="tdApproval" sectionSeq="${rowItem.section_seq}" rowSeq="${rowItem.row_seq}" colSeq="${rowItem.col_seq}"><span name="approvalInfo">${rowItem.grave_exp}</span>
+	                    </td>
+	                    <c:if test="${fn:length(changeGraveList) > 1}">
+	                    <!-- 신규 신청이고 가족형 예약자리가 있는 경우만 -->
+	                    <td>
+	                    	<c:if test="${rowItem.use_user_seq1 eq userSeq }">
+	                    		<select id="selChangeGrave" onchange="changeGrave()">
+			                    	<c:forEach items="${changeGraveList}" var="rowItem2" varStatus="status2">
+			                    		<option sectionSeq="${rowItem2.section_seq}" rowSeq="${rowItem2.row_seq}" colSeq="${rowItem2.col_seq}">${rowItem2.grave_exp}</option>
+			                    	</c:forEach>
+			                    </select>
+	                    	</c:if>
+	                    </td>
+	                    </c:if>
 	                    <td>
 	                    <c:choose>
-							<c:when test="${status.first}">
-							
+							<c:when test="${rowItem.bunyang_seq eq bunyangSeq && (rowItem.use_user_seq1 eq userSeq || rowItem.use_user_seq2 eq userSeq || rowItem.use_user_seq eq userSeq) }">
+								
 							</c:when>
 							<c:otherwise>
 							가족형예약
@@ -387,7 +408,11 @@ function getRectFillColor(d) {
 			if(assignStatus == 'RESERVED' && isRequestedItem(d.section_seq, d.row_seq, d.col_seq)) {
 				return "#007BFF";	
 			} else {
-				return "#BFBFBF";	
+				if((!d.group_seq && d.bunyang_seq == '${bunyangSeq}') || (d.group_seq && d.group_seq == '${bunyangInfo.group_seq}')) {// 가족형예약
+					return "#47CCCA";
+				} else {
+					return "#BFBFBF";	
+				}	
 			}
 		} else if(d.assign_status == 'REQUESTED') {
 			return "#BFBFBF";
@@ -431,24 +456,36 @@ function setSelectedStyleAll(el, selected, changeStatus) {
 	var cnt = getRequestGraveCount();
 	var bStart = false;
 	var selectedCnt = 0;
+	var selChangeGraveOptions = [];
 	d3.select(el.parentNode).selectAll('.square').each(function(d, i) {
 		if(this == el) {
 			bStart = true;
 		}
 		if(bStart && selectedCnt < cnt) {
 			if(selected && changeStatus) {
-				// 가구역 1행-C열	
-				$('span[name="approvalInfo"]').eq(selectedCnt).text(d.section_seq + '구역 ' + d.row_seq + '행-' + seqToAlpha(d.col_seq) + '열');
+				var sectionSeq = d.section_seq;
+				var rowSeq = d.row_seq;
+				var colSeq = d.col_seq;
+				var exp = sectionSeq + '구역 ' + rowSeq + '행-' + seqToAlpha(colSeq) + '열';
+				$('span[name="approvalInfo"]').eq(selectedCnt).text(exp);
+				var td = $('td[name="tdApproval"]').eq(selectedCnt);
+				td.attr('sectionSeq', sectionSeq);
+				td.attr('rowSeq', rowSeq);
+				td.attr('colSeq', colSeq);
 				if(selectedCnt == 0) {
 					d.assign_status = 'APPROVAL';
 				} else {
 					d.assign_status = 'APPROVAL_RESERVED';	
 				}
+				selChangeGraveOptions.push('<option sectionSeq="' + sectionSeq + '" rowSeq="' + rowSeq + '" colSeq="' + colSeq + '">' + exp + '</option>');
 			}
 			setSelectedStyle(this, selected, d, selectedCnt > 0 ? '#47CCCA' : null);
 			selectedCnt++;
 		}
 	});
+	if($('#selChangeGrave').length > 0 && selChangeGraveOptions.length > 0) {
+		$('#selChangeGrave').html(selChangeGraveOptions.join(''));
+	}
 }
 
 /**
@@ -541,11 +578,16 @@ function getRequestGraveCount() {
 function isRequestedItem(section_seq, row_seq, col_seq) {
 	var exists = false;
 	$('#tblRequestInfo tbody tr').each(function(idx) {
-		if($(this).attr('sectionSeq') == section_seq
-				&& $(this).attr('rowSeq') == row_seq
-				&& $(this).attr('colSeq') == col_seq) {
-			exists = true;
+		if(${isReserved} == 1 && idx > 0) {
+			exists = false;
 			return false;
+		}else {
+			if($(this).attr('sectionSeq') == section_seq
+					&& $(this).attr('rowSeq') == row_seq
+					&& $(this).attr('colSeq') == col_seq) {
+				exists = true;
+				return false;
+			}	
 		}
 	});
 	return exists;
@@ -577,41 +619,45 @@ function _confirm() {
 	var requestGraveList = [];
 	var approvalGraveList = [];
 	var graveInfoVo;
-	if(assignStatus == 'REQUESTED') {// 신규신청
+	$('#tblRequestInfo tbody tr').each(function(idx) {
 		// 신청자리
-		$('#tblRequestInfo tbody tr').each(function(idx) {
-			graveInfoVo = {};
-			graveInfoVo.groupSeq = $(this).attr('groupSeq');
-			graveInfoVo.bunyangSeq = $(this).attr('bunyangSeq');
-			graveInfoVo.sectionSeq = $(this).attr('sectionSeq');
-			graveInfoVo.rowSeq = $(this).attr('rowSeq');
-			graveInfoVo.colSeq = $(this).attr('colSeq');
-			requestGraveList.push(graveInfoVo);
-		});
-		// 승인자리
-		var iTmp = 0;
-		d3.select('#divGrave').selectAll('.square').each(function(d, i) {
-			if(d.assign_status == 'REAL_REQUESTED' || d.assign_status == 'APPROVAL' || d.assign_status == 'APPROVAL_RESERVED') {
-				graveInfoVo = {};
-				graveInfoVo.groupSeq = requestGraveList[iTmp].groupSeq;
-				graveInfoVo.bunyangSeq = requestGraveList[iTmp].bunyangSeq;
-				graveInfoVo.sectionSeq = d.section_seq;
-				graveInfoVo.rowSeq = d.row_seq;
-				graveInfoVo.colSeq = d.col_seq;
-				approvalGraveList.push(graveInfoVo);
-				iTmp++;
-			}
-		});
-	} else {// 부부형 또는 가족형 예약자리가 이미 있는 경우
 		graveInfoVo = {};
-		graveInfoVo.groupSeq = tr.attr('groupSeq');
-		graveInfoVo.bunyangSeq = tr.attr('bunyangSeq');
-		graveInfoVo.sectionSeq = tr.attr('sectionSeq');
-		graveInfoVo.rowSeq = tr.attr('rowSeq');
-		graveInfoVo.colSeq = tr.attr('colSeq');
+		graveInfoVo.groupSeq = $(this).attr('groupSeq');
+		graveInfoVo.bunyangSeq = $(this).attr('bunyangSeq');
+		graveInfoVo.sectionSeq = $(this).attr('sectionSeq');
+		graveInfoVo.rowSeq = $(this).attr('rowSeq');
+		graveInfoVo.colSeq = $(this).attr('colSeq');
+		graveInfoVo.useUserSeq1 = $(this).attr('useUserSeq1');
+		graveInfoVo.useUserSeq2 = $(this).attr('useUserSeq2');
 		requestGraveList.push(graveInfoVo);
+		// 승인자리
+		var tdApproval = $(this).find('td[name="tdApproval"]');
+		graveInfoVo = {};
+		graveInfoVo.groupSeq = $(this).attr('groupSeq');
+		graveInfoVo.bunyangSeq = $(this).attr('bunyangSeq');
+		graveInfoVo.sectionSeq = $(tdApproval).attr('sectionSeq');
+		graveInfoVo.rowSeq = $(tdApproval).attr('rowSeq');
+		graveInfoVo.colSeq = $(tdApproval).attr('colSeq');
+		graveInfoVo.useUserSeq1 = $(this).attr('useUserSeq1');
+		graveInfoVo.useUserSeq2 = $(this).attr('useUserSeq2');
 		approvalGraveList.push(graveInfoVo);
-	}
+	});
+		// 승인자리
+// 		var iTmp = 0;
+// 		d3.select('#divGrave').selectAll('.square').each(function(d, i) {
+// 			if(d.assign_status == 'REAL_REQUESTED' || d.assign_status == 'APPROVAL' || d.assign_status == 'APPROVAL_RESERVED') {
+// 				graveInfoVo = {};
+// 				graveInfoVo.groupSeq = requestGraveList[iTmp].groupSeq;
+// 				graveInfoVo.bunyangSeq = requestGraveList[iTmp].bunyangSeq;
+// 				graveInfoVo.sectionSeq = d.section_seq;
+// 				graveInfoVo.rowSeq = d.row_seq;
+// 				graveInfoVo.colSeq = d.col_seq;
+// 				graveInfoVo.useUserSeq1 = d.use_user_seq1;
+// 				graveInfoVo.useUserSeq2 = d.use_user_seq2;
+// 				approvalGraveList.push(graveInfoVo);
+// 				iTmp++;
+// 			}
+// 		});
 	
 	if(approvalGraveList.length == 0) {
 		common.showAlert('승인할 동산정보가 없습니다.');
@@ -645,6 +691,64 @@ function _confirm() {
 		}
 	});
     
+}
+
+/** 
+ * 가족형 구역내 자리 변경 처리
+ */
+function changeGrave(e) {
+	var selectedOption = $('#selChangeGrave').find('option:selected');
+	var sectionSeq = $(selectedOption).attr('sectionSeq');
+	var rowSeq = $(selectedOption).attr('rowSeq');
+	var colSeq = $(selectedOption).attr('colSeq');
+	var notSelectedOptions = [];
+	$('#selChangeGrave option').each(function(idx) {
+		if(!$(this).is(':selected')) {
+			notSelectedOptions.push($(this));
+		}
+	});
+	notSelectedOptions.sort(function(a, b) {
+		return $(a).attr('colSeq') < $(b).attr('colSeq') ? -1 : $(a).attr('colSeq') > $(b).attr('colSeq') ? 1 : 0;
+	});
+	
+	clearSelectedGrave();
+	
+	var idx = 0;
+	$('#tblRequestInfo tbody tr').each(function() {
+		var option;
+		if($(this).attr('bunyangSeq') == '${bunyangSeq}' && $(this).attr('useUserSeq1') == '${userSeq}') {
+			option = $(selectedOption);
+		}else {
+			option = $(notSelectedOptions[idx++]);
+		}
+		if(option) {
+			$(this).find('span[name="approvalInfo"]').text(option.text());
+			var sectionSeq = option.attr('sectionSeq');
+			var rowSeq = option.attr('rowSeq');
+			var colSeq = option.attr('colSeq');
+			var td = $(this).find('td[name="tdApproval"]');
+			td.attr('sectionSeq', sectionSeq);
+			td.attr('rowSeq', rowSeq);
+			td.attr('colSeq', colSeq);
+		}
+	});
+	$('#selChangeGrave option').each(function(idx) {
+		var sectionSeq = $(this).attr('sectionSeq');
+		var rowSeq = $(this).attr('rowSeq');
+		var colSeq = $(this).attr('colSeq');
+		var selected = $(this).is(':selected');
+		d3.select('#divGrave').selectAll('.square').each(function(d, i) {
+			if(d.section_seq == sectionSeq && d.row_seq == rowSeq && d.col_seq == colSeq) {
+				if(selected) {
+					d.assign_status = 'APPROVAL';
+				} else {
+					d.assign_status = 'APPROVAL_RESERVED';
+				}
+				setSelectedStyle(this, true, d, !selected ? '#47CCCA' : null);
+			}
+		});
+	});
+	
 }
 
 </script>

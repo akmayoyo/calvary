@@ -177,6 +177,7 @@
 			  ,d.relation_type use_user_relation
 			  ,(SELECT code_name FROM TB_COM_RELATION_CODE cc WHERE cc.code_seq = d.relation_type) use_user_relation_name
 			  ,d.cnt use_user_cnt
+			  ,d.matchcnt
 			  ,a.regist_user_id
 			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
 		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
@@ -217,6 +218,7 @@
 			(SELECT
 				*
 				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
+				,(SELECT SUM(CASE WHEN USER_NAME LIKE CONCAT('%',#{apply_user_name},'%') THEN 1 ELSE 0 END) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') matchcnt
 			FROM
 				(SELECT
 					bunyang_seq
@@ -241,7 +243,7 @@
 			) t
 		WHERE 1=1
 		<if test="apply_user_name != null and apply_user_name != ''">
-		AND apply_user_name like CONCAT('%',#{apply_user_name},'%')
+		AND (apply_user_name like CONCAT('%',#{apply_user_name},'%') OR agent_user_name like CONCAT('%',#{apply_user_name},'%') OR matchcnt > 0)
 		</if>
 		<if test="bunyang_seq != null and bunyang_seq != ''">
 		AND bunyang_seq like CONCAT('%',#{bunyang_seq},'%')
