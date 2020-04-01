@@ -797,11 +797,18 @@ public class PopupController {
 		String bunyangSeq = request.getParameter("bunyangSeq");
 		boolean bRslt = false;
 		if(StringUtils.isEmpty(groupSeq)) {
-			groupSeq = String.valueOf(commonService.getSeqNexVal("GROUP_SEQ"));
+			Map<String, Object> tmp = adminService.getBunyangInfo(bunyangSeq);
+			if(tmp != null) {
+				groupSeq = (String)tmp.get("group_seq");
+			}
+			if(StringUtils.isEmpty(groupSeq)) {
+				groupSeq = String.valueOf(commonService.getSeqNexVal("GROUP_SEQ"));
+			}
 		}
 		int iRslt = adminService.createConnectBunyangInfo(groupSeq, bunyangSeq, selectedBunyangSeq);
 		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);
+		rtnMap.put("groupSeq", groupSeq);
 		return rtnMap;
 	}
 }

@@ -58,6 +58,14 @@
 				</thead>
 				<tbody>
 					<c:forEach items="${bunyangList}" var="bunyangItem">
+						<c:choose>
+							<c:when test="${not empty bunyangItem.group_seq}">
+								<c:set var="btnstatus" value="btn-primary"></c:set>
+							</c:when>
+							<c:otherwise>
+								<c:set var="btnstatus" value="btn-default"></c:set>
+							</c:otherwise>
+						</c:choose>
 						<tr bunyangSeq="${bunyangItem.bunyang_seq}" <c:if test="${bunyangItem.cancel_yn == 'Y' || bunyangItem.progress_status == 'E' || bunyangItem.progress_status == 'R'}">class="cancel"</c:if>>
 							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.bunyang_no}</a></td>
 							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.apply_user_name}</a></td>
@@ -71,7 +79,7 @@
 							<td><c:if test="${not empty bunyangItem.full_payment_date}">O</c:if></td>
 							<td>${bunyangItem.use_approval_date}</td>
 							<td style="text-decoration:none;">${bunyangItem.progress_status_exp}</td>
-							<td><button type="button" class="btn btn-default btn-sm" onclick="connectDetail('${bunyangItem.group_seq}', '${bunyangItem.bunyang_seq}')"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></button></td>
+							<td><button type="button" class="btn ${btnstatus} btn-sm" onclick="connectDetail('${bunyangItem.group_seq}', '${bunyangItem.bunyang_seq}')"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span></button></td>
 						</tr>
 					</c:forEach>
 				</tbody>

@@ -92,7 +92,13 @@
 				<tbody>
 					<c:forEach items="${bunyangList}" var="bunyangItem">
 						<tr bunyangSeq="${bunyangItem.bunyang_seq}" <c:if test="${bunyangItem.cancel_yn == 'Y' || bunyangItem.progress_status == 'E' || bunyangItem.progress_status == 'R'}">class="cancel"</c:if>>
-							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.bunyang_no}</a></td>
+							<td>
+								<a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.bunyang_no}
+								<c:if test="${not empty bunyangItem.group_seq}">
+								<br><span class="label label-primary">추가분양</span>
+								</c:if>
+								</a>
+							</td>
 							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.apply_user_name}</a></td>
 							<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${bunyangItem.use_user_exp}</a></td>
 							<td>${bunyangItem.product_type_name}</td>

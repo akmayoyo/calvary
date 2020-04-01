@@ -9,6 +9,7 @@
 	<input type="hidden" id="countPerPage" name="countPerPage" value="${searchVo.countPerPage}">
 	<input type="hidden" id="totalCount" name="totalCount" value="${searchVo.totalCount}">
 	<input type="hidden" id="bunyangSeq" name="bunyangSeq" value="${bunyangSeq}">
+	<input type="hidden" id="groupSeq" name="groupSeq" value="${groupSeq}">
 
 <div class="poptitle">
 	<strong>추가분양 선택</strong>
@@ -153,10 +154,11 @@ function connectSelectedBunyang() {
         contentType:false,
         success : function(result) {
         	if(result){
+        		var jResult = JSON.parse(result);
         		common.showAlert('저장되었습니다.');
         		setTimeout(function(){
         			if (window.opener && window.opener.saveCallBack != 'undefined') {
-    			        window.opener.saveCallBack(true);
+    			        window.opener.saveCallBack(jResult.groupSeq);
     			    }
     				common.closeWindow();
 				}, 300);

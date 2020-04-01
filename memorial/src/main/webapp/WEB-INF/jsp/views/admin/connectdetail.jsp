@@ -130,11 +130,17 @@ function _showBunyangInfo(el) {
 function selectConnectBunyang() {
 	var groupSeq = '${groupSeq}';
 	var bunyangSeq = '${bunyangSeq}';
+	if(!groupSeq && !bunyangSeq) {
+		common.showAlert("분양 정보가 없습니다.");
+		goToList();
+		return;
+	}
 	var winoption = {width:1024, height:600};
 	common.openWindow("${contextPath}/popup/selectConnectBunyang", "popSelectConnectBunyang", winoption, {groupSeq:groupSeq, bunyangSeq:bunyangSeq});
 	window.saveCallBack = function(val) {
 		if(val) {
 			var frm = document.getElementById("frm");
+			$("#groupSeq").val(val);
 			frm.action = "${contextPath}/admin/connectdetail";
 			frm.submit();
 		}

@@ -85,11 +85,8 @@
     <!-- 가족형으로 묶인 모든 배정 정보 조회 -->
     <select id="getGraveAssignInfoByFamily" parameterType="map" resultType="map">
     	SELECT
-    		T.*
-    		,CASE 
-        		WHEN cnt > 1 THEN CONCAT(use_user_name,' 외 ',cnt-1,'명')
-          		ELSE  use_user_name
-        	END use_user_exp
+    		bunyang_seq, group_seq, section_seq, row_seq, col_seq, seq_no, grave_type, assign_status, use_user_seq1, use_user_seq2, couple_seq, assign_date1, assign_date2, bunyang_no, connect_product_type, apply_user_name, assign_date
+    		,case when count(1) > 1 then concat(max(use_user_name),' 외 ', count(1)-1,'명') else max(use_user_name) end use_user_exp
     	FROM
     	(SELECT
 	  		a.bunyang_seq
@@ -109,7 +106,6 @@
 	  		,b.connect_product_type
             ,COALESCE(c.user_name, (SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = c.user_id)) AS apply_user_name
             ,COALESCE(d.user_name, e.user_name) AS use_user_name
-            ,d.cnt
             ,CASE 
 		    	WHEN a.use_user_seq1 = d.user_seq then DATE_FORMAT(a.assign_date1, '%Y-%m-%d')
 		    	WHEN a.use_user_seq2 = d.user_seq then DATE_FORMAT(a.assign_date2, '%Y-%m-%d')
@@ -117,35 +113,7 @@
 		FROM TB_BUNYANG_GRAVE_ASSIGN a 
 		LEFT OUTER JOIN vw_bunyang_connect_info b ON a.bunyang_seq = b.bunyang_seq
 		LEFT OUTER JOIN TB_BUNYANG_REF_USER c ON a.bunyang_seq = c.bunyang_seq AND c.ref_type = 'APPLY_USER'
-		LEFT OUTER JOIN (
-		SELECT
-				*
-				,(SELECT COUNT(*) FROM TB_BUNYANG_REF_USER RU WHERE RU.bunyang_seq = t.bunyang_seq and RU.ref_type = 'USE_USER') cnt
-			FROM
-				(SELECT
-					bunyang_seq
-				  	,user_id
-					,user_name
-					,relation_type
-					,is_move
-					,user_seq
-					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
-                    ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
-				FROM      
-					(SELECT 
-						 bunyang_seq
-					   	,user_id
-					   	,user_name
-					   	,relation_type
-					   	,is_move
-					   	,user_seq 
-					FROM TB_BUNYANG_REF_USER a
-					WHERE a.ref_type = 'USE_USER'
-					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
-				ORDER BY bunyang_seq, CASE WHEN relation_type = 'ONESELF' THEN 1 ELSE 2 end, user_seq
-			  ) t
-			  WHERE rn = 1
-		) d ON a.bunyang_seq = d.bunyang_seq and (a.use_user_seq1 = d.user_seq or a.use_user_seq2 = d.user_seq)
+		LEFT OUTER JOIN TB_BUNYANG_REF_USER d ON a.bunyang_seq = d.bunyang_seq and (a.use_user_seq1 = d.user_seq or a.use_user_seq2 = d.user_seq) and d.ref_type = 'USE_USER'
         LEFT OUTER JOIN TB_COM_USER e ON d.user_id = e.user_id
 		WHERE 1=1
 		<if test="group_seq != null and group_seq != ''">
@@ -160,6 +128,7 @@
 		AND a.col_seq = #{colSeq}
 		</if>
 		) T
+		GROUP BY bunyang_seq, group_seq, section_seq, row_seq, col_seq, seq_no, grave_type, assign_status, use_user_seq1, use_user_seq2, couple_seq, assign_date1, assign_date2, bunyang_no, connect_product_type, apply_user_name, assign_date
 		ORDER BY section_seq, row_seq, col_seq, bunyang_no
     </select>
     
@@ -444,9 +413,35 @@
 		FROM TB_BUNYANG_GRAVE_ASSIGN a INNER JOIN vw_bunyang_connect_info b ON ((b.group_seq is not null and b.group_seq = a.group_seq) or (b.group_seq is null and b.bunyang_seq = a.bunyang_seq))
 		WHERE b.bunyang_seq = #{bunyangSeq}
 		and a.grave_type = #{graveType}
-		and a.assign_status IN ('RESERVED', 'HALF_OCCUPIED')
 		) a
 		ORDER BY section_seq, row_seq, col_seq
+    </select>
+    
+    <!-- 부부형 배우자가 사용중인 자리가 있는지 조회함(개별형인 경우만 사용함) -->
+    <select id="getCoupleReservedGraveInfo" parameterType="map" resultType="map">
+    	SELECT
+    		a.*
+    	FROM
+    	(SELECT 
+			a.section_seq
+			,a.row_seq
+			,a.col_seq
+			,a.bunyang_seq
+			,a.use_user_seq1
+			,a.use_user_seq2
+			,a.couple_seq
+			,a.assign_status
+			,a.grave_type
+			,a.seq_no
+			,concat(a.section_seq, '구역 ', a.row_seq, '행-', char(64+a.col_seq), '열') as grave_exp
+			,(select count(1) from TB_BUNYANG_GRAVE_REQUEST_INFO gr where gr.section_seq = a.section_seq and gr.row_seq = a.row_seq and gr.col_seq = a.col_seq and gr.request_status = 'REQUESTED') request_count
+			,1 couple_reserved
+		FROM TB_BUNYANG_GRAVE_ASSIGN a
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		and a.couple_seq = #{coupleSeq}
+		) a
+		ORDER BY section_seq, row_seq, col_seq
+		LIMIT 1
     </select>
     
     <!-- 가족형의 다른가족 또는 부부형 배우자가 사용시 내 자리는 이미 정해져있기때문에 그자리가 있는지 조회함 -->

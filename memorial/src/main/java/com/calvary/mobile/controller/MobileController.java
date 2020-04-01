@@ -144,12 +144,21 @@ public class MobileController {
 				} else {
 					graveType = CalvaryConstants.GRAVE_TYPE_SINGLE;
 				}
+				
+				String connect_product_type = (String)bunyangInfo.get("connect_product_type");
+				
 				// 이미 배정된 자리가 있는지 조회
-				List<Object> assignedGraveList = mobileService.getReservedGraveInfo(bunyangSeq, userSeq, coupleSeq, graveType);
-				
+				List<Object> assignedGraveList = null;
 				Map<String, Object> assignedGraveInfo = null;
-				
 				String coupuleReserved = "0";
+				
+				if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(connect_product_type)) {
+					assignedGraveList = mobileService.getReservedGraveInfo(bunyangSeq, userSeq, coupleSeq, graveType);
+				} else {
+					if(CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) {
+						assignedGraveList = mobileService.getCoupleReservedGraveInfo(bunyangSeq, coupleSeq);
+					}
+				}
 				
 				if(assignedGraveList != null && assignedGraveList.size() > 0) {
 					assignedGraveInfo = (Map<String, Object>)assignedGraveList.get(0);
@@ -162,9 +171,12 @@ public class MobileController {
 					}
 				}
 				
-				List<Object> avaliableGraveList = null;
+				int requiredCnt = mobileService.getRequiredGraveCount(bunyangSeq);// 필요한 묘개수
+				if(!CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(connect_product_type)) {// 개별형인 경우 1개만 신청할 수 있기 때문에
+					requiredCnt = 1;
+				}
 				
-				int requiredCnt = mobileService.getRequiredGraveCount(bunyangSeq);
+				List<Object> avaliableGraveList = null;
 				
 				// 배정된 자리가 없는 경우 사용가능한 자리 조회
 				if(assignedGraveInfo == null) {

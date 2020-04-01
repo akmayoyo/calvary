@@ -564,25 +564,27 @@ function getRectFillColor(d) {
 	var bunyangSeq = '${bunyangInfo.bunyang_seq}';
 	var isFamilyGrave = false;
 	
-	if(isAssigned()) {
-		if(!groupSeq) {
-			if(bunyangSeq == d.bunyang_seq) {
-				isFamilyGrave = true;
-			}
+	if('${bunyangInfo.connect_product_type}' == 'FAMILY') {
+		if(isAssigned()) {
+			if(!groupSeq) {
+				if(bunyangSeq == d.bunyang_seq) {
+					isFamilyGrave = true;
+				}
+			} else {
+				if(groupSeq == d.group_seq) {
+					isFamilyGrave = true;
+				}
+			}	
 		} else {
-			if(groupSeq == d.group_seq) {
+			var selectedOption = $('#selGraveSection').find('option:selected');
+			var sectionSeq = selectedOption.val();
+			var rowSeq = selectedOption.attr('rowSeq');
+			var colSeq = selectedOption.attr('colSeq');
+			var seqNo = selectedOption.attr('seqNo');
+			var requiredCnt = getRequiredCnt();
+			if(d.section_seq == sectionSeq && d.row_seq == rowSeq && Number(d.col_seq) >= Number(colSeq) && Number(d.col_seq) < (Number(colSeq) + requiredCnt)) {
 				isFamilyGrave = true;
 			}
-		}	
-	} else {
-		var selectedOption = $('#selGraveSection').find('option:selected');
-		var sectionSeq = selectedOption.val();
-		var rowSeq = selectedOption.attr('rowSeq');
-		var colSeq = selectedOption.attr('colSeq');
-		var seqNo = selectedOption.attr('seqNo');
-		var requiredCnt = getRequiredCnt();
-		if(d.section_seq == sectionSeq && d.row_seq == rowSeq && Number(d.col_seq) >= Number(colSeq) && Number(d.col_seq) < (Number(colSeq) + requiredCnt)) {
-			isFamilyGrave = true;
 		}
 	}
 	

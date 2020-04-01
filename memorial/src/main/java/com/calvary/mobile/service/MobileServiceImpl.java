@@ -42,6 +42,14 @@ public class MobileServiceImpl implements IMobileService {
 		return list;
 	}
 	
+	public List<Object> getCoupleReservedGraveInfo(String bunyangSeq, int coupleSeq) {
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("coupleSeq", coupleSeq);
+		List<Object> list = commonDao.selectList("use.getCoupleReservedGraveInfo", parameter);
+		return list;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getFamilyGraveRequestInfo(String bunyangSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();

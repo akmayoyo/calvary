@@ -872,7 +872,7 @@ function _changeFamilyGraveOrder() {
 function doChangeFamilyGraveOrder() {
 	var groupSeq = $('#group_seq').val();
 	var bunyangSeq = $('#bunyang_seq').val();
-	var winoption = {width:950, height:400};
+	var winoption = {width:950, height:600};
 	common.openWindow("${contextPath}/popup/changeFamilyGraveOrder", "popChangeFamilyGraveOrder", winoption, {groupSeq:groupSeq, bunyangSeq:bunyangSeq});
 	window.changeFamilyCallBack = function(val) {
 		if(val) {
