@@ -32,8 +32,12 @@ int currDay = currDt.get(Calendar.DATE);
 	</div>
 </header>
 
+<div class="alert alert-info" style="margin-top: 60px; margin-bottom: 0; font-size: 12px; padding: 10px 15px;">
+<strong>[공지]</strong><br>- 원활한 장례 진행을 위해서 용인공원 고객센터(031-334-3483)에 장례접수를 해주시기 부탁드립니다.<br> 
+- 장례접수시 상주, 고인명, 발인일시, 배정구역(구역,행,열-고유번호)를 말씀해주시면 감사하겠습니다. 
+</div>
 <!-- 부고 알림 정보 입력 -->
-<div id="registInfo" class="m_contents">
+<div id="registInfo" class="m_contents" style="padding-top: 0;">
 	
 	<!-- 아코디언 메뉴 -->
 	<div id="m_menu" class="m_menu">
@@ -147,7 +151,7 @@ int currDay = currDt.get(Calendar.DATE);
 </div>
 
 <!-- 알림 메세지 확인 및 수신인 입력-->
-<div id="registContact" class="m_contents">
+<div id="registContact" class="m_contents" style="display: none; padding-top: 0;">
 	
 	<!-- 아코디언 메뉴 -->
 	<div id="m_menu" class="m_menu">
@@ -277,8 +281,8 @@ int currDay = currDt.get(Calendar.DATE);
 	
 </div>
 
-<<ul style="display: none;">
-<c:forEach items="${contract3}" var="rowItem"> --%>
+<ul style="display: none;">
+<c:forEach items="${contract3}" var="rowItem">
 	<li name="yonginLife" mobile="${rowItem.mobile}"></li>
 </c:forEach>
 </ul>
