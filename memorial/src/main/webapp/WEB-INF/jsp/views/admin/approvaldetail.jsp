@@ -186,7 +186,12 @@
             		<td>
             			<c:choose>
             				<c:when test="${not empty use.yongin_no}">
-            					${use.yongin_no}
+            					<div class="input-group add-on">
+					                <input class="form-control" name="yongin_no" type="text" value="${use.yongin_no}" style="min-width: 60px;">
+					                <div class="input-group-btn">
+					                    <button class="btn btn-primary btn-sm" style="margin-left: 3px;" type="button" onclick="editYonginNo('${use.user_id}', this)">수정</button>
+					                </div>
+					            </div>
             				</c:when>
             				<c:when test="${empty use.yongin_no}">
             					<input name="yongin_no" type="text" class="form-control" style="min-width: 65px;">
@@ -565,6 +570,38 @@ function approval() {
 	} else {
 		common.showAlert('사용(봉안) 대상자의 승인서가 모두 출력되어야 저장이 가능합니다.');
 	}
+}
+
+/** 
+ * 용인공원 확약번호 수정
+ */
+function editYonginNo(userId, el) {
+	var input = $(el).parent('div').prev('input');
+	var yonginNo = input.val();
+	if(!yonginNo) {
+		input.focus();
+		common.showAlert('용인공원 확약번호를 입력하세요.');
+		return;
+	}
+	var data = {};
+	data["bunyangSeq"] = '${bunyangSeq}';
+	data["userId"] = userId;
+	data["yonginNo"] = yonginNo;
+	// 저장 호출
+	common.ajax({
+		url:"${contextPath}/admin/saveYonginNo", 
+		data:data,
+		success: function(result) {
+			if(result) {
+				if(result.result) {
+					common.showAlert("저장되었습니다.");
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/admin/approvaldetail";
+					frm.submit();
+				}
+			}
+		}
+	});
 }
 
 function refresh() {

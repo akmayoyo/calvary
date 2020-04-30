@@ -667,6 +667,19 @@ public class AdminServiceImpl implements IAdminService {
 	}
 	
 	/** 
+	 *  용인공원 확약번호 저장
+	 */
+	public int saveYonginNo(String bunyangSeq, String userId, String yonginNo) throws Exception{
+		Map<String, Object> param = new HashMap<String, Object>();
+		int iRslt = 0;
+		param.put("bunyangSeq", bunyangSeq);
+		param.put("userId", userId);
+		param.put("yonginNo", yonginNo);
+		iRslt += commonDao.update("approval.saveYonginNo", param);
+		return iRslt; 
+	}
+	
+	/** 
 	 *  용인공원 확약번호 중복 체크
 	 */
 	@SuppressWarnings("unchecked")

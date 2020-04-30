@@ -225,6 +225,15 @@
 		AND a.user_id = #{userId}
 	</update>
 	
+    <!-- 용인공원 확약번호 저장 -->
+	<update id="saveYonginNo" parameterType="map">
+		UPDATE TB_BUNYANG_REF_USER a
+		SET yongin_no = #{yonginNo}
+		WHERE a.bunyang_seq = #{bunyangSeq}
+		AND a.ref_type = 'USE_USER'
+		AND a.user_id = #{userId}
+	</update>
+	
     <!-- 사용(봉안)자 승인서 출력일자 업데이트 -->
 	<update id="updateApprovalAssignDate" parameterType="map">
 		UPDATE TB_BUNYANG_REF_USER a

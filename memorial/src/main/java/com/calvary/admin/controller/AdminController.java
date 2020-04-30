@@ -413,6 +413,8 @@ public class AdminController {
 	public static final String APPROVAL_DETAIL_URL = "/approvaldetail";
 	/** 사용자 승인  URL */
 	public static final String SAVE_USER_APPROVAL_URL = "/saveUserApproval";
+	/** 용인공원 확약번호 저장  URL */
+	public static final String SAVE_YONGIN_NO_URL = "/saveYonginNo";
 	/** 사용자 승인서 출력  URL */
 	public static final String EXPORT_USER_APPROVAL_URL = "/exportUserApproval";
 	/** 분양정보 사용 승인  URL */
@@ -506,6 +508,48 @@ public class AdminController {
 		} else {
 			int iRslt = adminService.approvalUser(bunyangSeq, userId, approvalNo, yonginNo, approvalDate);
 			bRslt = iRslt > 0;
+		}
+		rtnMap.put("result", bRslt);
+		return rtnMap;
+	}
+	
+	/** 
+	 * 용인공원 확약번호 저장
+	 */
+	@RequestMapping(value=SAVE_YONGIN_NO_URL)
+	@ResponseBody
+	public Object saveYonginNoHandler(String bunyangSeq, String userId, String yonginNo) throws Exception {
+		boolean bRslt = false;
+		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		int iRslt = adminService.saveYonginNo(bunyangSeq, userId, yonginNo);
+		bRslt = iRslt > 0;
+		// 확약번호 저장 성공 했을 경우 엑셀 파일도 업데이트 해줌
+		if(bRslt) {
+			Map<String, Object> userMap = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId);
+			Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
+			Map<String, Object> coupleUserMap = null;
+			// 1. 분양신청-사용자 엑셀파일의 승인번호 업데이트
+			if(bunyangInfo != null) {
+				String useUserFileSeq = (String)bunyangInfo.get("file_seq_use_user");
+				excelService.createBunyangExcelForm(ExcelForms.USE_USER_FORM, bunyangSeq, useUserFileSeq, "");
+			}
+			// 2. 생성된 사용승인서 파일이 있을 경우 업데이트
+			String approvalFileSeq = (String)userMap.get("approval_file_seq");
+			if(!StringUtils.isEmpty(approvalFileSeq)) {
+				excelService.createBunyangExcelForm(ExcelForms.USE_APPROVAL_FORM, bunyangSeq, approvalFileSeq, userId);
+			}
+			// 3. 배우자 사용승인서 파일이 있을 경우 업데이트
+			int coupleSeq = CommonUtil.convertToInt(userMap.get("couple_seq"));
+			if(coupleSeq > 0 ) {
+				coupleUserMap = adminService.getCoupleUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId, coupleSeq);
+				if(coupleUserMap != null) {
+					String coupleUserId = (String)coupleUserMap.get("user_id");
+					String coupleFileSeq = (String)coupleUserMap.get("approval_file_seq");
+					if(!StringUtils.isEmpty(coupleFileSeq)) {
+						excelService.createBunyangExcelForm(ExcelForms.USE_APPROVAL_FORM, bunyangSeq, coupleFileSeq, coupleUserId);
+					}
+				}
+			}
 		}
 		rtnMap.put("result", bRslt);
 		return rtnMap;

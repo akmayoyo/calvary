@@ -161,6 +161,11 @@ public interface IAdminService {
 	public int approvalUser(String bunyangSeq, String userId, String approvalNo, String yonginNo, String approvalDate) throws Exception;
 	
 	/** 
+	 *  용인공원 확약번호 저장
+	 */
+	public int saveYonginNo(String bunyangSeq, String userId, String yonginNo) throws Exception;
+	
+	/** 
 	 *  용인공원 확약번호 중복 체크
 	 */
 	public int checkDuplicatedYonginNo(String yonginNo);
