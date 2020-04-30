@@ -154,7 +154,7 @@ function _downloadExcel() {
 	var searchKeys = ["apply_user_name", "maintYear", "maintStatus"];
 	var searchValues = ["${searchVo.searchVal}", "${searchVo.maintYear}", "${searchVo.maintStatus}"];
 	var queryId = "bunyangstatus.getMaintPaymentList";
-	var title = "갈보리추모동산 관리비납부현황";
+	var title = "갈보리부활동산 관리비납부현황";
 	var fileName = title + ".xlsx";
 	var sheetName = title;
 	if(${searchVo.maintYear} > 0) {

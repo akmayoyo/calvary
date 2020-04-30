@@ -21,7 +21,7 @@
 <!-- 분양현황 -->
 <div style="margin-top: 60px; padding: 15px 0;">
     <div class="col-xs-8" style="margin: 0 auto; float: none; text-align: center; padding:40px 10px; padding-bottom: 30px; ">
-        <p style="font-size: 23px; font-weight: bold; color: #333;">갈보리 추모동산 분양현황</p>
+        <p style="font-size: 23px; font-weight: bold; color: #333;">갈보리 부활동산 분양현황</p>
 
         <div style="margin-top: 10px; border-top: 1px solid #999;">
             <table id="tblBunyangStatus" class="table table-style table-bordered">
@@ -68,7 +68,7 @@
 <!-- 분양현황 -->
 <div>
     <div class="col-xs-8" style="margin: 0 auto; float: none; text-align: center; padding:40px 10px; padding-top: 0;">
-        <p style="font-size: 23px; font-weight: bold; color: #333;">추모동산 사용(봉안)현황</p>
+        <p style="font-size: 23px; font-weight: bold; color: #333;">부활동산 사용(봉안)현황</p>
 
         <div style="margin-top: 10px; border-top: 1px solid #999;">
             <table class="table table-style table-bordered" style="border-top: 0;">
@@ -117,10 +117,10 @@
     </div>
 </div>
 
-<!-- 추모동산 배치판 -->
+<!-- 부활동산 배치판 -->
 <div style="background-color: #E0EFFC; padding: 10px 10px;">
     <div style="text-align: center;">
-        <h3 style="display: inline-block;">추모동산 배치판</h3>
+        <h3 style="display: inline-block;">부활동산 배치판</h3>
     </div>
     <div style="text-align: center; margin-top: 5px;">
         <div style="width: 10px; height: 10px; background-color: #C785C8; display: inline-block;">
@@ -385,7 +385,7 @@ function getGridData(data, reverse, offset, w, h) {
 var clickedInfo = {};
 
 /**
- * 추모동산 배정현황 그리드 생성
+ * 부활동산 배정현황 그리드 생성
  */
 function makeGraveGrid(grid, gridData) {
 	var totalwidth = gridData.totalwidth;
@@ -602,7 +602,7 @@ function searchUser() {
 	}
 	
 	common.ajax({
-		url:"${contextPath}/admin/searchGraveUser", 
+		url:"${contextPath}/admin/searchGraveUser?checkSession=false", 
 		data:{userName:userName},
 		success: function(result) {
 			if(result && result.result) {

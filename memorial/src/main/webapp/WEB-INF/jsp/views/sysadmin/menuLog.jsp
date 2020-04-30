@@ -158,7 +158,7 @@ function _downloadExcel() {
 	var searchKeys = ["deviceType", "fromDt", "toDt"];
 	var searchValues = ["${searchVo.searchVal}", "${searchVo.fromDt}", "${searchVo.toDt}"];
 	var queryId = "sysadmin.getMenuLogList";
-	var title = "갈보리추모동산 메뉴사용이력";
+	var title = "갈보리부활동산 메뉴사용이력";
 	var fileName = title + ".xlsx";
 	var sheetName = title;
 	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);

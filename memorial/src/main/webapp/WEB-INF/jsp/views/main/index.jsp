@@ -39,7 +39,7 @@
 	<div class="img-container main">
 		<div class="img-title">
 			<div class="title center">
-				<h2>갈보리 추모 동산<span class="dot"></span></h2>
+				<h2>갈보리 부활동산<span class="dot"></span></h2>
 				<hr>
 			</div>
 			<div class="font-20 mb-35">
@@ -50,20 +50,20 @@
 		</div>
 	</div>
 	
-	<!-- 추모동산 정보 -->
+	<!-- 부활동산 정보 -->
 	<div class="list">
 		<div class="group">
 			<div class="container">
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>1. 추모동산 위치<span class="dot"></span></h3>
+							<h3>1. 부활동산 위치<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
 					<div class="col-sm-4">
 						<div class="text">
-							<p style="word-spacing: -2px">(재)용인공원 구역내 갈보리추모동산 묘역<br>
+							<p style="word-spacing: -2px">(재)용인공원 구역내 갈보리부활동산 묘역<br>
 							<span class="txt-gray" style="word-spacing: -2px">경기도 용인시 처인구 모현면 새래로 156-33</span><br><br></p>
 						</div>
 					</div>
@@ -79,7 +79,7 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>2. 추모동산 분양 총 기수<span class="dot"></span></h3>
+							<h3>2. 부활동산 분양 총 기수<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
@@ -97,7 +97,7 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>3. 추모동산 사용 자격<span class="dot"></span></h3>
+							<h3>3. 부활동산 사용 자격<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
@@ -115,7 +115,7 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>4. 추모동산 분양 및 봉안 현황<span class="dot"></span></h3>
+							<h3>4. 부활동산 분양 및 봉안 현황<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
@@ -133,13 +133,13 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>5. 추모동산 모바일 연결<span class="dot"></span></h3>
+							<h3>5. 부활동산 모바일 연결<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
 					<div class="col-sm-8">
 						<div class="text">
-							<a href="http://www.mparkcalvary.com/mobile/main" class="btn btn-color btn-round btn-lg" target="_blank">추모동산 모바일 연결</a>
+							<a href="http://www.mparkcalvary.com/mobile/main" class="btn btn-color btn-round btn-lg" target="_blank">부활동산 모바일 연결</a>
 						</div>
 					</div>
 				</div>
@@ -151,13 +151,13 @@
 				<div class="row">
 					<div class="col-sm-4">
 						<div class="title">
-							<h3>6. 추모동산 분양상담<span class="dot"></span></h3>
+							<h3>6. 부활동산 분양상담<span class="dot"></span></h3>
 							<hr>
 						</div>
 					</div>
 					<div class="col-sm-8">
 						<div class="text">
-							<p>갈보리교회 추모동산추진위원회에서 상담해 드립니다.<br>
+							<p>갈보리교회 부활동산추진위원회에서 상담해 드립니다.<br>
 								교회행정실(본당3층)에 자세한 안내문이 배치되어 있습니다.<br><br></p>
 						</div>
 					</div>
@@ -175,7 +175,7 @@
 			<div class="col-sm-4">
 				<div class="text-center img-view">
 					<div class="title center">
-						<h3>추모동산 위치 전경</h3>
+						<h3>부활동산 위치 전경</h3>
 						<hr>
 					</div>
 					<div class="mb-35">
@@ -189,7 +189,7 @@
 			<div class="col-sm-4">
 				<div class="text-center img-view">
 					<div class="title center">
-						<h3>추모동산 위치 조감도</h3>
+						<h3>부활동산 위치 조감도</h3>
 						<hr>
 					</div>
 					<div class="mb-35">
@@ -203,7 +203,7 @@
 			<div class="col-sm-4">
 				<div class="text-center img-view">
 					<div class="title center">
-						<h3>추모동산 입석 모형</h3>
+						<h3>부활동산 입석 모형</h3>
 						<hr>
 					</div>
 					<div class="mb-35">

@@ -144,7 +144,7 @@ function _downloadExcel() {
 	var apply_user_name = $('input[name="searchVal"]').val();
 	var searchValues = [bunyangTimes, progressStatus, apply_user_name];
 	var queryId = "admin.getApplyList";
-	var title = "갈보리추모동산 신청현황";
+	var title = "갈보리부활동산 신청현황";
 	var fileName = title + ".xlsx";
 	var sheetName = title;
 	title += " (" + $('select[name="bunyangTimes"] option:selected').text() + ")";

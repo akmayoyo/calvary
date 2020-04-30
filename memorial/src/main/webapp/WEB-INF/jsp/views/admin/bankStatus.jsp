@@ -297,7 +297,7 @@ function _downloadExcel() {
 	var searchKeys = ["bunyangNo", "paymentType", "paymentDivision", "fromDt", "toDt"];
 	var searchValues = ["${searchVo.searchVal}", "${paymentType}", "${parentCodeSeq}", "${searchVo.fromDt}", "${searchVo.toDt}"];
 	var queryId = "payment.getPaymentList";
-	var title = "갈보리추모동산 입출금현황";
+	var title = "갈보리부활동산 입출금현황";
 	var fileName = title + ".xlsx";
 	var sheetName = title;
 	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);

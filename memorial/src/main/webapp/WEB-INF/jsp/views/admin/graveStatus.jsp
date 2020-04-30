@@ -9,7 +9,7 @@
 <!-- 그리드 샘플 -->
 <div class="col-md-9">
 	
-<div class="pull-left"><h3 style="margin-top: 0;">추모동산 사용(봉안)현황</h3></div>
+<div class="pull-left"><h3 style="margin-top: 0;">부활동산 사용(봉안)현황</h3></div>
    	<div class="clearfix"></div>
 	<div class="table-responsive" style="border-top: 1px solid #999;">
         <table class="table table-style table-bordered" style="border-top: 0;">
@@ -57,7 +57,7 @@
 	
 	<div style="background-color: #E0EFFC; padding: 10px 10px; margin-top: 15px;">
 		<div style="text-align: center;">
-			<h3 style="display: inline-block;">추모동산 배치판</h3>
+			<h3 style="display: inline-block;">부활동산 배치판</h3>
 		</div>
 		<div style="text-align: center; margin-top: 5px;">
 			<div style="width: 10px; height: 10px; background-color: #C785C8; display: inline-block;">
@@ -328,7 +328,7 @@ function getGridData(data, reverse, offset, w, h) {
 var clickedInfo = {};
 
 /**
- * 추모동산 배정현황 그리드 생성
+ * 부활동산 배정현황 그리드 생성
  */
 function makeGraveGrid(grid, gridData) {
 	var totalwidth = gridData.totalwidth;

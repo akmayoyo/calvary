@@ -133,7 +133,7 @@ function _downloadExcel() {
 	var searchKeys = ["apply_user_name", "progressStatus", "bunyangTimes"];
 	var searchValues = ["${searchVo.searchVal}", "${searchVo.progressStatus}", "${searchVo.bunyangTimes}"];
 	var queryId = "usechange.getUseChangeList";
-	var title = "갈보리추모동산 사용계약현황";
+	var title = "갈보리부활동산 사용계약현황";
 	var fileName = title + ".xlsx";
 	var sheetName = title;
 	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);

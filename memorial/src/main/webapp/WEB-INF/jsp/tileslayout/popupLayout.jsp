@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>갈보리 추모 동산</title>
+<title>갈보리 부활동산</title>
 <!-- Bootstrap -->
 <link href="${contextPath}/resources/bootstrap/css/bootstrap.css" rel="stylesheet">
 <script type="text/javascript" src="${contextPath}/resources/js/jquery-3.3.1.min.js"></script>

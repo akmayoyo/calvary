@@ -112,7 +112,7 @@ function _downloadExcel() {
 	var searchKeys = ["maintYear", "paymentYn"];
 	var searchValues = [${searchVo.maintYear}, "N"];
 	var queryId = "bunyangstatus.getUnpaidMaintPaymentList";
-	var title = "갈보리추모동산 관리비 납부 대상자";
+	var title = "갈보리부활동산 관리비 납부 대상자";
 	var fileName = title + ".xlsx";
 	var sheetName = title;
 // 	if(${searchVo.maintYear} > 0) {

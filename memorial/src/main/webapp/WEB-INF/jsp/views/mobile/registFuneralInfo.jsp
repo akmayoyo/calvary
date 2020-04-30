@@ -121,7 +121,7 @@ int currDay = currDt.get(Calendar.DATE);
 							<tr>
 								<th scope="sel">장지</th>
 								<td class="text-left">
-								용인공원 갈보리 추모동산<br>
+								용인공원 갈보리 부활동산<br>
 								<span name="section_info" section_seq="${graveInfo.section_seq}" row_seq="${graveInfo.row_seq}" col_seq="${graveInfo.col_seq}" seq_no="${graveInfo.seq_no}"></span>
 								</td>
 							</tr>
@@ -172,7 +172,7 @@ int currDay = currDt.get(Calendar.DATE);
 				2. 장례식장 : <span id="sFuneralHall"></span><br>
 				&nbsp;&nbsp;- 주소 : <span id="sFuneralHallLocation"></span><br>
 				&nbsp;&nbsp;- 전화번호 : <span id="sFuneralHallPhone"></span><br>
-				3. 장지 : 용인공원 갈보리추모동산&nbsp;&nbsp;<span id="sSection"></span><br>
+				3. 장지 : 용인공원 갈보리부활동산&nbsp;&nbsp;<span id="sSection"></span><br>
 				4. 발인일시 : <span id="sBorneOutDate"></span><br>
 				5. 알리는분<br>
 				&nbsp;&nbsp;- 성명 : <span id="sSenderName"></span><br>

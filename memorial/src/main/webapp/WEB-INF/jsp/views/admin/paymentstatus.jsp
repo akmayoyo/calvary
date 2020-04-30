@@ -150,7 +150,7 @@ function _downloadExcel() {
 	var searchKeys = ["${searchVo.searchKey}"];
 	var searchValues = ["${searchVo.searchVal}"];
 	var queryId = "admin.getBunyangList";
-	var title = "갈보리추모동산 대금납부현황";
+	var title = "갈보리부활동산 대금납부현황";
 	var fileName = title + ".xlsx";
 	var sheetName = title;
 	common.exportExcel(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName);

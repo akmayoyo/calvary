@@ -68,7 +68,7 @@
 		
 		<div class="panel">
 			<div class="depth1">
-				<a href="javascript:void(0)" style="font-size: 14px;">추모동산 배치도</a>
+				<a href="javascript:void(0)" style="font-size: 14px;">부활동산 배치도</a>
 			</div>
 			<div id="menu2">
 				<div class="padding-15" style="border-bottom: 1px solid #e7e7e7; text-align: center;">
@@ -465,7 +465,7 @@ function getGridData(data, reverse, offset, w, h) {
 var squareData = {};
 
 /**
- * 추모동산 배정현황 그리드 생성
+ * 부활동산 배정현황 그리드 생성
  */
 function makeGraveGrid(grid, gridData) {
 	d3.select("svg").remove();
@@ -641,7 +641,7 @@ function getTextFillColor(d) {
 }
 
 /**
- * 배정된 추모동산 구역 정보를 반환
+ * 배정된 부활동산 구역 정보를 반환
  */
 function getAssignedGraveInfo() {
 	var sectionSeq, rowSeq, colSeq, seqNo;

@@ -4,7 +4,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <div class="poptitle">
-	<strong>추모동산 사용(봉안)신청</strong>
+	<strong>부활동산 사용(봉안)신청</strong>
 	<button type="button" class="close btnClose" aria-label="Close">
 		<span aria-hidden="true">&times;</span>
 	</button>

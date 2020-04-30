@@ -350,7 +350,7 @@ var clickedInfo = null;
 var selectedGraves = [];
 
 /**
- * 추모동산 배정현황 그리드 생성
+ * 부활동산 배정현황 그리드 생성
  */
 function makeGraveGrid(grid, gridData) {
 	var totalwidth = gridData.totalwidth;

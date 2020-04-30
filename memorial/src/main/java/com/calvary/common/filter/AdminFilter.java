@@ -42,7 +42,8 @@ public class AdminFilter implements Filter {
 		String query = hRequest.getQueryString();
 		String requestUrl = hRequest.getServletPath();
 		String contextPath = hRequest.getContextPath();
-		if(sessionVo != null && sessionVo.getUserVo() != null) {
+		String checkSession = hRequest.getParameter("checkSession");
+		if("false".equals(checkSession) || (sessionVo != null && sessionVo.getUserVo() != null)) {
 			try {
 				// 메뉴접속이력 생성
 				String menuId = hRequest.getParameter("_menuId");
