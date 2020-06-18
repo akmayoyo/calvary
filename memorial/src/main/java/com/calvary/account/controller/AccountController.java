@@ -68,6 +68,7 @@ public class AccountController {
 	public static final int KEEP_LOGIN_AGE_DAYS = 1000;
 	
 	private static final Logger errLogger = LoggerFactory.getLogger("ERROR_LOGGER");
+	private static final Logger infoLogger = LoggerFactory.getLogger(AccountController.class);
 	
 	@Autowired
 	private IAccountService accountService;
@@ -158,7 +159,7 @@ public class AccountController {
 	
 	@RequestMapping(CHECK_MOBILE_LOGIN_URL)
 	@ResponseBody
-	public Object checkMobileLoginHandler(HttpSession session, HttpServletResponse response, String userName, String birthDate, String keepLogin) {
+	public Object checkMobileLoginHandler(HttpServletRequest request, HttpSession session, HttpServletResponse response, String userName, String birthDate, String keepLogin) {
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		boolean bRslt = false;
 		BunyangUserVo userVo = mobileService.getBunyangUserVo(userName, birthDate);
@@ -171,6 +172,13 @@ public class AccountController {
 			sessionVo.setBunyangUserVo(userVo);
 			session.setAttribute("sessionVo", sessionVo);
 			
+			infoLogger.info("================== mobile login info ==================");
+			String loginIP = SessionUtil.getRequestIP(request);
+			String deviceType = SessionUtil.isMobile(request) ? "MOBILE" : "WEB";
+			infoLogger.info("loginIP : " + loginIP);
+			infoLogger.info("deviceType : " + deviceType);
+			infoLogger.info("userId : " + userVo.getUserId());
+			
 			// 로그인 유지
 			if("1".equals(keepLogin)) {
 				String sessionId = session.getId();
@@ -178,6 +186,7 @@ public class AccountController {
                 cookie.setPath("/");
                 cookie.setMaxAge(60*60*24*KEEP_LOGIN_AGE_DAYS);
                 response.addCookie(cookie);
+                infoLogger.info("keepLogin SessionId : " + sessionId);
                 try {
                 	accountService.saveKeepLoginInfo(userVo.getUserId(), sessionId, KEEP_LOGIN_AGE_DAYS);
                 } catch (Exception e) {

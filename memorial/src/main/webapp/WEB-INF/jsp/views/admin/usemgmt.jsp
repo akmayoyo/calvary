@@ -36,6 +36,7 @@
 	                <tr>
 	                    <th scope="col">계약번호</th>
 	                    <th scope="col">사용(봉안)자</th>
+	                    <th scope="col">신청자</th>
 	                    <th scope="col">신청일시</th>
 	                    <th scope="col">신청위치</th>
 	                    <th scope="col">승인자</th>
@@ -50,6 +51,7 @@
 					<tr bunyangSeq="${rowItem.bunyang_seq}" userSeq="${rowItem.use_user_seq}" coupleSeq="${rowItem.couple_seq}" userId="${rowItem.user_id}">
 						<td><a href="#" class="tbllink" onclick="_showBunyangInfo(this)">${rowItem.bunyang_no}</a></td>
 	                    <td>${rowItem.user_name}</td>
+	                    <td>${rowItem.request_user_name}</td>
 	                    <td>${rowItem.request_date}</td>
 	                    <td>${rowItem.request_grave}</td>
 	                    <td>${rowItem.approval_user_name}</td>

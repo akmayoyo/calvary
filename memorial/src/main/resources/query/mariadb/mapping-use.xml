@@ -679,6 +679,8 @@
             ,c.couple_seq
             ,DATE_FORMAT(a.request_date, '%Y-%m-%d') request_date
 			,a.request_status
+			,a.request_user
+			,(SELECT max(user_name) from TB_BUNYANG_REF_USER t WHERE t.user_id = a.request_user) as request_user_name
             ,case 
             	when a.request_status = 'REQUESTED' then '승인대기'
                 when a.request_status = 'APPROVAL' then '승인완료'

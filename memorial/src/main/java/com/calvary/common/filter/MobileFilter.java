@@ -34,6 +34,7 @@ public class MobileFilter implements Filter {
 	private IAccountService accountService;
 	
 	private static final Logger logger = LoggerFactory.getLogger("ERROR_LOGGER");
+	private static final Logger logger2 = LoggerFactory.getLogger(MobileFilter.class);
 	
 	@Override
 	public void destroy() {
@@ -49,14 +50,26 @@ public class MobileFilter implements Filter {
 		String query = hRequest.getQueryString();
 		String requestUrl = hRequest.getServletPath();
 		String contextPath = hRequest.getContextPath();
+		String menuId = hRequest.getParameter("_menuId");
+		String loginIP = SessionUtil.getRequestIP(hRequest);
+		String deviceType = SessionUtil.isMobile(hRequest) ? "MOBILE" : "WEB";
+		
+		logger2.info("================== mobile request info ==================");
+		logger2.info("menuId : " + menuId);
+		logger2.info("loginIP : " + loginIP);
+		logger2.info("deviceType : " + deviceType);
+		logger2.info("query : " + query);
+		logger2.info("requestUrl : " + requestUrl);
+		
 		if(sessionVo != null && sessionVo.getBunyangUserVo() != null) {
 			try {
 				// 메뉴접속이력 생성
-				String menuId = hRequest.getParameter("_menuId");
+				String userId = sessionVo.getBunyangUserVo().getUserId();
+				
+				logger2.info("session is alive!!");
+				logger2.info("userId : " + userId);
+				
 				if(!StringUtils.isEmpty(menuId)) {
-					String userId = sessionVo.getBunyangUserVo().getUserId();
-					String loginIP = SessionUtil.getRequestIP(hRequest);
-					String deviceType = SessionUtil.isMobile(hRequest) ? "MOBILE" : "WEB";
 					commonService.createMenuAccessLog(userId, loginIP, deviceType, menuId);
 				}
 			} catch(Exception e) {
@@ -78,9 +91,15 @@ public class MobileFilter implements Filter {
 				sessionVo.setBunyangUserVo(bunyangUserVo);
 				hRequest.getSession().setAttribute("sessionVo", sessionVo);
 				
+				logger2.info("session maked from cookie!!");
+				logger2.info("userId : " + bunyangUserVo.getUserId());
+				
 				chain.doFilter(request, response);
 				
 			} else {
+				
+				logger2.info("redirect to login page!!");
+				
 				if(!StringUtils.isEmpty(query)) {
 					requestUrl += "?" + query;
 				}
