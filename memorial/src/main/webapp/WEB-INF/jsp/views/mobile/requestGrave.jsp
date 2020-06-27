@@ -1,9 +1,20 @@
+<%@page import="java.util.Calendar"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+<%
+Calendar currDt = Calendar.getInstance();
+int currYear = currDt.get(Calendar.YEAR);
+int currMonth = currDt.get(Calendar.MONTH) + 1;
+int currDay = currDt.get(Calendar.DATE);
+%>
+
 <form id="frm" method="post">
 	<input type="hidden" name="bunyangSeq">
 	<input type="hidden" name="userId">
 	<input type="hidden" name="sectionSeq">
 	<input type="hidden" name="seqNo">
+	<input type="hidden" name="deathDate">
+	<input type="hidden" name="borneOutDate">
 </form>
 <c:choose>
 <c:when test="${errorCode == '1'}">
@@ -175,6 +186,48 @@
 									</c:choose>
 								</td>
 							</tr>
+							<tr>
+								<th scope="sel">부고일시</th>
+								<td class="text-left">
+									<select id="selDeathMonth" class="form-control input-sm dateselect">
+										<option value="1">1월</option>
+										<option value="2">2월</option>
+										<option value="3">3월</option>
+										<option value="4">4월</option>
+										<option value="5">5월</option>
+										<option value="6">6월</option>
+										<option value="7">7월</option>
+										<option value="8">8월</option>
+										<option value="9">9월</option>
+										<option value="10">10월</option>
+										<option value="11">11월</option>
+										<option value="12">12월</option>
+									</select><span> - </span>
+									<select id="selDeathDay" class="form-control input-sm dateselect"><option>1일</option></select><span> - </span>
+									<select id="selDeathHour" class="form-control input-sm dateselect"></select>
+								</td>
+							</tr>
+							<tr>
+								<th scope="sel">발인일시</th>
+								<td class="text-left">
+									<select id="selBorneOutMonth" class="form-control input-sm dateselect">
+										<option value="1">1월</option>
+										<option value="2">2월</option>
+										<option value="3">3월</option>
+										<option value="4">4월</option>
+										<option value="5">5월</option>
+										<option value="6">6월</option>
+										<option value="7">7월</option>
+										<option value="8">8월</option>
+										<option value="9">9월</option>
+										<option value="10">10월</option>
+										<option value="11">11월</option>
+										<option value="12">12월</option>
+									</select><span> - </span>
+									<select id="selBorneOutDay" class="form-control input-sm dateselect"><option>1일</option></select><span> - </span>
+									<select id="selBorneOutHour" class="form-control input-sm dateselect"></select>
+								</td>
+							</tr>
 						</tbody>
 					</table>
     				
@@ -231,6 +284,31 @@
 <script type="text/javascript">
 
 (function() {
+	
+	var hourOptions = "";
+	for(var i = 0; i <= 23; i++) {
+		hourOptions += '<option value="' + i + '">' + i + '시' + '</option>';
+	}
+	$('#selDeathHour, #selBorneOutHour').html(hourOptions);
+	
+	$('#selDeathMonth').change(function(e) {
+		var selectedYear = <%=currYear%>;
+		var selectedMonth = $(this).find('option:selected').val();
+		generateDays(selectedYear, selectedMonth, $('#selDeathDay'));
+	});
+	$('#selBorneOutMonth').change(function(e) {
+		var selectedYear = <%=currYear%>;
+		var selectedMonth = $(this).find('option:selected').val();
+		generateDays(selectedYear, selectedMonth, $('#selBorneOutDay'));
+	});
+	
+	$('#selDeathMonth option[value=' + <%=currMonth%> + ']').attr('selected', 'selected');
+	$('#selBorneOutMonth option[value=' + <%=currMonth%> + ']').attr('selected', 'selected');
+	
+	$('#selDeathMonth, #selBorneOutMonth').trigger('change');
+	
+	$('#selDeathDay option[value=' + <%=currDay%> + ']').attr('selected', 'selected');
+	$('#selBorneOutDay option[value=' + <%=currDay%> + ']').attr('selected', 'selected');
 	
 	if(isAssigned()) {
 		var sectionSeq = $('#assignedSectionSeq').val();
@@ -708,13 +786,44 @@ function _request() {
 			if(result && result.result) {
 				//common.showAlert('신청되었습니다.\n부고 알림 메세지 전송 페이지로 이동합니다.');
 				common.showAlert('신청되었습니다.\n원활한 장례 진행을 위해서 용인공원 고객센터(031-334-3483)에 장례접수를 해주시기 부탁드립니다.\n장례접수시 상주, 고인명, 발인일시, 배정구역(구역,행,열-고유번호)를 말씀해주시면 감사하겠습니다.');
-				$('input[name="bunyangSeq"]').val('${bunyangInfo.bunyang_seq}');
-				$('input[name="userId"]').val('${useUserInfo.user_id}');
-				$('input[name="sectionSeq"]').val(sectionSeq);
-				$('input[name="seqNo"]').val(seqNo);
-				var frm = document.getElementById("frm");
-				frm.action = "${contextPath}/mobile/registFuneralInfo";
-				frm.submit();
+				
+				// 부고일시,발인일시
+				var selectedHour = $('#selDeathHour option:selected').val();
+				if(selectedHour < 10) {
+					selectedHour = '0' + selectedHour;
+				}
+				selectedHour += '시';
+				var deathDate = $('#selDeathMonth option:selected').text();
+				deathDate += $('#selDeathDay option:selected').text();
+				deathDate += ' ' + selectedHour;
+				
+				selectedHour = $('#selBorneOutHour option:selected').val();
+				if(selectedHour < 10) {
+					selectedHour = '0' + selectedHour;
+				}
+				selectedHour += '시';
+				// 교회행정담당자, 용인공원담당자에게 SMS 전송
+				var borneOutDate = $('#selBorneOutMonth option:selected').text();
+				borneOutDate += $('#selBorneOutDay option:selected').text();
+				borneOutDate += ' ' + selectedHour;
+				var receivers = ['${contract1.mobile}', '${contract2.mobile}'];
+				var sendSmsVo = {};
+				sendSmsVo.msgKey = 'M0009';
+				sendSmsVo.receivers = receivers.join(',');
+				sendSmsVo.sequences = ['${useUserInfo.user_name}', '${useUserInfo.user_name}', deathDate, borneOutDate];
+				common.sendSms(sendSmsVo, function(result) {
+					$('input[name="bunyangSeq"]').val('${bunyangInfo.bunyang_seq}');
+					$('input[name="userId"]').val('${useUserInfo.user_id}');
+					$('input[name="sectionSeq"]').val(sectionSeq);
+					$('input[name="seqNo"]').val(seqNo);
+					$('input[name="deathDate"]').val(deathDate);
+					$('input[name="borneOutDate"]').val(borneOutDate);
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/mobile/registFuneralInfo";
+					frm.submit();
+				}, function(xhr, status, message) {
+					//console.log(message);
+				});
 			} else {
 				var errorCode = result.errorCode;
 				if(errorCode == '1') {
@@ -752,6 +861,23 @@ function seqToAlpha(seq) {
 	var seqOfA = "A".charCodeAt(0) + (seq-1);
 	var alpha = String.fromCharCode(seqOfA);
 	return alpha;
+}
+
+/**
+ * 연월에 해당하는 날짜 선택용 select box 생성
+ */
+function generateDays(year, month, el) {
+	var firstDay = 1;
+	var lastDay = new Date(year, month, 0).getDate();
+	var options = "";
+	for(var i = firstDay; i <= lastDay; i++) {
+		options += '<option value="' + i + '">' + i + '일' + '</option>';
+	}
+	var selectedDay = $(el).val();
+	$(el).html(options);
+	if(selectedDay > 0 && selectedDay <= lastDay) {
+		$(el).find('option[value=' + selectedDay + ']').attr('selected', 'selected');
+	}
 }
 
 /**

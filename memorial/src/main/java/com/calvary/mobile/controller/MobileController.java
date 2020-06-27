@@ -194,6 +194,11 @@ public class MobileController {
 			}
 		}
 		mv.addObject("errorCode", errorCode);
+		
+		Map<String, Object> contract1 = mobileService.getContract("CONTRACT_01");// 교회행정담당
+		Map<String, Object> contract2 = mobileService.getContract("CONTRACT_02");// 용인공원 장례담당
+		mv.addObject("contract1", contract1);
+		mv.addObject("contract2", contract2);
 		return mv;
 	}
 	
@@ -274,7 +279,9 @@ public class MobileController {
 			@RequestParam(value="bunyangSeq", required=true) String bunyangSeq,
 			@RequestParam(value="userId", required=true) String userId,
 			@RequestParam(value="sectionSeq", required=true) String sectionSeq,
-			@RequestParam(value="seqNo", required=true) String seqNo
+			@RequestParam(value="seqNo", required=true) String seqNo,
+			@RequestParam(value="deathDate", required=true) String deathDate,
+			@RequestParam(value="borneOutDate", required=true) String borneOutDate
 			) {
 		Map<String, Object> useUserInfo = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId);
 		Map<String, Object> graveInfo = adminService.getGraveAssignInfoBySeqNo(sectionSeq, seqNo);
@@ -291,6 +298,8 @@ public class MobileController {
 		mv.addObject("contract1", contract1);
 		mv.addObject("contract2", contract2);
 		mv.addObject("contract3", contract3);
+		mv.addObject("deathDate", deathDate);
+		mv.addObject("borneOutDate", borneOutDate);
 		mv.setViewName(ROOT_URL + REGIST_FUNERAL_INFO);
 		return mv;
 	}

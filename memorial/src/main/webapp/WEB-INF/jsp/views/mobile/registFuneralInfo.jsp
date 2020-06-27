@@ -63,22 +63,7 @@ int currDay = currDt.get(Calendar.DATE);
 							<tr>
 								<th scope="sel">부고일시</th>
 								<td class="text-left">
-									<select id="selDeathMonth" class="form-control input-sm dateselect">
-										<option value="1">1월</option>
-										<option value="2">2월</option>
-										<option value="3">3월</option>
-										<option value="4">4월</option>
-										<option value="5">5월</option>
-										<option value="6">6월</option>
-										<option value="7">7월</option>
-										<option value="8">8월</option>
-										<option value="9">9월</option>
-										<option value="10">10월</option>
-										<option value="11">11월</option>
-										<option value="12">12월</option>
-									</select><span> - </span>
-									<select id="selDeathDay" class="form-control input-sm dateselect"><option>1일</option></select><span> - </span>
-									<select id="selDeathHour" class="form-control input-sm dateselect"></select>
+									<span>${deathDate }</span>
 								</td>
 							</tr>
 							<tr>
@@ -100,22 +85,7 @@ int currDay = currDt.get(Calendar.DATE);
 							<tr>
 								<th scope="sel">발인일시</th>
 								<td class="text-left">
-									<select id="selBorneOutMonth" class="form-control input-sm dateselect">
-										<option value="1">1월</option>
-										<option value="2">2월</option>
-										<option value="3">3월</option>
-										<option value="4">4월</option>
-										<option value="5">5월</option>
-										<option value="6">6월</option>
-										<option value="7">7월</option>
-										<option value="8">8월</option>
-										<option value="9">9월</option>
-										<option value="10">10월</option>
-										<option value="11">11월</option>
-										<option value="12">12월</option>
-									</select><span> - </span>
-									<select id="selBorneOutDay" class="form-control input-sm dateselect"><option>1일</option></select><span> - </span>
-									<select id="selBorneOutHour" class="form-control input-sm dateselect"></select>
+									<span>${borneOutDate }</span>
 								</td>
 							</tr>
 							<tr>
@@ -204,18 +174,18 @@ int currDay = currDt.get(Calendar.DATE);
 								</select>
 							</td>
 						</tr>
-						<tr>
-							<th scope="sel">2. 교회행정담당</th>
-							<td class="text-left">
-								<span name="receiver">${contract1.mobile}</span>
-							</td>
-						</tr>
-						<tr>
-							<th scope="sel">3. 용인공원담당</th>
-							<td class="text-left">
-								<span name="receiverNot">${contract2.mobile}</span>
-							</td>
-						</tr>
+<!-- 						<tr> -->
+<!-- 							<th scope="sel">2. 교회행정담당</th> -->
+<!-- 							<td class="text-left"> -->
+<%-- 								<span name="receiver">${contract1.mobile}</span> --%>
+<!-- 							</td> -->
+<!-- 						</tr> -->
+<!-- 						<tr> -->
+<!-- 							<th scope="sel">3. 용인공원담당</th> -->
+<!-- 							<td class="text-left"> -->
+<%-- 								<span name="receiverNot">${contract2.mobile}</span> --%>
+<!-- 							</td> -->
+<!-- 						</tr> -->
 <!-- 						<tr> -->
 <!-- 							<th scope="sel">4. 용인공원라이프</th> -->
 <!-- 							<td class="text-left"> -->
@@ -227,7 +197,7 @@ int currDay = currDt.get(Calendar.DATE);
 <!-- 							</td> -->
 <!-- 						</tr> -->
 						<tr>
-							<th scope="sel">4. 상조회사</th>
+							<th scope="sel">2. 상조회사</th>
 							<td class="text-left">
 								<div style="margin-bottom: 5px;">
 									<input id="companyPhone1" type="tel" class="form-control input-sm tel_input"><span> - </span>
@@ -239,7 +209,7 @@ int currDay = currDt.get(Calendar.DATE);
 							</td>
 						</tr>
 						<tr>
-							<th scope="sel">5. 추가연락처</th>
+							<th scope="sel">3. 추가연락처</th>
 							<td class="text-left">
 								<div>
 									<input name="extraPhone1" type="tel" class="form-control input-sm tel_input"><span> - </span>
@@ -299,31 +269,6 @@ int currDay = currDt.get(Calendar.DATE);
 		$(this).text(section);
 	});
 	
-	var hourOptions = "";
-	for(var i = 0; i <= 23; i++) {
-		hourOptions += '<option value="' + i + '">' + i + '시' + '</option>';
-	}
-	$('#selDeathHour, #selBorneOutHour').html(hourOptions);
-	
-	$('#selDeathMonth').change(function(e) {
-		var selectedYear = <%=currYear%>;
-		var selectedMonth = $(this).find('option:selected').val();
-		generateDays(selectedYear, selectedMonth, $('#selDeathDay'));
-	});
-	$('#selBorneOutMonth').change(function(e) {
-		var selectedYear = <%=currYear%>;
-		var selectedMonth = $(this).find('option:selected').val();
-		generateDays(selectedYear, selectedMonth, $('#selBorneOutDay'));
-	});
-	
-	$('#selDeathMonth option[value=' + <%=currMonth%> + ']').attr('selected', 'selected');
-	$('#selBorneOutMonth option[value=' + <%=currMonth%> + ']').attr('selected', 'selected');
-	
-	$('#selDeathMonth, #selBorneOutMonth').trigger('change');
-	
-	$('#selDeathDay option[value=' + <%=currDay%> + ']').attr('selected', 'selected');
-	$('#selBorneOutDay option[value=' + <%=currDay%> + ']').attr('selected', 'selected');
-	
 	$("#taMessage").keyup(function(){
 		var maxLen = $(this).attr('maxLength');
 		var len = $(this).val().length;
@@ -381,23 +326,8 @@ function generateDays(year, month, el) {
  */
 function _confirm() {
 	var userName = '${useUserInfo.user_name}';
-	var selectedHour = $('#selDeathHour option:selected').val();
-	if(selectedHour < 10) {
-		selectedHour = '0' + selectedHour;
-	}
-	selectedHour += '시';
-	var deathDate = $('#selDeathMonth option:selected').text();
-	deathDate += $('#selDeathDay option:selected').text();
-	deathDate += ' ' + selectedHour;
-	
-	selectedHour = $('#selBorneOutHour option:selected').val();
-	if(selectedHour < 10) {
-		selectedHour = '0' + selectedHour;
-	}
-	selectedHour += '시';
-	var borneOutDate = $('#selBorneOutMonth option:selected').text();
-	borneOutDate += $('#selBorneOutDay option:selected').text();
-	borneOutDate += ' ' + selectedHour;
+	var deathDate = '${deathDate}';
+	var borneOutDate = '${borneOutDate}';
 	
 	var el = $('#tiFuneralHall');
 	var funeralHall = el.val();
@@ -512,12 +442,12 @@ function _sendSms() {
 	var receivers = [];
 	var mobile;
 	// 기지정된 담당자 연락처
-	$('span[name="receiver"]').each(function(idx) {
-		mobile = $(this).text();
-		if(mobile && receivers.indexOf(mobile) < 0) {
-			receivers.push(mobile);
-		}
-	});
+// 	$('span[name="receiver"]').each(function(idx) {
+// 		mobile = $(this).text();
+// 		if(mobile && receivers.indexOf(mobile) < 0) {
+// 			receivers.push(mobile);
+// 		}
+// 	});
 	
 	// 교구목사
 	mobile = $('#receiverMinister option:selected').val();
@@ -551,7 +481,7 @@ function _sendSms() {
 			return;
 		}
 		if(companyPhone && receivers.indexOf(companyPhone) < 0) {
-			//receivers.push(companyPhone);
+			receivers.push(companyPhone);
 		}
 	}
 	var bValid = true;
@@ -581,7 +511,7 @@ function _sendSms() {
 				return false;
 			}
 			if(phone && receivers.indexOf(phone) < 0) {
-				//receivers.push(phone);
+				receivers.push(phone);
 			}
 		}
 	});
