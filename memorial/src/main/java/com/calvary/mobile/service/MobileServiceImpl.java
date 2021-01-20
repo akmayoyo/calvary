@@ -23,7 +23,7 @@ public class MobileServiceImpl implements IMobileService {
 	private CommonDao commonDao;
 	@Autowired
 	private IAdminService adminService;
-	
+
 	public BunyangUserVo getBunyangUserVo(String userName, String birthDate) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("userName", userName);
@@ -31,7 +31,7 @@ public class MobileServiceImpl implements IMobileService {
 		BunyangUserVo userVo = (BunyangUserVo)commonDao.selectOne("mobile.getBunyangUserVo", parameter);
 		return userVo;
 	}
-	
+
 	public List<Object> getReservedGraveInfo(String bunyangSeq, int userSeq, int coupleSeq, String graveType) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("bunyangSeq", bunyangSeq);
@@ -41,7 +41,7 @@ public class MobileServiceImpl implements IMobileService {
 		List<Object> list = commonDao.selectList("use.getReservedGraveInfo", parameter);
 		return list;
 	}
-	
+
 	public List<Object> getCoupleReservedGraveInfo(String bunyangSeq, int coupleSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("bunyangSeq", bunyangSeq);
@@ -49,7 +49,7 @@ public class MobileServiceImpl implements IMobileService {
 		List<Object> list = commonDao.selectList("use.getCoupleReservedGraveInfo", parameter);
 		return list;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getFamilyGraveRequestInfo(String bunyangSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
@@ -57,7 +57,7 @@ public class MobileServiceImpl implements IMobileService {
 		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("use.getFamilyGraveRequestInfo", parameter);
 		return rtnMap;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public int getRequiredGraveCount(String bunyangSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
@@ -66,14 +66,14 @@ public class MobileServiceImpl implements IMobileService {
 		int requiredCnt = CommonUtil.convertToInt(rtnMap.get("required_cnt"));
 		return requiredCnt;
 	}
-	
+
 	public List<Object> getRequiredGraveList(String bunyangSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("bunyangSeq", bunyangSeq);
 		List<Object> list = commonDao.selectList("mobile.getRequiredGraveList", parameter);
 		return list;
 	}
-	
+
 	public List<Object> getAvailableGraveInfoAll(String graveType, int cnt) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("graveType", graveType);
@@ -81,7 +81,7 @@ public class MobileServiceImpl implements IMobileService {
 		List<Object> list = commonDao.selectList("use.getAvailableGraveInfoAll", parameter);
 		return list;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Transactional
 	public int assignGrave(String productType, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int isReserved) throws Exception {
@@ -131,13 +131,13 @@ public class MobileServiceImpl implements IMobileService {
 			}
 			iRslt += commonDao.update("use.updateGrave", parameter);
 		} else {// 배정받은 자리가 없는 경우
-			
+
 			// 가족형인 경우 미리 자리를 예약상태로 업데이트
 			if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productType)) {
-				
+
 				List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
 				int requireCnt = useUserList.size();
-				
+
 				if(CalvaryConstants.GRAVE_TYPE_COUPLE.equals(graveType)) {// 부부형인 경우 두명이 한자리
 					requireCnt = requireCnt/2;
 				}
@@ -168,7 +168,7 @@ public class MobileServiceImpl implements IMobileService {
 					throw new Exception("no available grave!!");
 				}
 			}
-			
+
 			if(coupleSeq > 0) {// 부부형인 경우
 				parameter = new HashMap<String, Object>();
 				parameter.put("bunyangSeq", bunyangSeq);
@@ -192,10 +192,10 @@ public class MobileServiceImpl implements IMobileService {
 			}
 			iRslt += commonDao.update("use.updateGrave", parameter);
 		}
-		
+
 		return iRslt;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Transactional
 	public int requestGrave(String productType, String groupSeq, String bunyangSeq, int coupleSeq, int userSeq, String sectionSeq, int rowSeq, int colSeq, int firstColSeq, int isReserved) throws Exception {
@@ -215,7 +215,7 @@ public class MobileServiceImpl implements IMobileService {
 		parameter2.put("useUserSeq", userSeq);
 		parameter2.put("requestUser", requestUserId);
 		iRslt += commonDao.insert("use.createGraveRequestInfo", parameter2);
-		
+
 		// 추모동산 배치현황의 상태값을 신청상태로 변경
 		String graveType = coupleSeq > 0 ? CalvaryConstants.GRAVE_TYPE_COUPLE : CalvaryConstants.GRAVE_TYPE_SINGLE;
 		if(isReserved == 1) {// 배우자 또는 가족구성원이 이미 신청한 경우 예약된 자리가 있기 때문에 별도 처리안함
@@ -239,7 +239,7 @@ public class MobileServiceImpl implements IMobileService {
 								, bunyangSeq2
 						);
 					}
-					
+
 				}
 			}
 		} else {// 배정받은 자리가 없는 경우
@@ -267,7 +267,7 @@ public class MobileServiceImpl implements IMobileService {
 				commonDao.delete("use.deleteGraveRequestInfo", parameter2);
 				throw new Exception("no available grave!! sectionSeq : " + sectionSeq);
 			}
-			
+
 			if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(productType)) {
 				int i = 0, j = 0;
 				List<Integer> reservedColSeqs = new ArrayList<Integer>();
@@ -326,14 +326,14 @@ public class MobileServiceImpl implements IMobileService {
 		}
 		return iRslt;
 	}
-	
+
 	public List<Object> getContractMinister(String bunyangSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("bunyangSeq", bunyangSeq);
 		List<Object> rtnList = commonDao.selectList("mobile.getContractMinister", parameter);
 		return rtnList;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> getContract(String codeSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
@@ -341,14 +341,14 @@ public class MobileServiceImpl implements IMobileService {
 		Map<String, Object> rtnMap = (HashMap<String, Object>)commonDao.selectOne("mobile.getContract", parameter);
 		return rtnMap;
 	}
-	
+
 	public List<Object> getContractList(String codeSeq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("codeSeq", codeSeq);
 		List<Object> rtnList = commonDao.selectList("mobile.getContractList", parameter);
 		return rtnList;
 	}
-	
+
 	public List<Object> getBunyangSeqOfGrave(String section_seq, String row_seq, String col_seq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("section_seq", section_seq);
@@ -357,14 +357,14 @@ public class MobileServiceImpl implements IMobileService {
 		List<Object> rtnList = commonDao.selectList("mobile.getBunyangSeqOfGrave", parameter);
 		return rtnList;
 	}
-	
+
 	public List<Object> getFirstReservedInfo(String bunyang_seq) {
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("bunyang_seq", bunyang_seq);
 		List<Object> rtnList = commonDao.selectList("mobile.getFirstReservedInfo", parameter);
 		return rtnList;
 	}
-	
+
 	@Transactional
 	public int updateGraveBunyangSeq(String section_seq, String row_seq, String col_seq, String bunyang_seq) throws Exception {
 		int iRslt = 0;
@@ -374,6 +374,19 @@ public class MobileServiceImpl implements IMobileService {
 		parameter.put("row_seq", row_seq);
 		parameter.put("col_seq", col_seq);
 		iRslt += commonDao.update("mobile.updateGraveBunyangSeq", parameter);
+		return iRslt;
+	}
+
+	@Transactional
+	public int createGraveNotice(String bunyangSeq, String useUserSeq, String requestUser, String borneOutDate, String deathDate) throws Exception {
+		int iRslt = 0;
+		Map<String, Object> parameter = new HashMap<String, Object>();
+		parameter.put("bunyangSeq", bunyangSeq);
+		parameter.put("useUserSeq", useUserSeq);
+		parameter.put("requestUser", requestUser);
+		parameter.put("borneOutDate", borneOutDate);
+		parameter.put("deathDate", deathDate);
+		iRslt += commonDao.insert("common.createGraveNotice", parameter);
 		return iRslt;
 	}
 }

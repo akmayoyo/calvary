@@ -41,7 +41,7 @@ public class PopupController {
 
 	/** */
 	public static final String ROOT_URL = "/popup";
-	
+
 	public static final String SELECT_USER_URL = "/selectuser";
 	public static final String SUCCEED_CONTRACTOR_URL = "/succeedcontractor";
 	public static final String CHANGE_REF_USER_INFO_URL = "/changeRefUserInfo";
@@ -61,6 +61,7 @@ public class PopupController {
 	public static final String SAVE_APPROVAL_REQUEST_GRAVE = "/saveApprovalRequestGrave";
 	public static final String CHANGE_FAMILY_GRAVE_ORDER = "/changeFamilyGraveOrder";
 	public static final String SAVE_FAMILY_GRAVE_ORDER = "/saveFamilyGraveOrder";
+	public static final String NOTI_GRAVE_URL = "/notiGrave";
 	/** 분양상세정보 페이지  URL */
 	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
 	/** comment 입력 팝업 URL */
@@ -89,7 +90,7 @@ public class PopupController {
 	public static final String SELECT_CONNECT_BUNYANG_URL = "/selectConnectBunyang";
 	/** 선택분양을 추가분양으로 연결 */
 	public static final String CONNECT_SELECTED_BUNYANG_URL = "/connectSelectedBunyang";
-	
+
 	@Autowired
 	private IPopupService popupService;
 	@Autowired
@@ -102,7 +103,7 @@ public class PopupController {
 	private IExcelService excelService;
 	@Autowired
 	private CommonDao commonDao;
-	
+
 	@RequestMapping(value=SELECT_USER_URL)
 	public Object selectUserHandler(SelectUserVo selectUserVo) {
 		ModelAndView mv = new ModelAndView();
@@ -116,7 +117,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + SELECT_USER_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=SUCCEED_CONTRACTOR_URL)
 	public Object succeedContractorHandler(String bunyangSeq) {
 		ModelAndView mv = new ModelAndView();
@@ -127,7 +128,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + SUCCEED_CONTRACTOR_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=CHANGE_REF_USER_INFO_URL)
 	public Object changeRefUserInfoHandler(String bunyangSeq, String refType, String userId, String popupTitle) {
 		ModelAndView mv = new ModelAndView();
@@ -142,7 +143,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + CHANGE_REF_USER_INFO_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=REGIST_USE_USER_URL)
 	public Object registUseUserHandler(SelectUserVo selectUserVo) {
 		ModelAndView mv = new ModelAndView();
@@ -159,7 +160,7 @@ public class PopupController {
 		}
 		return mv;
 	}
-	
+
 	@RequestMapping(value=CHECK_DUPLICATED_USER_URL)
 	@ResponseBody
 	public Object checkDuplicatedUserHandler(BunyangUserVo bunyangUserVo) {
@@ -168,8 +169,8 @@ public class PopupController {
 		rtnMap.put("duplicatedUser", duplicatedUser);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 분양계약 해약
 	 */
 	@RequestMapping(value=CONTRACT_CANCEL_URL)
@@ -180,8 +181,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + CONTRACT_CANCEL_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 사용(봉안)자 해약
 	 */
 	@RequestMapping(value=USE_USER_CANCEL_URL)
@@ -199,8 +200,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + USE_USER_CANCEL_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 동산 사용신청
 	 */
 	@RequestMapping(value=USE_APPLY_URL)
@@ -213,7 +214,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + USE_APPLY_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=SELECT_USE_USER)
 	public Object selectUseUserHandler(SearchVo searchVo, String bunyangSeq) {
 		ModelAndView mv = new ModelAndView();
@@ -226,7 +227,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + SELECT_USE_USER);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=ASSIGN_GRAVE)
 	@ResponseBody
 	public Object assignGraveHandler(
@@ -248,7 +249,7 @@ public class PopupController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
+
 	@RequestMapping(value=REGIST_PAYMENT)
 	public Object registPaymentHandler() {
 		List<Object> depositTypeList = commonService.getChildCodeList(CalvaryConstants.CODE_SEQ_DEPOSIT_TYPE);
@@ -259,7 +260,7 @@ public class PopupController {
 		mv.addObject("withdrawalTypeList", withdrawalTypeList);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=SAVE_PAYMENT)
 	@ResponseBody
 	public Object savePaymentHandler(
@@ -287,9 +288,9 @@ public class PopupController {
 //				iRslt += adminService.createPaymentHistory(bunyangSeqs[i], paymentAmounts[i], paymentMethods[i], paymentDates[i], paymentDivisions[i], paymentTypes[i], paymentUsers[i], remarks[i]);
 //			}
 //		}
-		
+
 		iRslt = adminService.createPaymentHistory(bunyangSeqs, paymentAmounts, paymentMethods, paymentDates, paymentDivisions, paymentTypes, paymentUsers, remarks, maintSeqs, sendSmsYn);
-		
+
 		// 계약금 납부가 된 건에 대해 계약상태로 업데이트(현재는 자동 상태 변경은 안하지만 혹시몰라 남겨둠)
 //		if(contractBunyangSeqs != null && contractBunyangSeqs.length > 0) {
 //			for(i = 0; i < contractBunyangSeqs.length; i++) {
@@ -324,12 +325,12 @@ public class PopupController {
 //				}
 //			}
 //		}
-		
+
 		bRslt = iRslt > 0;
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
+
 	@RequestMapping(value=SAVE_MANUAL_PAYMENT)
 	@ResponseBody
 	public Object saveManualPaymentHandler(
@@ -358,7 +359,7 @@ public class PopupController {
 				progressStatus = (String)bunyangInfo.get("progress_status");
 				cancelYn = (String)bunyangInfo.get("cancel_yn");
 			}
-			
+
 			if(!StringUtils.isEmpty(bunyangNo) && StringUtils.isEmpty(bunyangSeq)) {
 				errorMsg = "등록되지 않은 분양건";
 			} else if("Y".equals(cancelYn)) {
@@ -386,7 +387,7 @@ public class PopupController {
 		rtnMap.put("errorMsg", errorMsg);
 		return rtnMap;
 	}
-	
+
 	@RequestMapping(value=UPDATE_BUNYANG_PROGRESS)
 	@ResponseBody
 	public Object updateBunyangProgress(@RequestBody UpdateBunyangVo vo
@@ -405,7 +406,7 @@ public class PopupController {
 						bunyangInfo = adminService.getBunyangInfoByNo(bunyangNo);
 						if(bunyangInfo != null) {
 							String bunyangSeq = (String)bunyangInfo.get("bunyang_seq");
-							String contractDate = (String)bunyangInfo.get("contract_date"); 
+							String contractDate = (String)bunyangInfo.get("contract_date");
 							String fullPaymentDate = (String)bunyangInfo.get("full_payment_date");
 							String downPaymentDate = (String)bunyangInfo.get("down_payment_date");
 							String balancePaymentDate = (String)bunyangInfo.get("balance_payment_date");
@@ -486,7 +487,7 @@ public class PopupController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
+
 	@RequestMapping(value=SAVE_PAYMENT_ONE)
 	@ResponseBody
 	public Object savePaymentOneHandler(
@@ -515,9 +516,9 @@ public class PopupController {
 		rtnMap.put("errorMessage", errorMessage);
 		return rtnMap;
 	}
-	
-	/** 
-	 * 분양상세정보 페이지 
+
+	/**
+	 * 분양상세정보 페이지
 	 */
 	@RequestMapping(value=BUNYANG_INFO_URL)
 	public Object bunyangInfoHandler(String bunyangSeq) {
@@ -544,8 +545,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + BUNYANG_INFO_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * comment 입력 팝업
 	 */
 	@RequestMapping(value=REGIST_COMMENT_URL)
@@ -555,8 +556,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + REGIST_COMMENT_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 날짜 입력 팝업
 	 */
 	@RequestMapping(value=REGIST_DATE_URL)
@@ -566,8 +567,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + REGIST_DATE_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 분양정보 엑셀업로드 등록 팝업
 	 */
 	@RequestMapping(value=REGIST_BUNYANG_EXCEL_URL)
@@ -576,8 +577,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + REGIST_BUNYANG_EXCEL_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 입출금 엑셀업로드 등록 팝업
 	 */
 	@RequestMapping(value=REGIST_PAYMENT_EXCEL_URL)
@@ -592,8 +593,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + REGIST_PAYMENT_EXCEL_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 분양대금 입출금 대장 엑셀업로드 등록 팝업
 	 */
 	@RequestMapping(value=REGIST_MANUAL_EXCEL_URL)
@@ -602,8 +603,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + REGIST_MANUAL_EXCEL_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 관리비 납부/미납 상세정보 표시 팝업
 	 */
 	@SuppressWarnings("unchecked")
@@ -623,8 +624,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + MAINT_PAYMENT_DETAIL_INFO_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 관리비 청구대상 표시 팝업
 	 */
 	@SuppressWarnings("unchecked")
@@ -640,8 +641,8 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + MAINT_PAYMENT_CLAIM_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 코드등록 팝업
 	 */
 	@RequestMapping(value=REGIST_CODE_URL)
@@ -652,7 +653,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + REGIST_CODE_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=SELECT_MENU_ROLE_URL)
 	public Object selectMenuRoleHandler(String roleId) {
 		ModelAndView mv = new ModelAndView();
@@ -662,7 +663,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + SELECT_MENU_ROLE_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=SELECT_USER_ROLE_URL)
 	public Object selectUserRoleHandler(String roleId) {
 		ModelAndView mv = new ModelAndView();
@@ -672,7 +673,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + SELECT_USER_ROLE_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=FIND_ID_PWD_URL)
 	public Object findIdPwdHandler(HttpServletRequest request) {
 		String findType = request.getParameter("findType");
@@ -681,7 +682,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + FIND_ID_PWD_URL);
 		return mv;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=APPROVAL_REQUEST_GRAVE)
 	public Object approvalRequestGraveHandler(String bunyangSeq, String userSeq, String userId, String coupleSeq) {
@@ -689,7 +690,7 @@ public class PopupController {
 		List<Object> changeGraveList = null;
 		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
 		Map<String, Object> requestUserInfo = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId);
-		
+
 		Map<String, Object> parameter = new HashMap<String, Object>();
 		parameter.put("bunyangSeq", bunyangSeq);
 		parameter.put("userSeq", userSeq);
@@ -724,7 +725,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + APPROVAL_REQUEST_GRAVE);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=SAVE_APPROVAL_REQUEST_GRAVE)
 	@ResponseBody
 	public Object saveApprovalRequestGraveHandler(@RequestBody ApprovalGraveVo vo) throws Exception {
@@ -734,7 +735,7 @@ public class PopupController {
 		int iRslt = 0;
 		String bunyangSeq = vo.getBunyangSeq();
 		String userSeq = vo.getUserSeq();
-		// 이미 승인이 된 건인지 체크 
+		// 이미 승인이 된 건인지 체크
 		int cnt = adminService.checkApprovalStatus(bunyangSeq, userSeq);
 		if(cnt > 0) {
 			iRslt = adminService.approvalRequestGrave(vo, null);
@@ -746,7 +747,7 @@ public class PopupController {
 		rtnMap.put("errorCode", errorCode);
 		return rtnMap;
 	}
-	
+
 	@RequestMapping(value=CHANGE_FAMILY_GRAVE_ORDER)
 	public Object changeFamilyGraveOrderHandler(String groupSeq, String bunyangSeq, SearchVo searchVo) throws Exception {
 		List<Object> graveAssignList = adminService.getGraveAssignInfoByFamily(groupSeq, bunyangSeq, null, null, null);
@@ -757,7 +758,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + CHANGE_FAMILY_GRAVE_ORDER);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=SAVE_FAMILY_GRAVE_ORDER)
 	@ResponseBody
 	public Object saveFamilyGraveOrderHandler(@RequestBody ApprovalGraveVo vo) throws Exception {
@@ -767,7 +768,7 @@ public class PopupController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=SELECT_CONNECT_BUNYANG_URL)
 	public Object selectConnectBunyangHandler(String groupSeq, String bunyangSeq, SearchVo searchVo) throws Exception {
@@ -787,7 +788,7 @@ public class PopupController {
 		mv.setViewName(ROOT_URL + SELECT_CONNECT_BUNYANG_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=CONNECT_SELECTED_BUNYANG_URL)
 	@ResponseBody
 	public Object connectSelectedBunyangHandler(HttpServletRequest request) throws Exception {
@@ -810,5 +811,14 @@ public class PopupController {
 		rtnMap.put("result", bRslt);
 		rtnMap.put("groupSeq", groupSeq);
 		return rtnMap;
+	}
+
+	@RequestMapping(value=NOTI_GRAVE_URL)
+	public Object notiGraveHandler(String seq) {
+		Map<String, Object> info = popupService.getGraveNoticeInfo(seq);
+		ModelAndView mv = new ModelAndView();
+		mv.setViewName(ROOT_URL + NOTI_GRAVE_URL);
+		mv.addObject("info", info);
+		return mv;
 	}
 }

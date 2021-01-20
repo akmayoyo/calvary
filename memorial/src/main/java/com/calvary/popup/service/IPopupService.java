@@ -11,9 +11,11 @@ public interface IPopupService {
 
 	public List<Object> getUserList(SearchVo searchVo);
 	public long getUserListTotalCount(SearchVo searchVo);
-	
+
 	public Map<String, Object> getRefUserByNameAndBirthDate(BunyangUserVo bunyangUserVo);
 	public Map<String, Object> getUserByNameAndBirthDate(String userName, String birthDate);
-	
+
 	public boolean checkDuplicatedUser(BunyangUserVo bunyangUserVo);
+
+	public Map<String, Object> getGraveNoticeInfo(String seq);
 }

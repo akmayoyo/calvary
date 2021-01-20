@@ -6,31 +6,31 @@
 
 	<resultMap id="map" type="java.util.HashMap">
 	</resultMap>
-	
+
 	<!--///////////////////////////  SQL_CALC_FOUND_ROWS 수행후 전체 행 개수 반환 ///////////////////////////-->
 	<select id="getTotalCount" resultType="map">
 		SELECT FOUND_ROWS() as total_count
 	</select>
-	
+
     <!--///////////////////////////  사용자 관련 ///////////////////////////-->
 
 	<select id="getUser" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			a.user_id, a.password, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date,
 			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') as church_officer_name
 		FROM TB_COM_USER a
 		WHERE a.user_id = #{userId}
 		ORDER BY a.user_id
 	</select>
-	
+
 	<select id="getRefUserByNameAndBirthDate" parameterType="map" resultType="map">
-		SELECT 
-			a.user_id, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, 
-			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') as church_officer_name 
+		SELECT
+			a.user_id, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese,
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') as church_officer_name
 		FROM TB_BUNYANG_REF_USER a
-		WHERE a.ref_type = #{refType} 
-		AND a.user_name = #{userName} 
-		AND a.birth_date = #{birthDate} 
+		WHERE a.ref_type = #{refType}
+		AND a.user_name = #{userName}
+		AND a.birth_date = #{birthDate}
 		AND a.gender = #{gender}
 		AND a.mobile = #{mobile}
 		<if test="userId != null and userId != ''">
@@ -38,19 +38,19 @@
 	  	</if>
 		LIMIT 0,1
 	</select>
-	
+
 	<select id="getUserByNameAndBirthDate" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			a.user_id, a.password, a.user_name, a.birth_date, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2, a.church_officer, a.diocese, a.user_status, DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date,
-			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') as church_officer_name 
+			(SELECT code_name FROM TB_COM_CODE cc WHERE cc.code_seq = a.church_officer AND cc.parent_code_seq = 'CHURCH_OFFICER') as church_officer_name
 		FROM TB_COM_USER a
 		WHERE a.user_name = #{userName} AND a.birth_date = #{birthDate}
 		ORDER BY a.user_id
 		LIMIT 0,1
 	</select>
-	
+
 	<select id="getUserList" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			a.user_id, a.password, a.user_name, a.birth_date
 			, a.gender, a.email, a.mobile, a.phone, a.post_number, a.address1, a.address2
 			, a.church_officer, a.diocese, a.user_status
@@ -66,47 +66,47 @@
 		LIMIT #{start}, #{count}
 		</if>
 	</select>
-	
+
 	<select id="getUserListTotalCount" parameterType="map" resultType="map">
-		SELECT 
-			COUNT(*) total_count 
+		SELECT
+			COUNT(*) total_count
 		FROM TB_COM_USER a
 		WHERE 1=1
 		<if test="user_name != null">
 		AND user_name like CONCAT('%',#{user_name},'%')
 		</if>
 	</select>
-	
+
 	<select id="checkDuplicatedUser" parameterType="map" resultType="map">
 		SELECT
 			COUNT(*) AS cnt
 		FROM TB_COM_USER a
 		WHERE a.user_name = #{userName} AND a.birth_date = #{birthDate}
 	</select>
-	
+
 	<select id="checkDuplicatedBunyangUser" parameterType="map" resultType="map">
 		SELECT
 			COUNT(*) AS cnt
 		FROM TB_BUNYANG_REF_USER a
-		WHERE a.ref_type = #{refType} 
-		AND a.user_name = #{userName} 
-		AND a.birth_date = #{birthDate} 
+		WHERE a.ref_type = #{refType}
+		AND a.user_name = #{userName}
+		AND a.birth_date = #{birthDate}
 		AND a.gender = #{gender}
 		AND a.mobile = #{mobile}
 	</select>
-	
+
 	<!-- 사용자정보 생성 -->
 	<insert id="createUser" parameterType="map">
 		INSERT INTO TB_COM_USER( USER_ID,PASSWORD,USER_NAME,BIRTH_DATE,GENDER,EMAIL,MOBILE,PHONE,POST_NUMBER,ADDRESS1,ADDRESS2,CHURCH_OFFICER,DIOCESE,USER_STATUS,REGIST_DATE )
 		VALUES(COALESCE(#{userId},(SELECT CONCAT('USER', LPAD(MAX(CAST(replace(USER_ID,'USER','') AS UNSIGNED))+1, 5, '0')) FROM TB_COM_USER)),#{password},#{userName},#{birthDate},#{gender},#{email},#{mobile},#{phone},#{postNumber},#{address1},#{address2},#{churchOfficer},#{diocese}, 'ACTIVE', CURRENT_TIMESTAMP)
 	</insert>
-	
-	
+
+
 	<!--///////////////////////////  메뉴 관련 ///////////////////////////-->
-	
+
 	<!-- 메뉴정보 조회 -->
 	<select id="getMenuInfo" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			A.menu_seq,
        		A.menu_name,
        		A.menu_url,
@@ -115,13 +115,13 @@
        		A.display_order,
        		A.parent_menu_seq,
        		A.use_yn
-  		FROM TB_COM_MENU A 
+  		FROM TB_COM_MENU A
   		WHERE A.menu_seq = #{menuSeq}
 	</select>
-	
-	
+
+
 	<!--///////////////////////////  코드 관련 ///////////////////////////-->
-	
+
 	<select id="getChildCodeList" parameterType="String" resultType="map">
 		SELECT A.code_seq,
 			A.code_name,
@@ -139,7 +139,7 @@
 	  	</if>
 	  	ORDER BY A.display_order
 	</select>
-	
+
 	<select id="getCodeInfo" parameterType="map" resultType="map">
 		SELECT A.code_seq,
 			A.code_name,
@@ -154,7 +154,7 @@
 	  	WHERE A.code_seq = #{codeSeq}
 	  	LIMIT 0,1
 	</select>
-	
+
 	<select id="getRelationCodeList" parameterType="String" resultType="map">
 		SELECT A.code_seq,
 			A.code_name,
@@ -166,7 +166,7 @@
 	  	FROM TB_COM_RELATION_CODE A
 	  	ORDER BY A.display_order
 	</select>
-	
+
 	<select id="getRelationCoupleCodeList" parameterType="String" resultType="map">
 		SELECT A.couple_seq,
 			A.couple_name,
@@ -184,77 +184,139 @@
 	  	INNER JOIN TB_COM_RELATION_CODE C ON A.code_seq2 = C.code_seq
 	  	ORDER BY A.display_order
 	</select>
-	
-	
+
+
 	<!--///////////////////////////  파일 관련 ///////////////////////////-->
-	
+
 	<select id="getFileSequence" resultType="map">
 		SELECT LPAD(NEXTVAL('seq_sys_file_info')::text, 10, '0') AS seq
 	</select>
-	
+
 	<insert id="createFileInfo" parameterType="map">
 		INSERT INTO TB_SYS_FILE_INFO ( file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date )
 		VALUES (#{fileSeq} , #{fileType} , #{fileSize} , #{filePath} , #{fileName} , #{realFileName}, CURRENT_TIMESTAMP  )
 	</insert>
-	
+
 	<select id="getBunyangFileForm" parameterType="String" resultType="map">
-		SELECT 
-			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.update_date 
-		FROM TB_SYS_FILE_INFO a 
+		SELECT
+			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.update_date
+		FROM TB_SYS_FILE_INFO a
 		WHERE a.file_seq = (SELECT file_seq FROM TB_BUNYANG_FILE_FORM WHERE file_form_type = #{fileFormType})
 	</select>
-	
+
 	<select id="getSysFileInfo" parameterType="String" resultType="map">
-		SELECT 
-			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.update_date 
-		FROM TB_SYS_FILE_INFO a 
+		SELECT
+			a.file_seq, a.file_type, a.file_size, a.file_path, a.file_name, a.real_file_name, a.update_date
+		FROM TB_SYS_FILE_INFO a
 		WHERE a.file_seq = #{fileSeq}
 	</select>
-	
-	
+
+
 	<!--///////////////////////////  시퀀스 관련 ///////////////////////////-->
-	
+
 	<select id="getSeqNexVal" parameterType="map" resultType="map">
 		SELECT COALESCE(seq_num,1) AS seq FROM SEQ_NUMBER a WHERE a.seq_type = #{seqType}
 	</select>
-	
+
 	<update id="updateSeqNexVal" parameterType="map">
 		UPDATE SEQ_NUMBER a
 			SET seq_num = COALESCE(seq_num,0)+1
 		WHERE a.seq_type = #{seqType}
 	</update>
-	
-	
+
+
 	<select id="getYearList" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			YEAR(CURDATE())- seq as year_val
 		FROM seq_0_to_110
 	</select>
-	
+
 	<!-- 메뉴접속 이력 생성 -->
 	<insert id="createMenuAccessLog" parameterType="map">
-		INSERT INTO TB_SYS_MENU_ACCESS_LOG ( 
+		INSERT INTO TB_SYS_MENU_ACCESS_LOG (
 			MENU_ID
 			,LOGIN_USER
 			,LOGIN_IP
 			,ACCESS_TIME
-			,DEVICE_TYPE 
+			,DEVICE_TYPE
 		)
-		SELECT 
+		SELECT
 			menu_seq
 			,#{loginUser}
 			,#{loginIP}
-			,CURRENT_TIMESTAMP  
+			,CURRENT_TIMESTAMP
 			,#{deviceType}
-		FROM TB_COM_MENU a 
+		FROM TB_COM_MENU a
 		WHERE a.menu_seq = #{menuId}
 	</insert>
-	
+
 	<select id="getMsgContent" parameterType="map" resultType="map">
 		select
 			msg_key,msg_type,msg_contents,msg_desc,msg_subject
 		from TB_COM_SMS_MSG
 		where msg_key = #{msgKey}
 	</select>
+
+	<!--///////////////////////////  공지 관련 ///////////////////////////-->
+
+	<select id="getGraveNotice" parameterType="map" resultType="map">
+		select
+			seq
+			,bunyang_seq
+			,use_user_seq
+			,(SELECT user_name FROM TB_BUNYANG_REF_USER t WHERE t.bunyang_seq = a.bunyang_seq AND t.ref_type = 'USE_USER' AND t.user_seq = a.use_user_seq) as use_user_name
+			,request_user
+			,(SELECT user_name FROM TB_BUNYANG_REF_USER t WHERE t.user_id = a.request_user) as request_user_name
+			,borne_out_date
+			,death_date
+			,notice_date
+			,expire_date
+		from TB_BUNYANG_GRAVE_NOTICE a
+		where expire_date > NOW()
+		order by notice_date
+	</select>
+
+	<select id="getGraveNoticeInfo" parameterType="map" resultType="map">
+		select
+			seq
+			,bunyang_seq
+			,use_user_seq
+			,(SELECT user_name FROM TB_BUNYANG_REF_USER t WHERE t.bunyang_seq = a.bunyang_seq AND t.ref_type = 'USE_USER' AND t.user_seq = a.use_user_seq) as use_user_name
+			,request_user
+			,(SELECT user_name FROM TB_BUNYANG_REF_USER t WHERE t.user_id = a.request_user) as request_user_name
+			,borne_out_date
+			,death_date
+			,notice_date
+			,expire_date
+		from TB_BUNYANG_GRAVE_NOTICE a
+		where seq = #{seq}
+		LIMIT 1
+	</select>
+
+	<insert id="createGraveNotice" parameterType="map">
+		<selectKey keyProperty="seq" resultType="int" order="BEFORE">
+			SELECT IFNULL(MAX(seq)+1, 1) FROM TB_BUNYANG_GRAVE_NOTICE
+		</selectKey>
+		INSERT INTO TB_BUNYANG_GRAVE_NOTICE (
+			seq
+			,bunyang_seq
+			,use_user_seq
+			,request_user
+			,borne_out_date
+			,death_date
+			,notice_date
+			,expire_date
+		)
+		VALUES (
+			#{seq}
+			,#{bunyangSeq}
+			,#{useUserSeq}
+			,#{requestUser}
+			,#{borneOutDate}
+			,#{deathDate}
+			,NOW()
+			,DATE_ADD(NOW(), INTERVAL 7 DAY)
+		)
+	</insert>
 
 </mapper>

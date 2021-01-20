@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -22,36 +24,38 @@ import com.calvary.mobile.service.IMobileService;
 @Controller
 @RequestMapping(value=MobileController.ROOT_URL)
 public class MobileController {
-	
+
 	/** */
 	public static final String ROOT_URL = "/mobile";
-	
+
 	@Autowired
 	private IMobileService mobileService;
 	@Autowired
 	private IAdminService adminService;
-	
+
 	/** 메인 페이지  URL */
 	public static final String MAIN = "/main";
-	
+
 	/** 사용신청  URL */
 	public static final String REQUEST_GRAVE = "/requestGrave";
-	
+
 	/** 동산배정  URL */
 	public static final String ASSIGN_GRAVE = "/assignGrave";
-	
+
 	/** 사용신청 정보 저장  URL */
 	public static final String SAVE_REQUEST_GRAVE = "/saveRequestGrave";
-	
+
 	/** 부고알림을 위한 장례정보 입력  URL */
 	public static final String REGIST_FUNERAL_INFO = "/registFuneralInfo";
-	
+
 	/** 추모동산 사용현황 리스트 조회  URL */
 	public static final String GET_GRAVE_USE_LIST = "/getGraveUseList";
-	
-	
-	/** 
-	 * 메인 페이지 
+
+	private static final Logger logger = LoggerFactory.getLogger(MobileController.class);
+
+
+	/**
+	 * 메인 페이지
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=MAIN)
@@ -72,17 +76,17 @@ public class MobileController {
 		}
 		List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
 		List<Object> connectUseUserList = adminService.getConnectBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
-		
+
 		if(useUserList != null && connectUseUserList != null) {
 			useUserList.addAll(connectUseUserList);
 		}
-		
+
 		List<Object> paymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);// 계약금 납부내역
 		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT));// 분양잔금
 		paymentList.addAll(adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_MAINT_PAYMENT));// 관리비
-		
+
 		Map<String, Object> familyGraveRequestInfo = mobileService.getFamilyGraveRequestInfo(bunyangSeq);
-		
+
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName(ROOT_URL + MAIN);
 		mv.addObject("userVo", userVo);
@@ -96,9 +100,9 @@ public class MobileController {
 		mv.addObject("familyGraveRequestInfo", familyGraveRequestInfo);
 		return mv;
 	}
-	
-	/** 
-	 * 사용신청 페이지 
+
+	/**
+	 * 사용신청 페이지
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=REQUEST_GRAVE)
@@ -106,15 +110,15 @@ public class MobileController {
 		Map<String, Object> familyGraveRequestInfo = mobileService.getFamilyGraveRequestInfo(bunyangSeq);
 		Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
 		Map<String, Object> useUserInfo = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId);
-		
+
 		int userSeq = CommonUtil.convertToInt(useUserInfo.get("user_seq"));
 		int coupleSeq = CommonUtil.convertToInt(useUserInfo.get("couple_seq"));
-		
+
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName(ROOT_URL + REQUEST_GRAVE);
-		
+
 		String errorCode = "";
-		
+
 		if(familyGraveRequestInfo != null) {// 가족형 최초 신청건이 승인대기중인 경우
 			errorCode = "1";
 		}else {
@@ -144,14 +148,14 @@ public class MobileController {
 				} else {
 					graveType = CalvaryConstants.GRAVE_TYPE_SINGLE;
 				}
-				
+
 				String connect_product_type = (String)bunyangInfo.get("connect_product_type");
-				
+
 				// 이미 배정된 자리가 있는지 조회
 				List<Object> assignedGraveList = null;
 				Map<String, Object> assignedGraveInfo = null;
 				String coupuleReserved = "0";
-				
+
 				if(CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(connect_product_type)) {
 					assignedGraveList = mobileService.getReservedGraveInfo(bunyangSeq, userSeq, coupleSeq, graveType);
 				} else {
@@ -159,7 +163,7 @@ public class MobileController {
 						assignedGraveList = mobileService.getCoupleReservedGraveInfo(bunyangSeq, coupleSeq);
 					}
 				}
-				
+
 				if(assignedGraveList != null && assignedGraveList.size() > 0) {
 					assignedGraveInfo = (Map<String, Object>)assignedGraveList.get(0);
 					for(int i = 0; i < assignedGraveList.size(); i++) {
@@ -167,17 +171,17 @@ public class MobileController {
 						if("1".equals(String.valueOf(tmp.get("couple_reserved")))) {
 							coupuleReserved = "1";
 							break;
-						}					
+						}
 					}
 				}
-				
+
 				int requiredCnt = mobileService.getRequiredGraveCount(bunyangSeq);// 필요한 묘개수
 				if(!CalvaryConstants.PRODUCT_TYPE_FAMILY.equals(connect_product_type)) {// 개별형인 경우 1개만 신청할 수 있기 때문에
 					requiredCnt = 1;
 				}
-				
+
 				List<Object> avaliableGraveList = null;
-				
+
 				// 배정된 자리가 없는 경우 사용가능한 자리 조회
 				if(assignedGraveInfo == null) {
 					avaliableGraveList = mobileService.getAvailableGraveInfoAll(graveType, requiredCnt);
@@ -194,16 +198,16 @@ public class MobileController {
 			}
 		}
 		mv.addObject("errorCode", errorCode);
-		
+
 		Map<String, Object> contract1 = mobileService.getContract("CONTRACT_01");// 교회행정담당
 		Map<String, Object> contract2 = mobileService.getContract("CONTRACT_02");// 용인공원 장례담당
 		mv.addObject("contract1", contract1);
 		mv.addObject("contract2", contract2);
 		return mv;
 	}
-	
-	/** 
-	 * 사용신청정보 저장 
+
+	/**
+	 * 사용신청정보 저장
 	 */
 	@RequestMapping(value=ASSIGN_GRAVE)
 	@ResponseBody
@@ -215,30 +219,30 @@ public class MobileController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	/** 
-	 * 사용신청정보 저장 
+
+	/**
+	 * 사용신청정보 저장
 	 */
 	@RequestMapping(value=SAVE_REQUEST_GRAVE)
 	@ResponseBody
 	public Object saveRequestGraveHandler(
-			String productType, 
+			String productType,
 			String bunyangSeq,
 			int coupleSeq,
-			int userSeq, 
-			String userId, 
-			String sectionSeq, 
-			int rowSeq, 
-			int colSeq, 
-			int firstColSeq, 
+			int userSeq,
+			String userId,
+			String sectionSeq,
+			int rowSeq,
+			int colSeq,
+			int firstColSeq,
 			int isReserved
 			) throws Exception{
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
 		boolean bRslt = false;
 		String errorCode = "";
-		
+
 		Map<String, Object> familyGraveRequestInfo = mobileService.getFamilyGraveRequestInfo(bunyangSeq);
-		
+
 		if(familyGraveRequestInfo != null) {// 가족형 최초 신청건이 승인대기중인 경우
 			errorCode = "1";
 		}else {
@@ -265,7 +269,7 @@ public class MobileController {
 		if(StringUtils.isEmpty(errorCode)) {
 			Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
 			String groupSeq = (String)bunyangInfo.get("group_seq");
-			
+
 			int iRslt = mobileService.requestGrave(productType, groupSeq, bunyangSeq, coupleSeq, userSeq, sectionSeq, rowSeq, colSeq, firstColSeq, isReserved);
 			bRslt = iRslt > 0;
 		}
@@ -273,7 +277,7 @@ public class MobileController {
 		rtnMap.put("errorCode", errorCode);
 		return rtnMap;
 	}
-	
+
 	@RequestMapping(value=REGIST_FUNERAL_INFO)
 	public Object registFuneralInfoHandler(
 			@RequestParam(value="bunyangSeq", required=true) String bunyangSeq,
@@ -285,12 +289,21 @@ public class MobileController {
 			) {
 		Map<String, Object> useUserInfo = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId);
 		Map<String, Object> graveInfo = adminService.getGraveAssignInfoBySeqNo(sectionSeq, seqNo);
-		
+
 		List<Object> contractMinister = mobileService.getContractMinister(bunyangSeq);
 		Map<String, Object> contract1 = mobileService.getContract("CONTRACT_01");// 교회행정담당
 		Map<String, Object> contract2 = mobileService.getContract("CONTRACT_02");// 용인공원 장례담당
 		List<Object> contract3 = mobileService.getContractList("CONTRACT_03");// 용인공원 라이프
-		
+		// 봉안신청시 공지 팝업 표시를 위해 해당 정보 저장
+		try {
+			String requestUser = "";
+			if(SessionUtil.getCurrentBunyangUser() != null) {
+				requestUser = SessionUtil.getCurrentBunyangUser().getUserId();
+			}
+			mobileService.createGraveNotice(bunyangSeq, String.valueOf(useUserInfo.get("user_seq")), requestUser, borneOutDate, deathDate);
+		} catch (Exception e) {
+			logger.error("createGraveNotice error occured!!", e);
+		}
 		ModelAndView mv = new ModelAndView();
 		mv.addObject("useUserInfo", useUserInfo);
 		mv.addObject("graveInfo", graveInfo);
@@ -303,8 +316,8 @@ public class MobileController {
 		mv.setViewName(ROOT_URL + REGIST_FUNERAL_INFO);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 추모동산 사용현황 리스트 조회
 	 */
 	@RequestMapping(value=GET_GRAVE_USE_LIST)

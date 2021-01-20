@@ -1,3 +1,5 @@
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Date"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <style>
 .btn.btn-round{
@@ -49,7 +51,7 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<!-- 부활동산 정보 -->
 	<div class="list">
 		<div class="group">
@@ -73,7 +75,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="group">
 			<div class="container">
 				<div class="row">
@@ -91,7 +93,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="group">
 			<div class="container">
 				<div class="row">
@@ -127,7 +129,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 		<div class="group">
 			<div class="container">
 				<div class="row">
@@ -164,13 +166,13 @@
 				</div>
 			</div>
 		</div>
-		
+
 	</div>
-	
-	
+
+
 	<!-- 안내 -->
 	<div class="container section">
-		
+
 		<div class="row">
 			<div class="col-sm-4">
 				<div class="text-center img-view">
@@ -185,7 +187,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="col-sm-4">
 				<div class="text-center img-view">
 					<div class="title center">
@@ -199,7 +201,7 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div class="col-sm-4">
 				<div class="text-center img-view">
 					<div class="title center">
@@ -215,5 +217,35 @@
 			</div>
 		</div>
 	</div>
-	
+
 </div>
+<script type="text/javascript" src="${contextPath}/resources/js/common.js?"<%= new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()) %>></script>
+<script type="text/javascript">
+// init 함수
+(function(){
+	// 공지 리스트 조회
+	common.ajax({
+		url:"${contextPath}/main/notice",
+		data:{},
+		showLoading: false,
+		success: function(result) {
+			if(result) {
+				// 봉안 신청 공지사항
+				var graveNotice = result.grave;
+				if(graveNotice && graveNotice.length > 0) {
+					$.each(graveNotice, function(idx, d) {
+						var cookie = common.getCookie('notiGrave'+ d.seq);
+						if(!cookie) {
+							var winoption = {width:560, height:400, left:1+(idx*20), top:1+(idx*20), resizable:'no'};
+							var param = {seq: d.seq};
+							common.openWindow("${contextPath}/popup/notiGrave", "popNotiGrave" + d.seq, winoption, param);
+						}
+					});
+				}
+			}
+		}
+	});
+
+})();
+
+</script>

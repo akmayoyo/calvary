@@ -18,7 +18,7 @@ public class PopupServiceImpl implements IPopupService {
 
 	@Autowired
 	private CommonDao commonDao;
-	
+
 	@Override
 	public List<Object> getUserList(SearchVo searchVo) {
 		Map<String, Object> searchParam = new HashMap<String, Object>();
@@ -28,7 +28,7 @@ public class PopupServiceImpl implements IPopupService {
 		List<Object> list = commonDao.selectList("common.getUserList", searchParam);
 		return list;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public long getUserListTotalCount(SearchVo searchVo) {
@@ -41,7 +41,7 @@ public class PopupServiceImpl implements IPopupService {
 		}
 		return totalCount;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getRefUserByNameAndBirthDate(BunyangUserVo bunyangUserVo) {
@@ -55,7 +55,7 @@ public class PopupServiceImpl implements IPopupService {
 		Map<String, Object> map = (HashMap<String, Object>)commonDao.selectOne("common.getRefUserByNameAndBirthDate", searchParam);
 		return map;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getUserByNameAndBirthDate(String userName, String birthDate) {
@@ -65,7 +65,7 @@ public class PopupServiceImpl implements IPopupService {
 		Map<String, Object> map = (HashMap<String, Object>)commonDao.selectOne("common.getUserByNameAndBirthDate", searchParam);
 		return map;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean checkDuplicatedUser(BunyangUserVo bunyangUserVo) {
@@ -81,6 +81,14 @@ public class PopupServiceImpl implements IPopupService {
 			isDuplicated = (long)map.get("cnt") > 0;
 		}
 		return isDuplicated;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getGraveNoticeInfo(String seq) {
+		Map<String, Object> searchParam = new HashMap<String, Object>();
+		searchParam.put("seq", seq);
+		Map<String, Object> map = (HashMap<String, Object>)commonDao.selectOne("common.getGraveNoticeInfo", searchParam);
+		return map;
 	}
 
 }

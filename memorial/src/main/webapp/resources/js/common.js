@@ -1,12 +1,12 @@
 /**
- * 
+ *
  */
 (function(){
-	
+
 	$.fn.exists = function () {
 	    return this.length !== 0;
 	}
-	
+
 	var ajax = function(opt) {
 		opt = opt || {};
 		opt = $.extend(true, {
@@ -101,7 +101,7 @@
 
 	var loading = function(show) {
 		if(show) {
-			$('body').append('<div class="loadingModalWrapper"><div class="loadingModal"></div><div class="spinner"></div></div>');	
+			$('body').append('<div class="loadingModalWrapper"><div class="loadingModal"></div><div class="spinner"></div></div>');
 		} else {
 			$('body div.loadingModalWrapper').remove();
 		}
@@ -122,7 +122,7 @@
 	        data:fileFrm,
 	        type : "POST",
 	        enctype: 'multipart/form-data',
-	        processData: false, 
+	        processData: false,
 	        contentType:false,
 	        success : function(result) {
 	        	if(result){
@@ -140,9 +140,9 @@
 			}
 	    });
 	};
-	
+
 	var exportExcel = function(excelHeaders, excelFields, searchKeys, searchValues, queryId, fileName, title, sheetName) {
-		
+
 		var data = {};
 		data["excelHeaders"] = excelHeaders;
 		data["excelFields"] = excelFields;
@@ -152,9 +152,9 @@
 		data["fileName"] = fileName;
 		data["title"] = title;
 		data["sheetName"] = sheetName;
-		
+
 		loading(true);
-		
+
 		$.fileDownload("/excel/exportExcel", {
 			httpMethod: "POST",
 			data:data,
@@ -164,7 +164,7 @@
 			prepareCallback: function (url) {
 				loading(false);
 			},
-			failCallback: function (responseHtml, url, error) { 
+			failCallback: function (responseHtml, url, error) {
 				loading(false);
 			}
 		});
@@ -182,7 +182,7 @@
 				}).appendTo(frm);
 			});
 		}
-		
+
 		// fields
 		if(fields && fields.length > 0) {
 			$.each(fields, function(idx, field) {
@@ -193,21 +193,21 @@
 				}).appendTo(frm);
 			});
 		}
-		
+
 		// fileName
 		$('<input>').attr({
 		    type: 'hidden',
 		    name: 'fileName',
 		    value: fileName
 		}).appendTo(frm);
-		
+
 		// queryId
 		$('<input>').attr({
 			type: 'hidden',
 			name: 'queryId',
 			value: queryId
 		}).appendTo(frm);
-		
+
 		// paramKeys
 		if(paramKeys && paramKeys.length > 0) {
 			$.each(paramKeys, function(idx, paramKey) {
@@ -218,7 +218,7 @@
 				}).appendTo(frm);
 			});
 		}
-		
+
 		// paramValues
 		if(paramValues && paramValues.length > 0) {
 			$.each(paramValues, function(idx, paramValue) {
@@ -229,11 +229,11 @@
 				}).appendTo(frm);
 			});
 		}
-		
+
 		frm.appendTo('body').submit();
 		frm.remove();
 	};
-	
+
 	var formatBirthday = function(birthday) {
 		var rtnVal = birthday;
 		var numericVal = toNumeric(rtnVal);
@@ -242,7 +242,7 @@
 		}
 		return rtnVal;
 	}
-	
+
 	var toNumeric = function(val) {
 		var rtnVal = val;
 		if(rtnVal) {
@@ -250,11 +250,11 @@
 		}
 		return rtnVal;
 	}
-	
+
 	var showAlert = function(msg) {
 		alert(msg);
 	}
-	
+
 	var calcBunyangPrice = function(coupleType, singleType) {
 		var price = 0;
 		var cnt = 0;
@@ -268,7 +268,7 @@
 		price = cnt*pricePerCnt;
 		return price;
 	}
-	
+
 	var isValidMail = function(email) {
 		var regExp = /^[0-9a-zA-Z][_a-zA-Z0-9-\.]+@[\.a-zA-Z0-9-]+\.[a-zA-Z]+$/;
 		if(!email) {
@@ -279,7 +279,7 @@
 		}
 		return true;
 	}
-	
+
 	var isValidMobile = function(mobile) {
 		var regExp = /^(010|011|016|017|018|019)-?\d{3,4}-?\d{4}$/;
 		if(!mobile) {
@@ -290,7 +290,7 @@
 		}
 		return true;
 	}
-	
+
 	var isValidPhone = function(phone) {
 		var regExp = /^\d{2,4}-?\d{3,4}-?\d{4}$/;
 		if(!phone) {
@@ -301,7 +301,7 @@
 		}
 		return true;
 	}
-	
+
 	var isVisible = function(el) {
 	    if (el.length > 0 && el.css('visibility') !== 'hidden' && el.css('display') !== 'none') {
 	        return true;
@@ -309,7 +309,7 @@
 	        return false;
 	    }
 	}
-	
+
 	var datePicker = function(el, opt) {
 		opt = opt || {};
 		opt = $.extend(true, {
@@ -352,7 +352,7 @@
 				}
 		);
 	}
-	
+
 	var trimAll = function(val) {
 		var sRtn = '';
 		if(val) {
@@ -360,7 +360,7 @@
 		}
 		return sRtn;
 	}
-	
+
 	var sendSms = function(vo, successFunc, errorFunc) {
 		var sendSmsVo = $.extend(true, {
 			msgKey:null,
@@ -371,9 +371,9 @@
 			subject:null,
 			sequences:null
 		}, vo);
-		
+
 		ajax({
-			url:"/commrest/sendSms", 
+			url:"/commrest/sendSms",
 			data:JSON.stringify(sendSmsVo),
 			contentType: 'application/json',
 			success: function(result) {
@@ -389,13 +389,36 @@
 			}
 		});
 	}
-	
+
 	var isFreeBunyang = function(price) {
 		var bRtn = false;
 		if(!price || price == 0) {
 			bRtn = true;
 		}
 		return bRtn;
+	}
+
+	var getCookie = function(cname) {
+		var name = cname + "=";
+		var decodedCookie = decodeURIComponent(document.cookie);
+		var ca = decodedCookie.split(';');
+		for(var i = 0; i <ca.length; i++) {
+			var c = ca[i];
+		    while (c.charAt(0) == ' ') {
+		      c = c.substring(1);
+		    }
+		    if (c.indexOf(name) == 0) {
+		      return c.substring(name.length, c.length);
+		    }
+		}
+		return "";
+	}
+
+	var setCookie = function (cname, cvalue, exdays) {
+		var d = new Date();
+		d.setTime(d.getTime() + (exdays*24*60*60*1000));
+		var expires = "expires="+ d.toUTCString();
+		document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
 	}
 
 	var common = {};
@@ -418,6 +441,8 @@
 	common.trimAll = trimAll;
 	common.sendSms = sendSms;
 	common.isFreeBunyang = isFreeBunyang;
+	common.getCookie = getCookie;
+	common.setCookie = setCookie;
 
 	window.common = common;
 })();
