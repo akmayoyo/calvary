@@ -33,12 +33,12 @@ int currDay = currDt.get(Calendar.DATE);
 </header>
 
 <div class="alert alert-info" style="margin-top: 60px; margin-bottom: 0; font-size: 12px; padding: 10px 15px;">
-<strong>[공지]</strong><br>- 원활한 장례 진행을 위해서 용인공원 고객센터(031-334-3483)에 장례접수를 해주시기 부탁드립니다.<br> 
-- 장례접수시 상주, 고인명, 발인일시, 배정구역(구역,행,열-고유번호)를 말씀해주시면 감사하겠습니다. 
+<strong>[공지]</strong><br>- 원활한 장례 진행을 위해서 용인공원 고객센터(031-334-3484)에 장례접수를 해주시기 부탁드립니다.<br>
+- 장례접수시 상주, 고인명, 발인일시, 배정구역(구역,행,열-고유번호)를 말씀해주시면 감사하겠습니다.
 </div>
 <!-- 부고 알림 정보 입력 -->
 <div id="registInfo" class="m_contents" style="padding-top: 0;">
-	
+
 	<!-- 아코디언 메뉴 -->
 	<div id="m_menu" class="m_menu">
 
@@ -113,16 +113,16 @@ int currDay = currDt.get(Calendar.DATE);
 			</div>
 		</div>
 	</div>
-	
+
 	<div class="text-center" style="margin-top: 10; padding: 0 15px;">
         <button type="button" class="btn btn-primary btn-lg btn-block" onclick="_confirm()">확인</button>
     </div>
-	
+
 </div>
 
 <!-- 알림 메세지 확인 및 수신인 입력-->
 <div id="registContact" class="m_contents" style="display: none; padding-top: 0;">
-	
+
 	<!-- 아코디언 메뉴 -->
 	<div id="m_menu" class="m_menu">
 
@@ -243,12 +243,12 @@ int currDay = currDt.get(Calendar.DATE);
 			</div>
 		</div>
 	</div>
-	
+
 	<div class="text-center" style="margin-top: 15">
         <button type="button" class="btn btn-default btn-lg" onclick="_reReist()">다시입력</button>
         <button type="button" class="btn btn-primary btn-lg" onclick="_sendSms()">알림전송</button>
     </div>
-	
+
 </div>
 
 <ul style="display: none;">
@@ -261,14 +261,14 @@ int currDay = currDt.get(Calendar.DATE);
 <script type="text/javascript">
 
 (function() {
-	
+
 	// 사용구역표시
 	$('span[name="section_info"]').each(function(idx) {
 		var section = $(this).attr('section_seq') + '구역';
 		section += '  ' + $(this).attr('row_seq') + '행 - ' + seqToAlpha($(this).attr('col_seq')) + '열 (고유번호 : ' + $(this).attr('seq_no') + ')';
 		$(this).text(section);
 	});
-	
+
 	$("#taMessage").keyup(function(){
 		var maxLen = $(this).attr('maxLength');
 		var len = $(this).val().length;
@@ -277,7 +277,7 @@ int currDay = currDt.get(Calendar.DATE);
 		}
 	  $("#sMessageLength").text('(' + len + '/' + maxLen + ')');
 	});
-	
+
 	$('#chkYonginLife').change(function() {
 	    if($(this).is(':checked')) {
 	    	var contact = $('li[name="yonginLife"]').eq(0).attr("mobile");
@@ -292,11 +292,11 @@ int currDay = currDt.get(Calendar.DATE);
 	    	}
 	    }
 	  });
-	
+
 })();
 
 /**
- * 
+ *
  */
 function seqToAlpha(seq) {
 	var seqOfA = "A".charCodeAt(0) + (seq-1);
@@ -328,7 +328,7 @@ function _confirm() {
 	var userName = '${useUserInfo.user_name}';
 	var deathDate = '${deathDate}';
 	var borneOutDate = '${borneOutDate}';
-	
+
 	var el = $('#tiFuneralHall');
 	var funeralHall = el.val();
 	if(!funeralHall) {
@@ -376,7 +376,7 @@ function _confirm() {
 		el.focus();
 		return;
 	}
-	
+
 	el = $('#tiSenderPhon1');
 	var senderPhone1 = el.val();
 	if(!senderPhone1) {
@@ -403,7 +403,7 @@ function _confirm() {
 		common.showAlert('알리는분 연락처 양식이 올바르지 않습니다.');
 		return;
 	}
-	
+
 	$('#sUserName').text(userName);
 	$('#sUserName2').text(userName);
 	$('#sDeathDate').text(deathDate);
@@ -414,7 +414,7 @@ function _confirm() {
 	$('#sSenderName').text(senderName);
 	$('#sSenderPhone').text(senderPhone);
 	$('#sSection').text($('span[name="section_info"]').text());
-	
+
 	$('#registInfo').hide();
 	$('#registContact').show();
 	scrollToTop();
@@ -448,7 +448,7 @@ function _sendSms() {
 // 			receivers.push(mobile);
 // 		}
 // 	});
-	
+
 	// 교구목사
 	mobile = $('#receiverMinister option:selected').val();
 	if(mobile && receivers.indexOf(mobile) < 0) {
@@ -459,7 +459,7 @@ function _sendSms() {
 // 	if(mobile && receivers.indexOf(mobile) < 0) {
 // 		receivers.push(mobile);
 // 	}
-	
+
 	// 상조회사
 	var companyPhone1 = $('#companyPhone1').val();
 	var companyPhone2 = $('#companyPhone2').val();
@@ -470,7 +470,7 @@ function _sendSms() {
 		if(!common.isValidMobile(companyPhone)) {
 			common.showAlert('상조회사 연락처가 올바른 핸드폰 번호가 아닙니다.');
 			if(!companyPhone1) {
-				$('#companyPhone1').focus();		
+				$('#companyPhone1').focus();
 			}else if(!companyPhone2) {
 				$('#companyPhone2').focus();
 			}else if(!companyPhone3) {
@@ -499,7 +499,7 @@ function _sendSms() {
 			if(!common.isValidMobile(phone)) {
 				common.showAlert('추가로 입력한 연락처가 올바른 핸드폰 번호가 아닙니다.');
 				if(!phone1) {
-					$(input1).focus();		
+					$(input1).focus();
 				}else if(!phone2) {
 					$(input2).focus();
 				}else if(!phone3) {
@@ -515,12 +515,12 @@ function _sendSms() {
 			}
 		}
 	});
-	
+
 	if(receivers.length == 0) {
 		common.showAlert('메세지 수신정보가 없습니다.');
 		return;
 	}
-	
+
 	if(bValid) {
 		var userName = $('#sUserName').text();
 		var deathDate = $('#sDeathDate').text();
@@ -531,11 +531,11 @@ function _sendSms() {
 		var senderName = $('#sSenderName').text();
 		var senderPhone = $('#sSenderPhone').text();
 		var extraMessage = $('#taMessage').val();
-		
+
 		if(!common.trimAll(extraMessage)) {
 			extraMessage = '';
 		}
-		
+
 		var sendSmsVo = {};
 		sendSmsVo.msgKey = 'M0008';
 		sendSmsVo.receivers = receivers.join(',');
@@ -558,7 +558,7 @@ function _sendSms() {
  */
 function _logout() {
 	common.ajax({
-		url:"${contextPath}/account/mobile/logout", 
+		url:"${contextPath}/account/mobile/logout",
 		data:{},
 		success: function(result) {
 			if(result) {

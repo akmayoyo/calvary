@@ -73,10 +73,10 @@ int currDay = currDt.get(Calendar.DATE);
 
 <!-- 컨텐츠 -->
 <div class="m_contents">
-	
+
 	<!-- 아코디언 메뉴 -->
 	<div id="m_menu" class="m_menu">
-		
+
 		<div class="panel">
 			<div class="depth1">
 				<a href="javascript:void(0)" style="font-size: 14px;">부활동산 배치도</a>
@@ -230,7 +230,7 @@ int currDay = currDt.get(Calendar.DATE);
 							</tr>
 						</tbody>
 					</table>
-    				
+
     				<div style="background-color: #E0EFFC; padding: 10px 10px; margin-top: 15px;">
     					<div style="text-align: center;">
 							<h4 id="mapTitle" style="display: inline-block;">[ 구역] 사용(봉안)위치 정보</h3>
@@ -248,24 +248,24 @@ int currDay = currDt.get(Calendar.DATE);
 								<span id="assignLegend">가족</span>
 							</c:if>
 						</div>
-						
+
 						<div id="grid" style="text-align: center; margin-top: 20px;">
-						</div>			
-						
-						
+						</div>
+
+
     				</div>
-    				
+
     				<div class="text-center" style="margin-top: 15px;">
         				<button type="button" class="btn btn-primary btn-lg" onclick="_request()">신청</button>
         				<button type="button" class="btn btn-default btn-lg" onclick="_cancel()">취소</button>
     				</div>
-    				
+
 				</div>
 			</div>
 		</div>
-		
+
 	</div>
-	
+
 </div>
 
 <c:if test="${!empty useUserInfo.couple_seq}">
@@ -284,13 +284,13 @@ int currDay = currDt.get(Calendar.DATE);
 <script type="text/javascript">
 
 (function() {
-	
+
 	var hourOptions = "";
 	for(var i = 0; i <= 23; i++) {
 		hourOptions += '<option value="' + i + '">' + i + '시' + '</option>';
 	}
 	$('#selDeathHour, #selBorneOutHour').html(hourOptions);
-	
+
 	$('#selDeathMonth').change(function(e) {
 		var selectedYear = <%=currYear%>;
 		var selectedMonth = $(this).find('option:selected').val();
@@ -301,15 +301,15 @@ int currDay = currDt.get(Calendar.DATE);
 		var selectedMonth = $(this).find('option:selected').val();
 		generateDays(selectedYear, selectedMonth, $('#selBorneOutDay'));
 	});
-	
+
 	$('#selDeathMonth option[value=' + <%=currMonth%> + ']').attr('selected', 'selected');
 	$('#selBorneOutMonth option[value=' + <%=currMonth%> + ']').attr('selected', 'selected');
-	
+
 	$('#selDeathMonth, #selBorneOutMonth').trigger('change');
-	
+
 	$('#selDeathDay option[value=' + <%=currDay%> + ']').attr('selected', 'selected');
 	$('#selBorneOutDay option[value=' + <%=currDay%> + ']').attr('selected', 'selected');
-	
+
 	if(isAssigned()) {
 		var sectionSeq = $('#assignedSectionSeq').val();
 		var rowSeq = $('#assignedRowSeq').val();
@@ -317,11 +317,11 @@ int currDay = currDt.get(Calendar.DATE);
 		var seqNo = $('#assignedSeqNo').val();
 		showGraveMap(sectionSeq, rowSeq, colSeq, seqNo);
 	} else {
-		$('#selGraveSection').trigger('change');	
+		$('#selGraveSection').trigger('change');
 	}
 })();
 
-/** 
+/**
  * 이미 배정된 자리가 있는지 여부 반환
  */
 function isAssigned() {
@@ -333,7 +333,7 @@ function isAssigned() {
 }
 
 /**
- * 
+ *
  */
 function _changeGraveSection() {
 	var selectedOption = $('#selGraveSection').find('option:selected');
@@ -345,14 +345,14 @@ function _changeGraveSection() {
 }
 
 /**
- * 
+ *
  */
 function showGraveMap(sectionSeq, rowSeq, colSeq, seqNo) {
-	
+
 	if(sectionSeq && rowSeq && colSeq) {
 		$('#mapTitle').text('[' + sectionSeq + '구역] 사용(봉안)위치 정보');
 		common.ajax({
-			url:"${contextPath}/mobile/getGraveUseList", 
+			url:"${contextPath}/mobile/getGraveUseList",
 			data:{},
 			success: function(result) {
 				var sectionData = getSectionData(result, sectionSeq);
@@ -368,7 +368,7 @@ function showGraveMap(sectionSeq, rowSeq, colSeq, seqNo) {
 }
 
 /**
- * 
+ *
  */
 function showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo) {
 	if(sectionSeq) {
@@ -397,14 +397,14 @@ function showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo) {
 				if($(this).is(':enabled') && !bChecked) {
 					bChecked = true;
 					$(this).attr('checked', true);
-					$(this).trigger('change');	
+					$(this).trigger('change');
 				}
 			});
 		}
-		
-		
+
+
 		if(requiredCnt > 1) {// 가족형인 경우 선택가능한 리스트를 표시
-			
+
 		} else {
 // 			detailGraveInfo = sectionSeq + '구역';
 // 			//detailGraveInfo += '  ' + (rowSeq ? rowSeq : '') + '행 - ' + seqToAlpha(colSeq) + '열 (고유번호 : ' + (seqNo ? seqNo : '') + ')';
@@ -420,7 +420,7 @@ function showDetailGraveInfo(sectionSeq, rowSeq, colSeq, seqNo) {
  */
 var clickedInfo = {};
 
-/** 
+/**
  *
  */
 function rbRequestChange(e) {
@@ -436,16 +436,16 @@ function rbRequestChange(e) {
 	}
 	clickedInfo.square = square;
 	clickedInfo.data = d;
-	setSelectedStyle(square, true, d);	
+	setSelectedStyle(square, true, d);
 	$('#assignLegend').text('신청위치 (' + rowSeq + '행 - ' + seqToAlpha(colSeq) + '열)');
 }
 
-/** 
+/**
  * 필요한 묘개수 반환
  */
 function getRequiredCnt() {
 	if('${bunyangInfo.connect_product_type}' == 'FAMILY') {
-		return Number(${requiredCnt});	
+		return Number(${requiredCnt});
 	} else {
 		return 1;
 	}
@@ -497,7 +497,7 @@ function getGridData(data, reverse, offset, w, h) {
 			rowCols[rowIdx][col_seq + offset] = item;
 		}
 	});
-	
+
 	var xpos = 1;
     var ypos = 1;
     var width = w ? w : 15;
@@ -519,25 +519,25 @@ function getGridData(data, reverse, offset, w, h) {
                     y: ypos,
                     width: colInfo['is_rownum'] ? rowNumWidth : width,
                     height: height
-                }, colInfo))	
+                }, colInfo))
         	}
         	if(colInfo['is_rownum']) {
-        		xpos += rowNumWidth + margin;	
+        		xpos += rowNumWidth + margin;
         	} else {
         		xpos += width + margin;
         	}
         }
         totalwidth = xpos;
         xpos = 1;
-        ypos += height + margin; 
+        ypos += height + margin;
     }
     totalheight = ypos;
-	
+
     rtnData['totalwidth'] = totalwidth;
     rtnData['totalheight'] = totalheight;
     rtnData['gridData'] = gridData;
-    
-    return rtnData; 
+
+    return rtnData;
 }
 
 var squareData = {};
@@ -554,12 +554,12 @@ function makeGraveGrid(grid, gridData) {
 		.append("svg")
 		.attr("width",totalwidth)
 		.attr("height",totalheight);
-		
+
 	var row = grid.selectAll(".row")
 		.data(gridData.gridData)
 		.enter().append("g")
 		.attr("class", "row");
-		
+
 	var column = row.selectAll(".square")
 		.data(function(d) { return d; })
 		.enter().append("rect")
@@ -581,10 +581,10 @@ function makeGraveGrid(grid, gridData) {
 			if(d.is_rownum) {
 	    		return 0;
 			} else {
-				return 1;	
+				return 1;
 			}
 		});
-	
+
 	var txt = row.selectAll("text")
 	.data(function(d) { return d; })
 	.enter().append("text")
@@ -605,7 +605,7 @@ function makeGraveGrid(grid, gridData) {
 		if(d.is_rownum) {
 			return d.row_seq;
 		} else {
-			return seqToAlpha(d.col_seq);	
+			return seqToAlpha(d.col_seq);
 		}
 	})
 	.style("text-anchor", function(d) {
@@ -615,33 +615,33 @@ function makeGraveGrid(grid, gridData) {
 			return "middle";
 		}
 	});
-	
+
 }
 
 /**
- * 
+ *
  */
 function setSelectedStyle(el, selected, d) {
 	var txt = $('#' + $(el).attr('id').replace('square', 'txt'));
 	if(selected) {
-		d3.select(el).style("cursor", "pointer"); 
-		d3.select(el).style("fill", "#007BFF"); 
-		txt.attr("fill", "#fff");	
+		d3.select(el).style("cursor", "pointer");
+		d3.select(el).style("fill", "#007BFF");
+		txt.attr("fill", "#fff");
 	} else {
-		d3.select(el).style("cursor", "default"); 
-		d3.select(el).style("fill", getRectFillColor(d)); 
-		txt.attr("fill", getTextFillColor(d));	
+		d3.select(el).style("cursor", "default");
+		d3.select(el).style("fill", getRectFillColor(d));
+		txt.attr("fill", getTextFillColor(d));
 	}
 }
 
 /**
- * 
+ *
  */
 function getRectFillColor(d) {
 	var groupSeq = '${bunyangInfo.group_seq}';
 	var bunyangSeq = '${bunyangInfo.bunyang_seq}';
 	var isFamilyGrave = false;
-	
+
 	if('${bunyangInfo.connect_product_type}' == 'FAMILY') {
 		if(isAssigned()) {
 			if(!groupSeq) {
@@ -652,7 +652,7 @@ function getRectFillColor(d) {
 				if(groupSeq == d.group_seq) {
 					isFamilyGrave = true;
 				}
-			}	
+			}
 		} else {
 			var selectedOption = $('#selGraveSection').find('option:selected');
 			var sectionSeq = selectedOption.val();
@@ -665,7 +665,7 @@ function getRectFillColor(d) {
 			}
 		}
 	}
-	
+
 	if(isFamilyGrave) {// 가족자리
 		return "#47CCCA";
 	} else if(d.is_rownum){// 행번호
@@ -678,13 +678,13 @@ function getRectFillColor(d) {
 }
 
 /**
- * 
+ *
  */
 function getTextFillColor(d) {
 	var groupSeq = '${bunyangInfo.group_seq}';
 	var bunyangSeq = '${bunyangInfo.bunyang_seq}';
 	var isFamilyGrave = false;
-	
+
 	if(isAssigned()) {
 		if(!groupSeq) {
 			if(bunyangSeq == d.bunyang_seq) {
@@ -694,7 +694,7 @@ function getTextFillColor(d) {
 			if(groupSeq == d.group_seq) {
 				isFamilyGrave = true;
 			}
-		}	
+		}
 	} else {
 		var selectedOption = $('#selGraveSection').find('option:selected');
 		var sectionSeq = selectedOption.val();
@@ -706,7 +706,7 @@ function getTextFillColor(d) {
 			isFamilyGrave = true;
 		}
 	}
-	
+
 	if(isFamilyGrave) {// 가족자리
 		return "#fff";
 	} else if(d.is_rownum){// 행번호
@@ -745,7 +745,7 @@ function getAssignedGraveInfo() {
 }
 
 /**
- * 
+ *
  */
 function _request() {
 	var sectionSeq = '', rowSeq = 0, colSeq = 0, firstColSeq = 0, isReserved = 0, seqNo = '';
@@ -765,7 +765,7 @@ function _request() {
 		firstColSeq = parseInt(selectedOption.attr('colSeq'));
 		seqNo = clickedInfo.data['seq_no'];
 	}
-	
+
 	var data = {};
 	data.productType = '${bunyangInfo.connect_product_type}';
 	data.bunyangSeq = '${bunyangInfo.bunyang_seq}';
@@ -777,16 +777,16 @@ function _request() {
 	data.colSeq = colSeq;
 	data.firstColSeq = firstColSeq;
 	data.isReserved = isReserved;
-	
+
 	common.ajax({
-		//url:"${contextPath}/mobile/assignGrave", 
-		url:"${contextPath}/mobile/saveRequestGrave", 
+		//url:"${contextPath}/mobile/assignGrave",
+		url:"${contextPath}/mobile/saveRequestGrave",
 		data:data,
 		success: function(result) {
 			if(result && result.result) {
 				//common.showAlert('신청되었습니다.\n부고 알림 메세지 전송 페이지로 이동합니다.');
-				common.showAlert('신청되었습니다.\n원활한 장례 진행을 위해서 용인공원 고객센터(031-334-3483)에 장례접수를 해주시기 부탁드립니다.\n장례접수시 상주, 고인명, 발인일시, 배정구역(구역,행,열-고유번호)를 말씀해주시면 감사하겠습니다.');
-				
+				common.showAlert('신청되었습니다.\n원활한 장례 진행을 위해서 용인공원 고객센터(031-334-3484)에 장례접수를 해주시기 부탁드립니다.\n장례접수시 상주, 고인명, 발인일시, 배정구역(구역,행,열-고유번호)를 말씀해주시면 감사하겠습니다.');
+
 				// 부고일시,발인일시
 				var selectedHour = $('#selDeathHour option:selected').val();
 				if(selectedHour < 10) {
@@ -796,7 +796,7 @@ function _request() {
 				var deathDate = $('#selDeathMonth option:selected').text();
 				deathDate += $('#selDeathDay option:selected').text();
 				deathDate += ' ' + selectedHour;
-				
+
 				selectedHour = $('#selBorneOutHour option:selected').val();
 				if(selectedHour < 10) {
 					selectedHour = '0' + selectedHour;
@@ -835,18 +835,18 @@ function _request() {
 				} else if(errorCode == '4') {
 					common.showAlert('이미 신청된 사용자입니다.');
 				} else {
-					common.showAlert('저장에 실패하였습니다.');	
+					common.showAlert('저장에 실패하였습니다.');
 				}
 			}
 		},
 		error: function(xhr, status, message) {
-			common.showAlert('사용(봉안)신청시 에러가 발생하였습니다.');	
+			common.showAlert('사용(봉안)신청시 에러가 발생하였습니다.');
 		}
 	});
 }
 
 /**
- * 
+ *
  */
 function _cancel() {
 	var frm = document.getElementById("frm");
@@ -855,7 +855,7 @@ function _cancel() {
 }
 
 /**
- * 
+ *
  */
 function seqToAlpha(seq) {
 	var seqOfA = "A".charCodeAt(0) + (seq-1);
@@ -885,7 +885,7 @@ function generateDays(year, month, el) {
  */
 function _logout() {
 	common.ajax({
-		url:"${contextPath}/account/mobile/logout", 
+		url:"${contextPath}/account/mobile/logout",
 		data:{},
 		success: function(result) {
 			if(result) {
