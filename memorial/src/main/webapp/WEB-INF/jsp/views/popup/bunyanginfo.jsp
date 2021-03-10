@@ -77,7 +77,7 @@
             </tbody>
         </table>
     </div>
-    
+
     <!-- 대리인(대리인신청시만 표시됨) -->
     <div id="divAgentInfo" style="margin-top: 15px;">
     	<div>
@@ -200,10 +200,10 @@
 
 	<!-- 동산 신청 정보 -->
 	<div style="margin-top: 15px;">
-		<div class="pull-left"><h4>동산 신청 정보</h4></div>	
+		<div class="pull-left"><h4>동산 신청 정보</h4></div>
 	</div>
     <div class="clearfix"></div>
-    
+
     <div class="table-responsive" style="border-top: 1px solid #999;">
         <table class="table table-style" style="border-top: 0;">
         	<colgroup>
@@ -239,7 +239,7 @@
             </tbody>
         </table>
     </div>
-    
+
     <c:if test="${not empty paymentList}">
     <!-- 잔금 납부 내역 -->
 	<div style="margin-top: 15px;">
@@ -283,18 +283,20 @@
         </table>
     </div>
     </c:if>
-    
+
     <c:if test="${bunyangInfo.progress_status == 'E'}">
-    
-    <c:set var="penalty" value="${bunyangInfo.down_payment/2}"/><!-- 위약금 -->
-    <c:set var="cancelReturn" value="${bunyangInfo.down_payment + bunyangInfo.balance_payment - penalty}"/><!-- 반환금 -->
-    
+
+    <c:set var="penalty" value="${bunyangInfo.down_payment/2}"/><!-- 위약금(단순 계약금/2) -->
+    <c:set var="penalty2" value="${bunyangInfo.down_payment + bunyangInfo.balance_payment - bunyangInfo.cancel_payment}"/><!-- 위약금 -->
+    <c:set var="cancelReturn" value="${bunyangInfo.down_payment + bunyangInfo.balance_payment - penalty}"/><!-- 반환금(단순 계약금/2로 계산한 반환금) -->
+    <c:set var="cancelPayment" value="${bunyangInfo.cancel_payment}"/><!-- 반환금(납부내역에 기록된 반환금) -->
+
     <!-- 계약금 납부 내역 -->
 	<div style="margin-top: 15px;">
 		<div class="pull-left"><h4>해약 내역</h4></div>
 	</div>
     <div class="clearfix"></div>
-    
+
     <div class="table-responsive" style="border-top: 1px solid #999;">
         <table class="table table-style" style="border-top: 0;">
         	<colgroup>
@@ -313,11 +315,25 @@
             	<tr>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static">해약 위약금</p></th>
             		<td align="left">
-            			<p class="form-control-static">일금 : ${cutil:convertPriceToHangul(penalty)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(penalty)})</p>
+           			<c:choose>
+           				<c:when test="${cancelPayment eq 0 }">
+           				<p class="form-control-static">일금 : ${cutil:convertPriceToHangul(penalty)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(penalty)})</p>
+           				</c:when>
+           				<c:otherwise>
+           				<p class="form-control-static">일금 : ${cutil:convertPriceToHangul(penalty2)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(penalty2)})</p>
+           				</c:otherwise>
+           			</c:choose>
             		</td>
             		<th style="background-color: #f5f5f5;"><p class="form-control-static">반환금</p></th>
             		<td align="left">
-            			<p class="form-control-static">일금 : ${cutil:convertPriceToHangul(cancelReturn)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(cancelReturn)})</p>
+            		<c:choose>
+           				<c:when test="${cancelPayment eq 0 }">
+           				<p class="form-control-static">일금 : ${cutil:convertPriceToHangul(cancelReturn)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(cancelReturn)})</p>
+           				</c:when>
+           				<c:otherwise>
+           				<p class="form-control-static">일금 : ${cutil:convertPriceToHangul(cancelPayment)}원&nbsp;&nbsp;(₩${cutil:getThousandSeperatorFormatString(cancelPayment)})</p>
+           				</c:otherwise>
+           			</c:choose>
             		</td>
             	</tr>
             	<tr>
@@ -330,14 +346,14 @@
         </table>
     </div>
     </c:if>
-    
+
     <!-- 추가분양리스트 -->
     <c:if test="${not empty addedBunyangList}">
     <div style="margin-top: 15px;">
-		<div class="pull-left"><h4>추가 분양 리스트</h4></div>	
+		<div class="pull-left"><h4>추가 분양 리스트</h4></div>
 	</div>
 	<div class="clearfix"></div>
-    
+
     <div class="table-responsive" style="border-top: 1px solid #999;">
          <table class="table table-style">
 			<thead>
@@ -377,10 +393,10 @@
 		</table>
     </div>
     </c:if>
-    
+
     <!-- 관련 양식 -->
 	<div style="margin-top: 15px;">
-		<div class="pull-left"><h4>관련 양식</h4></div>	
+		<div class="pull-left"><h4>관련 양식</h4></div>
 	</div>
     <div class="clearfix"></div>
     <!-- 양식 리스트 -->
@@ -389,7 +405,7 @@
 		<li class="list-group-item"><a href="javascript:void(0)" onclick="donwloadFile('${file.file_seq}')">${file.file_name }</a></li>
 		</c:forEach>
 	</ul>
-	
+
 	<div class="mt-30 text-center">
         <button type="button" class="btn btn-default btn-lg btnClose">닫기</button>
     </div>
@@ -404,14 +420,14 @@
     $("button.btnClose").click(function(e) {
         common.closeWindow();
     });
-	
+
  	// 사용구역표시
 	$('span[name="section_info"]').each(function(idx) {
 		var section = $(this).attr('section_seq') + '구역';
 		section += '  ' + $(this).attr('row_seq') + '행-' + seqToAlpha($(this).attr('col_seq')) + '열 (고유번호:' + $(this).attr('seq_no') + ')';
 		$(this).text(section);
 	});
-	
+
 })();
 
 /**
@@ -422,7 +438,7 @@ function donwloadFile(fileSeq) {
 }
 
 /**
- * 
+ *
  */
 function seqToAlpha(seq) {
 	var seqOfA = "A".charCodeAt(0) + (seq-1);

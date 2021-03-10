@@ -41,10 +41,10 @@ import com.calvary.file.service.IFileService;
 
 @Service
 public class ExcelServiceImpl implements IExcelService {
-	
+
 	/** */
 	private static final Logger logger = LoggerFactory.getLogger("ERROR_LOGGER");
-	
+
 	@Autowired
 	private CommonDao commonDao;
 	@Autowired
@@ -53,15 +53,15 @@ public class ExcelServiceImpl implements IExcelService {
 	private ICommonService commonService;
 	@Autowired
 	private IAdminService adminService;
-	
-	/** 
+
+	/**
 	 * 엑셀파일의 특정셀 값을 업데이트
 	 * @param excelFile 엑셀파일
-	 * @param sheetnums sheet번호 
-	 * @param rownums 행번호 
-	 * @param cellnums 셀번호 
+	 * @param sheetnums sheet번호
+	 * @param rownums 행번호
+	 * @param cellnums 셀번호
 	 * @param cellvalues 셀값
-	 * @return true/false 
+	 * @return true/false
 	 */
 	@Override
 	public boolean updateExcelCellValue(File excelFile, List<Integer> sheetnums, List<Integer> rownums, List<Integer> cellnums, List<Object> cellvalues) {
@@ -123,24 +123,24 @@ public class ExcelServiceImpl implements IExcelService {
         		try {
 					workbook.close();
 				} catch (IOException e) {
-					
+
 				}
         	}
         }
 		return bRslt;
 	}
 
-	/** 
-	 * Export 할 데이터 리스트 조회  
+	/**
+	 * Export 할 데이터 리스트 조회
 	 */
 	@Override
 	public List<Object> getExportDataList(String queryId, Map<String, Object> queryParam) {
 		List<Object> list = commonDao.selectList(queryId, queryParam);
 		return list;
 	}
-	
-	/** 
-	 * 분양 파일 서식 정보 생성 또는 업데이트 
+
+	/**
+	 * 분양 파일 서식 정보 생성 또는 업데이트
 	 */
 	@SuppressWarnings("unchecked")
 	public String createBunyangExcelForm(ExcelForms excelForm, String bunyangSeq, String fileSeq, String userId) {
@@ -149,15 +149,15 @@ public class ExcelServiceImpl implements IExcelService {
 		String destFilePath = FileController.ROOT_DIR + "/bunyang";
 		String file_append_value = "";
 		int i;
-		
+
 		List<Integer> sheetnums = new ArrayList<Integer>();
 		List<Integer> rownums = new ArrayList<Integer>();
 		List<Integer> cellnums = new ArrayList<Integer>();
 		List<Object> cellvalues = new ArrayList<Object>();
-		
+
 		Map<String, Object> param = new HashMap<String, Object>();
 		param.put("bunyangSeq", bunyangSeq);
-		
+
 		// 분양정보
 		Map<String, Object> bunyangInfo = (HashMap<String, Object>) commonDao.selectOne("admin.getBunyangInfo", param);
 		// 신청자정보
@@ -166,7 +166,7 @@ public class ExcelServiceImpl implements IExcelService {
 		// 대리인정보
 		param.put("refType", CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER);
 		Map<String, Object> agentUser = (HashMap<String, Object>) commonDao.selectOne("admin.getBunyangRefUserInfo",  param);
-		
+
 		// 부부형
 		int coupleTypeCount = (int)bunyangInfo.get("couple_type_count");
 		// 1인형
@@ -183,10 +183,10 @@ public class ExcelServiceImpl implements IExcelService {
 		int balancePrice = totalPrice - contractPrice;
 		// 번호(승인이후부터 생성됨)
 		String bunyangNo = (String)bunyangInfo.get("bunyang_no");
-		
+
 		int downPayment = CommonUtil.convertToInt(bunyangInfo.get("down_payment"));// 납부계약금
 		int balancePayment = CommonUtil.convertToInt(bunyangInfo.get("balance_payment"));// 납부잔금
-		
+
 		// 금액 한글변환명
 		String totalPriceH = CommonUtil.convertPriceToHangul(totalPrice);
 		String contractPriceH = CommonUtil.convertPriceToHangul(contractPrice);
@@ -199,9 +199,9 @@ public class ExcelServiceImpl implements IExcelService {
 		String balancePriceF = CommonUtil.getThousandSeperatorFormatString(balancePrice);
 		String downPaymentF = CommonUtil.getThousandSeperatorFormatString(downPayment);
 		String balancePaymentF = CommonUtil.getThousandSeperatorFormatString(balancePayment);
-		
+
 		if(ExcelForms.APPLY_FORM.equals(excelForm) || ExcelForms.APPROVAL_FORM.equals(excelForm)) {// 분양신청서, 신청승인서
-			
+
 			if(ExcelForms.APPLY_FORM.equals(excelForm)) {
 				fileFormType = CalvaryConstants.FILE_FORM_TYPE_APPLY;
 				destFilePath += "/apply";
@@ -209,7 +209,7 @@ public class ExcelServiceImpl implements IExcelService {
 				fileFormType = CalvaryConstants.FILE_FORM_TYPE_APPROVAL;
 				destFilePath += "/approval";
 			}
-			
+
 			//============= 업데이트할 셀정보 설정 =============//
 			// 승인번호
 			if(ExcelForms.APPROVAL_FORM.equals(excelForm)) {
@@ -218,7 +218,7 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(13);
 				cellvalues.add(bunyangNo);
 			}
-			
+
 			// 신청자성명
 			sheetnums.add(0);
 			rownums.add(8);
@@ -239,43 +239,43 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(8);
 			cellnums.add(7);
 			cellvalues.add((String)applyUser.get("church_officer_name"));
-			
+
 			// 신청자  교구
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(10);
 			cellvalues.add((String)applyUser.get("diocese"));
-			
+
 			// 신청자  휴대전화
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(11);
 			cellvalues.add((String)applyUser.get("mobile"));
-			
+
 			// 신청자  우편번호
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(1);
 			cellvalues.add((String)applyUser.get("post_number"));
-			
+
 			// 신청자  주소
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(2);
 			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
-			
+
 			// 전화
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("K"));
 			cellvalues.add((String)applyUser.get("phone"));
-			
+
 			// 신청자  이메일
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(11);
 			cellvalues.add((String)applyUser.get("email"));
-			
+
 			// 신청형태
 			String productionType = (String)bunyangInfo.get("product_type");
 			if(CalvaryConstants.PRODUCT_TYPE_EACH.equals(productionType)) {// 개별형
@@ -289,21 +289,21 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(11);
 				cellvalues.add("O");
 			}
-			
+
 			if(coupleTypeCount > 0) {
 				sheetnums.add(0);
 				rownums.add(20);
 				cellnums.add(8);
 				cellvalues.add(coupleTypeCount);
 			}
-			
+
 			if(singleTypeCount > 0) {
 				sheetnums.add(0);
 				rownums.add(20);
 				cellnums.add(11);
 				cellvalues.add(singleTypeCount);
 			}
-			
+
 			// 관리비 납부형태
 			String serviceChargeType = (String)bunyangInfo.get("service_charge_type");
 			if(CalvaryConstants.SERVICE_CHARGE_TYPE_APPLY_USER.equals(serviceChargeType)) {// 신청자
@@ -358,7 +358,7 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(convertColAlphabetToIndex("M"));
 				cellvalues.add((String)bunyangInfo.get("maint_charger_name"));
 			}
-			
+
 			// 신청일
 			sheetnums.add(0);
 			rownums.add(30);
@@ -370,7 +370,7 @@ public class ExcelServiceImpl implements IExcelService {
 			}else {
 				cellvalues.add("");
 			}
-			
+
 			if(ExcelForms.APPLY_FORM.equals(excelForm)) {// 신청자는 분양신청서만
 				// 신청자
 				sheetnums.add(0);
@@ -378,13 +378,13 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(3);
 				cellvalues.add((String)applyUser.get("user_name"));
 			}
-			
+
 			// 총기수
 			sheetnums.add(0);
 			rownums.add(21);
 			cellnums.add(1);
 			cellvalues.add(bunyangCnt);
-			
+
 			if(ExcelForms.APPROVAL_FORM.equals(excelForm)) {// 총기수, 분양가, 계약금은 신청승인서만
 				// 총분양가
 				sheetnums.add(0);
@@ -395,7 +395,7 @@ public class ExcelServiceImpl implements IExcelService {
 				rownums.add(37);
 				cellnums.add(5);
 				cellvalues.add(totalPrice);
-				
+
 				// 총계약금
 				sheetnums.add(0);
 				rownums.add(38);
@@ -406,7 +406,7 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(5);
 				cellvalues.add(contractPrice);
 			}
-			
+
 			// 대리인신청시 대리인 정보
 			if(agentUser != null) {
 				// 성명
@@ -414,49 +414,49 @@ public class ExcelServiceImpl implements IExcelService {
 				rownums.add(13);
 				cellnums.add(1);
 				cellvalues.add((String)agentUser.get("user_name"));
-				
+
 				// 생년월일
 				sheetnums.add(0);
 				rownums.add(13);
 				cellnums.add(4);
 				cellvalues.add((String)agentUser.get("birth_date"));
-				
+
 				// 성별
 				sheetnums.add(0);
 				rownums.add(13);
 				cellnums.add(6);
 				cellvalues.add(agentUser.get("gender"));
-				
+
 				// 신청자와의 관계
 				sheetnums.add(0);
 				rownums.add(13);
 				cellnums.add(7);
 				cellvalues.add((String)agentUser.get("relation_type_name"));
-				
+
 				// 휴대전화
 				sheetnums.add(0);
 				rownums.add(13);
 				cellnums.add(11);
 				cellvalues.add((String)agentUser.get("mobile"));
-				
+
 				// 우편번호
 				sheetnums.add(0);
 				rownums.add(15);
 				cellnums.add(1);
 				cellvalues.add((String)agentUser.get("post_number"));
-				
+
 				// 주소
 				sheetnums.add(0);
 				rownums.add(15);
 				cellnums.add(2);
 				cellvalues.add(CommonUtil.nullToEmpty(agentUser.get("address1")) + CommonUtil.nullToEmpty(agentUser.get("address2")));
-				
+
 				// 이메일
 				sheetnums.add(0);
 				rownums.add(15);
 				cellnums.add(11);
 				cellvalues.add((String)agentUser.get("email"));
-				
+
 				if(ExcelForms.APPLY_FORM.equals(excelForm)) {// 신청자는 분양신청서만
 					// 신청자(대리인)
 					sheetnums.add(0);
@@ -465,19 +465,19 @@ public class ExcelServiceImpl implements IExcelService {
 					cellvalues.add((String)agentUser.get("user_name"));
 				}
 			}
-			
+
 		}else if(ExcelForms.USE_USER_FORM.equals(excelForm)) {// 분양신청서-사용자
 			param = new HashMap<String, Object>();
 			param.put("bunyangSeq", bunyangSeq);
 			param.put("refType", CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
 			// 사용자정보
 			List<Object> useUserList = commonDao.selectList("admin.getBunyangRefUserInfo",  param);
-			
+
 			fileFormType = CalvaryConstants.FILE_FORM_TYPE_USE_USER;
 			destFilePath += "/useUser";
-			
+
 			int startRowNum = 10;
-			
+
 			if(useUserList != null && useUserList.size() > 0) {
 				// 신청자 성명
 				sheetnums.add(0);
@@ -517,7 +517,7 @@ public class ExcelServiceImpl implements IExcelService {
 					rownums.add(startRowNum);
 					cellnums.add(7);
 					cellvalues.add(CommonUtil.nullToEmpty(userMap.get("address1")) + CommonUtil.nullToEmpty(userMap.get("address2")));
-					
+
 					// 신청유형
 					if(coupleSeq > 0) {
 						sheetnums.add(0);
@@ -535,7 +535,7 @@ public class ExcelServiceImpl implements IExcelService {
 						cellnums.add(9);
 						cellvalues.add("O");
 					}
-					
+
 					// 갈보리 교인여부
 					String isChurchPerson = (String)userMap.get("is_church_person");
 					sheetnums.add(0);
@@ -574,10 +574,10 @@ public class ExcelServiceImpl implements IExcelService {
 				}
 			}
 		}else if(ExcelForms.CONTRACT_FORM.equals(excelForm)) {// 분양계약서
-			
+
 			fileFormType = CalvaryConstants.FILE_FORM_TYPE_CONTRACT;
 			destFilePath += "/contract";
-			
+
 			// 계약번호
 			sheetnums.add(0);
 			rownums.add(5);
@@ -611,25 +611,25 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("I"));
 			cellvalues.add((String)applyUser.get("church_officer_name"));
-			
+
 			// 신청자  교구
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add((String)applyUser.get("diocese"));
-			
+
 			// 신청자  휴대전화
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("M"));
 			cellvalues.add((String)applyUser.get("mobile"));
-			
+
 			// 신청자  우편번호
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("C"));
 			cellvalues.add((String)applyUser.get("post_number"));
-			
+
 			// 신청자  주소
 			sheetnums.add(0);
 			rownums.add(10);
@@ -639,19 +639,19 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(54);
 			cellnums.add(convertColAlphabetToIndex("E"));
 			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
-			
+
 			// 신청자  전화번호
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add((String)applyUser.get("phone"));
-			
+
 			// 신청자  이메일
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("M"));
 			cellvalues.add((String)applyUser.get("email"));
-			
+
 			// 신청형태
 			String productionType = (String)bunyangInfo.get("product_type");
 			if(CalvaryConstants.PRODUCT_TYPE_EACH.equals(productionType)) {// 개별형
@@ -677,13 +677,13 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(convertColAlphabetToIndex("M"));
 				cellvalues.add(singleTypeCount);
 			}
-			
+
 			// 총기수
 			sheetnums.add(0);
 			rownums.add(16);
 			cellnums.add(convertColAlphabetToIndex("C"));
 			cellvalues.add(bunyangCnt);
-			
+
 			// 총분양가
 			sheetnums.add(0);
 			rownums.add(17);
@@ -695,7 +695,7 @@ public class ExcelServiceImpl implements IExcelService {
 			cellnums.add(convertColAlphabetToIndex("H"));
 			//cellvalues.add("(₩" + totalPriceF + ")");
 			cellvalues.add(totalPrice);
-			
+
 			// 총계약금
 			sheetnums.add(0);
 			rownums.add(18);
@@ -707,7 +707,7 @@ public class ExcelServiceImpl implements IExcelService {
 			cellnums.add(convertColAlphabetToIndex("H"));
 			//cellvalues.add("(₩" + contractPriceF + ")");
 			cellvalues.add(contractPrice);
-			
+
 			// 잔금
 			sheetnums.add(0);
 			rownums.add(19);
@@ -719,7 +719,7 @@ public class ExcelServiceImpl implements IExcelService {
 			cellnums.add(convertColAlphabetToIndex("H"));
 			//cellvalues.add("(₩" + balancePriceF + ")");
 			cellvalues.add(balancePrice);
-			
+
 			// 계약금 납부내역
 			List<Object> downPaymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_DOWN_PAYMENT);
 			Map<String, Object> tmp = null;
@@ -732,7 +732,7 @@ public class ExcelServiceImpl implements IExcelService {
 					int totalAmount = CommonUtil.convertToInt(tmp.get("total_amount"));
 					String paymentMethod = (String)tmp.get("payment_method");
 					String createUser = (String)tmp.get("create_user_name");
-					
+
 					// 납부일자
 					sheetnums.add(0);
 					rownums.add(22);
@@ -758,7 +758,7 @@ public class ExcelServiceImpl implements IExcelService {
 					cellnums.add(convertColAlphabetToIndex("L"));
 					//cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
 					cellvalues.add(paymentAmount);
-					
+
 					// 납부방법
 					if(CalvaryConstants.PAYMENT_METHOD_TRANSFER.equals(paymentMethod)) {// 이체
 						sheetnums.add(0);
@@ -771,7 +771,7 @@ public class ExcelServiceImpl implements IExcelService {
 						cellnums.add(convertColAlphabetToIndex("N"));
 						cellvalues.add("O");
 					}
-					
+
 					// 확인일자
 					sheetnums.add(0);
 					rownums.add(26);
@@ -781,7 +781,7 @@ public class ExcelServiceImpl implements IExcelService {
 					rownums.add(46);
 					cellnums.add(convertColAlphabetToIndex("H"));
 					cellvalues.add((String)bunyangInfo.get("contract_date"));
-					
+
 					// 계약금미납,완납,과납
 					sheetnums.add(0);
 					rownums.add(26);
@@ -793,17 +793,17 @@ public class ExcelServiceImpl implements IExcelService {
 					} else {
 						cellvalues.add("계약금미납");
 					}
-					
+
 					// 확인자
 					sheetnums.add(0);
 					rownums.add(26);
 					cellnums.add(convertColAlphabetToIndex("J"));
 					cellvalues.add(createUser);
-					
+
 					paymentRnum++;
 				}
 			}
-			
+
 			// 잔금 납부내역
 			List<Object> balancePaymentList = adminService.getPaymentHistory(bunyangSeq, CalvaryConstants.PAYMENT_TYPE_BALANCE_PAYMENT);
 			if(balancePaymentList != null && balancePaymentList.size() > 0) {
@@ -811,7 +811,7 @@ public class ExcelServiceImpl implements IExcelService {
 					tmp = (HashMap<String, Object>)balancePaymentList.get(i);
 					String paymentDate = (String)tmp.get("payment_date_short");
 					int paymentAmount = CommonUtil.convertToInt(tmp.get("payment_amount"));
-					
+
 					// 납부일자
 					sheetnums.add(0);
 					rownums.add(paymentRnum);
@@ -823,14 +823,14 @@ public class ExcelServiceImpl implements IExcelService {
 					cellnums.add(convertColAlphabetToIndex("L"));
 					//cellvalues.add("₩" + CommonUtil.getThousandSeperatorFormatString(paymentAmount));
 					cellvalues.add(paymentAmount);
-					
+
 					paymentRnum++;
 				}
 			}
 		}else if(ExcelForms.FULL_PAYMENT_FORM.equals(excelForm)) {// 완납확인증명서
 			fileFormType = CalvaryConstants.FILE_FORM_TYPE_FULL_PAYMENT;
 			destFilePath += "/fullPayment";
-			
+
 			// 계약번호
 			sheetnums.add(0);
 			rownums.add(5);
@@ -856,43 +856,43 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("I"));
 			cellvalues.add((String)applyUser.get("church_officer_name"));
-			
+
 			// 신청자  교구
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add((String)applyUser.get("diocese"));
-			
+
 			// 신청자  휴대전화
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("M"));
 			cellvalues.add((String)applyUser.get("mobile"));
-			
+
 			// 신청자  우편번호
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("C"));
 			cellvalues.add((String)applyUser.get("post_number"));
-			
+
 			// 신청자  주소
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("D"));
 			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
-			
+
 			// 신청자  전화번호
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add((String)applyUser.get("phone"));
-			
+
 			// 신청자  이메일
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("M"));
 			cellvalues.add((String)applyUser.get("email"));
-			
+
 			// 신청형태
 			String productionType = (String)bunyangInfo.get("product_type");
 			if(CalvaryConstants.PRODUCT_TYPE_EACH.equals(productionType)) {// 개별형
@@ -918,13 +918,13 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(convertColAlphabetToIndex("M"));
 				cellvalues.add(singleTypeCount);
 			}
-			
+
 			// 총기수
 			sheetnums.add(0);
 			rownums.add(16);
 			cellnums.add(convertColAlphabetToIndex("C"));
 			cellvalues.add(bunyangCnt);
-			
+
 			// 총분양가
 			sheetnums.add(0);
 			rownums.add(17);
@@ -934,7 +934,7 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(17);
 			cellnums.add(convertColAlphabetToIndex("H"));
 			cellvalues.add(totalPrice);
-			
+
 			// 총계약금
 			sheetnums.add(0);
 			rownums.add(18);
@@ -944,7 +944,7 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("H"));
 			cellvalues.add(contractPrice);
-			
+
 			// 잔금
 			sheetnums.add(0);
 			rownums.add(19);
@@ -954,13 +954,13 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(19);
 			cellnums.add(convertColAlphabetToIndex("H"));
 			cellvalues.add(balancePrice);
-			
+
 			// 완납문구
 			sheetnums.add(0);
 			rownums.add(19);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add("완납");
-			
+
 			// 확인일자
 			sheetnums.add(0);
 			rownums.add(25);
@@ -973,7 +973,7 @@ public class ExcelServiceImpl implements IExcelService {
 		}else if(ExcelForms.USE_APPROVAL_FORM.equals(excelForm)) {// 사용승인서
 			fileFormType = CalvaryConstants.FILE_FORM_TYPE_USE_APPROVAL;
 			destFilePath += "/useApproval";
-			
+
 			param = new HashMap<String, Object>();
 			param.put("bunyangSeq", bunyangSeq);
 			param.put("refType", CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
@@ -1070,7 +1070,7 @@ public class ExcelServiceImpl implements IExcelService {
 				rownums.add(13);
 				cellnums.add(convertColAlphabetToIndex("G"));
 				cellvalues.add(approvalUserMap.get("yongin_no"));
-				
+
 				// 배우자정보
 				if(coupleUserMap != null) {
 					// 성별
@@ -1090,7 +1090,7 @@ public class ExcelServiceImpl implements IExcelService {
 					cellvalues.add(coupleUserMap.get("yongin_no"));
 				}
 			}
-			
+
 			// 사용승인번호
 			sheetnums.add(0);
 			rownums.add(5);
@@ -1125,43 +1125,43 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("I"));
 			cellvalues.add((String)applyUser.get("church_officer_name"));
-			
+
 			// 신청자  교구
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add((String)applyUser.get("diocese"));
-			
+
 			// 신청자  휴대전화
 			sheetnums.add(0);
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("M"));
 			cellvalues.add((String)applyUser.get("mobile"));
-			
+
 			// 신청자  우편번호
 			sheetnums.add(0);
 			rownums.add(20);
 			cellnums.add(convertColAlphabetToIndex("C"));
 			cellvalues.add((String)applyUser.get("post_number"));
-			
+
 			// 신청자  주소
 			sheetnums.add(0);
 			rownums.add(20);
 			cellnums.add(convertColAlphabetToIndex("D"));
 			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
-			
+
 			// 신청자  전화
 			sheetnums.add(0);
 			rownums.add(20);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add((String)applyUser.get("phone"));
-			
+
 			// 신청자  이메일
 			sheetnums.add(0);
 			rownums.add(20);
 			cellnums.add(convertColAlphabetToIndex("M"));
 			cellvalues.add((String)applyUser.get("email"));
-			
+
 			// 신청형태
 			String productionType = (String)bunyangInfo.get("product_type");
 			if(CalvaryConstants.PRODUCT_TYPE_EACH.equals(productionType)) {// 개별형
@@ -1187,13 +1187,13 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(convertColAlphabetToIndex("M"));
 				cellvalues.add(singleTypeCount);
 			}
-			
+
 			// 총기수
 			sheetnums.add(0);
 			rownums.add(23);
 			cellnums.add(convertColAlphabetToIndex("C"));
 			cellvalues.add(bunyangCnt);
-			
+
 			// 확인일자
 			sheetnums.add(0);
 			rownums.add(31);
@@ -1202,7 +1202,7 @@ public class ExcelServiceImpl implements IExcelService {
 		}else if(ExcelForms.CANCEL_APPROVAL_FORM.equals(excelForm)) {// 해약승인서
 			fileFormType = CalvaryConstants.FILE_FORM_TYPE_CANCEL_APPROVAL;
 			destFilePath += "/cancelApproval";
-			
+
 			// 해약승인번호
 			sheetnums.add(0);
 			rownums.add(5);
@@ -1218,7 +1218,7 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(25);
 			cellnums.add(convertColAlphabetToIndex("I"));
 			cellvalues.add((String)applyUser.get("user_name"));
-			
+
 			// 신청자 생년월일
 			sheetnums.add(0);
 			rownums.add(8);
@@ -1234,43 +1234,43 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("I"));
 			cellvalues.add((String)applyUser.get("church_officer_name"));
-			
+
 			// 신청자  교구
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add(applyUser.get("diocese"));
-			
+
 			// 신청자  휴대전화
 			sheetnums.add(0);
 			rownums.add(8);
 			cellnums.add(convertColAlphabetToIndex("M"));
 			cellvalues.add((String)applyUser.get("mobile"));
-			
+
 			// 신청자  우편번호
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("C"));
 			cellvalues.add((String)applyUser.get("post_number"));
-			
+
 			// 신청자  주소
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("D"));
 			cellvalues.add(CommonUtil.nullToEmpty(applyUser.get("address1")) + CommonUtil.nullToEmpty(applyUser.get("address2")));
-			
+
 			// 신청자  전화
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add((String)applyUser.get("phone"));
-			
+
 			// 신청자  이메일
 			sheetnums.add(0);
 			rownums.add(10);
 			cellnums.add(convertColAlphabetToIndex("M"));
 			cellvalues.add((String)applyUser.get("email"));
-			
+
 			// 신청형태
 			String productionType = (String)bunyangInfo.get("product_type");
 			if(CalvaryConstants.PRODUCT_TYPE_EACH.equals(productionType)) {// 개별형
@@ -1296,13 +1296,13 @@ public class ExcelServiceImpl implements IExcelService {
 				cellnums.add(convertColAlphabetToIndex("M"));
 				cellvalues.add(singleTypeCount);
 			}
-			
+
 			// 총기수
 			sheetnums.add(0);
 			rownums.add(16);
 			cellnums.add(convertColAlphabetToIndex("C"));
 			cellvalues.add(bunyangCnt);
-			
+
 			// 총계약대금
 			sheetnums.add(0);
 			rownums.add(17);
@@ -1312,13 +1312,13 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(17);
 			cellnums.add(convertColAlphabetToIndex("H"));
 			cellvalues.add(totalPrice);
-			
+
 			// 총납부금액
 			sheetnums.add(0);
 			rownums.add(17);
 			cellnums.add(convertColAlphabetToIndex("M"));
 			cellvalues.add(downPayment+balancePayment);
-			
+
 			// 계약금 납부금액
 			sheetnums.add(0);
 			rownums.add(18);
@@ -1328,7 +1328,7 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(18);
 			cellnums.add(convertColAlphabetToIndex("H"));
 			cellvalues.add(downPayment);
-			
+
 			// 잔금 납부금액
 			sheetnums.add(0);
 			rownums.add(19);
@@ -1338,13 +1338,13 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(19);
 			cellnums.add(convertColAlphabetToIndex("H"));
 			cellvalues.add(balancePayment);
-			
+
 			// 해약신청일자
 			sheetnums.add(0);
 			rownums.add(24);
 			cellnums.add(convertColAlphabetToIndex("G"));
 			cellvalues.add(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
-			
+
 			String cancelReason = (String)bunyangInfo.get("cancel_reason");
 			String cancelBank = (String)bunyangInfo.get("cancel_bank");
 			String cancelAccount = (String)bunyangInfo.get("cancel_account");
@@ -1352,18 +1352,23 @@ public class ExcelServiceImpl implements IExcelService {
 			String cancelDepositPlanDate = (String)bunyangInfo.get("cancel_deposit_plan_date");
 			int penalty = downPayment/2;// 위약금
 			int cancelReturn = downPayment + balancePayment - penalty;// 해약반환금
-			
+			int cancelPayment = CommonUtil.convertToInt(bunyangInfo.get("cancel_payment"));// 해약반환금(실제 반환된 금액)
+			if(cancelPayment > 0) {
+				cancelReturn = cancelPayment;
+				penalty = downPayment + balancePayment - cancelPayment;
+			}
+
 			Map<String, Object> cancelParam = new HashMap<String, Object>();
 			cancelParam.put("bunyangSeq", bunyangSeq);
 			// 해약정보
 			Map<String, Object> cancelInfo = (HashMap<String, Object>)commonDao.selectOne("cancel.getCancelInfo", cancelParam);
-			
+
 			// 해약사유
 			sheetnums.add(0);
 			rownums.add(20);
 			cellnums.add(convertColAlphabetToIndex("D"));
 			cellvalues.add(cancelReason);
-			
+
 			// 해약반환금
 			sheetnums.add(0);
 			rownums.add(21);
@@ -1381,25 +1386,25 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(34);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add(cancelReturn);
-			
+
 			// 입금은행
 			sheetnums.add(0);
 			rownums.add(22);
 			cellnums.add(convertColAlphabetToIndex("E"));
 			cellvalues.add(cancelBank);
-			
+
 			// 입금계좌번호
 			sheetnums.add(0);
 			rownums.add(22);
 			cellnums.add(convertColAlphabetToIndex("J"));
 			cellvalues.add(cancelAccount);
-			
+
 			// 예금주명
 			sheetnums.add(0);
 			rownums.add(22);
 			cellnums.add(convertColAlphabetToIndex("O"));
 			cellvalues.add(cancelAccountHoler);
-			
+
 			// 해약위약금
 			sheetnums.add(0);
 			rownums.add(33);
@@ -1409,13 +1414,13 @@ public class ExcelServiceImpl implements IExcelService {
 			rownums.add(33);
 			cellnums.add(convertColAlphabetToIndex("L"));
 			cellvalues.add(penalty);
-			
+
 			// 입금예정일자
 			sheetnums.add(0);
 			rownums.add(35);
 			cellnums.add(convertColAlphabetToIndex("G"));
 			cellvalues.add(cancelDepositPlanDate);
-			
+
 			if(cancelInfo != null) {
 				// 확인일자
 				sheetnums.add(0);
@@ -1429,18 +1434,18 @@ public class ExcelServiceImpl implements IExcelService {
 				cellvalues.add(cancelInfo.get("update_user_name"));
 			}
 		}
-		
+
 		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 		String realPath = request.getSession().getServletContext().getRealPath("/");
 		File destFile = null;
 		String destFileName = null;
-		
+
 		if(StringUtils.isEmpty(fileSeq)) {// 신규 생성일 경우 엑셀 서식을 복사
 			// 엑셀 서식 정보 조회
 			param = new HashMap<String, Object>();
 			param.put("fileFormType", fileFormType);
 			Map<String, Object> map = (HashMap<String, Object>)commonDao.selectOne("common.getBunyangFileForm", param);
-			// 엑셀 서식 복사 
+			// 엑셀 서식 복사
 			String srcFilePath = (String)map.get("file_path");
 			String srcFileName = (String)map.get("file_name");
 			String srcRealFileName = (String)map.get("real_file_name");
@@ -1470,16 +1475,16 @@ public class ExcelServiceImpl implements IExcelService {
 			destFileName = (String)fileInfo.get("real_file_name");
 			destFile = new File(realPath + destFilePath, destFileName);
 		}
-		
+
 		updateExcelCellValue(destFile, sheetnums, rownums, cellnums, cellvalues);
-		
+
 		rtn = fileSeq;
-		
+
 		return rtn;
 	}
-	
-	/** 
-	 * 엑셀의 컬럼 영문명을 0으로 시작하는 index 로 변환 
+
+	/**
+	 * 엑셀의 컬럼 영문명을 0으로 시작하는 index 로 변환
 	 */
 	private int convertColAlphabetToIndex(String alphabet) {
 		int colIdx = 0;
@@ -1490,5 +1495,5 @@ public class ExcelServiceImpl implements IExcelService {
 		}
 		return colIdx;
 	}
-	
+
 }

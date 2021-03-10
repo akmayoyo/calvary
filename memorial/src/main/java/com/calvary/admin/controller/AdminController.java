@@ -33,17 +33,17 @@ import com.calvary.excel.service.IExcelService;
 @Controller
 @RequestMapping(value=AdminController.ROOT_URL)
 public class AdminController {
-	
+
 	/** */
 	public static final String ROOT_URL = "/admin";
-	
+
 	@Autowired
 	private IAdminService adminService;
 	@Autowired
 	private ICommonService commonService;
 	@Autowired
 	private IExcelService excelService;
-	
+
 	//===============================================================================
 	// 분양신청관리
 	//===============================================================================
@@ -61,9 +61,9 @@ public class AdminController {
 	public static final String REJECT_URL = "/reject";
 	/** 취소 URL */
 	public static final String CANCEL_URL = "/cancel";
-	
-	/** 
-	 * 분양신청관리 메인 페이지 
+
+	/**
+	 * 분양신청관리 메인 페이지
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=APPLY_MGMT_URL)
@@ -89,9 +89,9 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + APPLY_MGMT_URL);
 		return mv;
 	}
-	
-	/** 
-	 * 분양 신청정보 등록 페이지 
+
+	/**
+	 * 분양 신청정보 등록 페이지
 	 */
 	@RequestMapping(value=APPLY_REGIST_URL)
 	public Object applyRegistHandler(SearchVo searchVo) {
@@ -109,9 +109,9 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + APPLY_REGIST_URL);
 		return mv;
 	}
-	
-	/** 
-	 * 분양신청 상세 정보 페이지 
+
+	/**
+	 * 분양신청 상세 정보 페이지
 	 */
 	@RequestMapping(value=APPLY_DETAIL_URL)
 	public Object applyDetailHandler(SearchVo searchVo, String bunyangSeq) {
@@ -140,9 +140,9 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + APPLY_DETAIL_URL);
 		return mv;
 	}
-	
-	/** 
-	 * 분양 신청정보 저장 
+
+	/**
+	 * 분양 신청정보 저장
 	 */
 	@RequestMapping(value=SAVE_APPLY_URL)
 	@ResponseBody
@@ -177,8 +177,8 @@ public class AdminController {
 		rtnMap.put("bunyangSeq", bunyangSeq);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 신청승인
 	 */
 	@RequestMapping(value=APPROVAL_URL)
@@ -204,8 +204,8 @@ public class AdminController {
 		rtnMap.put("fileSeq", approvalFileSeq);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 반려
 	 */
 	@RequestMapping(value=REJECT_URL)
@@ -218,8 +218,8 @@ public class AdminController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 취소
 	 */
 	@RequestMapping(value=CANCEL_URL)
@@ -238,8 +238,8 @@ public class AdminController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 사용계약관리
 	//===============================================================================
@@ -251,9 +251,9 @@ public class AdminController {
 	public static final String APPR_CONTRACT_URL = "/apprcontract";
 	/** 잔금 납부 처리 URL */
 	public static final String SAVE_BALANCE_PAYMENT_URL = "/savebalancepayment";
-	
-	/** 
-	 * 사용계약관리 메인 페이지 
+
+	/**
+	 * 사용계약관리 메인 페이지
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=CONTRACT_MGMT_URL)
@@ -279,8 +279,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + CONTRACT_MGMT_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 사용계약관리 상세 정보 페이지
 	 */
 	@RequestMapping(value=CONTRACT_DETAIL_URL)
@@ -315,8 +315,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + CONTRACT_DETAIL_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 계약 승인 처리
 	 */
 	@RequestMapping(value=APPR_CONTRACT_URL)
@@ -362,8 +362,8 @@ public class AdminController {
 		rtnMap.put("fileSeq", fileSeq);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 잔급 납부 처리
 	 */
 	@RequestMapping(value=SAVE_BALANCE_PAYMENT_URL)
@@ -401,9 +401,9 @@ public class AdminController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	
-	
+
+
+
 	//===============================================================================
 	// 사용승인관리
 	//===============================================================================
@@ -419,9 +419,9 @@ public class AdminController {
 	public static final String EXPORT_USER_APPROVAL_URL = "/exportUserApproval";
 	/** 분양정보 사용 승인  URL */
 	public static final String APPROVAL_BUNYANG_INFO_URL = "/approvalBunyangInfo";
-	
-	/** 
-	 * 사용승인관리 메인 페이지 
+
+	/**
+	 * 사용승인관리 메인 페이지
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=APPROVAL_MGMT_URL)
@@ -444,8 +444,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + APPROVAL_MGMT_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 사용승인관리 상세 정보 페이지
 	 */
 	@RequestMapping(value=APPROVAL_DETAIL_URL)
@@ -479,8 +479,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + APPROVAL_DETAIL_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 사용자 승인 처리
 	 */
 	@RequestMapping(value=SAVE_USER_APPROVAL_URL)
@@ -512,8 +512,8 @@ public class AdminController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 용인공원 확약번호 저장
 	 */
 	@RequestMapping(value=SAVE_YONGIN_NO_URL)
@@ -554,8 +554,8 @@ public class AdminController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 사용자 승인서 출력
 	 */
 	@RequestMapping(value=EXPORT_USER_APPROVAL_URL)
@@ -595,8 +595,8 @@ public class AdminController {
 		rtnMap.put("fileSeq", fileSeq);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 분양정보 사용 승인
 	 */
 	@RequestMapping(value=APPROVAL_BUNYANG_INFO_URL)
@@ -619,8 +619,8 @@ public class AdminController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 계약자관리
 	//===============================================================================
@@ -630,9 +630,9 @@ public class AdminController {
 	public static final String CONTRACTOR_DETAIL_URL = "/contractordetail";
 	/** 계약자정보변경 URL */
 	public static final String CHANGE_CONTRACT_INFO_URL = "/changeContractInfo";
-	
-	/** 
-	 * 계약자관리 메인 페이지 
+
+	/**
+	 * 계약자관리 메인 페이지
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=CONTRACTOR_MGMT_URL)
@@ -655,8 +655,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + CONTRACTOR_MGMT_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 계약자관리 상세 정보 페이지
 	 */
 	@SuppressWarnings("unchecked")
@@ -673,7 +673,7 @@ public class AdminController {
 		mv.addObject("menuList", menuList);
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("searchVo", searchVo);
-		
+
 		List<Object> applyUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER);
 		List<Object> agentUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER);
 		Map<String, Object> applyUser = null;
@@ -703,8 +703,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + CONTRACTOR_DETAIL_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 계약자정보변경
 	 */
 	@RequestMapping(value=CHANGE_CONTRACT_INFO_URL)
@@ -728,7 +728,7 @@ public class AdminController {
 			// 완납확인증명서
 			String file_seq_full_payment = null;
 			// 계약상태 이후만
-			if(CalvaryConstants.PROGRESS_STATUS_B.equals(bunyangInfoVo.getProgressStatus()) 
+			if(CalvaryConstants.PROGRESS_STATUS_B.equals(bunyangInfoVo.getProgressStatus())
 					||CalvaryConstants.PROGRESS_STATUS_C.equals(bunyangInfoVo.getProgressStatus())
 					) {
 				// 분양계약서
@@ -744,14 +744,14 @@ public class AdminController {
 			param.put("file_seq_contract", file_seq_contract);
 			param.put("file_seq_full_payment", file_seq_full_payment);
 			adminService.updateBunyangFileSeq(param);
-			
+
 			bRslt = true;
 		}
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 해약관리
 	//===============================================================================
@@ -759,9 +759,9 @@ public class AdminController {
 	public static final String CANCEL_MGMT_URL = "/cancelmgmt";
 	/** 해약승인 URL */
 	public static final String CANCEL_APPROVAL_URL = "/cancelapproval";
-	
-	/** 
-	 * 해약관리 메인 페이지 
+
+	/**
+	 * 해약관리 메인 페이지
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=CANCEL_MGMT_URL)
@@ -782,8 +782,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + CANCEL_MGMT_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 해약승인
 	 */
 	@RequestMapping(value=CANCEL_APPROVAL_URL)
@@ -816,16 +816,16 @@ public class AdminController {
 		rtnMap.put("fileSeq", fileSeq);
 		return rtnMap;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 납부관리
 	//===============================================================================
 	/** 납부관리 메인 페이지  URL */
 	public static final String PAYMENT_MGMT_URL = "/paymentmgmt";
-		
-	/** 
-	 * 납부관리 메인 페이지 
+
+	/**
+	 * 납부관리 메인 페이지
 	 */
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=PAYMENT_MGMT_URL)
@@ -865,9 +865,9 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + PAYMENT_MGMT_URL);
 		return mv;
 	}
-	
-	
-	
+
+
+
 	//===============================================================================
 	// 분양정보 관리
 	//===============================================================================
@@ -875,9 +875,9 @@ public class AdminController {
 	public static final String BUNYANG_INFO_URL = "/bunyanginfo";
 	/** 분양정보 수정 페이지 URL */
 	public static final String BUNYANG_INFO_EDIT_URL = "/bunyanginfoedit";
-	
-	/** 
-	 * 분양상세정보 페이지 
+
+	/**
+	 * 분양상세정보 페이지
 	 */
 	@RequestMapping(value=BUNYANG_INFO_URL)
 	public Object bunyangInfoHandler(SearchVo searchVo, String menuId, String bunyangSeq, String listUrl) {
@@ -912,9 +912,9 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + BUNYANG_INFO_URL);
 		return mv;
 	}
-	
-	
-	
+
+
+
 	//===============================================================================
 	// 사용(봉안)신청 관리
 	//===============================================================================
@@ -926,20 +926,20 @@ public class AdminController {
 	public static final String GET_GRAVE_ASSIGN_INFO = "/getGraveAssignInfo";
 	/** 가족형으로 묶인 모든 배정 정보 조회  URL */
 	public static final String GET_GRAVE_ASSIGN_INFO_BY_FAMILY = "/getGraveAssignInfoByFamily";
-	
+
 	/** 동산 위치 수정 페이지  URL */
 	public static final String MODIFY_GRAVE_URL = "/modifyGrave";
-	
+
 	/** 동산 위치 수정 페이지(다음 Step)  URL */
 	public static final String MODIFY_GRAVE_NEXT_URL = "/modifyGraveNext";
-	
+
 	/** 위치 수정할 분양건에 대해 승인되지 않은 신청 정보가 있는지 조회 */
 	public static final String NOT_APPROVAL_GRAVE_LIST_URL = "/notApprovalGraveList";
-	
+
 	/** 동산 위치 수정 정보 저장  URL */
 	public static final String SAVE_CHANGED_GRAVE_URL = "/saveChangedGrave";
-	
-	/** 
+
+	/**
 	 * 사용(봉안)신청 관리 페이지
 	 */
 	@SuppressWarnings("unchecked")
@@ -949,12 +949,12 @@ public class AdminController {
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU02_02");
-		
+
 		Map<String, Object> rtnMap = adminService.getGraveRequestList(searchVo, requestStatus);
 		List<Object> graveRequestList = (ArrayList<Object>)rtnMap.get("list");
 		int total_count = CommonUtil.convertToInt(rtnMap.get("total_count"));
 		searchVo.setTotalCount(total_count);
-		
+
 		mv.addObject("pMenuInfo", pMenuInfo);
 		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
@@ -964,8 +964,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + USE_MGMT_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 동산 위치 수정 페이지
 	 */
 	@RequestMapping(value=MODIFY_GRAVE_URL)
@@ -982,26 +982,26 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + MODIFY_GRAVE_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 동산 위치 수정 페이지(다음 Step)
 	 */
 	@RequestMapping(value=MODIFY_GRAVE_NEXT_URL)
 	public Object modifyGraveNextHandler(
-			SearchVo searchVo, 
-			String group_seq, 
-			String bunyang_seq, 
-			String sectionSeq, 
-			String rowSeq, 
+			SearchVo searchVo,
+			String group_seq,
+			String bunyang_seq,
+			String sectionSeq,
+			String rowSeq,
 			String colSeq
 			) {
 		List<Object> menuList = adminService.getMenuList(SessionUtil.getCurrentUserId());
 		ModelAndView mv = new ModelAndView();
 		Map<String, Object> pMenuInfo = commonService.getMenuInfo("MENU02");
 		Map<String, Object> menuInfo = commonService.getMenuInfo("MENU02_02");
-		
+
 		List<Object> graveAssignList = adminService.getGraveAssignInfoByFamily(group_seq, bunyang_seq, sectionSeq, rowSeq, colSeq);
-		
+
 		mv.addObject("pMenuInfo", pMenuInfo);
 		mv.addObject("menuInfo", menuInfo);
 		mv.addObject("menuList", menuList);
@@ -1016,8 +1016,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + MODIFY_GRAVE_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 위치 수정할 분양건에 대해 승인되지 않은 신청 정보가 있는지 조회
 	 */
 	@RequestMapping(value=NOT_APPROVAL_GRAVE_LIST_URL)
@@ -1026,8 +1026,8 @@ public class AdminController {
 		List<Object> notApprovalGraveList = adminService.getNotApprovalGraveList(bunyang_seq);
 		return notApprovalGraveList;
 	}
-	
-	/** 
+
+	/**
 	 * 동산 위치 수정 정보 저장
 	 */
 	@RequestMapping(value=SAVE_CHANGED_GRAVE_URL)
@@ -1048,8 +1048,8 @@ public class AdminController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 추모동산 사용현황 리스트 조회
 	 */
 	@RequestMapping(value=GET_GRAVE_USE_LIST)
@@ -1058,8 +1058,8 @@ public class AdminController {
 		List<Object> graveUseList = adminService.getGraveUseList();
 		return graveUseList;
 	}
-	
-	/** 
+
+	/**
 	 * 특정 구역에 배정된 정보 조회
 	 */
 	@RequestMapping(value=GET_GRAVE_ASSIGN_INFO)
@@ -1068,24 +1068,24 @@ public class AdminController {
 		List<Object> graveAssignList = adminService.getGraveAssignInfo(sectionSeq, rowSeq, colSeq);
 		return graveAssignList;
 	}
-	
-	/** 
+
+	/**
 	 * 가족형으로 묶인 모든 배정 정보 조회
 	 */
 	@RequestMapping(value=GET_GRAVE_ASSIGN_INFO_BY_FAMILY)
 	@ResponseBody
 	public List<Object> getGraveAssignInfoByFamilyHandler(
-			String group_seq, 
-			String bunyang_seq, 
-			String sectionSeq, 
-			String rowSeq, 
+			String group_seq,
+			String bunyang_seq,
+			String sectionSeq,
+			String rowSeq,
 			String colSeq
 			) {
 		List<Object> graveAssignList = adminService.getGraveAssignInfoByFamily(group_seq, bunyang_seq, sectionSeq, rowSeq, colSeq);
 		return graveAssignList;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 사용계약 변경 및 해약
 	//===============================================================================
@@ -1101,8 +1101,8 @@ public class AdminController {
 	public static final String CHANGE_SERVICE_CHARGER_URL = "/changeServiceCharger";
 	/** 사용(봉안)자 해약 처리  URL */
 	public static final String CANCEL_USE_USER_URL = "/cancelUseUser";
-	
-	/** 
+
+	/**
 	 * 사용계약 변경 및 해약 페이지
 	 */
 	@SuppressWarnings("unchecked")
@@ -1126,8 +1126,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + USE_CHANGE_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 사용계약 변경 및 해약 상세페이지
 	 */
 	@SuppressWarnings("unchecked")
@@ -1144,7 +1144,7 @@ public class AdminController {
 		mv.addObject("menuList", menuList);
 		mv.addObject("bunyangSeq", bunyangSeq);
 		mv.addObject("searchVo", searchVo);
-		
+
 		List<Object> applyUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER);
 		List<Object> agentUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_AGENT_USER);
 		Map<String, Object> applyUser = null;
@@ -1174,8 +1174,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + USE_CHANGE_DETAIL_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 계약승계
 	 */
 	@SuppressWarnings("unchecked")
@@ -1199,7 +1199,7 @@ public class AdminController {
 			String file_seq_contract = excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, "", "");
 			// 완납확인증명서
 			String file_seq_full_payment = excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, "", "");
-			
+
 			Map<String, Object> param = new HashMap<String, Object>();
 			param.put("bunyangSeq", bunyangSeq);
 			param.put("file_seq_apply", file_seq_apply);
@@ -1208,9 +1208,9 @@ public class AdminController {
 			param.put("file_seq_contract", file_seq_contract);
 			param.put("file_seq_full_payment", file_seq_full_payment);
 			adminService.updateBunyangFileSeq(param);
-			
+
 			List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
-			
+
 			if(useUserList != null && useUserList.size() > 0) {
 				for(int i = 0; i < useUserList.size(); i++) {
 					Map<String, Object> tmp = (HashMap<String, Object>)useUserList.get(i);
@@ -1221,14 +1221,14 @@ public class AdminController {
 					}
 				}
 			}
-			
+
 			bRslt = true;
 		}
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 사용자 정보 변경
 	 */
 	@SuppressWarnings("unchecked")
@@ -1242,11 +1242,11 @@ public class AdminController {
 		int iRslt = adminService.updateRefUserInfo(bunyangUserVo);
 		// 엑셀양식 업데이트
 		if(iRslt > 0) {
-			
+
 			Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
-			
+
 			List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
-			
+
 			// 분양신청서
 			String file_seq_apply = (String)bunyangInfo.get("file_seq_apply");
 			// 분양신청서-사용자
@@ -1262,7 +1262,7 @@ public class AdminController {
 			excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, file_seq_approval, "");
 			excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, file_seq_contract, "");
 			excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, file_seq_full_payment, "");
-			
+
 			if(useUserList != null && useUserList.size() > 0) {
 				for(int i = 0; i < useUserList.size(); i++) {
 					Map<String, Object> tmp = (HashMap<String, Object>)useUserList.get(i);
@@ -1273,14 +1273,14 @@ public class AdminController {
 					}
 				}
 			}
-			
+
 			bRslt = true;
 		}
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 관리비 납부자 변경
 	 */
 	@SuppressWarnings("unchecked")
@@ -1293,11 +1293,11 @@ public class AdminController {
 		int iRslt = adminService.updateServiceCharger(bunyangSeq, serviceChargeType, maintCharger);
 		// 엑셀양식 업데이트
 		if(iRslt > 0) {
-			
+
 			Map<String, Object> bunyangInfo = adminService.getBunyangInfo(bunyangSeq);
-			
+
 			List<Object> useUserList = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER);
-			
+
 			// 분양신청서
 			String file_seq_apply = (String)bunyangInfo.get("file_seq_apply");
 			// 분양신청서-사용자
@@ -1313,7 +1313,7 @@ public class AdminController {
 			excelService.createBunyangExcelForm(ExcelForms.APPROVAL_FORM, bunyangSeq, file_seq_approval, "");
 			excelService.createBunyangExcelForm(ExcelForms.CONTRACT_FORM, bunyangSeq, file_seq_contract, "");
 			excelService.createBunyangExcelForm(ExcelForms.FULL_PAYMENT_FORM, bunyangSeq, file_seq_full_payment, "");
-			
+
 			if(useUserList != null && useUserList.size() > 0) {
 				for(int i = 0; i < useUserList.size(); i++) {
 					Map<String, Object> tmp = (HashMap<String, Object>)useUserList.get(i);
@@ -1324,14 +1324,14 @@ public class AdminController {
 					}
 				}
 			}
-			
+
 			bRslt = true;
 		}
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
-	/** 
+
+	/**
 	 * 사용(봉안)자 해약 처리
 	 */
 	@RequestMapping(value=CANCEL_USE_USER_URL)
@@ -1348,21 +1348,32 @@ public class AdminController {
 			,int penaltyValue) throws Exception{
 		boolean bRslt = false;
 		Map<String, Object> rtnMap = new HashMap<String, Object>();
+		String fileSeq = null;
 		// 사용자 정보 변경
 		int iRslt = adminService.cancelUseUser(bunyangSeq, userId1, userId2, cancelReason, cancelBank, cancelAccount, cancelAccountHolder, cancelDepositPlanDate, surrenderValue, penaltyValue);
-		bRslt = iRslt > 0;
+		if(iRslt > 0) {
+			fileSeq = excelService.createBunyangExcelForm(ExcelForms.CANCEL_APPROVAL_FORM, bunyangSeq, "", "");
+			if(!StringUtils.isEmpty(fileSeq)) {
+				Map<String, Object> param = new HashMap<String, Object>();
+				param.put("bunyangSeq", bunyangSeq);
+				param.put("file_seq_cancel", fileSeq);
+				adminService.updateBunyangFileSeq(param);
+				bRslt = true;
+			}
+		}
 		rtnMap.put("result", bRslt);
+		rtnMap.put("fileSeq", fileSeq);
 		return rtnMap;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 분양현황
 	//===============================================================================
 	/** 분양현황  URL */
 	public static final String BUNYANG_STATUS_URL = "/bunyangstatus";
-		
-	/** 
+
+	/**
 	 * 분양현황 페이지
 	 */
 	@SuppressWarnings("unchecked")
@@ -1390,15 +1401,15 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + BUNYANG_STATUS_URL);
 		return mv;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 대금납부현황
 	//===============================================================================
 	/** 대금납부현황  URL */
 	public static final String PAYMENT_STATUS_URL = "/paymentstatus";
-	
-	/** 
+
+	/**
 	 * 대금납부현황 페이지
 	 */
 	@SuppressWarnings("unchecked")
@@ -1426,15 +1437,15 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + PAYMENT_STATUS_URL);
 		return mv;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 관리비납부현황
 	//===============================================================================
 	/** 관리비납부현황  URL */
 	public static final String MAINT_PAYMENT_STATUS_URL = "/maintPaymentStatus";
-	
-	/** 
+
+	/**
 	 * 관리비납부현황 페이지
 	 */
 	@SuppressWarnings("unchecked")
@@ -1465,15 +1476,15 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + MAINT_PAYMENT_STATUS_URL);
 		return mv;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 일출금현황
 	//===============================================================================
 	/** 일출금현황  URL */
 	public static final String BANK_STATUS_URL = "/bankStatus";
-	
-	/** 
+
+	/**
 	 * 입출금현황 페이지
 	 */
 	@SuppressWarnings("unchecked")
@@ -1516,8 +1527,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + BANK_STATUS_URL);
 		return mv;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 추모동산 사용(봉안)현황
 	//===============================================================================
@@ -1525,8 +1536,8 @@ public class AdminController {
 	public static final String GRAVE_STATUS_URL = "/graveStatus";
 	/** 사용(봉안)자 이름에 해당하는 정보 검색  URL */
 	public static final String SEARCH_GRAVE_USER_URL = "/searchGraveUser";
-	
-	/** 
+
+	/**
 	 * 입출금현황 페이지
 	 */
 	@RequestMapping(value=GRAVE_STATUS_URL)
@@ -1544,8 +1555,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + GRAVE_STATUS_URL);
 		return mv;
 	}
-	
-	/** 
+
+	/**
 	 * 사용(봉안)자 이름에 해당하는 정보 검색
 	 */
 	@RequestMapping(value=SEARCH_GRAVE_USER_URL)
@@ -1556,16 +1567,16 @@ public class AdminController {
 		rtnMap.put("result", resultMap);
 		return rtnMap;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 공통
 	//===============================================================================
 	/** 분양리스트 조회용 select2 ajax URL */
 	public static final String GET_BUNYANG_SELECT_LIST_URL = "/getBunyangSelectList";
-	
-	
-	/** 
+
+
+	/**
 	 * 분양리스트 조회용 select2 ajax 처리
 	 */
 	@SuppressWarnings("unchecked")
@@ -1580,28 +1591,28 @@ public class AdminController {
 		rtnMap.put("total_count", total_count);
 		return rtnMap;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 사용자 관리
 	//===============================================================================
 	/** 사용자 관리 ROOT URL */
 	public static final String USER_MGMT_URL = "/usermgmt";
-	
+
 	@RequestMapping(value=USER_MGMT_URL)
 	public Object userMgmtHandler() {
 		ModelAndView mv = new ModelAndView();
 		mv.setViewName(ROOT_URL + USER_MGMT_URL);
 		return mv;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 메뉴 관리
 	//===============================================================================
 	/** 메뉴 관리 ROOT URL */
 	public static final String MENU_MGMT_URL = "/menumgmt";
-	
+
 	@RequestMapping(value=MENU_MGMT_URL)
 	public Object menuMgmtHandler() {
 		// TODO 로그인아이디 넘겨야됨
@@ -1611,8 +1622,8 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + MENU_MGMT_URL);
 		return mv;
 	}
-	
-	
+
+
 	//===============================================================================
 	// 추가분양관리
 	//===============================================================================
@@ -1622,7 +1633,7 @@ public class AdminController {
 	public static final String CONNECT_DETAIL_URL = "/connectdetail";
 	/** 추가분양 연결정보 해제 URL */
 	public static final String DISCONNECT_BUNYANG_URL = "/disconnectbunyang";
-	
+
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value=CONNECT_BUNYANG_URL)
 	public Object connectBunyangHandler(SearchVo searchVo) {
@@ -1644,7 +1655,7 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + CONNECT_BUNYANG_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=CONNECT_DETAIL_URL)
 	public Object connectDetailHandler(String groupSeq, String bunyangSeq, SearchVo searchVo) {
 		ModelAndView mv = new ModelAndView();
@@ -1664,7 +1675,7 @@ public class AdminController {
 		mv.setViewName(ROOT_URL + CONNECT_DETAIL_URL);
 		return mv;
 	}
-	
+
 	@RequestMapping(value=DISCONNECT_BUNYANG_URL)
 	@ResponseBody
 	public Object disconnectbunyangHandler(String groupSeq, String bunyangSeq) throws Exception {
@@ -1675,5 +1686,5 @@ public class AdminController {
 		rtnMap.put("result", bRslt);
 		return rtnMap;
 	}
-	
+
 }

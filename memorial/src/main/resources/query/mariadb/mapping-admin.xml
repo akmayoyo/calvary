@@ -9,7 +9,7 @@
     	SELECT
     		SQL_CALC_FOUND_ROWS
     		t.*
-    		,CASE 
+    		,CASE
         		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
           		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
         	END use_user_exp
@@ -54,7 +54,7 @@
 			  ,a.regist_user_id
 			  ,(SELECT user_name FROM TB_COM_USER cu WHERE cu.user_id = a.regist_user_id) regist_user_name
 		      ,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
-			FROM TB_BUNYANG_INFO a INNER JOIN       
+			FROM TB_BUNYANG_INFO a INNER JOIN
 			(SELECT
 				bunyang_seq
 			  	,user_id
@@ -64,7 +64,7 @@
 				,mobile
 			FROM TB_BUNYANG_REF_USER a
 			WHERE ref_type = 'APPLY_USER'
-			) b ON a.bunyang_seq = b.bunyang_seq  
+			) b ON a.bunyang_seq = b.bunyang_seq
 			LEFT OUTER JOIN
 			(SELECT
 				bunyang_seq
@@ -88,13 +88,13 @@
 					,is_move
 					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
                     ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
-				FROM      
-					(SELECT 
+				FROM
+					(SELECT
 						 bunyang_seq
 					   	,user_id
 					   	,user_name
 					   	,relation_type
-					   	,is_move 
+					   	,is_move
 					FROM TB_BUNYANG_REF_USER a
 					WHERE a.ref_type = 'USE_USER'
 					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
@@ -122,19 +122,19 @@
 		LIMIT #{start}, #{count}
 		</if>
     </select>
-    
+
     <!-- 분양신청리스트 조회 -->
 	<select id="getBunyangList" parameterType="map" resultType="map">
 		SELECT
 			SQL_CALC_FOUND_ROWS
     		t.*
-    		,CASE 
+    		,CASE
         		WHEN use_user_cnt > 1 THEN CONCAT(use_user_name,'(',use_user_relation_name,')',' 외 ',use_user_cnt-1,'명')
           		ELSE  CONCAT(use_user_name,'(',use_user_relation_name,')')
         	END use_user_exp
         	,CASE WHEN down_payment >= (total_price/10) THEN 'O' ELSE '' END AS contract_yn
         	,CASE WHEN down_payment + balance_payment >= total_price THEN 'O' ELSE '' END AS full_payment_yn
-        	,CASE 
+        	,CASE
         		WHEN cancel_yn = 'Y' THEN '취소'
         		WHEN progress_status = 'N' THEN '신청미승인'
         		WHEN progress_status = 'A' THEN '신청승인'
@@ -147,7 +147,7 @@
         	,(select count(*) from TB_BUNYANG_INFO tbi where tbi.group_seq = t.group_seq and tbi.bunyang_seq != t.bunyang_seq) connected_bunyang_cnt
     	FROM
 		    (SELECT
-		      a.group_seq 
+		      a.group_seq
 		      ,a.bunyang_times
 		      ,a.bunyang_seq as id
 			  ,a.bunyang_seq
@@ -190,7 +190,7 @@
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C' order by bh.update_date desc limit 1) full_payment_date
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D' order by bh.update_date desc limit 1) use_approval_date
 			  ,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E' order by bh.update_date desc limit 1) cancel_approval_date
-			FROM TB_BUNYANG_INFO a INNER JOIN       
+			FROM TB_BUNYANG_INFO a INNER JOIN
 			(SELECT
 				bunyang_seq
 			  	,user_id
@@ -203,7 +203,7 @@
 				,mobile
 			FROM TB_BUNYANG_REF_USER a
 			WHERE ref_type = 'APPLY_USER'
-			) b ON a.bunyang_seq = b.bunyang_seq  
+			) b ON a.bunyang_seq = b.bunyang_seq
 			LEFT OUTER JOIN
 			(SELECT
 				bunyang_seq
@@ -227,12 +227,12 @@
 					,relation_type
 					,CASE WHEN @vbunyang_seq = a.bunyang_seq THEN @rownum:=@rownum+1 ELSE @rownum:=1 END rn
                     ,(@vbunyang_seq := a.bunyang_seq) vbunyang_seq
-				FROM      
-					(SELECT 
+				FROM
+					(SELECT
 						 bunyang_seq
 					   	,user_id
 					   	,user_name
-					   	,relation_type 
+					   	,relation_type
 					FROM TB_BUNYANG_REF_USER a
 					WHERE a.ref_type = 'USE_USER'
 					) a, (SELECT @vbunyang_seq:='', @rownum:=0 FROM DUAL) b
@@ -271,7 +271,7 @@
         		ELSE remarks
         	END remarks_exp
 		FROM
-		(SELECT 
+		(SELECT
 			a.bunyang_seq
 			,a.group_seq
 	       	,a.bunyang_no
@@ -295,6 +295,7 @@
           	,(COALESCE(a.couple_type_count,0)*2 + COALESCE(a.single_type_count,0)) * COALESCE((select code_value from TB_COM_CODE where parent_code_seq = 'BUNYANG_TIMES' and code_seq = a.bunyang_times), a.price_per_count) AS total_price
           	,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment
             ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment
+            ,(SELECT COALESCE(SUM(payment_amount),0) FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'CANCEL_PAYMENT') AS cancel_payment
             ,(SELECT DATE_FORMAT(max(payment_date), '%Y%m%d') FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'DOWN_PAYMENT') AS down_payment_date
             ,(SELECT DATE_FORMAT(max(payment_date), '%Y%m%d') FROM TB_BUNYANG_PAYMENT_HISTORY ph WHERE ph.bunyang_seq = a.bunyang_seq AND ph.payment_type = 'BALANCE_PAYMENT') AS balance_payment_date
 	       	,DATE_FORMAT(a.regist_date, '%Y-%m-%d') AS regist_date
@@ -319,7 +320,7 @@
 			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E' order by bh.update_date desc limit 1) cancel_approval_date
 			,(SELECT COUNT(1) FROM TB_BUNYANG_REF_USER bru WHERE bru.bunyang_seq = a.bunyang_seq AND bru.ref_type = 'USE_USER') use_user_cnt
 			,(SELECT COUNT(1) FROM TB_BUNYANG_REF_USER bru WHERE bru.bunyang_seq = a.bunyang_seq AND bru.ref_type = 'USE_USER' and approval_file_seq is not null) approval_use_user_cnt
-	  	FROM vw_bunyang_connect_info a INNER JOIN       
+	  	FROM vw_bunyang_connect_info a INNER JOIN
 			(SELECT
 				bunyang_seq
 			  	,user_id
@@ -343,7 +344,7 @@
 	  	LIMIT 0,1
 	  	) t
 	</select>
-	
+
 	<!-- 분양 정보(추가분양연결) -->
 	<select id="getConnectBunyangInfo" parameterType="map" resultType="map">
 		SELECT
@@ -352,7 +353,7 @@
         		ELSE remarks
         	END remarks_exp
 		FROM
-		(SELECT 
+		(SELECT
 			a.bunyang_seq
 	       	,a.bunyang_no
 	       	,a.bunyang_times
@@ -398,7 +399,7 @@
 			,(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E' order by bh.update_date desc limit 1) cancel_approval_date
 			,(SELECT COUNT(1) FROM TB_BUNYANG_REF_USER bru WHERE bru.bunyang_seq = a.bunyang_seq AND bru.ref_type = 'USE_USER') use_user_cnt
 			,(SELECT COUNT(1) FROM TB_BUNYANG_REF_USER bru WHERE bru.bunyang_seq = a.bunyang_seq AND bru.ref_type = 'USE_USER' and approval_file_seq is not null) approval_use_user_cnt
-	  	FROM TB_BUNYANG_INFO a INNER JOIN       
+	  	FROM TB_BUNYANG_INFO a INNER JOIN
 			(SELECT
 				bunyang_seq
 			  	,user_id
@@ -416,10 +417,10 @@
 		and a.bunyang_seq != #{bunyangSeq}
 	  	) t
 	</select>
-	
+
 	<!-- 분양관련 사용자 정보 -->
 	<select id="getBunyangRefUserInfo" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			'own' as type,
 			a.bunyang_seq,
 		    a.ref_type,
@@ -455,16 +456,16 @@
 			b.assign_status,
 			b.seq_no,
 			(select request_status from TB_BUNYANG_GRAVE_REQUEST_INFO gr where gr.bunyang_seq = a.bunyang_seq and gr.use_user_seq = a.user_seq) request_status,
-			case 
-				when b.assign_status = 'HALF_OCCUPIED' then 
-					case when a.user_seq = b.use_user_seq1 then 'OCCUPIED' 
-					else 'RESERVED' 
-					end 
-				when b.assign_status = 'REQUESTED' then 
-					case when a.user_seq = b.use_user_seq1 then 'REQUESTED' 
-					else 'COUPLE_REQUESTED' 
-					end 
-				else b.assign_status 
+			case
+				when b.assign_status = 'HALF_OCCUPIED' then
+					case when a.user_seq = b.use_user_seq1 then 'OCCUPIED'
+					else 'RESERVED'
+					end
+				when b.assign_status = 'REQUESTED' then
+					case when a.user_seq = b.use_user_seq1 then 'REQUESTED'
+					else 'COUPLE_REQUESTED'
+					end
+				else b.assign_status
 			end couple_assign_status,
 			b.use_user_seq1,
 			b.use_user_seq2,
@@ -474,7 +475,7 @@
 			(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'C' order by bh.update_date desc limit 1) full_payment_date,
 			(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D' order by bh.update_date desc limit 1) use_approval_date,
 			(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E' order by bh.update_date desc limit 1) cancel_approval_date
-		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_BUNYANG_GRAVE_ASSIGN b ON a.bunyang_seq = b.bunyang_seq AND (b.use_user_seq1 = a.user_seq or b.couple_seq = a.couple_seq)  
+		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_BUNYANG_GRAVE_ASSIGN b ON a.bunyang_seq = b.bunyang_seq AND (b.use_user_seq1 = a.user_seq or b.couple_seq = a.couple_seq)
 		WHERE a.bunyang_seq = #{bunyangSeq}
     	AND a.ref_type = #{refType}
     	<if test="userId != null and userId != ''">
@@ -482,10 +483,10 @@
 	  	</if>
     	ORDER BY a.user_seq
 	</select>
-	
+
 	<!-- 분양관련 사용자 정보(추가분양 연결) -->
 	<select id="getConnectBunyangRefUserInfo" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			'connect' as type,
 			a.bunyang_seq,
 		    a.ref_type,
@@ -521,16 +522,16 @@
 			b.assign_status,
 			b.seq_no,
 			(select request_status from TB_BUNYANG_GRAVE_REQUEST_INFO gr where gr.bunyang_seq = a.bunyang_seq and gr.use_user_seq = a.user_seq) request_status,
-			case 
-				when b.assign_status = 'HALF_OCCUPIED' then 
-					case when a.user_seq = b.use_user_seq1 then 'OCCUPIED' 
-					else 'RESERVED' 
-					end 
-				when b.assign_status = 'REQUESTED' then 
-					case when a.user_seq = b.use_user_seq1 then 'REQUESTED' 
-					else 'COUPLE_REQUESTED' 
-					end 
-				else b.assign_status 
+			case
+				when b.assign_status = 'HALF_OCCUPIED' then
+					case when a.user_seq = b.use_user_seq1 then 'OCCUPIED'
+					else 'RESERVED'
+					end
+				when b.assign_status = 'REQUESTED' then
+					case when a.user_seq = b.use_user_seq1 then 'REQUESTED'
+					else 'COUPLE_REQUESTED'
+					end
+				else b.assign_status
 			end couple_assign_status,
 			b.use_user_seq1,
 			b.use_user_seq2,
@@ -541,7 +542,7 @@
 			(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'D' order by bh.update_date desc limit 1) use_approval_date,
 			(SELECT DATE_FORMAT(update_date, '%Y-%m-%d') FROM TB_BUNYANG_HISTORY bh WHERE bh.bunyang_seq = a.bunyang_seq and bh.progress_status = 'E' order by bh.update_date desc limit 1) cancel_approval_date
 		FROM TB_BUNYANG_REF_USER a LEFT OUTER JOIN TB_BUNYANG_GRAVE_ASSIGN b ON a.bunyang_seq = b.bunyang_seq AND (b.use_user_seq1 = a.user_seq or b.couple_seq = a.couple_seq)
-		JOIN TB_BUNYANG_INFO c ON a.bunyang_seq = c.bunyang_seq  
+		JOIN TB_BUNYANG_INFO c ON a.bunyang_seq = c.bunyang_seq
 		WHERE c.group_seq = (select group_seq from TB_BUNYANG_INFO where bunyang_seq = #{bunyangSeq})
 		and c.bunyang_seq != #{bunyangSeq}
     	AND a.ref_type = #{refType}
@@ -551,10 +552,10 @@
 	  	</if>
     	ORDER BY a.bunyang_seq, a.user_seq
 	</select>
-	
+
 	<!-- 배우자 정보 조회 -->
 	<select id="getCoupleUserInfo" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			a.bunyang_seq,
 		    a.ref_type,
 		    a.relation_type,
@@ -587,7 +588,7 @@
     	AND a.user_id != #{userId}
 	  	AND a.couple_seq = #{coupleSeq}
 	</select>
-	
+
 	<!-- 분양정보의 신청서,승인서등 관련 파일양식 조회 -->
 	<select id="getBunyangFileList" parameterType="String" resultType="map">
 		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_apply FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
@@ -599,13 +600,13 @@
 		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq = (SELECT file_seq_cancel FROM TB_BUNYANG_INFO a WHERE a.bunyang_seq = #{bunyangSeq}) UNION ALL
 		SELECT file_seq, file_type, file_size, file_path, file_name, real_file_name, update_date FROM TB_SYS_FILE_INFO WHERE file_seq IN (SELECT approval_file_seq FROM TB_BUNYANG_REF_USER a WHERE a.bunyang_seq = #{bunyangSeq} and a.ref_type = 'USE_USER' and approval_file_seq is not null)
 	</select>
-	
+
 	<!-- 분양정보 생성 -->
 	<insert id="createBunyangInfo" parameterType="map">
 		INSERT INTO TB_BUNYANG_INFO ( bunyang_seq,product_type,couple_type_count,single_type_count,service_charge_type,progress_status,regist_user_id,regist_date,bunyang_times,price_per_count )
 		VALUES (#{bunyangSeq} , #{productType}, #{coupleTypeCount}, #{singleTypeCount}, #{serviceChargeType}, #{progressStatus}, #{registUserId}, COALESCE(STR_TO_DATE(REGEXP_REPLACE(#{registDate}, '[^0-9]+', ''), '%Y%m%d'),CURRENT_TIMESTAMP), #{bunyangTimes}, #{pricePerCount})
 	</insert>
-	
+
 	<!-- 분양 관련 인명정보 생성 -->
 	<insert id="createBunyangRefUserInfo" parameterType="map">
 		INSERT INTO TB_BUNYANG_REF_USER ( bunyang_seq,ref_type,relation_type,user_id,user_name,birth_date,gender,email,mobile,phone,post_number,address1,address2,is_church_person,user_seq,couple_seq, is_move, is_maint_charger, church_officer, diocese )
@@ -613,7 +614,7 @@
 		,(SELECT CONCAT('USER', LPAD(COALESCE(CAST(REPLACE(MAX(USER_ID),'USER','') AS INT)+1, 1), 7, '0')) FROM TB_BUNYANG_REF_USER t)
 		,#{userName}, #{birthDate}, #{gender}, #{email}, #{mobile}, #{phone}, #{postNumber}, #{address1}, #{address2}, #{isChurchPerson}, #{userSeq}, #{coupleSeq}, #{isMove}, #{isMaintCharger}, #{churchOfficer}, #{diocese})
 	</insert>
-	
+
 	<update id="updateBunyangFileSeq">
 		UPDATE TB_BUNYANG_INFO a
 			<set>
@@ -624,10 +625,10 @@
 				<if test="file_seq_full_payment != null">file_seq_full_payment=#{file_seq_full_payment},</if>
 				<if test="file_seq_use_approval != null">file_seq_use_approval=#{file_seq_use_approval},</if>
 				<if test="file_seq_cancel != null">file_seq_cancel=#{file_seq_cancel}</if>
-			</set> 
+			</set>
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
-	
+
 	<!-- 사용(봉안)자 사용승인서 파일seq 업데이트 -->
 	<update id="updateUseUserFileSeq">
 		UPDATE TB_BUNYANG_REF_USER a
@@ -636,7 +637,7 @@
 		AND a.ref_type = 'USE_USER'
 		AND a.user_id = #{userId}
 	</update>
-	
+
 	<!-- 분양정보 진행상태 업데이트 -->
 	<update id="updateBunyangProgressStatus">
 		UPDATE TB_BUNYANG_INFO a
@@ -646,105 +647,105 @@
 			</set>
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
-	
+
 	<!-- 분양상태변경 이력 생성 -->
 	<insert id="createBunyangHistory" parameterType="map">
 		INSERT INTO TB_BUNYANG_HISTORY ( bunyang_seq,progress_status,update_user_id,update_date,remarks )
 		VALUES ( #{bunyangSeq}, #{progressStatus}, #{userId}, COALESCE(STR_TO_DATE(REGEXP_REPLACE(#{updateDate}, '[^0-9]+', ''), '%Y%m%d'),CURRENT_TIMESTAMP), #{remarks})
 	</insert>
-	
+
 	<!-- 분양차수중 최종 분양번호 +1 반환 -->
 	<select id="getNextBunyangNo" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			COALESCE(max(bunyang_no) + 1, CONCAT(#{bunyangTimes},'001')) as bunyang_no
 		FROM TB_BUNYANG_INFO a
 		WHERE a.bunyang_times = #{bunyangTimes}
 	</select>
-	
+
 	<!-- 분양정보삭제 -->
 	<delete id="deleteBunyangInfo" parameterType="map">
 		DELETE FROM TB_BUNYANG_INFO WHERE bunyang_seq = #{bunyangSeq}
 	</delete>
-	
+
 	<!-- 분양관련 사용자정보 삭제 -->
 	<delete id="deleteBunyangRefUser" parameterType="map">
 		DELETE FROM TB_BUNYANG_REF_USER WHERE bunyang_seq = #{bunyangSeq}
 	</delete>
-	
+
 	<!-- 분양취소 -->
 	<update id="cancelBunyangInfo" parameterType="map">
 		UPDATE TB_BUNYANG_INFO a
 		SET cancel_yn = 'Y'
 		WHERE a.bunyang_seq = #{bunyangSeq}
 	</update>
-	
+
 	<!-- 관리비 납부 정보가 있는지 체크 -->
 	<select id="getMaintPaymentCount" parameterType="map" resultType="map">
-		SELECT 
+		SELECT
 			count(1) as cnt
 		FROM TB_BUNYANG_MAINT_PAYMENT_INFO a
 		WHERE a.bunyang_seq = #{bunyangSeq}
 		AND a.user_seq = #{userSeq}
 		AND a.maint_end_date >= CURDATE()
 	</select>
-	
+
 	<!-- 일배치에서 납부기간 갱신된 관리비 납부정보 생성 -->
 	<insert id="createAutoMaintPaymentInfo" parameterType="map">
 		insert into TB_BUNYANG_MAINT_PAYMENT_INFO( MAINT_SEQ, BUNYANG_SEQ,USER_SEQ,PAYMENT_PRICE,MAINT_START_DATE,MAINT_END_DATE,MAINT_YEAR,PAYMENT_YN, PAYMENT_TYPE )
 		values(
 		#{maintSeq},
-		#{bunyangSeq}, 
-		#{userSeq}, 
-		(select code_value from TB_COM_CODE a WHERE a.CODE_SEQ = 'MAINT_PRICE' ), 
+		#{bunyangSeq},
+		#{userSeq},
+		(select code_value from TB_COM_CODE a WHERE a.CODE_SEQ = 'MAINT_PRICE' ),
 		str_to_date(#{maintStartDate},'%Y%m%d'),
-		DATE_ADD(DATE_ADD(str_to_date(#{maintStartDate},'%Y%m%d'), INTERVAL (case when #{paymentType} = 'AFTER_USE' THEN 30 ELSE 1 END)  YEAR), INTERVAL -1 DAY),  
-		year(str_to_date(#{maintStartDate},'%Y%m%d')), 
+		DATE_ADD(DATE_ADD(str_to_date(#{maintStartDate},'%Y%m%d'), INTERVAL (case when #{paymentType} = 'AFTER_USE' THEN 30 ELSE 1 END)  YEAR), INTERVAL -1 DAY),
+		year(str_to_date(#{maintStartDate},'%Y%m%d')),
 		'N',
 		#{paymentType}
 		)
 	</insert>
-	
+
 	<!-- 사용승인시 사용승인일 정보로 관리비 납부정보 생성 -->
 	<insert id="createMaintPaymentInfo" parameterType="map">
 		insert into TB_BUNYANG_MAINT_PAYMENT_INFO( MAINT_SEQ, BUNYANG_SEQ,USER_SEQ,PAYMENT_PRICE,MAINT_START_DATE,MAINT_END_DATE,MAINT_YEAR,PAYMENT_YN, PAYMENT_TYPE )
 		values(
 		#{maintSeq},
-		#{bunyangSeq}, 
-		#{userSeq}, 
+		#{bunyangSeq},
+		#{userSeq},
 		(select code_value from TB_COM_CODE a WHERE a.CODE_SEQ = 'MAINT_PRICE' ),
-		str_to_date(#{approvalDate},'%Y%m%d'), 
-		DATE_ADD(DATE_ADD(str_to_date(#{approvalDate},'%Y%m%d'), INTERVAL 1 YEAR), INTERVAL -1 DAY), 
+		str_to_date(#{approvalDate},'%Y%m%d'),
+		DATE_ADD(DATE_ADD(str_to_date(#{approvalDate},'%Y%m%d'), INTERVAL 1 YEAR), INTERVAL -1 DAY),
 		year(str_to_date(#{approvalDate},'%Y%m%d')),
 		'N',
 		'BEFORE_USE'
 		)
 	</insert>
-	
+
 	<!-- 사용신청승인시 관리비 납부정보 생성 -->
 	<insert id="createUseMaintPaymentInfo" parameterType="map">
 		insert into TB_BUNYANG_MAINT_PAYMENT_INFO( MAINT_SEQ, BUNYANG_SEQ,USER_SEQ,PAYMENT_PRICE,MAINT_START_DATE,MAINT_END_DATE,MAINT_YEAR,PAYMENT_YN, PAYMENT_TYPE )
 		values(
 		#{maintSeq},
-		#{bunyangSeq}, 
-		#{userSeq}, 
+		#{bunyangSeq},
+		#{userSeq},
 		(select code_value * 30 from TB_COM_CODE a WHERE a.CODE_SEQ = 'MAINT_PRICE' ),
-		str_to_date(#{approvalDate},'%Y%m%d'), 
-		DATE_ADD(DATE_ADD(str_to_date(#{approvalDate},'%Y%m%d'), INTERVAL 30 YEAR), INTERVAL -1 DAY), 
+		str_to_date(#{approvalDate},'%Y%m%d'),
+		DATE_ADD(DATE_ADD(str_to_date(#{approvalDate},'%Y%m%d'), INTERVAL 30 YEAR), INTERVAL -1 DAY),
 		year(str_to_date(#{approvalDate},'%Y%m%d')),
 		'N',
 		'AFTER_USE'
 		)
 	</insert>
-	
+
 	<!-- 관리비 납부정보 삭제 -->
 	<delete id="deleteMaintPaymentInfo" parameterType="map">
-		DELETE FROM TB_BUNYANG_MAINT_PAYMENT_INFO 
+		DELETE FROM TB_BUNYANG_MAINT_PAYMENT_INFO
 		WHERE bunyang_seq = #{bunyangSeq}
 		<if test="userSeq != null and userSeq > 0">
 	  	AND a.user_seq = #{userSeq}
 	  	</if>
 	</delete>
-	
+
 	<!-- 관리비 납부기간을 갱신해야할 대상 조회 -->
 	<select id="getRemakePaymentInfo" parameterType="map" resultType="map">
 		<![CDATA[
@@ -756,7 +757,7 @@
 		    ,t2.user_name
 		    ,t3.bunyang_no
 		from
-		(select 
+		(select
 			bunyang_seq
 		    ,user_seq
 		    ,payment_type
@@ -768,7 +769,7 @@
 		inner join TB_BUNYANG_INFO t3 on t1.bunyang_seq = t3.bunyang_seq
 		]]>
 	</select>
-	
+
 	<!-- 해약금 출금정보 조회 -->
 	<select id="getCancelPaymentInfo" parameterType="map" resultType="map">
 		select
@@ -783,12 +784,12 @@
 			,payment_division
 			,remarks
 			,maint_seq
-		from TB_BUNYANG_PAYMENT_HISTORY a 
+		from TB_BUNYANG_PAYMENT_HISTORY a
 		where a.bunyang_seq = #{bunyangSeq}
 		ORDER BY create_date DESC
 		LIMIT 0,1
 	</select>
-	
+
 	<select id="getRequestGraveInfo" parameterType="map" resultType="map">
 		select
 			bunyang_seq,
@@ -806,7 +807,7 @@
 		AND a.use_user_seq = #{userSeq}
 		LIMIT 0,1
 	</select>
-	
+
 	<select id="getCoupleRequestGraveInfo" parameterType="map" resultType="map">
 		select
 			bunyang_seq,
@@ -824,5 +825,5 @@
 		AND a.use_user_seq = (select user_seq FROM TB_BUNYANG_REF_USER t WHERE t.bunyang_seq = #{bunyangSeq} AND t.ref_type = 'USE_USER' AND t.user_seq != #{userSeq} AND t.couple_seq = #{coupleSeq})
 		LIMIT 0,1
 	</select>
-	
+
 </mapper>

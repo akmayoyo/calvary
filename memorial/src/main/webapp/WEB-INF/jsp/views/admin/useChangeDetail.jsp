@@ -81,7 +81,7 @@
             </tbody>
         </table>
     </div>
-    
+
     <!-- 대리인(대리인신청시만 표시됨) -->
     <div id="divAgentInfo" style="margin-top: 35px;">
     	<div>
@@ -223,10 +223,10 @@
 
 	<!-- 동산 신청 정보 -->
 	<div style="margin-top: 35px;">
-		<div class="pull-left"><h4>동산 신청 정보</h4></div>	
+		<div class="pull-left"><h4>동산 신청 정보</h4></div>
 	</div>
     <div class="clearfix"></div>
-    
+
     <div class="table-responsive" style="border-top: 1px solid #999;">
         <table class="table table-style" style="border-top: 0;">
         	<colgroup>
@@ -302,7 +302,7 @@
             </tbody>
         </table>
     </div>
-    
+
     <!-- 잔금 납부 내역 -->
 	<div style="margin-top: 35px;">
 		<div class="pull-left"><h4>납부 내역 (총 ₩${cutil:getThousandSeperatorFormatString(totalPaymentInfo.total_amount)})</h4></div>
@@ -347,14 +347,14 @@
             </tbody>
         </table>
     </div>
-    
+
     <!-- 추가분양리스트 -->
     <c:if test="${not empty addedBunyangList}">
     <div style="margin-top: 35px;">
-		<div class="pull-left"><h4>추가 분양 리스트</h4></div>	
+		<div class="pull-left"><h4>추가 분양 리스트</h4></div>
 	</div>
 	<div class="clearfix"></div>
-    
+
     <div class="table-responsive" style="border-top: 1px solid #999;">
          <table class="table table-style">
 			<thead>
@@ -394,10 +394,10 @@
 		</table>
     </div>
     </c:if>
-    
+
     <!-- 관련 양식 -->
 	<div style="margin-top: 35px;">
-		<div class="pull-left"><h4>관련 양식</h4></div>	
+		<div class="pull-left"><h4>관련 양식</h4></div>
 	</div>
     <div class="clearfix"></div>
     <!-- 양식 리스트 -->
@@ -410,7 +410,7 @@
     <div class="mt-30 text-center">
         <button type="button" class="btn btn-default btn-lg" onclick="goToList()">목록</button>
     </div>
-    
+
 </div>
 
 
@@ -430,7 +430,7 @@
 		changed = true;
 		changedBunyangInfo.serviceChargeType = selectedVal;
 	});
-	
+
 })();
 
 /**
@@ -449,7 +449,7 @@ function succeedContractor() {
 	var winoption = {width:1024, height:740};
 	var param = {bunyangSeq:'${bunyangSeq}'};
 	common.openWindow("${contextPath}/popup/succeedcontractor", "popSucceedContractor", winoption, param);
-	
+
 	// 팝업 callback 함수
 	window.selectuserCallBack = function(item) {
 		var idx = 0, userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', churchOfficerName = '', diocese = '', relationType = '', relationTypeName = '', changeReason = '', remarks = '';
@@ -471,7 +471,7 @@ function succeedContractor() {
 			relationTypeName = item[idx++];
 			changeReason = item[idx++];
 			remarks = item[idx++];
-			
+
 			var userVo = {};
 			userVo['bunyangSeq'] = '${bunyangSeq}';
 			userVo['userName'] = userName;
@@ -488,9 +488,9 @@ function succeedContractor() {
 			userVo['relationType'] = relationType;
 			userVo['changeReason'] = changeReason;
 			userVo['remarks'] = remarks;
-			
+
 			common.ajax({
-				url:"${contextPath}/admin/succeedContractor", 
+				url:"${contextPath}/admin/succeedContractor",
 				data:userVo,
 				success: function(result) {
 					if(result && result.result) {
@@ -515,7 +515,7 @@ function editApplyUser() {
 	param['bunyangSeq'] = '${bunyangSeq}';
 	param['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>';
 	common.openWindow("${contextPath}/popup/changeRefUserInfo", "popChangeRefUserInfo", winoption, param);
-	
+
 	// 팝업 callback 함수
 	window.selectuserCallBack = function(item) {
 		var idx = 0, userId = '', userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', churchOfficerName = '', diocese = '', relationType = '', relationTypeName = '', changeReason = '', remarks = '';
@@ -530,7 +530,7 @@ function editApplyUser() {
 			churchOfficerName = item[idx++];
 			diocese = item[idx++];
 			email = item[idx++];
-			
+
 			var userVo = {};
 			userVo['bunyangSeq'] = '${bunyangSeq}';
 			userVo['userId'] = userId;
@@ -543,9 +543,9 @@ function editApplyUser() {
 			userVo['diocese'] = diocese;
 			userVo['email'] = email;
 			userVo['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_APPLY_USER%>';
-			
+
 			common.ajax({
-				url:"${contextPath}/admin/changeRefUserInfo", 
+				url:"${contextPath}/admin/changeRefUserInfo",
 				data:userVo,
 				success: function(result) {
 					if(result && result.result) {
@@ -570,7 +570,7 @@ function editUseUser(btn) {
 	param['bunyangSeq'] = '${bunyangSeq}';
 	param['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>';
 	common.openWindow("${contextPath}/popup/changeRefUserInfo", "popChangeRefUserInfo", winoption, param);
-	
+
 	// 팝업 callback 함수
 	window.selectuserCallBack = function(item) {
 		var idx = 0, userId = '', userName = '', birthDate = '', gender = '', email = '', mobile = '', phone = '', postNumber = '', address1 = '', address2 = '', fulladdress = '', churchOfficer = '', diocese = '', relationType = '', relationTypeName = '', changeReason = '', remarks = '';
@@ -582,7 +582,7 @@ function editUseUser(btn) {
 			address1 = item[idx++];
 			address2 = item[idx++];
 			email = item[idx++];
-			
+
 			var userVo = {};
 			userVo['bunyangSeq'] = '${bunyangSeq}';
 			userVo['userId'] = userId;
@@ -593,9 +593,9 @@ function editUseUser(btn) {
 			userVo['address2'] = address2;
 			userVo['email'] = email;
 			userVo['refType'] = '<%=CalvaryConstants.BUNYANG_REF_TYPE_USE_USER%>';
-			
+
 			common.ajax({
-				url:"${contextPath}/admin/changeRefUserInfo", 
+				url:"${contextPath}/admin/changeRefUserInfo",
 				data:userVo,
 				success: function(result) {
 					if(result && result.result) {
@@ -616,7 +616,7 @@ function editUseUser(btn) {
 function changeServiceCharger() {
 	var maintCharger = $('#selMaintCharger option:selected').val();
 	var serviceChargeType = $(":input:radio[name=rbServiceChargeType]:checked").val();
-	
+
 	// 관리비 납부 사용자 대표의 경우
 	if(serviceChargeType == '<%=CalvaryConstants.SERVICE_CHARGE_TYPE_REPRESENT%>') {
 		if(!maintCharger) {
@@ -631,10 +631,10 @@ function changeServiceCharger() {
 	data['bunyangSeq'] = '${bunyangSeq}';
 	data['serviceChargeType'] = serviceChargeType;
 	data['maintCharger'] = maintCharger;
-	
+
 	// 저장 호출
 	common.ajax({
-		url:"${contextPath}/admin/changeServiceCharger", 
+		url:"${contextPath}/admin/changeServiceCharger",
 		data:data,
 		success: function(result) {
 			if(result && result.result) {
@@ -658,7 +658,7 @@ function cancelContract(btn) {
 	var coupleSeq = tr.attr('coupleSeq');
 	if(coupleSeq) {// 부부형의 경우
 		tr = $('#tblUseUser tbody tr[coupleSeq="' + coupleSeq + '"]');
-		if(tr.eq(0).attr('assignStatus') == '<%=CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED%>' || 
+		if(tr.eq(0).attr('assignStatus') == '<%=CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED%>' ||
 				tr.eq(1).attr('assignStatus') == '<%=CalvaryConstants.GRAVE_ASSIGN_STATUS_OCCUPIED%>') {
 			common.showAlert('부부형의 경우 사용(봉안)기수가 하나라도 있을 경우 해약이 불가합니다.');
 			return;
@@ -670,13 +670,20 @@ function cancelContract(btn) {
 			common.showAlert('미사용(미봉안) 기수에 대해서만 해약이 가능합니다.');
 			return;
 		}
-		param['userId1'] = tr.attr('userId');	
+		param['userId1'] = tr.attr('userId');
 	}
 	common.openWindow("${contextPath}/popup/useUserCancel", "popUseUserCancel", winoption, param);
 	window.useUserCancelCallBack = function(result) {
-		var frm = document.getElementById("frm");
-		frm.action = "${contextPath}/admin/useChangeDetail";
-		frm.submit();	
+		if(result && result.result) {
+			// 승인서 파일번호
+			var fileSeq = result.fileSeq;
+			donwloadFile(fileSeq);
+			setTimeout(function(){
+				var frm = document.getElementById("frm");
+				frm.action = "${contextPath}/admin/useChangeDetail";
+				frm.submit();
+			}, 100);
+		}
 	}
 }
 
