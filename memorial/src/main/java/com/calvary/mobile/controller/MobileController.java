@@ -214,7 +214,7 @@ public class MobileController {
 		}
 		mv.addObject("contract1", contract1);
 		mv.addObject("contract2", contract2);
-		mv.addObject("contract3", contract3);
+		mv.addObject("contract3", contract3);//
 		return mv;
 	}
 
