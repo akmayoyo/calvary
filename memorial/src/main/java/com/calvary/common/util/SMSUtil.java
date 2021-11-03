@@ -24,18 +24,18 @@ public class SMSUtil {
 	public static final String SMS_TYPE_SMS = "S";
 	public static final String SMS_TYPE_LMS = "L";
 	public static final String SMS_TYPE_MMS = "M";
-	
+
 	public static final String SMS_URL = "https://sslsms.cafe24.com/sms_sender.php";
 	public static final String SMS_USER_ID = "mparkcalvary";
 	public static final String SMS_SECURE = "0ab3e384e97e239ce9f61a248f85f74a";
 	public static final String SMS_SENDER = "031-789-8803";
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(SMSUtil.class);
 	private static final Logger errLogger = LoggerFactory.getLogger("ERROR_LOGGER");
-	
+
 	public static ResultSmsVo sendSms(SendSmsVo smsVo) {
 		ResultSmsVo resultVo = new ResultSmsVo();
-		
+
 		Socket socket = null;
 		BufferedWriter wr = null;
 		BufferedReader rd = null;
@@ -53,18 +53,18 @@ public class SMSUtil {
 	        String rtime = base64Encode("");
 	        String mode = base64Encode("1");
 	        String subject = base64Encode("");
-	        //String testflag = base64Encode("Y");
-	        String testflag = base64Encode("");
+	        String testflag = base64Encode("Y");
+	        //String testflag = base64Encode("");
 	        String destination = base64Encode("");
 	        String repeatFlag = base64Encode("");
 	        String repeatNum = base64Encode("");
 	        String repeatTime = base64Encode("");
 	        String smsType = base64Encode(smsVo.getMsgType());
-	        
+
 	        if(SMS_TYPE_LMS.equals(smsVo.getMsgType())) {
 	            subject = base64Encode(smsVo.getSubject());
 	        }
-	        
+
 	        String[] host_info = sms_url.split("/");
 	        String host = host_info[2];
 	        String path = "/" + host_info[3];
@@ -92,7 +92,7 @@ public class SMSUtil {
 	        valKey[14] = repeatTime;
 	        valKey[15] = smsType;
 	        valKey[16] = subject;
-	        
+
 	        String boundary = "";
 	        Random rnd = new Random();
 	        String rndKey = Integer.toString(rnd.nextInt(32000));
@@ -121,7 +121,7 @@ public class SMSUtil {
 	        }
 
 	        socket = new Socket(host, port);
-	        
+
 	        // 헤더 전송
 	        wr = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
 	        wr.write("POST "+path+" HTTP/1.0\r\n");
@@ -145,12 +145,12 @@ public class SMSUtil {
 
 	        String tmpMsg = (String)tmpArr.get(tmpArr.size()-1);
 	        String[] rMsg = tmpMsg.split(",");
-	        
+
 	        if(rMsg.length > 0) {
 	        	String result = rMsg[0]; //발송결과
 		        String count = ""; //잔여건수
 		        if(rMsg.length > 1) {
-		        	count = rMsg[1]; 
+		        	count = rMsg[1];
 		        }
 		        resultVo.setResult(result);
 		        resultVo.setCount(count);
@@ -179,7 +179,7 @@ public class SMSUtil {
 		}
 		return resultVo;
 	}
-	
+
 	/** */
 	public static String getMsgContents(String msgContents, String[] sequences) {
 		String sRtn = msgContents;
@@ -191,7 +191,7 @@ public class SMSUtil {
 		}
 		return sRtn;
 	}
-	
+
 	/** */
 	public static String base64Encode(String str)  throws IOException {
 		String result = "";
