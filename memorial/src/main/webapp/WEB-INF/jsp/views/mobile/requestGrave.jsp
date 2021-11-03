@@ -766,6 +766,26 @@ function _request() {
 		seqNo = clickedInfo.data['seq_no'];
 	}
 
+	// 부고일시,발인일시
+	var selectedHour = $('#selDeathHour option:selected').val();
+	if(selectedHour < 10) {
+		selectedHour = '0' + selectedHour;
+	}
+	selectedHour += '시';
+	var deathDate = $('#selDeathMonth option:selected').text();
+	deathDate += $('#selDeathDay option:selected').text();
+	deathDate += ' ' + selectedHour;
+
+	selectedHour = $('#selBorneOutHour option:selected').val();
+	if(selectedHour < 10) {
+		selectedHour = '0' + selectedHour;
+	}
+	selectedHour += '시';
+	// 교회행정담당자, 용인공원담당자에게 SMS 전송
+	var borneOutDate = $('#selBorneOutMonth option:selected').text();
+	borneOutDate += $('#selBorneOutDay option:selected').text();
+	borneOutDate += ' ' + selectedHour;
+
 	var data = {};
 	data.productType = '${bunyangInfo.connect_product_type}';
 	data.bunyangSeq = '${bunyangInfo.bunyang_seq}';
@@ -773,6 +793,9 @@ function _request() {
 	data.userSeq = $('#userSeq').val();
 	data.userId = $('#userId').val();
 	data.sectionSeq = sectionSeq;
+	data.seqNo = seqNo;
+	data.deathDate = deathDate;
+	data.borneOutDate = borneOutDate;
 	data.rowSeq = rowSeq;
 	data.colSeq = colSeq;
 	data.firstColSeq = firstColSeq;
@@ -786,32 +809,25 @@ function _request() {
 			if(result && result.result) {
 				//common.showAlert('신청되었습니다.\n부고 알림 메세지 전송 페이지로 이동합니다.');
 				common.showAlert('신청되었습니다.\n원활한 장례 진행을 위해서 용인공원 고객센터(031-334-3484)에 장례접수를 해주시기 부탁드립니다.\n장례접수시 상주, 고인명, 발인일시, 배정구역(구역,행,열-고유번호)를 말씀해주시면 감사하겠습니다.');
-
-				// 부고일시,발인일시
-				var selectedHour = $('#selDeathHour option:selected').val();
-				if(selectedHour < 10) {
-					selectedHour = '0' + selectedHour;
-				}
-				selectedHour += '시';
-				var deathDate = $('#selDeathMonth option:selected').text();
-				deathDate += $('#selDeathDay option:selected').text();
-				deathDate += ' ' + selectedHour;
-
-				selectedHour = $('#selBorneOutHour option:selected').val();
-				if(selectedHour < 10) {
-					selectedHour = '0' + selectedHour;
-				}
-				selectedHour += '시';
-				// 교회행정담당자, 용인공원담당자에게 SMS 전송
-				var borneOutDate = $('#selBorneOutMonth option:selected').text();
-				borneOutDate += $('#selBorneOutDay option:selected').text();
-				borneOutDate += ' ' + selectedHour;
+				// 장지
+				var graveInfo = result.graveInfo;
+				var locationInfo = graveInfo.section_seq + '구역';
+				locationInfo += ' ' + graveInfo.row_seq + '행 - ' + seqToAlpha(graveInfo.col_seq) + '열 (고유번호 : ' + graveInfo.seq_no + ')';
 				var receivers = ['${contract1.mobile}', '${contract2.mobile}'];
+				var contract3 = '${contract3}';
+				if (contract3) {
+					receivers.push(contract3);
+				}
 				var sendSmsVo = {};
 				sendSmsVo.msgKey = 'M0009';
 				sendSmsVo.receivers = receivers.join(',');
-				sendSmsVo.sequences = ['${useUserInfo.user_name}', '${useUserInfo.user_name}', deathDate, borneOutDate];
+				sendSmsVo.sequences = ['${useUserInfo.user_name}', '${useUserInfo.user_name}', deathDate, locationInfo, borneOutDate];
 				common.sendSms(sendSmsVo, function(result) {
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/mobile/main";
+					frm.submit();
+					//---------------------------- 21-11-03 부고 알림 메세지 페이지 이동 처리 삭제함
+					/*
 					$('input[name="bunyangSeq"]').val('${bunyangInfo.bunyang_seq}');
 					$('input[name="userId"]').val('${useUserInfo.user_id}');
 					$('input[name="sectionSeq"]').val(sectionSeq);
@@ -821,8 +837,12 @@ function _request() {
 					var frm = document.getElementById("frm");
 					frm.action = "${contextPath}/mobile/registFuneralInfo";
 					frm.submit();
+					*/
 				}, function(xhr, status, message) {
 					//console.log(message);
+					var frm = document.getElementById("frm");
+					frm.action = "${contextPath}/mobile/main";
+					frm.submit();
 				});
 			} else {
 				var errorCode = result.errorCode;

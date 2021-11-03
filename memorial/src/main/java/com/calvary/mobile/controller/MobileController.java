@@ -201,8 +201,20 @@ public class MobileController {
 
 		Map<String, Object> contract1 = mobileService.getContract("CONTRACT_01");// 교회행정담당
 		Map<String, Object> contract2 = mobileService.getContract("CONTRACT_02");// 용인공원 장례담당
+		List<Object> contractMinister = mobileService.getContractMinister(bunyangSeq);// 교구 목사
+		String contract3 = "";
+		// 담당 교구 목사 연락처
+		if (contractMinister != null) {
+			for(int i = 0; i < contractMinister.size(); i++) {
+				Map<String, Object> ministerMap = (Map<String, Object>)contractMinister.get(i);
+				if (ministerMap != null && ministerMap.get("user_diocese") != null && ministerMap.get("user_diocese").equals(ministerMap.get("diocese"))) {
+					contract3 = (String)ministerMap.get("mobile");
+				}
+			}
+		}
 		mv.addObject("contract1", contract1);
 		mv.addObject("contract2", contract2);
+		mv.addObject("contract3", contract3);
 		return mv;
 	}
 
@@ -232,6 +244,9 @@ public class MobileController {
 			int userSeq,
 			String userId,
 			String sectionSeq,
+			String seqNo,
+			String deathDate,
+			String borneOutDate,
 			int rowSeq,
 			int colSeq,
 			int firstColSeq,
@@ -272,9 +287,20 @@ public class MobileController {
 
 			int iRslt = mobileService.requestGrave(productType, groupSeq, bunyangSeq, coupleSeq, userSeq, sectionSeq, rowSeq, colSeq, firstColSeq, isReserved);
 			bRslt = iRslt > 0;
+			// 21-11-03 봉안 신청 시 notice 생성하도록 변경
+			if (bRslt) {
+				String requestUser = "";
+				if(SessionUtil.getCurrentBunyangUser() != null) {
+					requestUser = SessionUtil.getCurrentBunyangUser().getUserId();
+				}
+				Map<String, Object> useUserInfo = adminService.getBunyangRefUserInfo(bunyangSeq, CalvaryConstants.BUNYANG_REF_TYPE_USE_USER, userId);
+				mobileService.createGraveNotice(bunyangSeq, String.valueOf(useUserInfo.get("user_seq")), requestUser, borneOutDate, deathDate);
+			}
 		}
+		Map<String, Object> graveInfo = adminService.getGraveAssignInfoBySeqNo(sectionSeq, seqNo);
 		rtnMap.put("result", bRslt);
 		rtnMap.put("errorCode", errorCode);
+		rtnMap.put("graveInfo", graveInfo);
 		return rtnMap;
 	}
 
