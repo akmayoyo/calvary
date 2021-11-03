@@ -810,7 +810,7 @@ function _request() {
 				//common.showAlert('신청되었습니다.\n부고 알림 메세지 전송 페이지로 이동합니다.');
 				common.showAlert('신청되었습니다.\n원활한 장례 진행을 위해서 용인공원 고객센터(031-334-3484)에 장례접수를 해주시기 부탁드립니다.\n장례접수시 상주, 고인명, 발인일시, 배정구역(구역,행,열-고유번호)를 말씀해주시면 감사하겠습니다.');
 				// 장지
-				var graveInfo = result.graveInfo;
+				var graveInfo = result.graveInfo;//
 				var locationInfo = graveInfo.section_seq + '구역';
 				locationInfo += ' ' + graveInfo.row_seq + '행 - ' + seqToAlpha(graveInfo.col_seq) + '열 (고유번호 : ' + graveInfo.seq_no + ')';
 				var receivers = ['${contract1.mobile}', '${contract2.mobile}'];

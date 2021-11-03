@@ -53,7 +53,7 @@ public class SMSUtil {
 	        String rtime = base64Encode("");
 	        String mode = base64Encode("1");
 	        String subject = base64Encode("");
-	        String testflag = base64Encode("Y");
+	        String testflag = base64Encode("Y");//
 	        //String testflag = base64Encode("");
 	        String destination = base64Encode("");
 	        String repeatFlag = base64Encode("");

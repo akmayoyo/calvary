@@ -40,6 +40,6 @@ label[for="chkClose"] {
 <script type="text/javascript">
 $('#chkClose').click(function() {
 	common.setCookie('notiGrave'+'${info.seq}', 'expire', 1000);
-	common.closeWindow();
+	common.closeWindow();//
 });
 </script>
