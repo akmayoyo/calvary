@@ -7,6 +7,8 @@
 	<input type="hidden" id="maintYear" name="maintYear" value="${searchVo.maintYear}">
 	<input type="hidden" id="bunyangSeq" name="bunyangSeq" value="${bunyangSeq}">
 	<input type="hidden" id="paymentYn" name="paymentYn" value="${paymentYn}">
+	<input type="hidden" id="popupTitle" name="popupTitle" value="${popupTitle}">
+	<input type="hidden" id="selectable" name="selectable" value="${selectable}">
 </form>
 
 <div class="poptitle">
